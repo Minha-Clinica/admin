@@ -95,6 +95,8 @@ export default function CalendarComponent(props) {
     const [defaultRangeDate, setDefaultRangeDate] = useState([])
     const [defaultEvents, setDefaultEvents] = useState([])
     const [filteredEvents, setFilteredEvents] = useState([]);
+    const [filterData, setFilterData] = useState('');
+
     const [eventData, setEventData] = useState({
         title: "",
         description: "",
@@ -395,39 +397,71 @@ export default function CalendarComponent(props) {
 
     return (
         <>
-            <SectionHeader title={`Calendário de Agendas`} />
+            <SectionHeader title={`Dtr(a). ${user?.nome}` || `Calendário de Agendas`} />
 
-                <Calendar
-                    localizer={localizer}
-                    // defaultDate={month?.start}
-                    culture="pt-br"
-                    events={events}
-                    startAccessor="start" 
-                    endAccessor="end" 
-                    selectable
-                    onSelectSlot={(slotInfo) => {
-                        setEventData({
-                            ...eventData,
-                            start: slotInfo.start,
-                            end: slotInfo.end,
-                        });
-                        setSelectedEvent(null);
-                        setShowEventForm(true);
-                    }}
-                    onSelectEvent={handleSelectEvent}
-                    eventPropGetter={eventStyleGetter}
-                    // messages={messages}
-                    style={{
-                        fontFamily: 'MetropolisBold',
-                        color: colorPalette.textColor,
-                        backgroundColor: colorPalette.secondary,
-                        borderRadius: '12px',
-                        boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
-                        border: `.5px solid lightgray`,
-                        padding: 10,
-                        height: 800
-                    }}
-                />
+            <Box sx={{ display: 'flex', gap: 3 }}>
+                <TextInput placeholder="Buscar pelo paciente" name='filterData' type="search" onChange={(event) => setFilterData(event.target.value)} value={filterData} sx={{ flex: 1 }}
+                    InputProps={{
+                        style: {
+                            backgroundColor: colorPalette.secondary
+                        }
+                    }} />
+
+                <Box sx={{
+                    display: 'flex', backgroundColor: colorPalette.secondary, padding: '10px 20px', width: 200,
+                    borderRadius: 2,
+                    alignItems: 'center', gap: 2,
+                    boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
+                    "&:hover": {
+                        opacity: 0.8,
+                        cursor: 'pointer'
+                    }
+                }}>
+                    <Box sx={{
+                        ...styles.menuIcon,
+                        backgroundImage: `url('/icons/include_icon.png')`,
+                        transition: '.3s',
+                        width: 20, height: 20,
+                        "&:hover": {
+                            opacity: 0.8,
+                            cursor: 'pointer'
+                        }
+                    }} />
+                    <Text bold>Novo agendamento</Text>
+                </Box>
+            </Box>
+
+            <Calendar
+                localizer={localizer}
+                // defaultDate={month?.start}
+                culture="pt-br"
+                events={events}
+                startAccessor="start"
+                endAccessor="end"
+                selectable
+                onSelectSlot={(slotInfo) => {
+                    setEventData({
+                        ...eventData,
+                        start: slotInfo.start,
+                        end: slotInfo.end,
+                    });
+                    setSelectedEvent(null);
+                    setShowEventForm(true);
+                }}
+                onSelectEvent={handleSelectEvent}
+                eventPropGetter={eventStyleGetter}
+                // messages={messages}
+                style={{
+                    fontFamily: 'MetropolisBold',
+                    color: colorPalette.textColor,
+                    backgroundColor: colorPalette.secondary,
+                    borderRadius: '12px',
+                    boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
+                    border: `.5px solid lightgray`,
+                    padding: 10,
+                    height: 800
+                }}
+            />
             {/* <Box sx={{ marginTop: 5 }}>
                 <Text bold sx={{ marginBottom: 3 }}>Legenda</Text>
                 {listEvents.map((item, index) => (
@@ -468,16 +502,12 @@ export default function CalendarComponent(props) {
                             </Box>
                             <Divider />
                             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                <SelectList
-                                    disabled={!isPermissionEdit && true}
-                                    fullWidth
-                                    data={defaultEvents}
-                                    valueSelection={eventData?.title}
-                                    onSelect={(value) => handleEventToSelect(value)}
-                                    title="Evento"
-                                    filterOpition="label"
-                                    sx={{ color: colorPalette.textColor, flex: 1 }}
-                                    inputStyle={{ color: colorPalette.textColor, fontSize: '15px', fontFamily: 'MetropolisBold' }}
+                                  <TextInput disabled={!isPermissionEdit && true}
+                                    name="title"
+                                    value={eventData?.title || ''}
+                                    label='Título'
+                                    onChange={handleEventFormChange}
+                                    sx={{ flex: 1 }}
                                 />
                                 <TextInput
                                     disabled={!isPermissionEdit && true}
@@ -549,7 +579,7 @@ export default function CalendarComponent(props) {
                     </Backdrop>
                 )
             }
-           
+
         </ >
     );
 }

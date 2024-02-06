@@ -33,7 +33,7 @@ const styles = {
         backgroundSize: 'cover',
         backgroundRepeat: 'no-repeat',
         backgroundPosition: 'center center',
-        backgroundImage: `url('/icons/tec_icon_dark.png')`,
+        backgroundImage: `url('/icons/logo-clinica-light.png')`,
         backgroundSize: 'contain',
         width: 180,
         height: 120,

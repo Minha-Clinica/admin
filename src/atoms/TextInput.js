@@ -28,9 +28,9 @@ export const TextInput = (props) => {
                borderRadius: 2,
                fontSize: small ? '12px' : { xs: '13px', xm: '13px', md: '13px', lg: '14px', xl: '15px' },
                fontFamily: bold ? 'MetropolisBold' : 'MetropolisRegular',
+               backgroundColor: colorPalette.inputColor,
                ...InputProps?.style,
                color: colorPalette.textColor,
-               backgroundColor: colorPalette.inputColor,
                maxHeight: props.multiline ? 'none' : '45px',
             },
 

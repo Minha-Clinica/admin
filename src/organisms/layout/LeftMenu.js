@@ -210,7 +210,7 @@ export const LeftMenu = ({ }) => {
                         }} onClick={() => {
                            // router.push(`/administrative/users/${user?.id}`)
                         }} />
-                        <Text bold small style={{ ...styles.text, textAlign: 'center', color: '#fff', padding: `2px 5px` }}>meus dados</Text>
+                        <Text bold small style={{ ...styles.text, textAlign: 'center', color: '#fff', padding: `2px 5px` }}>Meus dados</Text>
 
                      </Box>
                   </Box>}
@@ -378,7 +378,7 @@ export const LeftMenu = ({ }) => {
                <Box sx={{
                   ...styles.icon,
                   display: !showMenuHelp && 'none',
-                  backgroundImage: `url('/icons/tec_icon_dark.png')`,
+                  backgroundImage: `url('/icons/logo-clinica-light.png')`,
                   backgroundSize: 'contain',
                   width: '107px',
                   height: '51px',
