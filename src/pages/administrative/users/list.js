@@ -136,7 +136,7 @@ export default function ListUsers(props) {
         { key: 'id', label: 'ID' },
         { key: 'nome', avatar: true, label: 'Nome', avatarUrl: 'location', matricula: true },
         { key: 'email', label: 'E-mail' },
-        { key: 'email_corporativo', label: 'E-mail Corporativo' },
+        { key: 'perfil', label: 'Perfil' },
     ];
 
     const listAtivo = [

@@ -23,22 +23,13 @@ export default function EditUser() {
     const [fileCallback, setFileCallback] = useState()
     const [bgPhoto, setBgPhoto] = useState({})
     const [userData, setUserData] = useState({
-        autista: null,
-        superdotacao: null,
         cpf: null,
         naturalidade: null,
         nacionalidade: null,
         estado_civil: null,
-        conjuge: null,
-        email_corporativo: null,
         email_pessoal: null,
-        nome_pai: null,
-        nome_mae: null,
         escolaridade: null,
         genero: null,
-        cor_raca: null,
-        deficiencia: null,
-        doc_estrangeiro: null,
         pais_origem: 'Brasil',
         telefone_emergencia: null,
         telefone: null,
@@ -50,10 +41,9 @@ export default function EditUser() {
         complemento: null,
         numero: null,
         ativo: 1,
-        admin_sistema: 0,
+        admin_sistema: null,
         login: null,
         nascimento: null,
-        tipo_deficiencia: null,
         nome_emergencia: null,
         foto_perfil_id: bgPhoto?.location || fileCallback?.filePreview || null,
         nome_social: null
@@ -121,8 +111,6 @@ export default function EditUser() {
         responsavel: user?.nome
     });
     const [arrayHistoric, setArrayHistoric] = useState([])
-    const [arrayDependent, setArrayDependent] = useState([])
-    const [dependent, setDependent] = useState({})
     const [valueIdHistoric, setValueIdHistoric] = useState()
     const [filesUser, setFilesUser] = useState([])
     const [officeHours, setOfficeHours] = useState([
@@ -158,19 +146,8 @@ export default function EditUser() {
         try {
             const response = await api.get(`/user/${id}`)
             const { data } = response
+            console.log(data)
             setUserData(data.response)
-        } catch (error) {
-            console.log(error)
-            return error
-        }
-    }
-
-
-    const getDependent = async () => {
-        try {
-            const response = await api.get(`/user/dependent/${id}`)
-            const { data } = response
-            setArrayDependent(data.dependents)
         } catch (error) {
             console.log(error)
             return error
@@ -378,7 +355,6 @@ export default function EditUser() {
             getContractStudent()
             getOfficeHours()
             getPermissionUser()
-            getDependent()
         } catch (error) {
             alert.error('Ocorreu um arro ao carregar Usuarios')
         } finally {
@@ -465,39 +441,6 @@ export default function EditUser() {
 
     const handleOfficeHours = (newData) => {
         setOfficeHours(newData);
-    };
-
-    const handleChangeDependent = (value) => {
-
-        if (value.target.name?.includes('cpf_dependente')) {
-            let str = value.target.value;
-            value.target.value = formatCPF(str)
-        }
-
-
-        setDependent((prevValues) => ({
-            ...prevValues,
-            [value.target.name]: value.target.value,
-        }))
-    };
-
-    const handleChangeDependentArray = (event, fieldName, id_dependente) => {
-
-        if (event.target.name?.includes('cpf_dependente')) {
-            let str = event.target.value;
-            event.target.value = formatCPF(str)
-        }
-
-        const newValue = event.target.value;
-
-        setArrayDependent((prevArray) => {
-            const newArray = prevArray.map((item) =>
-                item.id_dependente === id_dependente
-                    ? { ...item, [fieldName]: newValue }
-                    : item
-            );
-            return newArray;
-        });
     };
 
 
@@ -608,11 +551,24 @@ export default function EditUser() {
             setLoading(true)
             try {
                 const response = await createUser(userData, arrayHistoric, usuario_id)
+                console.log(response)
                 const { data } = response
-                if (userData?.perfil?.includes('funcionario')) { await createContract(data?.userId, contract) }
-                if (fileCallback) { await api.patch(`/file/edit/${fileCallback?.id_foto_perfil}/${data?.userId}`) }
+                if (userData?.perfil?.includes('profissional')) {
+                    console.log('entrou aqui')
+                    const contracthere = await createContract(data?.userId, contract)
+                    console.log(contracthere)
+                }
+                if (fileCallback) {
+                    console.log('fileCallback')
+
+                    const file = await api.patch(`/file/edit/${fileCallback?.id_foto_perfil}/${data?.userId}`)
+                    console.log(file)
+                }
                 if (officeHours) { await api.post(`/officeHours/create/${data?.userId}`, { officeHours }) }
-                if (newUser && filesUser) { await api.patch(`/file/editFiles/${data?.userId}`, { filesUser }); }
+                if (newUser && filesUser) {
+                    const files = await api.patch(`/file/editFiles/${data?.userId}`, { filesUser });
+                    console.log(files)
+                }
                 if (permissionPerfil) {
                     const permissionsToAdd = permissionPerfil.split(',').map(id => parseInt(id));
                     if (permissionsToAdd.length > 0) {
@@ -621,7 +577,7 @@ export default function EditUser() {
                 }
                 if (response?.status === 201) {
                     alert.success('Usuário cadastrado com sucesso.');
-                    if (data?.userId) router.push(`/administrative/users/list`)
+                    // if (data?.userId) router.push(`/administrative/users/list`)
                 }
             } catch (error) {
                 alert.error('Tivemos um problema ao cadastrar usuário.');
@@ -663,9 +619,6 @@ export default function EditUser() {
                 }
                 if (officeHours?.map((item) => item.id_hr_trabalho).length > 0) {
                     await api.patch(`/officeHours/update`, { officeHours })
-                }
-                if (arrayDependent?.length > 0) {
-                    await api.patch(`/user/dependent/update`, { arrayDependent })
                 }
                 if (response?.status === 201) {
                     alert.success('Usuário atualizado com sucesso.');
@@ -739,53 +692,6 @@ export default function EditUser() {
         }
     }
 
-    const addDependent = () => {
-        setArrayDependent((prevArray) => [...prevArray, { nome_dependente: dependent.nome_dependente }])
-        setDependent({ nome_dependente: '', cpf_dependente: '', dt_nasc_dependente: '' })
-    }
-
-    const deleteDependent = (index) => {
-        if (newUser) {
-            setArrayDependent((prevArray) => {
-                const newArray = [...prevArray];
-                newArray.splice(index, 1);
-                return newArray;
-            });
-        }
-    };
-
-    const handleAddDependent = async () => {
-        setLoading(true)
-        try {
-            const response = await api.post(`/user/dependent/create/${id}`, { dependent })
-            if (response?.status === 201) {
-                alert.success('Dependente incluido')
-                setDependent({})
-                getDependent()
-            }
-        } catch (error) {
-            console.log(error)
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    const handleDeleteDependent = async (id_dependente) => {
-        setLoading(true)
-        try {
-            const response = await api.delete(`/user/dependent/delete/${id_dependente}`)
-            if (response?.status === 200) {
-                alert.success('Dependente removido.');
-                getDependent()
-            }
-        } catch (error) {
-            alert.error('Ocorreu um erro ao remover a Habilidade selecionada.');
-            console.log(error)
-        } finally {
-            setLoading(false)
-        }
-    }
-
 
     const toggleEnrollTable = (index) => {
         setShowEnrollTable(prevState => ({
@@ -853,7 +759,10 @@ export default function EditUser() {
     const groupAdmin = [
         { label: 'sim', value: 1 },
         { label: 'não', value: 0 },
+
     ]
+
+    console.log(userData)
 
     const groupRacaCor = [
         { label: 'Prefiro não declarar', value: 'Prefiro não declarar' },
@@ -895,99 +804,6 @@ export default function EditUser() {
         { label: 'Bradesco', value: 'Bradesco' },
     ]
 
-    const groupArea = [
-        { label: 'Financeiro', value: 'Financeiro' },
-        { label: 'Biblioteca', value: 'Biblioteca' },
-        { label: 'TI - Suporte', value: 'TI - Suporte' },
-        { label: 'RH', value: 'RH' },
-        { label: 'Marketing', value: 'Marketing' },
-        { label: 'Atendimento/Recepção', value: 'Atendimento/Recepção' },
-        { label: 'Secretaria', value: 'Secretaria' },
-        { label: 'Administrativo', value: 'Administrativo' },
-        { label: 'Diretoria', value: 'Diretoria' },
-        { label: 'Acadêmica', value: 'Acadêmica' },
-
-    ]
-
-    const groupStatusProcess = [
-        { label: 'Aprovado - pré-matricula', value: 'Aprovado - pré-matricula' },
-        { label: 'Reprovado', value: 'Reprovado' },
-        { label: 'Pendente de nota', value: 'Pendente de nota' },
-    ]
-
-    const grouperiod = [
-        { label: 'Manhã', value: 'Manhã' },
-        { label: 'Tarde', value: 'Tarde' },
-        { label: 'Noite', value: 'Noite' }
-    ]
-
-    const groupSituation = [
-        { label: 'Aguardando início', value: 'Aguardando início' },
-        { label: 'Pendente de assinatura do contrato', value: 'Pendente de assinatura do contrato' },
-        { label: 'Em andamento', value: 'Em andamento' },
-        { label: 'Concluído', value: 'Concluído' },
-        { label: 'Turma cancelada', value: 'Turma cancelada' },
-        { label: 'Aprovado', value: 'Aprovado' },
-        { label: 'Reprovado', value: 'Reprovado' },
-        { label: 'Bloq. Online', value: 'Bloq. Online' },
-        { label: 'Matrícula cancelada', value: 'Matrícula cancelada' },
-        { label: 'Transferido ', value: 'Transferido ' },
-        { label: 'Desistente ', value: 'Desistente ' },
-        { label: 'Nenhuma', value: 'Nenhuma' },
-    ]
-
-    const groupReasonsDroppingOut = [
-        { label: 'Pessoal', value: 'Pessoal' },
-        { label: 'Financeiro', value: 'Financeiro' },
-        { label: 'Insatisfação', value: 'Insatisfação' },
-        { label: 'Turma cancelada', value: 'Turma cancelada' },
-        { label: 'Reprovação', value: 'Reprovação' },
-        { label: 'Profissional', value: 'Profissional' },
-        { label: 'Saúde', value: 'Saúde' },
-        { label: 'Dificuldade', value: 'Dificuldade' },
-        { label: 'Não quis informar ', value: 'Não quis informar ' },
-    ]
-
-    const groupDeficiency = [
-        { label: 'Deficiência visual', value: 'Deficiência visual' },
-        { label: 'Deficiência intelectual', value: 'Deficiência intelectual' },
-        { label: 'Deficiência múltipla ', value: 'Deficiência múltipla ' },
-        { label: 'Surdez e deficiência auditiva', value: 'Surdez e deficiência auditiva' },
-        { label: 'Deficiência auditiva', value: 'Deficiência auditiva' },
-        { label: 'Deficiência fisica e motora', value: 'Deficiência fisica e motora' }
-    ]
-
-
-    const groupOrigemEnsinoMedio = [
-        { label: 'Pública', value: 'Pública' },
-        { label: 'Privada', value: 'Privada' }
-    ]
-
-    const groupAutism = [
-        {
-            label: 'Transtorno global do desenvolvimento (TGD)',
-            value: 'Transtorno global do desenvolvimento (TGD)'
-        },
-        {
-            label: 'Transtorno do espectro autista (TEA)',
-            value: 'Transtorno do espectro autista (TEA)'
-        },
-    ]
-
-    const groupSuperGifted = [
-        {
-            label: 'Altas habilidades/superdotação',
-            value: 'Altas habilidades/superdotação'
-        },
-    ]
-
-    const groupForeigner = [
-        {
-            label: 'Estrangeiro sem CPF',
-            value: true
-        },
-    ]
-
     const columnHistoric = [
         { key: 'id_historico', label: 'ID' },
         { key: 'ocorrencia', label: 'Ocorrência' },
@@ -999,7 +815,7 @@ export default function EditUser() {
         <>
             <SectionHeader
                 perfil={userData?.perfil}
-                title={userData?.nome || `Novo ${userData?.perfil === 'funcionario' && 'Funcionário' || userData?.perfil === 'aluno' && 'Aluno' || userData?.perfil === 'interessado' && 'Interessado' || 'Usuário'}`}
+                title={userData?.nome || `Novo ${userData?.perfil === 'profissional' && 'Profissional' || userData?.perfil === 'administrador' && 'Administrador' || userData?.perfil === 'paciente' && 'Paciente' || 'Usuário'}`}
                 saveButton={isPermissionEdit}
                 saveButtonAction={newUser ? handleCreateUser : handleEditUser}
                 deleteButton={!newUser && isPermissionEdit}
@@ -1093,8 +909,6 @@ export default function EditUser() {
                         onSelect={(value) => setUserData({
                             ...userData,
                             perfil: value,
-                            admin_sistema: !value.includes('funcionario') ? 0 : 1,
-                            portal_aluno: !value.includes('aluno') ? 0 : 1,
                         })}
                         sx={{ flex: 1, }}
                     />
@@ -1111,9 +925,7 @@ export default function EditUser() {
                 </Box>
                 <RadioItem disabled={!isPermissionEdit && true} valueRadio={userData?.ativo} group={groupStatus} title="Status *" horizontal={mobile ? false : true} onSelect={(value) => setUserData({
                     ...userData,
-                    ativo: parseInt(value),
-                    admin_sistema: value < 1 ? parseInt(value) : userData?.admin_sistema,
-                    portal_aluno: value < 1 ? parseInt(value) : userData?.admin_sistema
+                    ativo: parseInt(value)
                 })} />
             </ContentContainer>
 
@@ -1253,23 +1065,10 @@ export default function EditUser() {
                 {showSections.registration &&
                     <>
 
-                        <Box sx={{ padding: '0px 0px 20px 0px' }}>
-                            <CheckBoxComponent disabled={!isPermissionEdit && true}
-                                boxGroup={groupForeigner}
-                                valueChecked={userData?.foreigner || ''}
-                                horizontal={mobile ? false : true}
-                                onSelect={(value) => {
-                                    setForeigner(value)
-                                    setUserData({ ...userData, nacionalidade: value === true ? 'Estrangeira' : 'Brasileira Nata' })
-                                }}
-                                sx={{ width: 1 }} />
-                        </Box>
                         <Box sx={styles.inputSection}>
-                            {!foreigner &&
                                 <FileInput onClick={(value) => setShowEditFiles({ ...showEditFile, cpf: value })}>
                                     <TextInput disabled={!isPermissionEdit && true} placeholder='CPF' name='cpf' onChange={handleChange} value={userData?.cpf || ''} label='CPF' sx={{ flex: 1, }} />
                                 </FileInput>
-                            }
                             <EditFile
                                 isPermissionEdit={isPermissionEdit}
                                 columnId="id_doc_usuario"
@@ -1294,35 +1093,6 @@ export default function EditUser() {
                                     }
                                 }}
                             />
-                            {foreigner &&
-                                <FileInput onClick={(value) => setShowEditFiles({ ...showEditFile, foreigner: value })}>
-                                    <TextInput disabled={!isPermissionEdit && true} placeholder='Doc estrangeiro' name='doc_estrangeiro' onChange={handleChange} value={userData?.doc_estrangeiro || ''} label='Doc estrangeiro' sx={{ flex: 1, }} />
-                                    <EditFile
-                                        isPermissionEdit={isPermissionEdit}
-                                        columnId="id_doc_usuario"
-                                        open={showEditFile.foreigner}
-                                        newUser={newUser}
-                                        onSet={(set) => {
-                                            setShowEditFiles({ ...showEditFile, foreigner: set })
-                                        }}
-                                        title='Documento estrangeiro - Frente e verso'
-                                        text='Faça o upload do seu documento frente e verso, depois clique em salvar.'
-                                        textDropzone='Arraste ou clique para selecionar a Foto que deseja'
-                                        fileData={filesUser?.filter((file) => file.campo === 'estrangeiro')}
-                                        usuarioId={id}
-                                        campo='estrangeiro'
-                                        tipo='documento usuario'
-                                        callback={(file) => {
-                                            if (file.status === 201 || file.status === 200) {
-                                                if (!newUser) { handleItems() }
-                                                else {
-                                                    handleChangeFilesUser('estrangeiro', file.fileId, file.filePreview)
-                                                }
-                                            }
-                                        }}
-                                    />
-                                </FileInput>
-                            }
                             <TextInput disabled={!isPermissionEdit && true} placeholder='Cidade' name='naturalidade' onChange={handleChange} value={userData?.naturalidade || ''} label='Naturalidade *' sx={{ flex: 1, }} />
 
                             <SelectList disabled={!isPermissionEdit && true} fullWidth data={countries} valueSelection={userData?.pais_origem || ''} onSelect={(value) => setUserData({ ...userData, pais_origem: value })}
@@ -1337,153 +1107,18 @@ export default function EditUser() {
 
                         <Box sx={styles.inputSection}>
 
-                            <SelectList disabled={!isPermissionEdit && true} fullWidth data={groupRacaCor} valueSelection={userData.cor_raca} onSelect={(value) => setUserData({ ...userData, cor_raca: value })}
-                                title="Cor/raça *" filterOpition="value" sx={{ color: colorPalette.textColor, flex: 1 }}
-                                inputStyle={{ color: colorPalette.textColor, fontSize: '15px', fontFamily: 'MetropolisBold' }}
-                            />
-
                             <SelectList disabled={!isPermissionEdit && true} fullWidth data={groupGender} valueSelection={userData?.genero} onSelect={(value) => setUserData({ ...userData, genero: value })}
                                 title="Gênero *" filterOpition="value" sx={{ color: colorPalette.textColor, flex: 1 }}
                                 inputStyle={{ color: colorPalette.textColor, fontSize: '15px', fontFamily: 'MetropolisBold' }}
                             />
 
-                            <SelectList disabled={!isPermissionEdit && true} fullWidth data={groupDisability} valueSelection={userData?.deficiencia} onSelect={(value) => setUserData({ ...userData, deficiencia: value })}
-                                title="Deficiência Física/Necessidade especial educacional*" filterOpition="value" sx={{ color: colorPalette.textColor, flex: 1 }}
-                                inputStyle={{ color: colorPalette.textColor, fontSize: '15px', fontFamily: 'MetropolisBold' }}
-                            />
-
                         </Box>
-
-                        {userData?.deficiencia?.includes('Sim') &&
-                            <>
-                                <CheckBoxComponent disabled={!isPermissionEdit && true}
-                                    valueChecked={userData?.tipo_deficiencia || ''}
-                                    boxGroup={groupDeficiency}
-                                    title="Tipo de deficiência"
-                                    horizontal={mobile ? false : true}
-                                    onSelect={(value) => setUserData({
-                                        ...userData,
-                                        tipo_deficiencia: value
-                                    })}
-                                    sx={{ width: 1 }}
-                                />
-
-                                <CheckBoxComponent disabled={!isPermissionEdit && true}
-                                    valueChecked={userData?.autista || ''}
-                                    boxGroup={groupAutism}
-                                    title="Transtorno global do desenvolvimento/Transtorno do espectro autista"
-                                    horizontal={mobile ? false : true}
-                                    onSelect={(value) => setUserData({
-                                        ...userData,
-                                        autista: value
-                                    })}
-                                    sx={{ width: 1 }}
-                                />
-
-                                <CheckBoxComponent disabled={!isPermissionEdit && true}
-                                    valueChecked={userData?.superdotado || ''}
-                                    boxGroup={groupSuperGifted}
-                                    title="Altas habilidades/superdotação"
-                                    horizontal={mobile ? false : true}
-                                    onSelect={(value) => setUserData({
-                                        ...userData,
-                                        superdotado: value
-                                    })}
-                                    sx={{ width: 1 }}
-                                />
-                            </>
-                        }
 
                         <RadioItem disabled={!isPermissionEdit && true} valueRadio={userData?.estado_civil} group={groupCivil} title="Estado Cívil *" horizontal={mobile ? false : true} onSelect={(value) => setUserData({ ...userData, estado_civil: value })} />
                         <Box sx={{ ...styles.inputSection, alignItems: 'center' }}>
-                            <TextInput fullWidth disabled={!isPermissionEdit && true} placeholder='E-mail Corporativo' name='email_corporativo' onChange={handleChange} value={userData?.email_corporativo || ''} label='E-mail Corporativo' />
                             <TextInput fullWidth disabled={!isPermissionEdit && true} placeholder='E-mail Pessoal' name='email_pessoal' onChange={handleChange} value={userData?.email_pessoal || ''} label='E-mail Pessoal' />
                         </Box>
-                        <Box sx={{ maxWidth: '580px', margin: '10px 0px 10px 0px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-                            <Text bold style={{ padding: '0px 0px 0px 10px' }}>Dependentes</Text>
-                            {arrayDependent.map((dep, index) => (
-                                <>
 
-                                    <Box key={index} sx={{ ...styles.inputSection, alignItems: 'center' }}>
-                                        <FileInput left onClick={() => setShowEditFiles({ ...showEditFile, cpf_dependente: true })}>
-                                            <TextInput disabled={!isPermissionEdit && true} placeholder='Nome' name={`nome_dependente-${index}`} onChange={(e) => handleChangeDependentArray(e, 'nome_dependente', dep?.id_dependente)} value={dep.nome_dependente} sx={{ flex: 1 }} />
-                                            <TextInput disabled={!isPermissionEdit && true} placeholder='CPF' name={`cpf_dependente-${index}`} onChange={(e) => handleChangeDependentArray(e, 'cpf_dependente', dep?.id_dependente)} value={dep.cpf_dependente} sx={{ flex: 1 }} />
-                                            <TextInput disabled={!isPermissionEdit && true} placeholder='Data de Nascimento' name={`dt_nasc_dependente-${index}`} onChange={(e) => handleChangeDependentArray(e, 'dt_nasc_dependente', dep?.id_dependente)} type="date" value={(dep.dt_nasc_dependente)?.split('T')[0] || ''} sx={{ flex: 1 }} />
-                                        </FileInput>
-                                        <EditFile
-                                            isPermissionEdit={isPermissionEdit}
-                                            columnId="id_doc_usuario"
-                                            open={showEditFile.cpf_dependente}
-                                            newUser={newUser}
-                                            onSet={(set) => {
-                                                setShowEditFiles({ ...showEditFile, cpf_dependente: set })
-                                            }}
-                                            title='CPF Dependente - Frente e verso'
-                                            text='Faça o upload do documento do Dependente frente e verso, depois clique em salvar.'
-                                            textDropzone='Arraste ou clique para selecionar a Foto ou Arquivo que deseja'
-                                            fileData={filesUser?.filter((file) => file.campo === 'cpf_dependente')}
-                                            usuarioId={id}
-                                            campo='cpf_dependente'
-                                            tipo='documento usuario'
-                                            callback={(file) => {
-                                                if (file.status === 201 || file.status === 200) {
-                                                    if (!newUser) { handleItems() }
-                                                    else {
-                                                        handleChangeFilesUser('cpf_dependente', file.fileId, file.filePreview)
-                                                    }
-                                                }
-                                            }}
-                                        />
-
-                                        {isPermissionEdit && <Box sx={{
-                                            backgroundSize: 'cover',
-                                            backgroundRepeat: 'no-repeat',
-                                            backgroundPosition: 'center',
-                                            width: 25,
-                                            height: 25,
-                                            backgroundImage: `url(/icons/remove_icon.png)`,
-                                            transition: '.3s',
-                                            "&:hover": {
-                                                opacity: 0.8,
-                                                cursor: 'pointer'
-                                            }
-                                        }} onClick={() => {
-                                            newUser ? deleteDependent(index) : handleDeleteDependent(dep?.id_dependente)
-                                        }} />}
-
-                                    </Box>
-                                </>
-                            ))}
-                            {isPermissionEdit && <Box sx={{ ...styles.inputSection, alignItems: 'center' }}>
-                                <TextInput disabled={!isPermissionEdit && true} placeholder='Nome' name={`nome_dependente`} onChange={handleChangeDependent} value={dependent?.nome_dependente} sx={{ flex: 1 }} />
-                                <TextInput disabled={!isPermissionEdit && true} placeholder='CPF' name={`cpf_dependente`} onChange={handleChangeDependent} value={dependent?.cpf_dependente} sx={{ flex: 1 }} />
-                                <TextInput disabled={!isPermissionEdit && true} placeholder='Data de Nascimento' name={`dt_nasc_dependente`} onChange={handleChangeDependent} type="date" value={(dependent?.dt_nasc_dependente)?.split('T')[0] || ''} sx={{ flex: 1 }} />
-                                <Box sx={{
-                                    backgroundSize: 'cover',
-                                    backgroundRepeat: 'no-repeat',
-                                    backgroundPosition: 'center',
-                                    width: 25,
-                                    height: 25,
-                                    borderRadius: '50%',
-                                    backgroundImage: `url(/icons/include_icon.png)`,
-                                    transition: '.3s',
-                                    "&:hover": {
-                                        opacity: 0.8,
-                                        cursor: 'pointer'
-                                    }
-                                }} onClick={() => {
-                                    newUser ? addDependent() : handleAddDependent()
-                                }} />
-                            </Box>}
-                        </Box>
-
-
-                        <Box sx={styles.inputSection}>
-                            {userData?.estado_civil === 'Casado' && <TextInput disabled={!isPermissionEdit && true} placeholder='Conjuge' name='conjuge' onChange={handleChange} value={userData?.conjuge || ''} label='Conjuge' sx={{ flex: 1, }} />}
-                            <TextInput disabled={!isPermissionEdit && true} placeholder='Nome do Pai' name='nome_pai' onChange={handleChange} value={userData?.nome_pai || ''} label='Nome do Pai' sx={{ flex: 1, }} />
-                            <TextInput disabled={!isPermissionEdit && true} placeholder='Nome da Mãe' name='nome_mae' onChange={handleChange} value={userData?.nome_mae || ''} label='Nome da Mãe *' sx={{ flex: 1, }} />
-
-                        </Box>
                         <ContentContainer>
                             <Text large bold >Contato de Emergência</Text>
                             <Box sx={styles.inputSection}>
@@ -1534,13 +1169,6 @@ export default function EditUser() {
                                 }}
                             />
                         </FileInput>
-                        {userData?.escolaridade === 'Ensino médio' && <RadioItem disabled={!isPermissionEdit && true}
-                            valueRadio={userData?.tipo_origem_ensi_med}
-                            group={groupOrigemEnsinoMedio}
-                            title="Origem Ensino Médio *"
-                            horizontal={mobile ? false : true}
-                            onSelect={(value) => setUserData({ ...userData, tipo_origem_ensi_med: value })}
-                        />}
 
                         <Box sx={styles.inputSection}>
                             <TextInput disabled={!isPermissionEdit && true} placeholder='CEP' name='cep' onChange={handleChange} value={userData?.cep || ''} label='CEP *' onBlur={handleBlurCEP} sx={{ flex: 1, }} />
@@ -1614,7 +1242,7 @@ export default function EditUser() {
                                     <TextInput disabled={!isPermissionEdit && true} placeholder='Início da contratação' name='admissao' type="date" onChange={handleChangeContract} value={(contract?.admissao)?.split('T')[0] || ''} label='Início da contratação' sx={{ flex: 1, }} />
                                     <TextInput disabled={!isPermissionEdit && true} placeholder='Encerramento' name='desligamento' type="date" onChange={handleChangeContract} value={contract?.desligamento?.split('T')[0] || ''} label='Encerramento da contratação' sx={{ flex: 1, }} onBlur={() => {
                                         new Date(contract?.desligamento) > new Date(1001, 0, 1) &&
-                                            setUserData({ ...userData, ativo: 0, admin_sistema: contract?.desligamento ? 0 : userData?.admin_sistema })
+                                            setUserData({ ...userData, ativo: 0 })
                                     }} />
                                 </Box>
                                 <Box sx={styles.inputSection}>
@@ -1868,9 +1496,9 @@ export const EditFile = (props) => {
     }
 
     return (
-        <Backdrop open={open} sx={{ zIndex: 99999, }}>
-            <ContentContainer style={{ ...styles.containerFile, maxHeight: { md: '180px', lg: '1280px' }, marginLeft: { md: '180px', lg: '0px' }, overflowY: matches && 'scroll', }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', zIndex: 999999999, alignItems: 'center', padding: '0px 0px 8px 0px' }}>
+        <Backdrop open={open} sx={{ zIndex: 9999, }}>
+            <ContentContainer style={{ ...styles.containerFile, maxHeight: { md: '400px', lg: '1280px' }, marginLeft: { md: '80px', lg: '0px' }, overflowY: matches && 'scroll', }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', zIndex: 9999, alignItems: 'center', padding: '0px 0px 8px 0px' }}>
                     <Text bold>{title}</Text>
                     <Box sx={{
                         ...styles.menuIcon,
@@ -1878,7 +1506,7 @@ export const EditFile = (props) => {
                         height: 15,
                         backgroundImage: `url(${icons.gray_close})`,
                         transition: '.3s',
-                        zIndex: 999999999,
+                        zIndex: 9999,
                         "&:hover": {
                             opacity: 0.8,
                             cursor: 'pointer'
@@ -1972,7 +1600,7 @@ export const EditFile = (props) => {
                                                     opacity: 0.8,
                                                     cursor: "pointer",
                                                 },
-                                                zIndex: 9999999,
+                                                zIndex: 9999,
                                             }} onClick={(event) => {
                                                 event.preventDefault()
                                                 handleDeleteFile(file)

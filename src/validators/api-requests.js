@@ -69,6 +69,7 @@ export const createContract = async (id, contract) => {
       const response = await api.post(`/contract/create/${id}`, { contract })
       return response
    } catch (error) {
+      console.log(error)
       return error
    }
 }

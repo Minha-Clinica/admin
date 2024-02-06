@@ -149,7 +149,7 @@ export const CustomDropzone = (props) => {
                                         }
                                     }} onClick={() => setFilesDrop([])} />
                                 </Box>
-                                <Box sx={{ display: 'flex', flexDirection: 'row', gap: 2, maxWidth: 750, overflowX: 'auto', padding: '20px 20px' }}>
+                                <Box sx={{ display: 'flex', flexDirection: 'row', gap: 2, maxWidth: 750, overflowX: 'auto', padding: '20px 20px', zIndex: 99999 }}>
                                     {filesDrop?.map((file, index) => {
                                         const typePdf = file?.name?.includes('pdf') || null;
                                         return (
@@ -161,7 +161,7 @@ export const CustomDropzone = (props) => {
                                                         backgroundRepeat: 'no-repeat',
                                                         backgroundPosition: 'center center',
                                                         borderRadius: campo === 'foto_perfil' ? '50%' : '',
-                                                        width: { xs: '100%', sm: 150, md: 150, lg: 500, xl: 500 },
+                                                        width: { xs: '100%', sm: 150, md: 150, lg: 250, xl: 250 },
                                                         aspectRatio: '1/1',
                                                     }}>
                                                 </Box>

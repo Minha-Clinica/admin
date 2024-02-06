@@ -362,68 +362,13 @@ export default function EditInstitution(props) {
                 </Box>
                 <Box sx={styles.inputSection}>
                     <TextInput disabled={!isPermissionEdit && true} placeholder='CNPJ' name='cnpj' onChange={handleChange} value={institutionData?.cnpj || ''} label='CNPJ' sx={{ flex: 1, }} />
-                    <TextInput disabled={!isPermissionEdit && true} placeholder='Código Inep' name='cod_inep' onChange={handleChange} value={institutionData?.cod_inep || ''} label='Código Inep' sx={{ flex: 1, }} />
+                    <TextInput disabled={!isPermissionEdit && true} placeholder='Código' name='cod_inep' onChange={handleChange} value={institutionData?.cod_inep || ''} label='Código' sx={{ flex: 1, }} />
                 </Box>
                 <RadioItem disabled={!isPermissionEdit && true} valueRadio={institutionData?.ativo} group={groupStatus} title="Status" horizontal={mobile ? false : true} onSelect={(value) => setInstitutionData({ ...institutionData, ativo: parseInt(value) })} />
 
             </ContentContainer>
 
             <ContentContainer style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 1.8, padding: 5, }}>
-                <Text title bold >Presencial</Text>
-                <Box sx={{ display: 'flex', gap: 1 }}>
-                    <TextInput disabled={!isPermissionEdit && true} placeholder='Portaria de Credenciamento' name='pt_cred_pres' onChange={handleChange} value={institutionData?.pt_cred_pres || ''} label='Portaria de Credenciamento' sx={{ flex: 1, }} />
-                    <TextInput disabled={!isPermissionEdit && true} label="Data" placeholder='Data' name='dt_cred_pres' onChange={handleChange} value={(institutionData?.dt_cred_pres)?.split('T')[0] || ''} type="date" sx={{ flex: 1, }} />
-                    <TextInput disabled={!isPermissionEdit && true} placeholder='Portaria de Recredenciamento' name='pt_rec_pres' onChange={handleChange} value={institutionData?.pt_rec_pres || ''} label='Portaria de Recredenciamento' sx={{ flex: 1, }} />
-                    <TextInput disabled={!isPermissionEdit && true} label="Data" placeholder='Data' name='dt_rec_pres' onChange={handleChange} value={(institutionData?.dt_rec_pres)?.split('T')[0] || ''} type="date" sx={{ flex: 1, }} />
-
-                </Box>
-                <TextInput disabled={!isPermissionEdit && true} placeholder='Endereço' name='endereco_pres' onChange={handleChange} value={institutionData?.endereco_pres || ''} label='Endereço' sx={{ flex: 1, }} />
-
-                <Box sx={{ maxWidth: '580px', display: 'flex', flexDirection: 'column', gap: 1.8 }}>
-                    {arrayRecognitionP.map((rec, index) => (
-                        <>
-                            <Box key={index} sx={{ ...styles.inputSection, alignItems: 'center' }}>
-                                <TextInput disabled={!isPermissionEdit && true} label="Portaria de Renovação do Recredenciamento" placeholder='Portaria de Renovação do Recredenciamento' name={`ren_reconhecimento_p-${index}`} onChange={handleChangeRecognitionP} value={rec.ren_reconhecimento_p} sx={{ flex: 1 }} />
-                                <TextInput disabled={!isPermissionEdit && true} label="Data" placeholder='Data' name={`dt_renovacao_rec_p-${index}`} onChange={handleChangeRecognitionP} value={(rec?.dt_renovacao_rec_p)?.split('T')[0] || ''} type="date" sx={{ flex: 1, }} />
-                                {newInstitution && <Box sx={{
-                                    backgroundSize: 'cover',
-                                    backgroundRepeat: 'no-repeat',
-                                    backgroundPosition: 'center',
-                                    width: 25,
-                                    height: 25,
-                                    backgroundImage: `url(/icons/remove_icon.png)`,
-                                    transition: '.3s',
-                                    "&:hover": {
-                                        opacity: 0.8,
-                                        cursor: 'pointer'
-                                    }
-                                }} onClick={() => {
-                                    newInstitution ? deleteRecognitionP(index) : handleDeleteRecognition(rec?.id_renovacao_rec_p)
-                                }} />}
-                            </Box>
-                        </>
-                    ))}
-                    <Box sx={{ ...styles.inputSection, alignItems: 'center' }}>
-                        <TextInput disabled={!isPermissionEdit && true} label="Portaria de Renovação do Recredenciamento" placeholder='Portaria de Renovação do Recredenciamento' name={`ren_reconhecimento_p`} onChange={handleChangeRecognitionP} value={recognitionP.ren_reconhecimento_p} sx={{ flex: 1 }} />
-                        <TextInput disabled={!isPermissionEdit && true} label="Data" placeholder='Data' name='dt_renovacao_rec_p' onChange={handleChangeRecognitionP} value={(recognitionP?.dt_renovacao_rec_p)?.split('T')[0] || ''} type="date" sx={{ flex: 1, }} />
-                        {isPermissionEdit && <Box sx={{
-                            backgroundSize: 'cover',
-                            backgroundRepeat: 'no-repeat',
-                            backgroundPosition: 'center',
-                            width: 25,
-                            height: 25,
-                            borderRadius: '50%',
-                            backgroundImage: `url(/icons/include_icon.png)`,
-                            transition: '.3s',
-                            "&:hover": {
-                                opacity: 0.8,
-                                cursor: 'pointer'
-                            }
-                        }} onClick={() => {
-                            newInstitution ? addRecognitionP() : handleAddRecognition()
-                        }} />}
-                    </Box>
-                </Box>
                 <Text bold >Endereço</Text>
 
                 <Box sx={styles.inputSection}>
@@ -436,73 +381,6 @@ export default function EditInstitution(props) {
                     <TextInput disabled={!isPermissionEdit && true} placeholder='UF' name='uf_pres' onChange={handleChange} value={institutionData?.uf_pres || ''} label='UF *' sx={{ flex: 1, }} />
                     <TextInput disabled={!isPermissionEdit && true} placeholder='Bairro' name='bairro_pres' onChange={handleChange} value={institutionData?.bairro_pres || ''} label='Bairro *' sx={{ flex: 1, }} />
                     <TextInput disabled={!isPermissionEdit && true} placeholder='Complemento' name='complemento_pres' onChange={handleChange} value={institutionData?.complemento_pres || ''} label='Complemento' sx={{ flex: 1, }} />
-                </Box>
-            </ContentContainer>
-            <ContentContainer style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 1.8, padding: 5, }}>
-                <Text title bold >EAD</Text>
-
-                <Box sx={styles.inputSection}>
-                    <TextInput disabled={!isPermissionEdit && true} placeholder='Portaria de Credenciamento' name='pt_cred_ead' onChange={handleChange} value={institutionData?.pt_cred_ead || ''} label='Portaria de Credenciamento' sx={{ flex: 1, }} />
-                    <TextInput disabled={!isPermissionEdit && true} placeholder='Data' name='dt_cred_ead' onChange={handleChange} value={(institutionData?.dt_cred_ead)?.split('T')[0] || ''} type="date" sx={{ flex: 1, }} />
-                    <TextInput disabled={!isPermissionEdit && true} placeholder='Portaria de Recredenciamento' name='pt_rec_ead' onChange={handleChange} value={institutionData?.pt_rec_ead || ''} label='Portaria de Recredenciamento' sx={{ flex: 1, }} />
-                    <TextInput disabled={!isPermissionEdit && true} placeholder='Data' name='dt_rec_ead' onChange={handleChange} value={(institutionData?.dt_rec_ead)?.split('T')[0] || ''} type="date" sx={{ flex: 1, }} />
-                </Box>
-                <Box sx={{ maxWidth: '580px', display: 'flex', flexDirection: 'column', gap: 1.8 }}>
-                    {arrayRecognitionEad.map((rec, index) => (
-                        <>
-                            <Box key={index} sx={{ ...styles.inputSection, alignItems: 'center' }}>
-                                <TextInput disabled={!isPermissionEdit && true} label="Portaria de Renovação do Recredenciamento" placeholder='Portaria de Renovação do Recredenciamento' name={`ren_reconhecimento_ead-${index}`} onChange={handleChangeRecognitionEad} value={rec.ren_reconhecimento_ead} sx={{ flex: 1 }} />
-                                <TextInput disabled={!isPermissionEdit && true} label="Data" placeholder='Data' name={`dt_renovacao_rec_ead-${index}`} onChange={handleChangeRecognitionEad} value={(rec?.dt_renovacao_rec_ead)?.split('T')[0] || ''} type="date" sx={{ flex: 1, }} />
-                                {isPermissionEdit && <Box sx={{
-                                    backgroundSize: 'cover',
-                                    backgroundRepeat: 'no-repeat',
-                                    backgroundPosition: 'center',
-                                    width: 25,
-                                    height: 25,
-                                    backgroundImage: `url(/icons/remove_icon.png)`,
-                                    transition: '.3s',
-                                    "&:hover": {
-                                        opacity: 0.8,
-                                        cursor: 'pointer'
-                                    }
-                                }} onClick={() => {
-                                    newInstitution ? deleteRecognitionEad(index) : handleDeleteRecognition(rec?.id_renovacao_rec_ead)
-                                }} />}
-                            </Box>
-                        </>
-                    ))}
-                    <Box sx={{ ...styles.inputSection, alignItems: 'center' }}>
-                        <TextInput disabled={!isPermissionEdit && true} label="Portaria de Renovação do Recredenciamento" placeholder='Portaria de Renovação do Recredenciamento' name={`ren_reconhecimento_ead`} onChange={handleChangeRecognitionEad} value={recognitionEad.ren_reconhecimento_ead} sx={{ flex: 1 }} />
-                        <TextInput disabled={!isPermissionEdit && true} label="Data" placeholder='Data' name='dt_renovacao_rec_ead' onChange={handleChangeRecognitionEad} value={(recognitionEad?.dt_renovacao_rec_ead)?.split('T')[0] || ''} type="date" sx={{ flex: 1, }} />
-                        {isPermissionEdit && <Box sx={{
-                            backgroundSize: 'cover',
-                            backgroundRepeat: 'no-repeat',
-                            backgroundPosition: 'center',
-                            width: 25,
-                            height: 25,
-                            borderRadius: '50%',
-                            backgroundImage: `url(/icons/include_icon.png)`,
-                            transition: '.3s',
-                            "&:hover": {
-                                opacity: 0.8,
-                                cursor: 'pointer'
-                            }
-                        }} onClick={() => {
-                            newInstitution ? addRecognitionEad() : handleAddRecognition()
-                        }} />}
-                    </Box>
-                </Box>
-                <Text bold >Endereço Polo Sede</Text>
-                <Box sx={styles.inputSection}>
-                    <TextInput disabled={!isPermissionEdit && true} placeholder='CEP' name='cep_ead' onChange={handleChange} value={institutionData?.cep_ead || ''} label='CEP *' onBlur={handleBlurCEP} sx={{ flex: 1, }} />
-                    <TextInput disabled={!isPermissionEdit && true} placeholder='Endereço' name='rua_ead' onChange={handleChange} value={institutionData?.rua_ead || ''} label='Endereço *' sx={{ flex: 1, }} />
-                    <TextInput disabled={!isPermissionEdit && true} placeholder='Nº' name='numero_ead' onChange={handleChange} value={institutionData?.numero_ead || ''} label='Nº *' sx={{ flex: 1, }} />
-                </Box>
-                <Box sx={styles.inputSection}>
-                    <TextInput disabled={!isPermissionEdit && true} placeholder='Cidade' name='cidade_ead' onChange={handleChange} value={institutionData?.cidade_ead || ''} label='Cidade *' sx={{ flex: 1, }} />
-                    <TextInput disabled={!isPermissionEdit && true} placeholder='UF' name='uf_ead' onChange={handleChange} value={institutionData?.uf_ead || ''} label='UF *' sx={{ flex: 1, }} />
-                    <TextInput disabled={!isPermissionEdit && true} placeholder='Bairro' name='bairro_ead' onChange={handleChange} value={institutionData?.bairro_ead || ''} label='Bairro *' sx={{ flex: 1, }} />
-                    <TextInput disabled={!isPermissionEdit && true} placeholder='Complemento' name='complemento_ead' onChange={handleChange} value={institutionData?.complemento_ead || ''} label='Complemento' sx={{ flex: 1, }} />
                 </Box>
             </ContentContainer>
         </>

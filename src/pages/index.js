@@ -372,7 +372,7 @@ function Home() {
 
                      </Box>
                      <Box sx={{ display: 'flex', gap: 2, }}>
-                        <ContentContainer  style={{display: 'flex', flexDirection: 'row'}}>
+                        <ContentContainer style={{ display: 'flex', flexDirection: 'row' }}>
                            <Box>
                               <Text bold large style={{ textAlign: 'center' }}>Agenda do Mês</Text>
                               <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
@@ -402,18 +402,27 @@ function Home() {
                                  <style>{styleCalendar(colorPalette)}</style>
                               </Box>
                            </Box>
-                           <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column',
-                        maxHeight: 400, overflowY: 'auto', width: 200 }}>
-                              {sortedEvents?.map((item, index) => {
-                                 return (
-                                    <Box key={index} sx={{ display: 'flex', gap: 1, flexDirection: 'column',
-                                    backgroundColor: colorPalette.primary, padding: '10px', }}>
-                                       <Text bold small>{item?.title}</Text>
-                                       <Text light small>{item?.description}</Text>
-                                       <Text light small>{formatTimeStamp(item?.start, true)}</Text>
-                                    </Box>
-                                 )
-                              })}
+                           <Box sx={{
+                              display: 'flex', gap: 2, flexDirection: 'column',
+                           }}>
+                              <Box sx={{
+                                 display: 'flex', gap: 2, flexDirection: 'column',
+                                 maxHeight: 400, overflowY: 'auto', width: 200
+                              }}>
+                                 {sortedEvents?.map((item, index) => {
+                                    return (
+                                       <Box key={index} sx={{
+                                          display: 'flex', gap: 1, flexDirection: 'column',
+                                          backgroundColor: colorPalette.primary, padding: '10px',
+                                       }}>
+                                          <Text bold small>{item?.title}</Text>
+                                          <Text light small>{item?.description}</Text>
+                                          <Text light small>{formatTimeStamp(item?.start, true)}</Text>
+                                       </Box>
+                                    )
+                                 })}
+                              </Box>
+                              <Button small text="Ver agenda completa" style={{ height: 30 }} onClick={() => router.push('/administrative/calendar/calendar')}/>
                            </Box>
                         </ContentContainer>
                         <ContentContainer fullWidth>
