@@ -607,7 +607,7 @@ export default function EditUser() {
         if (checkRequiredFields()) {
             setLoading(true)
             try {
-                const response = await createUser(userData, arrayInterests, arrayHistoric, arrayDisciplinesProfessor, usuario_id)
+                const response = await createUser(userData, arrayHistoric, usuario_id)
                 const { data } = response
                 if (userData?.perfil?.includes('funcionario')) { await createContract(data?.userId, contract) }
                 if (fileCallback) { await api.patch(`/file/edit/${fileCallback?.id_foto_perfil}/${data?.userId}`) }
