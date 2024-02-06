@@ -42,14 +42,6 @@ export default function EditUser() {
         pais_origem: 'Brasil',
         telefone_emergencia: null,
         telefone: null,
-        professor: 0,
-        rg: null,
-        expedicao: '2001-01-01',
-        orgao: null,
-        uf_rg: null,
-        titulo: null,
-        zona: null,
-        secao: null,
         rua: null,
         cidade: null,
         uf: null,
@@ -59,7 +51,6 @@ export default function EditUser() {
         numero: null,
         ativo: 1,
         admin_sistema: 0,
-        portal_aluno: 0,
         login: null,
         nascimento: null,
         tipo_deficiencia: null,
@@ -87,20 +78,12 @@ export default function EditUser() {
         tipo_conta_2: null,
         cartao_ponto: null,
     })
-    const [enrollmentData, setEnrollmentData] = useState([])
     const [countries, setCountries] = useState([])
-    const [courses, setCourses] = useState([])
-    const [classes, setClasses] = useState([])
-    const [period, setPeriod] = useState([])
-    const [periodSelected, setPeriodSelected] = useState([])
-    const [classesInterest, setClassesInterest] = useState([])
     const [groupPermissions, setGroupPermissions] = useState([])
     const [permissionPerfil, setPermissionPerfil] = useState()
     const [permissionPerfilBefore, setPermissionPerfilBefore] = useState()
     const [foreigner, setForeigner] = useState(false)
     const [showContract, setShowContract] = useState(false)
-    const [showEnrollment, setShowEnrollment] = useState(false)
-    const [showSelectiveProcess, setShowSelectiveProcess] = useState(false)
     const [selectiveProcessData, setSelectiveProcessData] = useState({
         agendamento_processo: '',
         nota_processo: '',
@@ -108,8 +91,6 @@ export default function EditUser() {
     })
     const themeApp = useTheme()
     const mobile = useMediaQuery(themeApp.breakpoints.down('sm'))
-    const [interests, setInterests] = useState({});
-    const [arrayInterests, setArrayInterests] = useState([])
     const [showSections, setShowSections] = useState({
         registration: false,
         interest: false,
@@ -142,13 +123,8 @@ export default function EditUser() {
     const [arrayHistoric, setArrayHistoric] = useState([])
     const [arrayDependent, setArrayDependent] = useState([])
     const [dependent, setDependent] = useState({})
-    const [arrayDisciplinesProfessor, setArrayDisciplinesProfessor] = useState([])
-    const [disciplinesProfessor, setDisciplinesProfessor] = useState({})
     const [valueIdHistoric, setValueIdHistoric] = useState()
-    const [valueIdInterst, setValueIdInterst] = useState()
-    const [interestSelected, setInterestSelected] = useState({})
     const [filesUser, setFilesUser] = useState([])
-    const [contractStudent, setContractStudent] = useState([])
     const [officeHours, setOfficeHours] = useState([
         { dia_semana: '2ª Feira', ent1: null, sai1: null, ent2: null, sai2: null, ent3: null, sai3: null },
         { dia_semana: '3ª Feira', ent1: null, sai1: null, ent2: null, sai2: null, ent3: null, sai3: null },
@@ -157,12 +133,6 @@ export default function EditUser() {
         { dia_semana: '6ª Feira', ent1: null, sai1: null, ent2: null, sai2: null, ent3: null, sai3: null },
         { dia_semana: 'Sábado', ent1: null, sai1: null, ent2: null, sai2: null, ent3: null, sai3: null },
     ]);
-    const [showEnrollTable, setShowEnrollTable] = useState({})
-    const [enrollmentStudentEditId, setEnrollmentStudentEditId] = useState()
-    const [enrollmentStudentEditData, setEnrollmentStudentEditData] = useState({})
-    const [disciplines, setDisciplines] = useState([])
-    const [currentModule, setCurrentModule] = useState(1)
-    const [highestModule, setHighestModule] = useState(null)
     const [showEditPhoto, setShowEditPhoto] = useState(false)
     const [isPermissionEdit, setIsPermissionEdit] = useState(false)
 
@@ -180,16 +150,9 @@ export default function EditUser() {
     useEffect(() => {
         setPerfil()
         findCountries()
-        listCourses()
         listPermissions()
-        listDisciplines()
         fetchPermissions()
     }, [])
-
-    useEffect(() => {
-        listClass()
-    }, [enrollmentData?.curso_id, interests.curso_id, interestSelected?.curso_id])
-
 
     const getUserData = async () => {
         try {
@@ -215,63 +178,11 @@ export default function EditUser() {
     }
 
 
-    const getDisciplineProfessor = async () => {
-        try {
-            const response = await api.get(`/discipline/professor/${id}`)
-            const { data } = response
-            setArrayDisciplinesProfessor(data)
-        } catch (error) {
-            console.log(error)
-            return error
-        }
-    }
-
     const getContract = async () => {
         try {
             const response = await api.get(`/contract/${id}`)
             const { data } = response
             setContract(data)
-        } catch (error) {
-            console.log(error)
-            return error
-        }
-    }
-
-    const getEnrollment = async () => {
-        try {
-            const response = await api.get(`/enrollment/${id}`)
-            const { data } = response
-            if (data?.length > 0) {
-                data.sort((a, b) => a.modulo - b.modulo);
-                const highestModule = data[data.length - 1].modulo;
-                setHighestModule(highestModule);
-            }
-            setEnrollmentData(data)
-        } catch (error) {
-            console.log(error)
-            return error
-        }
-    }
-
-    const getInterest = async () => {
-        try {
-            const response = await api.get(`/user/interests/${id}`)
-            const { data } = response
-            setArrayInterests(data)
-        } catch (error) {
-            console.log(error)
-            return error
-        }
-    }
-
-    const getInterestEdit = async (interestId) => {
-        try {
-            const response = await api.get(`/user/interest/${interestId}`)
-            const { data } = response
-            setInterestSelected(data)
-            if (data) {
-                await listClassesInterest(data?.curso_id)
-            }
         } catch (error) {
             console.log(error)
             return error
@@ -420,68 +331,6 @@ export default function EditUser() {
         }
     }
 
-    async function listCourses() {
-        try {
-            const response = await api.get(`/courses`)
-            const { data } = response
-            const groupCourses = data.map(course => ({
-                label: `${course.nome_curso}_${course?.modalidade_curso}`,
-                value: course?.id_curso
-            }));
-
-            setCourses(groupCourses);
-        } catch (error) {
-        }
-    }
-
-    async function listClass() {
-
-        try {
-            const response = await api.get(`/classes`)
-
-            const { data = [] } = response
-            const groupClass = data.map(turma => ({
-                label: turma.nome_turma,
-                value: turma?.id_turma
-            }));
-
-            const groupPeriod = data.map(turma => ({
-                label: turma?.periodo,
-                value: turma?.periodo,
-                idClass: turma?.id_turma
-            }));
-
-            setClasses(groupClass);
-            setPeriod(groupPeriod)
-        } catch (error) {
-            return error
-        }
-    }
-
-
-
-    async function listClassesInterest(id_course) {
-
-        try {
-            const response = await api.get(`/class/course/${id_course}`)
-            const { data = [] } = response
-            const groupClass = data.map(turma => ({
-                label: turma.nome_turma,
-                value: turma?.id_turma
-            }));
-
-            const groupPeriod = data.map(turma => ({
-                label: turma?.periodo,
-                value: turma?.periodo
-            }));
-
-            setClassesInterest(groupClass);
-            setPeriodSelected(groupPeriod)
-        } catch (error) {
-            return error
-        }
-    }
-
 
     async function listPermissions() {
 
@@ -494,20 +343,6 @@ export default function EditUser() {
             }));
 
             setGroupPermissions(groupPermissions);
-        } catch (error) {
-        }
-    }
-
-    async function listDisciplines() {
-        try {
-            const response = await api.get(`/disciplines/active`)
-            const { data } = response
-            const groupDisciplines = data.map(disciplines => ({
-                label: disciplines.nome_disciplina,
-                value: disciplines?.id_disciplina
-            }));
-
-            setDisciplines(groupDisciplines);
         } catch (error) {
         }
     }
@@ -532,31 +367,11 @@ export default function EditUser() {
         findCEP(value);
     };
 
-    const handleEnrollments = async () => {
-        try {
-            const response = await api.get(`/enrollments/user/reenrollment/${id}`)
-            const { data } = response
-            if (data?.length > 0) {
-                const lastModule = data?.map(item => item.modulo)
-                lastModule.sort((a, b) => a - b)
-                const highestModule = Math.max(...lastModule);
-                setCurrentModule(highestModule + 1)
-                return highestModule + 1
-            }
-            return false
-        } catch (error) {
-            console.log(error)
-            return error
-        }
-    }
-
     const handleItems = async () => {
         setLoading(true)
         try {
             await getUserData()
-            await getEnrollment()
             getContract()
-            getInterest()
             getHistoric()
             getPhoto()
             getFileUser()
@@ -564,9 +379,6 @@ export default function EditUser() {
             getOfficeHours()
             getPermissionUser()
             getDependent()
-            getDisciplineProfessor()
-            await listClass()
-            await handleEnrollments()
         } catch (error) {
             alert.error('Ocorreu um arro ao carregar Usuarios')
         } finally {
@@ -651,42 +463,6 @@ export default function EditUser() {
         }))
     }
 
-    const handleChangeInterest = (value, field) => {
-
-        if (field === 'curso_id') {
-            let [courseName] = courses?.filter(item => item.value === value).map(item => item.label)
-            setInterests({
-                ...interests,
-                curso_id: value,
-                nome_curso: courseName
-            })
-            return
-        }
-
-        if (field === 'turma_id') {
-            let [className] = classes?.filter(item => item.value === value).map(item => item.label)
-            setInterests({
-                ...interests,
-                turma_id: value,
-                nome_turma: className
-            })
-            return
-        }
-
-        setInterests((prevValues) => ({
-            ...prevValues,
-            [value.target.name]: value.target.value,
-        }))
-    }
-
-    const handleChangeInterestSelected = (value) => {
-
-        setInterestSelected((prevValues) => ({
-            ...prevValues,
-            [value.target.name]: value.target.value,
-        }))
-    }
-
     const handleOfficeHours = (newData) => {
         setOfficeHours(newData);
     };
@@ -723,97 +499,6 @@ export default function EditUser() {
             return newArray;
         });
     };
-
-
-    const handleChangeDisciplineProfessor = (value) => {
-        setDisciplinesProfessor((prevValues) => ({
-            ...prevValues,
-            [value.target.name]: value.target.value,
-        }))
-    };
-
-    const addInterest = () => {
-        if (!interests.curso_id) {
-            alert.error('Por favor, selecione o curso de interesse.')
-            return
-        }
-
-        setArrayInterests((prevArray) => [
-            ...prevArray,
-            {
-                curso_id: interests.curso_id,
-                turma_id: interests.turma_id,
-                nome_curso: interests.nome_curso,
-                nome_turma: interests.nome_turma,
-                periodo_interesse: interests.periodo_interesse,
-                observacao_int: interests.observacao_int || '',
-            }
-        ]);
-
-        setInterests({})
-    }
-
-    const deleteInterest = (index) => {
-        if (newUser) {
-            setArrayInterests((prevArray) => {
-                const newArray = [...prevArray];
-                newArray.splice(index, 1);
-                return newArray;
-            });
-        }
-    };
-
-    const handleDeleteInterest = async (id_interesse) => {
-        setLoading(true)
-        try {
-            const response = await api.delete(`/user/interest/delete/${id_interesse}`)
-            if (response?.status == 201) {
-                alert.success('Interesse removido.');
-                getInterest()
-            }
-        } catch (error) {
-            alert.error('Ocorreu um erro ao remover o Interesse selecionado.');
-            console.log(error)
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    const handleAddInterest = async () => {
-        setLoading(true)
-        let userId = userData?.id;
-
-        try {
-            const response = await api.post(`/user/interest/create/${usuario_id}`, { interests, userId })
-            if (response?.status == 201) {
-                alert.success('Interesse adicionado.');
-                setInterests({})
-                getInterest()
-            }
-        } catch (error) {
-            alert.error('Ocorreu um erro ao adicionar Interesse.');
-            console.log(error)
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    const handleEditInterest = async (id_interest) => {
-        setLoading(true)
-        try {
-            const response = await api.patch(`/user/interest/update/${id_interest}`, { interestSelected })
-            if (response?.status === 200) {
-                alert.success('Interesse atualizado.');
-                setShowSections({ ...showSections, viewInterest: false })
-                getInterest()
-            }
-        } catch (error) {
-            alert.error('Ocorreu um erro ao adicionar Interesse.');
-            console.log(error)
-        } finally {
-            setLoading(false)
-        }
-    }
 
 
     const addHistoric = () => {
@@ -1101,53 +786,6 @@ export default function EditUser() {
         }
     }
 
-    const addDisciplineProfessor = () => {
-        setArrayDisciplinesProfessor((prevArray) => [...prevArray, { disciplina_id: disciplinesProfessor.disciplina_id }])
-        setDisciplinesProfessor({ disciplina_id: '' })
-    }
-
-    const deleteDisciplineProfessor = (index) => {
-        if (newUser) {
-            setArrayDisciplinesProfessor((prevArray) => {
-                const newArray = [...prevArray];
-                newArray.splice(index, 1);
-                return newArray;
-            });
-        }
-    };
-
-    const handleAddDisciplineProfessor = async () => {
-        setLoading(true)
-        try {
-            const response = await api.post(`/discipline/professor/create/${id}`, { disciplinesProfessor, usuario_id })
-            if (response?.status === 201) {
-                alert.success('Disciplina vinculada ao professor')
-                setDisciplinesProfessor({})
-                getDisciplineProfessor()
-            }
-        } catch (error) {
-            console.log(error)
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    const handleDeleteDisciplineProfessor = async (disciplineProfessorId) => {
-        setLoading(true)
-        try {
-            const response = await api.delete(`/discipline/professor/delete/${disciplineProfessorId}`)
-            if (response?.status === 200) {
-                alert.success('Dependente removido.');
-                getDisciplineProfessor()
-            }
-        } catch (error) {
-            alert.error('Ocorreu um erro ao remover a Habilidade selecionada.');
-            console.log(error)
-        } finally {
-            setLoading(false)
-        }
-    }
-
 
     const toggleEnrollTable = (index) => {
         setShowEnrollTable(prevState => ({
@@ -1157,134 +795,7 @@ export default function EditUser() {
     };
 
 
-    const handleEnrollStudentById = async (id) => {
-        setLoading(true)
-        try {
-            const response = await api.get(`/enrollment/edit/${id}`)
-            const { data } = response
-            if (data) {
-                setEnrollmentStudentEditData(data)
-            }
 
-        } catch (error) {
-            console.log(error)
-            return error
-        } finally {
-            setLoading(false)
-        }
-    }
-
-
-    const handleEnrollStudentEdit = async () => {
-        setLoading(true)
-        try {
-            if (enrollmentStudentEditData) {
-                const responseData = await editeEnrollment({ enrollmentStudentEditId, enrollmentStudentEditData })
-
-                if (responseData.status === 201) {
-                    setShowSections({ ...showSections, editEnroll: false })
-                    getEnrollment()
-                }
-            }
-
-        } catch (error) {
-            return error
-        } finally {
-            setLoading(false)
-        }
-    }
-
-
-    const handleValidateGetway = async () => {
-        setLoading(true)
-        try {
-            const result = await api.post(`/user/validate/getway`, { userData })
-            return result
-        } catch (error) {
-            alert.error('Ocorreu um erro. Valide os seus dados (Verifique se seu CPF está correto) e tente novamente.')
-            return error
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    const handleEnrollment = async (interest) => {
-        if (verifyDataToGetway()) {
-            if (verifyEnrollment(interest)) {
-                setLoading(true)
-                try {
-                    const result = await handleValidateGetway()
-                    if (result?.status === 201 || result?.status === 200) {
-                        router.push(`/administrative/users/${id}/enrollStudent?interest=${interest?.id_interesse}`)
-                        return
-                    } else {
-                        alert.error('Ocorreu um erro. Valide os seus dados (Verifique se seu CPF está correto) e tente novamente.')
-                    }
-                } catch (error) {
-                    alert.error('Ocorreu um erro. Valide os seus dados (Verifique se seu CPF está correto) e tente novamente.')
-                    return error
-                } finally {
-                    setLoading(false)
-                }
-            }
-        }
-    }
-
-    const verifyDataToGetway = () => {
-
-        if (!userData?.nome) {
-            alert.error('Preencha o campo nome para seguirmos com a matrícula.')
-            return false
-        }
-        if (!userData?.cpf) {
-            alert.error('Preencha o campo cpf para seguirmos com a matrícula.')
-            return false
-        }
-        if (!userData?.nascimento) {
-            alert.error('Preencha o campo nascimento para seguirmos com a matrícula.')
-            return false
-        }
-        if (!userData?.telefone) {
-            alert.error('Preencha o campo telefone para seguirmos com a matrícula.')
-            return false
-        }
-        if (!userData?.rua) {
-            alert.error('Preencha o campo rua para seguirmos com a matrícula.')
-            return false
-        }
-        if (!userData?.numero) {
-            alert.error('Preencha o campo numero para seguirmos com a matrícula.')
-            return false
-        }
-        if (!userData?.bairro) {
-            alert.error('Preencha o campo bairro para seguirmos com a matrícula.')
-            return false
-        }
-        if (!userData?.cidade) {
-            alert.error('Preencha o campo cidade para seguirmos com a matrícula.')
-            return false
-        }
-        if (!userData?.uf) {
-            alert.error('Preencha o campo uf para seguirmos com a matrícula.')
-            return false
-        }
-        if (!userData?.cep) {
-            alert.error('Preencha o campo cep para seguirmos com a matrícula.')
-            return false
-        }
-
-        return true
-    }
-
-    const verifyEnrollment = (interest) => {
-        const isRegistered = enrollmentData?.filter(item => item.turma_id === interest?.turma_id)
-
-        if (isRegistered?.length > 0) {
-            alert.info('O aluno já está matrículado na turma selecionada. Analíse bem antes de prosseguir, para não "duplicar" matrículas ativas.')
-            return false
-        }
-        return true
-    }
 
     const handleSendSelectiveProcess = async (type) => {
         try {
@@ -1305,9 +816,9 @@ export default function EditUser() {
     }
 
     const groupPerfil = [
-        { label: 'Funcionário', value: 'funcionario' },
-        { label: 'Aluno', value: 'aluno' },
-        { label: 'Interessado', value: 'interessado' },
+        { label: 'Profissional', value: 'profissional' },
+        { label: 'Paciente', value: 'paciente' },
+        { label: 'Administrador', value: 'administrador' },
     ]
 
     const groupCivil = [
@@ -1332,11 +843,6 @@ export default function EditUser() {
     const groupStatus = [
         { label: 'ativo', value: 1 },
         { label: 'inativo', value: 0 },
-    ]
-
-    const groupProfessor = [
-        { label: 'sim', value: 1 },
-        { label: 'não', value: 0 },
     ]
 
     const groupCertificate = [
@@ -1595,12 +1101,6 @@ export default function EditUser() {
 
                 </Box>
                 <Box sx={{ ...styles.inputSection, justifyContent: 'start', alignItems: 'center', gap: 25, padding: '0px 0px 20px 15px' }}>
-
-                    {(userData?.perfil?.includes('interessado') || userData?.perfil?.includes('aluno') || arrayInterests?.length > 0) &&
-                        <Box sx={{ display: 'flex', justifyContent: 'start', gap: 1, alignItems: 'center', marginTop: 2 }}>
-                            <Text bold small>Lista de interesses:</Text>
-                            <Button small text='interesses' style={{ padding: '5px 6px 5px 6px', width: 100 }} onClick={() => setShowSections({ ...showSections, interest: true })} />
-                        </Box>}
                     {!newUser &&
                         <Box sx={{ display: 'flex', justifyContent: 'start', gap: 1, alignItems: 'center', marginTop: 2 }}>
                             <Text bold small>Observações do {userData?.perfil}:</Text>
@@ -1675,9 +1175,7 @@ export default function EditUser() {
                             <TextInput disabled={!isPermissionEdit && true} placeholder='Nova senha' name='nova_senha' onChange={handleChange} value={userData?.nova_senha || ''} type="password" label='Nova senha' sx={{ flex: 1, }} />
                             <TextInput disabled={!isPermissionEdit && true} placeholder='Confirmar senha' name='confirmar_senha' onChange={handleChange} value={userData?.confirmar_senha || ''} type="password" label='Confirmar senha' sx={{ flex: 1, }} />
                         </Box>}
-                        {userData?.perfil.includes('funcionario') && <RadioItem disabled={!isPermissionEdit && true} valueRadio={userData?.admin_sistema} group={groupAdmin} title="Acesso ao Sistema *" horizontal={mobile ? false : true} onSelect={(value) => setUserData({ ...userData, admin_sistema: parseInt(value) })} />}
-                        {userData?.perfil.includes('aluno') && <RadioItem disabled={!isPermissionEdit && true} valueRadio={userData?.portal_aluno} group={groupAdmin} title="Acesso ao Portal do aluno *" horizontal={mobile ? false : true} onSelect={(value) => setUserData({ ...userData, portal_aluno: parseInt(value) })} />}
-
+                        <RadioItem disabled={!isPermissionEdit && true} valueRadio={userData?.admin_sistema} group={groupAdmin} title="Acesso ao Sistema *" horizontal={mobile ? false : true} onSelect={(value) => setUserData({ ...userData, admin_sistema: parseInt(value) })} />
                         <Box sx={{ display: 'flex', justifyContent: 'start', gap: 1, alignItems: 'start', marginTop: 2, flexDirection: 'column', padding: '0px 0px 20px 12px' }}>
                             <Button small text='permissões' style={{ padding: '5px 6px 5px 6px', width: 100 }} onClick={() => setShowSections({ ...showSections, permissions: true })} />
                         </Box>
@@ -1754,90 +1252,6 @@ export default function EditUser() {
                 </Box>
                 {showSections.registration &&
                     <>
-                        <RadioItem disabled={!isPermissionEdit && true} valueRadio={userData?.professor}
-                            group={groupProfessor}
-                            title="Professor *"
-                            horizontal={mobile ? false : true}
-                            onSelect={(value) => setUserData({ ...userData, professor: parseInt(value) })} />
-
-                        {userData?.professor === 1 &&
-                            <ContentContainer style={{ maxWidth: '580px', margin: '10px 0px 10px 0px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                <Text bold style={{ padding: '0px 0px 0px 10px' }}>Selecionar disciplina</Text>
-                                {arrayDisciplinesProfessor.length > 0 &&
-                                    arrayDisciplinesProfessor?.map((disciplina, index) => (
-                                        <>
-
-                                            <Box key={index} sx={{ ...styles.inputSection, alignItems: 'center' }}>
-                                                <SelectList disabled={!isPermissionEdit && true}
-                                                    clean={false}
-                                                    fullWidth={true}
-                                                    data={disciplines}
-                                                    valueSelection={disciplina?.disciplina_id}
-                                                    title="Disciplina"
-                                                    filterOpition="value"
-                                                    sx={{ color: colorPalette.textColor, flex: 1 }}
-                                                    inputStyle={{
-                                                        color: colorPalette.textColor,
-                                                        fontSize: "15px",
-                                                        fontFamily: "MetropolisBold",
-                                                    }}
-                                                />
-
-                                                <Box sx={{
-                                                    backgroundSize: 'cover',
-                                                    backgroundRepeat: 'no-repeat',
-                                                    backgroundPosition: 'center',
-                                                    width: 25,
-                                                    height: 25,
-                                                    backgroundImage: `url(/icons/remove_icon.png)`,
-                                                    transition: '.3s',
-                                                    "&:hover": {
-                                                        opacity: 0.8,
-                                                        cursor: 'pointer'
-                                                    }
-                                                }} onClick={() => {
-                                                    newUser ? deleteDisciplineProfessor(index) : handleDeleteDisciplineProfessor(disciplina?.id_disciplina_prof)
-                                                }} />
-                                            </Box>
-                                        </>
-                                    ))}
-                                <Box sx={{ ...styles.inputSection, alignItems: 'center' }}>
-                                    <SelectList disabled={!isPermissionEdit && true}
-
-                                        fullWidth={true}
-                                        data={disciplines}
-                                        valueSelection={disciplinesProfessor?.disciplina_id}
-                                        title="Disciplina"
-                                        filterOpition="value"
-                                        sx={{ color: colorPalette.textColor, flex: 1 }}
-                                        inputStyle={{
-                                            color: colorPalette.textColor,
-                                            fontSize: "15px",
-                                            fontFamily: "MetropolisBold",
-                                        }}
-                                        onSelect={(value) => setDisciplinesProfessor({ ...disciplinesProfessor, disciplina_id: value })}
-                                    />
-                                    <Box sx={{
-                                        backgroundSize: 'cover',
-                                        backgroundRepeat: 'no-repeat',
-                                        backgroundPosition: 'center',
-                                        width: 25,
-                                        height: 25,
-                                        borderRadius: '50%',
-                                        backgroundImage: `url(/icons/include_icon.png)`,
-                                        transition: '.3s',
-                                        "&:hover": {
-                                            opacity: 0.8,
-                                            cursor: 'pointer'
-                                        }
-                                    }} onClick={() => {
-                                        if (disciplinesProfessor?.disciplina_id) {
-                                            newUser ? addDisciplineProfessor() : handleAddDisciplineProfessor()
-                                        }
-                                    }} />
-                                </Box>
-                            </ContentContainer>
-                        }
 
                         <Box sx={{ padding: '0px 0px 20px 0px' }}>
                             <CheckBoxComponent disabled={!isPermissionEdit && true}
@@ -1982,7 +1396,7 @@ export default function EditUser() {
 
                         <RadioItem disabled={!isPermissionEdit && true} valueRadio={userData?.estado_civil} group={groupCivil} title="Estado Cívil *" horizontal={mobile ? false : true} onSelect={(value) => setUserData({ ...userData, estado_civil: value })} />
                         <Box sx={{ ...styles.inputSection, alignItems: 'center' }}>
-                            <TextInput fullWidth disabled={!isPermissionEdit && true} placeholder='E-mail Méliès' name='email_corporativo' onChange={handleChange} value={userData?.email_corporativo || ''} label='E-mail Corporativo' />
+                            <TextInput fullWidth disabled={!isPermissionEdit && true} placeholder='E-mail Corporativo' name='email_corporativo' onChange={handleChange} value={userData?.email_corporativo || ''} label='E-mail Corporativo' />
                             <TextInput fullWidth disabled={!isPermissionEdit && true} placeholder='E-mail Pessoal' name='email_pessoal' onChange={handleChange} value={userData?.email_pessoal || ''} label='E-mail Pessoal' />
                         </Box>
                         <Box sx={{ maxWidth: '580px', margin: '10px 0px 10px 0px', display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -2165,77 +1579,13 @@ export default function EditUser() {
                             <TextInput disabled={!isPermissionEdit && true} placeholder='Bairro' name='bairro' onChange={handleChange} value={userData?.bairro || ''} label='Bairro *' sx={{ flex: 1, }} />
                             <TextInput disabled={!isPermissionEdit && true} placeholder='Complemento' name='complemento' onChange={handleChange} value={userData?.complemento || ''} label='Complemento' sx={{ flex: 1, }} />
                         </Box>
-                        <Box sx={styles.inputSection}>
-                            <FileInput onClick={(value) => setShowEditFiles({ ...showEditFile, rg: value })}>
-                                <TextInput disabled={!isPermissionEdit && true} placeholder='RG' name='rg' onChange={handleChange} value={userData?.rg || ''} label='RG *' sx={{ flex: 1, }} />
-                                <EditFile
-                                    isPermissionEdit={isPermissionEdit}
-                                    columnId="id_doc_usuario"
-                                    open={showEditFile.rg}
-                                    newUser={newUser}
-                                    onSet={(set) => {
-                                        setShowEditFiles({ ...showEditFile, rg: set })
-                                    }}
-                                    title='RG - Frente e verso'
-                                    text='Faça o upload do seu documento frente e verso, depois clique em salvar.'
-                                    textDropzone='Arraste ou clique para selecionar a Foto que deseja'
-                                    fileData={filesUser?.filter((file) => file.campo === 'rg')}
-                                    usuarioId={id}
-                                    campo='rg'
-                                    tipo='documento usuario'
-                                    callback={(file) => {
-                                        if (file.status === 201 || file.status === 200) {
-                                            if (!newUser) { handleItems() }
-                                            else {
-                                                handleChangeFilesUser('rg', file.fileId, file.filePreview)
-                                            }
-                                        }
-                                    }}
-                                />
-                            </FileInput>
-                            <TextInput disabled={!isPermissionEdit && true} placeholder='UF' name='uf_rg' onChange={handleChange} value={userData?.uf_rg || ''} label='UF RG *' sx={{ flex: 1, }} />
-                            <TextInput disabled={!isPermissionEdit && true} placeholder='Expedição' name='expedicao' onChange={handleChange} type="date" value={(userData?.expedicao)?.split('T')[0] || ''} label='Expedição *' sx={{ flex: 1, }} />
-                            <TextInput disabled={!isPermissionEdit && true} placeholder='Orgão' name='orgao' onChange={handleChange} value={userData?.orgao || ''} label='Orgão *' sx={{ flex: 1, }} />
-                        </Box>
-                        <Box sx={styles.inputSection}>
-                            <FileInput onClick={(value) => setShowEditFiles({ ...showEditFile, titleDoc: value })}>
-                                <TextInput disabled={!isPermissionEdit && true} placeholder='Título de Eleitor' name='titulo' onChange={handleChange} value={userData?.titulo || ''} label='Título de Eleitor' sx={{ flex: 1, }} />
-                                <EditFile
-                                    isPermissionEdit={isPermissionEdit}
-                                    columnId="id_doc_usuario"
-                                    open={showEditFile.titleDoc}
-                                    newUser={newUser}
-                                    onSet={(set) => {
-                                        setShowEditFiles({ ...showEditFile, titleDoc: set })
-                                    }}
-                                    title='Título de Eleitor'
-                                    text='Faça o upload do seu título, depois clique em salvar.'
-                                    textDropzone='Arraste ou clique para selecionar a Foto que deseja'
-                                    fileData={filesUser?.filter((file) => file.campo === 'titulo')}
-                                    usuarioId={id}
-                                    campo='titulo'
-                                    tipo='documento usuario'
-                                    callback={(file) => {
-                                        if (file.status === 201 || file.status === 200) {
-                                            if (!newUser) { handleItems() }
-                                            else {
-                                                handleChangeFilesUser('titulo', file.fileId, file.filePreview)
-                                            }
-                                        }
-                                    }}
-                                />
-
-                            </FileInput>
-                            <TextInput disabled={!isPermissionEdit && true} placeholder='Zona' name='zona' onChange={handleChange} value={userData?.zona || ''} label='Zona' sx={{ flex: 1, }} />
-                            <TextInput disabled={!isPermissionEdit && true} placeholder='Seção' name='secao' onChange={handleChange} value={userData?.secao || ''} label='Seção' sx={{ flex: 1, }} />
-                        </Box>
 
                     </>
                 }
             </ContentContainer>
 
             {/* contrato */}
-            {userData.perfil && userData.perfil.includes('funcionario') &&
+            {userData.perfil && !userData.perfil.includes('cliente') &&
                 <>
                     <ContentContainer style={{ ...styles.containerContract, padding: showContract ? '40px' : '25px' }}>
                         <Box sx={{
@@ -2261,52 +1611,11 @@ export default function EditUser() {
                             <>
                                 <Box sx={styles.inputSection}>
                                     <TextInput disabled={!isPermissionEdit && true} placeholder='Função' name='funcao' onChange={handleChangeContract} value={contract?.funcao || ''} label='Função' sx={{ flex: 1, }} />
-                                    <SelectList disabled={!isPermissionEdit && true} fullWidth data={groupArea} valueSelection={contract?.area} onSelect={(value) => setContract({ ...contract, area: value })}
-                                        title="Área de atuação" filterOpition="value" sx={{ color: colorPalette.textColor, flex: 1 }}
-                                        inputStyle={{ color: colorPalette.textColor, fontSize: '15px', fontFamily: 'MetropolisBold' }}
-                                    />
-                                    <TextInput disabled={!isPermissionEdit && true} placeholder='Cartão de Ponto' name='cartao_ponto' onChange={handleChangeContract} value={contract?.cartao_ponto || ''} label='Cartão de Ponto' sx={{ flex: 1, }} />
-                                </Box>
-                                <Box sx={styles.inputSection}>
-                                    <TextInput disabled={!isPermissionEdit && true} placeholder='Admissão' name='admissao' type="date" onChange={handleChangeContract} value={(contract?.admissao)?.split('T')[0] || ''} label='Admissão' sx={{ flex: 1, }} />
-                                    <TextInput disabled={!isPermissionEdit && true} placeholder='Desligamento' name='desligamento' type="date" onChange={handleChangeContract} value={contract?.desligamento?.split('T')[0] || ''} label='Desligamento' sx={{ flex: 1, }} onBlur={() => {
+                                    <TextInput disabled={!isPermissionEdit && true} placeholder='Início da contratação' name='admissao' type="date" onChange={handleChangeContract} value={(contract?.admissao)?.split('T')[0] || ''} label='Início da contratação' sx={{ flex: 1, }} />
+                                    <TextInput disabled={!isPermissionEdit && true} placeholder='Encerramento' name='desligamento' type="date" onChange={handleChangeContract} value={contract?.desligamento?.split('T')[0] || ''} label='Encerramento da contratação' sx={{ flex: 1, }} onBlur={() => {
                                         new Date(contract?.desligamento) > new Date(1001, 0, 1) &&
                                             setUserData({ ...userData, ativo: 0, admin_sistema: contract?.desligamento ? 0 : userData?.admin_sistema })
                                     }} />
-                                </Box>
-                                <Box sx={styles.inputSection}>
-                                    <FileInput onClick={(value) => setShowEditFiles({ ...showEditFile, ctps: value })}>
-                                        <TextInput disabled={!isPermissionEdit && true} placeholder='CTPS' name='ctps' onChange={handleChangeContract} value={contract?.ctps || ''} label='CTPS' sx={{ flex: 1, }} />
-
-                                        <EditFile
-                                            isPermissionEdit={isPermissionEdit}
-                                            columnId="id_doc_usuario"
-                                            open={showEditFile.ctps}
-                                            newUser={newUser}
-                                            onSet={(set) => {
-                                                setShowEditFiles({ ...showEditFile, ctps: set })
-                                            }}
-                                            title='Carteira de Trabalho'
-                                            text='Faça o upload da dua carteira de trabalho, depois clique em salvar.'
-                                            textDropzone='Arraste ou clique para selecionar a Foto que deseja'
-                                            fileData={filesUser?.filter((file) => file.campo === 'ctps')}
-                                            usuarioId={id}
-                                            campo='ctps'
-                                            tipo='documento usuario'
-                                            callback={(file) => {
-                                                if (file.status === 201 || file.status === 200) {
-                                                    if (!newUser) { handleItems() }
-                                                    else {
-                                                        handleChangeFilesUser('ctps', file.fileId, file.filePreview)
-                                                    }
-                                                }
-                                            }}
-                                        />
-
-                                    </FileInput>
-
-                                    <TextInput disabled={!isPermissionEdit && true} placeholder='Série' name='serie' onChange={handleChangeContract} value={contract?.serie || ''} label='Série' sx={{ flex: 1, }} />
-                                    <TextInput disabled={!isPermissionEdit && true} placeholder='PIS' name='pis' onChange={handleChangeContract} value={contract?.pis || ''} label='PIS' sx={{ flex: 1, }} />
                                 </Box>
                                 <Box sx={styles.inputSection}>
                                     <SelectList disabled={!isPermissionEdit && true} fullWidth data={groupBank} valueSelection={contract?.banco_1} onSelect={(value) => setContract({ ...contract, banco_1: value })}
@@ -2333,7 +1642,7 @@ export default function EditUser() {
                                 <ContentContainer style={{ boxShadow: 'none' }}>
                                     <Box sx={{ display: 'flex', gap: 5, flexDirection: 'column' }}>
                                         <Box sx={{ display: 'flex', gap: 5, alignItems: 'center' }}>
-                                            <Text bold title>Horário de trabalho</Text>
+                                            <Text bold title>Horários de atendimento Disponíveis</Text>
                                             {officeHours && <Box sx={{ display: 'flex' }}>
                                                 <Button disabled={!isPermissionEdit && true} small text='replicar' style={{ padding: '5px 16px 5px 16px' }} onClick={replicateToDaysWork} />
                                             </Box>}
@@ -2347,684 +1656,6 @@ export default function EditUser() {
                     </ContentContainer>
 
                 </>}
-
-            {userData.perfil && userData.perfil.includes('aluno') &&
-                <ContentContainer style={{ ...styles.containerContract, padding: showEnrollment ? '40px' : '25px' }}>
-                    <Box sx={{
-                        display: 'flex', alignItems: 'center', padding: showEnrollment ? '0px 0px 20px 0px' : '0px', gap: 1, "&:hover": {
-                            opacity: 0.8,
-                            cursor: 'pointer'
-                        },
-                        justifyContent: 'space-between'
-                    }} onClick={() => setShowEnrollment(!showEnrollment)}>
-                        <Text title bold >Matrículas</Text>
-                        <Box sx={{
-                            ...styles.menuIcon,
-                            backgroundImage: `url(${icons.gray_arrow_down})`,
-                            transform: showEnrollment ? 'rotate(0deg)' : 'rotate(-90deg)',
-                            transition: '.3s',
-                            "&:hover": {
-                                opacity: 0.8,
-                                cursor: 'pointer'
-                            }
-                        }} />
-                    </Box>
-                    {showEnrollment &&
-                        <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column' }}>
-
-                            {enrollmentData.length > 0 ?
-                                enrollmentData?.map((item, index) => {
-                                    const isReenrollment = item.status === "Concluído" &&
-                                        item.modulo === highestModule;
-                                    const isDp = item.cursando_dp === 1;
-                                    const className = item?.nome_turma;
-                                    const courseName = item?.nome_curso;
-                                    const period = item?.periodo;
-                                    let datePeriod = new Date(item?.dt_inicio_cronograma || item?.dt_inicio)
-                                    let year = datePeriod.getFullYear()
-                                    let month = datePeriod.getMonth()
-                                    let moduloYear = month >= 6 ? '2' : '1';
-                                    let periodEnrollment = `${year}.${moduloYear}`
-                                    const startDate = formatDate(item?.dt_inicio_cronograma || item?.dt_inicio)
-                                    const title = `${periodEnrollment} - ${className}_${item?.modulo}SEM_${courseName}_${startDate}_${period}`
-                                    const enrollmentId = item?.id_matricula;
-                                    const files = contractStudent?.filter((file) => file?.matricula_id === item?.id_matricula);
-                                    const bgImagePdf = files?.filter(file => file.matricula_id === item?.id_matricula)?.name_file?.includes('pdf') ? '/icons/pdf_icon.png' : files?.location
-
-                                    return (
-
-                                        <ContentContainer key={index} sx={{ display: 'flex', flexDirection: 'column', gap: 2, border: isReenrollment && `1px solid ${colorPalette.buttonColor}` }}>
-                                            <Box
-                                                sx={{
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                    justifyContent: 'start',
-                                                    gap: 4,
-                                                    maxWidth: '90%',
-                                                    "&:hover": {
-                                                        opacity: 0.8,
-                                                        cursor: 'pointer'
-                                                    }
-                                                }}
-                                                onClick={() => toggleEnrollTable(index)}
-                                            >
-                                                <Box
-                                                    sx={{
-                                                        ...styles.menuIcon,
-                                                        backgroundImage: `url(${icons.gray_arrow_down})`,
-                                                        transform: showEnrollTable[index] ? 'rotate(0)' : 'rotate(-90deg)',
-                                                        transition: '.3s',
-                                                        width: 17,
-                                                        height: 17
-                                                    }}
-                                                />
-                                                <Text bold style={{ color: colorPalette.buttonColor }}>{title}</Text>
-                                                {isReenrollment && <Box sx={{ padding: '5px 15px', backgroundColor: colorPalette.buttonColor, borderRadius: 2 }}>
-                                                    <Text bold small style={{ color: '#fff' }}>Pendente de Rematrícula - {item?.modulo + 1} Semetre/Módulo</Text>
-                                                </Box>}
-                                                {isDp && <Box sx={{ padding: '5px 15px', backgroundColor: 'red', borderRadius: 2 }}>
-                                                    <Text bold small style={{ color: '#fff' }}>Cursando DP</Text>
-                                                </Box>}
-                                            </Box>
-                                            {showEnrollTable[index] && (
-                                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, padding: '20px 0px 0px 0px' }}>
-                                                    <Divider padding={0} />
-                                                    <Box sx={{ display: 'flex', gap: 1.8, alignItems: 'center' }}>
-                                                        <Text bold>Turma:</Text>
-                                                        <Text light>{item?.nome_turma}</Text>
-                                                    </Box>
-                                                    <Divider padding={0} />
-                                                    <Box sx={{ display: 'flex', gap: 1.8, alignItems: 'center' }}>
-                                                        <Text bold>Pendências:</Text>
-                                                        <Text light>{item?.qnt_disci_dp || 0}</Text>
-                                                    </Box>
-                                                    <Divider padding={0} />
-                                                    <Box sx={{ display: 'flex', gap: 1.8, alignItems: 'center' }}>
-                                                        <Text bold>Semestre/Módulo cursando:</Text>
-                                                        <Text light>{item?.modulo}º Módulo</Text>
-                                                    </Box>
-                                                    <Divider padding={0} />
-                                                    <Box sx={styles.inputSection}>
-                                                        <Box sx={{ display: 'flex', justifyContent: 'start', gap: 2, alignItems: 'center', flex: 1 }}>
-                                                            <Text bold>Contrato do aluno:</Text>
-                                                            <Box sx={{
-                                                                ...styles.menuIcon,
-                                                                backgroundImage: `url('${icons.file}')`,
-                                                                transition: '.3s',
-                                                                "&:hover": {
-                                                                    opacity: 0.8,
-                                                                    cursor: 'pointer'
-                                                                }
-                                                            }} onClick={() => setShowEditFiles({ ...showEditFile, contractStudent: true })} />
-                                                            <Box sx={{
-                                                                ...styles.menuIcon,
-                                                                width: 22,
-                                                                height: 22,
-                                                                backgroundImage: `url('${icons.print}')`,
-                                                                transition: '.3s',
-                                                                "&:hover": {
-                                                                    opacity: 0.8,
-                                                                    cursor: 'pointer'
-                                                                }
-                                                            }} />
-                                                            <Box sx={{
-                                                                ...styles.menuIcon,
-                                                                width: 22,
-                                                                height: 22,
-                                                                backgroundImage: `url('${icons.send}')`,
-                                                                transition: '.3s',
-                                                                "&:hover": {
-                                                                    opacity: 0.8,
-                                                                    cursor: 'pointer'
-                                                                }
-                                                            }} />
-                                                            <EditFile
-                                                                isPermissionEdit={isPermissionEdit}
-                                                                columnId="id_contrato_aluno"
-                                                                open={showEditFile.contractStudent}
-                                                                newUser={newUser}
-                                                                onSet={(set) => {
-                                                                    setShowEditFiles({ ...showEditFile, contractStudent: set })
-                                                                }}
-                                                                title='Contrato do aluno'
-                                                                text='Faça o upload do contrato do aluno, depois clique em salvar.'
-                                                                textDropzone='Arraste ou clique para selecionar a foto/arquivo que deseja'
-                                                                fileData={contractStudent?.filter((file) => file?.matricula_id === enrollmentId)}
-                                                                usuarioId={id}
-                                                                matriculaId={enrollmentId}
-                                                                bgImage={bgImagePdf}
-                                                                callback={(file) => {
-                                                                    if (file.status === 201 || file.status === 200) {
-                                                                        handleItems()
-                                                                    }
-                                                                }}
-                                                            />
-                                                        </Box>
-                                                    </Box>
-                                                    <Divider padding={0} />
-                                                    <Box sx={{ display: 'flex', gap: 1.8, alignItems: 'center' }}>
-                                                        <Text bold>Data de Início:</Text>
-                                                        <Text light>{formatTimeStamp(item?.dt_inicio_cronograma)}</Text>
-                                                    </Box>
-                                                    <Divider padding={0} />
-                                                    <Box sx={{ display: 'flex', gap: 1.8, alignItems: 'center' }}>
-                                                        <Text bold>Data Final:</Text>
-                                                        <Text light>{formatTimeStamp(item?.dt_fim_cronograma)}</Text>
-                                                    </Box>
-                                                    <Divider padding={0} />
-                                                    <Box sx={{ display: 'flex', gap: 1.8, alignItems: 'center' }}>
-                                                        <Text bold>Status/Situação:</Text>
-                                                        <Text light>{item?.status}</Text>
-                                                    </Box>
-                                                    <Divider padding={0} />
-                                                    {/* <Box sx={styles.inputSection}>
-                                                        <TextInput disabled={!isPermissionEdit && true} name='dt_inicio' type="date" value={(item?.dt_inicio)?.split('T')[0] || ''} label='Inicio' sx={{ flex: 1, }} />
-                                                        <TextInput disabled={!isPermissionEdit && true} name='dt_final' type="date" value={(item?.dt_final)?.split('T')[0] || ''} label='Fim' sx={{ flex: 1, }} />
-                                                        <SelectList disabled={!isPermissionEdit && true} fullWidth data={groupSituation} valueSelection={item?.status} clean={false}
-                                                            title="Status/Situação" filterOpition="value" sx={{ color: colorPalette.textColor, flex: 1 }}
-                                                            inputStyle={{ color: colorPalette.textColor, fontSize: '15px', fontFamily: 'MetropolisBold' }}
-                                                        />
-                                                    </Box>
-                                                    <Divider padding={0} /> */}
-                                                    {
-                                                        enrollmentData.status?.includes('Desistente') &&
-                                                        <>
-
-                                                            <CheckBoxComponent disabled={!isPermissionEdit && true}
-                                                                valueChecked={item?.motivo_desistencia || ''}
-                                                                boxGroup={groupReasonsDroppingOut}
-                                                                title="Motivo da desistência"
-                                                                horizontal={mobile ? false : true}
-                                                                sx={{ width: 1 }}
-                                                            />
-                                                            <TextInput disabled={!isPermissionEdit && true} name='dt_desistencia' type="date" value={(item?.dt_desistencia)?.split('T')[0] || ''} label='Data da desistência' sx={{ flex: 1, }} />
-                                                            <Divider padding={0} />
-                                                        </>
-                                                    }
-
-
-                                                    <RadioItem disabled={!isPermissionEdit && true} valueRadio={item?.certificado_emitido}
-                                                        group={groupCertificate}
-                                                        title="Certificado emitido:"
-                                                        horizontal={mobile ? false : true}
-                                                    />
-                                                    <Divider padding={0} />
-
-                                                    <Box sx={{ display: 'flex', gap: 1.8, alignItems: 'center' }}>
-                                                        <Text bold>Usuário responsável:</Text>
-                                                        <Text light>{item?.nome_usuario_resp}</Text>
-                                                    </Box>
-                                                    <Divider padding={0} />
-
-                                                    <Box sx={{ display: 'flex', gap: 1.8, alignItems: 'center' }}>
-                                                        <Text bold>Data de criação:</Text>
-                                                        <Text light>{formatTimeStamp(item?.dt_criacao)}</Text>
-                                                    </Box>
-                                                    <Divider padding={0} />
-
-                                                    <Box sx={{ display: 'flex', gap: 1.8, alignItems: 'center' }}>
-                                                        <Text bold>Notas, frequências, atividades complementares:</Text>
-                                                        <Link href={`/academic/teacherArea/${id}`} target="_blank">
-                                                            <Button small text="vizualizar" style={{ width: 105, height: 25, alignItems: 'center' }} />
-                                                        </Link>
-                                                    </Box>
-                                                    <Divider padding={0} />
-                                                    <Box sx={{ display: 'flex', gap: 1.8, alignItems: 'center' }}>
-                                                        <Text bold>Situação dos pagamentos:</Text>
-                                                        <Link href={`/administrative/users/${id}/statusPayment?enrollmentId=${enrollmentId}`} target="_blank">
-                                                            <Button small text="vizualizar" style={{ width: 105, height: 25, alignItems: 'center' }} />
-                                                        </Link>
-                                                    </Box>
-                                                    <Divider padding={0} />
-                                                    <Box sx={{ display: 'flex', gap: 1.8, alignItems: 'center' }}>
-                                                        <Button disabled={!isPermissionEdit && true} secondary small text="editar matrícula" style={{ width: 140, height: 30, alignItems: 'center' }} onClick={() => {
-                                                            setEnrollmentStudentEditId(item?.id_matricula)
-                                                            handleEnrollStudentById(item?.id_matricula)
-                                                            setShowSections({ ...showSections, editEnroll: true })
-                                                        }} />
-                                                        {isReenrollment &&
-                                                            <Link href={`/administrative/users/${id}/enrollStudent?classId=${item?.turma_id}&courseId=${item?.curso_id}&reenrollment=true`} target="_blank">
-                                                                <Button disabled={!isPermissionEdit && true} small text="rematrícula" style={{ width: 140, height: 30, alignItems: 'center' }} />
-                                                            </Link>
-                                                        }
-                                                    </Box>
-                                                </Box>
-                                            )}
-                                        </ContentContainer>
-
-                                    )
-                                })
-                                :
-                                <Text light> Não encontramos matrículas cadastradas.</Text>}
-                            <Button disabled={!isPermissionEdit && true} text="Nova matrícula" style={{ width: 150, marginTop: 3 }} onClick={() => setShowSections({ ...showSections, interest: true })} />
-                        </Box>
-                    }
-
-                </ContentContainer >
-            }
-
-            <Backdrop open={showSections?.editEnroll} sx={{ zIndex: 999 }}>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-
-                    <ContentContainer>
-                        <Box sx={{ flex: 1, display: 'flex', justifyContent: 'space-between' }}>
-                            <Text bold>Editar Matrícula</Text>
-                            <Box sx={{
-                                ...styles.menuIcon,
-                                backgroundImage: `url(${icons.gray_close})`,
-                                transition: '.3s',
-                                zIndex: 999999999,
-                                "&:hover": {
-                                    opacity: 0.8,
-                                    cursor: 'pointer'
-                                }
-                            }} onClick={() => setShowSections({ ...showSections, editEnroll: false })} />
-                        </Box>
-                        <Divider padding={0} />
-                        <Box sx={styles.inputSection}>
-                            <SelectList disabled={!isPermissionEdit && true} fullWidth data={classes} valueSelection={enrollmentStudentEditData?.turma_id} onSelect={(value) => setEnrollmentStudentEditData({ ...enrollmentStudentEditData, turma_id: value })}
-                                title="Turma" filterOpition="value" sx={{ color: colorPalette.textColor, flex: 1 }}
-                                inputStyle={{ color: colorPalette.textColor, fontSize: '15px', fontFamily: 'MetropolisBold' }}
-                            />
-                            <TextInput disabled={!isPermissionEdit && true} placeholder='Pendências' name='qnt_disci_dp' onChange={handleChangeEnrollmentEdit} type="number" value={enrollmentStudentEditData?.qnt_disci_dp || '0'} label='Pendências' sx={{ flex: 1, }} />
-                        </Box>
-                        <Box sx={styles.inputSection}>
-                            <TextInput disabled={!isPermissionEdit && true} name='dt_inicio' onChange={handleChangeEnrollmentEdit} type="date" value={(enrollmentStudentEditData?.dt_inicio)?.split('T')[0] || ''} label='Inicio' sx={{ flex: 1, }} />
-                            <TextInput disabled={!isPermissionEdit && true} name='dt_final' onChange={handleChangeEnrollmentEdit} type="date" value={(enrollmentStudentEditData?.dt_final)?.split('T')[0] || ''} label='Fim' sx={{ flex: 1, }} />
-                            <SelectList disabled={!isPermissionEdit && true} fullWidth data={groupSituation} valueSelection={enrollmentStudentEditData?.status} onSelect={(value) => setEnrollmentStudentEditData({ ...enrollmentStudentEditData, status: value })}
-                                title="Status/Situação" filterOpition="value" sx={{ color: colorPalette.textColor, flex: 1 }}
-                                inputStyle={{ color: colorPalette.textColor, fontSize: '15px', fontFamily: 'MetropolisBold' }}
-                            />
-                        </Box>
-                        {
-                            enrollmentData.status?.includes('Desistente') &&
-                            <>
-
-                                <CheckBoxComponent disabled={!isPermissionEdit && true}
-                                    valueChecked={enrollmentStudentEditData?.motivo_desistencia || ''}
-                                    boxGroup={groupReasonsDroppingOut}
-                                    title="Motivo da desistência"
-                                    horizontal={mobile ? false : true}
-                                    onSelect={(value) => setEnrollmentStudentEditData({
-                                        ...enrollmentStudentEditData,
-                                        motivo_desistencia: value
-                                    })}
-                                    sx={{ width: 1 }}
-                                />
-                                <TextInput disabled={!isPermissionEdit && true} name='dt_desistencia' onChange={handleChangeEnrollmentEdit} type="date" value={(enrollmentStudentEditData?.dt_desistencia)?.split('T')[0] || ''} label='Data da desistência' sx={{ flex: 1, }} />
-                            </>
-                        }
-                        <RadioItem disabled={!isPermissionEdit && true} valueRadio={enrollmentStudentEditData?.certificado_emitido}
-                            group={groupCertificate}
-                            title="Certificado emitido:"
-                            horizontal={mobile ? false : true}
-                            onSelect={(value) => setEnrollmentStudentEditData({ ...enrollmentStudentEditData, certificado_emitido: parseInt(value) })} />
-                        <Divider padding={0} />
-                        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flex: 1, justifyContent: 'flex-start' }}>
-                            <Button disabled={!isPermissionEdit && true} small text="salvar" onClick={() => handleEnrollStudentEdit()} />
-                            <Button disabled={!isPermissionEdit && true} secondary small text="cancelar" style={{}} onClick={() => setShowSections({ ...showSections, editEnroll: false })} />
-                        </Box>
-
-                    </ContentContainer>
-                </Box>
-            </Backdrop>
-
-
-
-            {userData.perfil && (userData.perfil.includes('aluno') || userData.perfil.includes('interessado')) &&
-                <>
-                    <ContentContainer style={{ ...styles.containerContract, padding: showSelectiveProcess ? '40px' : '25px' }}>
-                        <Box sx={{
-                            display: 'flex', alignItems: 'center', padding: showSelectiveProcess ? '0px 0px 20px 0px' : '0px', gap: 1, "&:hover": {
-                                opacity: 0.8,
-                                cursor: 'pointer'
-                            },
-                            justifyContent: 'space-between'
-                        }} onClick={() => setShowSelectiveProcess(!showSelectiveProcess)}>
-                            <Text title bold >Processo Seletivo</Text>
-                            <Box sx={{
-                                ...styles.menuIcon,
-                                backgroundImage: `url(${icons.gray_arrow_down})`,
-                                transform: showSelectiveProcess ? 'rotate(0deg)' : 'rotate(-90deg)',
-                                transition: '.3s',
-                                "&:hover": {
-                                    opacity: 0.8,
-                                    cursor: 'pointer'
-                                }
-                            }} />
-                        </Box>
-                        {showSelectiveProcess &&
-                            <>
-                                <Box sx={{ display: 'flex', gap: 3, flex: 1, flexDirection: 'column' }}>
-                                    <Divider padding={0} />
-                                    <Box sx={{ display: 'flex', justifyContent: 'start', gap: 2, alignItems: 'center', flex: 1, padding: '0px 0px 0px 5px' }}>
-                                        <Text bold>Boletim de resultados do ENEM:</Text>
-                                        <Box sx={{
-                                            ...styles.menuIcon,
-                                            backgroundImage: `url('${icons.file}')`,
-                                            transition: '.3s',
-                                            "&:hover": {
-                                                opacity: 0.8,
-                                                cursor: 'pointer'
-                                            }
-                                        }} onClick={() => setShowEditFiles({ ...showEditFile, enem: true })} />
-                                    </Box>
-                                    <EditFile
-                                        isPermissionEdit={isPermissionEdit}
-                                        columnId="id_doc_usuario"
-                                        open={showEditFile.enem}
-                                        newUser={newUser}
-                                        onSet={(set) => {
-                                            setShowEditFiles({ ...showEditFile, enem: set })
-                                        }}
-                                        title='Boletim de resultados do ENEM'
-                                        text='Faça o upload do seu Boletim, depois clique em salvar.'
-                                        textDropzone='Arraste ou clique para selecionar a Foto que deseja'
-                                        fileData={filesUser?.filter((file) => file.campo === 'enem')}
-                                        usuarioId={id}
-                                        campo='enem'
-                                        tipo='documento usuario'
-                                        callback={(file) => {
-                                            if (file.status === 201 || file.status === 200) {
-                                                if (!newUser) { handleItems() }
-                                                else {
-                                                    handleChangeFilesUser('enem', file.fileId, file.filePreview)
-                                                }
-                                            }
-                                        }}
-                                    />
-                                    <Divider padding={0} />
-                                    <Box sx={{ ...styles.inputSection, maxWidth: 280 }}>
-                                        <TextInput disabled={!isPermissionEdit && true} name='agendamento_processo' onChange={handleChangeSelectiveProcess} type="datetime-local" value={(selectiveProcessData?.agendamento_processo) || ''} label='Data do agendamento' sx={{ flex: 1, }} />
-                                    </Box>
-                                    <Divider padding={0} />
-                                    <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, alignItems: 'start', flex: 1, padding: '0px 0px 0px 5px', flexDirection: 'column' }}>
-                                        <Text bold>Redação:</Text>
-                                        <Box sx={{ display: 'flex', gap: 2, flexDirection: 'row' }}>
-                                            <Button disabled={!isPermissionEdit && true} text="enviar" onClick={() => handleSendSelectiveProcess('redação')} style={{ width: 120, height: 30 }} />
-                                            <Button disabled={!isPermissionEdit && true} secondary text="re-enviar" onClick={() => handleSendSelectiveProcess('redação')} style={{ width: 120, height: 30 }} />
-                                        </Box>
-                                    </Box>
-
-                                    <>
-                                        <Divider padding={0} />
-                                        <Box sx={{ display: 'flex', justifyContent: 'start', gap: 2, alignItems: 'center', flex: 1, padding: '0px 0px 0px 5px' }}>
-                                            <Text bold>Prova - Redação:</Text>
-                                            <Box sx={{
-                                                ...styles.menuIcon,
-                                                backgroundImage: `url('${icons.file}')`,
-                                                transition: '.3s',
-                                                "&:hover": {
-                                                    opacity: 0.8,
-                                                    cursor: 'pointer'
-                                                }
-                                            }} onClick={() => console.log('redação')} />
-                                        </Box>
-                                        <Divider padding={0} />
-                                        <Box sx={styles.inputSection}>
-                                            <TextInput disabled={!isPermissionEdit && true} placeholder='Nota da prova' name='nota_processo' onBlur={handleBlurNota} type="number" onChange={handleChangeSelectiveProcess} value={selectiveProcessData?.nota_processo || ''} label='Nota da prova' sx={{ flex: 1, }} />
-                                            <SelectList disabled={!isPermissionEdit && true} fullWidth data={groupStatusProcess} valueSelection={selectiveProcessData?.status_processo} onSelect={(value) => setSelectiveProcessData({ ...selectiveProcessData, status_processo: value })}
-                                                title="Status processo seletivo" filterOpition="value" sx={{ color: colorPalette.textColor, flex: 1 }}
-                                                inputStyle={{ color: colorPalette.textColor, fontSize: '15px', fontFamily: 'MetropolisBold' }}
-                                            />
-                                        </Box>
-                                        <Divider padding={0} />
-                                        <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, alignItems: 'start', flex: 1, padding: '0px 0px 0px 5px', flexDirection: 'column' }}>
-                                            <Text bold>Pré-Matrícula/Cadastro:</Text>
-                                            <Box sx={{ display: 'flex', gap: 2, flexDirection: 'row' }}>
-                                                <Button disabled={!isPermissionEdit && true} text="enviar" onClick={() => handleSendSelectiveProcess('pre-cadastro')} style={{ width: 120, height: 30 }} />
-                                                <Button disabled={!isPermissionEdit && true} secondary text="re-enviar" onClick={() => handleSendSelectiveProcess('pre-cadastro')} style={{ width: 120, height: 30 }} />
-                                            </Box>
-                                        </Box>
-                                    </>
-                                </Box>
-                            </>
-                        }
-                    </ContentContainer>
-
-                </>
-            }
-
-            <Backdrop open={showSections.interest} sx={{ zIndex: 999 }}>
-
-                {showSections.interest &&
-                    <ContentContainer style={{
-                        maxWidth: { md: '800px', lg: '1980px' },
-                        maxHeight: { md: '180px', lg: '1280px' },
-                        overflowY: matches && 'auto',
-                        marginLeft: { md: '180px', lg: '280px' }
-                    }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                            <Text bold large>Interesses</Text>
-                            <Box sx={{
-                                ...styles.menuIcon,
-                                backgroundImage: `url(${icons.gray_close})`,
-                                transform: showEnrollment ? 'rotate(0deg)' : 'rotate(-90deg)',
-                                transition: '.3s',
-                                zIndex: 999999999,
-                                "&:hover": {
-                                    opacity: 0.8,
-                                    cursor: 'pointer'
-                                }
-                            }} onClick={() => {
-                                setShowSections({ ...showSections, interest: false })
-                                alert.info('Lembresse de salvar antes de sair da tela.')
-                            }} />
-                        </Box>
-                        <Divider padding={0} />
-                        <ContentContainer style={{ boxShadow: 'none', overflowY: matches && 'auto', }}>
-                            <div style={{ borderRadius: '8px', overflow: 'hidden', marginTop: '10px', border: `1px solid #eaeaea`, }}>
-                                <table style={{ borderCollapse: 'collapse', }}>
-                                    <thead>
-                                        <tr style={{ backgroundColor: colorPalette.buttonColor, color: '#fff', width: '100%', borderRadius: '8px 0px 0px 8px', border: `1px solid #eaeaea`, }}>
-                                            <th style={{ fontSize: '13px', padding: '8px 10px', fontFamily: 'MetropolisBold' }}>Curso</th>
-                                            <th style={{ fontSize: '13px', padding: '8px 10px', fontFamily: 'MetropolisBold' }}>Turma</th>
-                                            <th style={{ fontSize: '13px', padding: '8px 10px', fontFamily: 'MetropolisBold' }}>Periodo</th>
-                                            <th style={{ fontSize: '13px', padding: '8px 10px', fontFamily: 'MetropolisBold' }}>Observação</th>
-                                            <th style={{ fontSize: '13px', padding: '8px 10px', fontFamily: 'MetropolisBold' }}>Ações</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody style={{ flex: 1 }}>
-                                        {
-                                            arrayInterests?.map((interest, index) => {
-                                                return (
-                                                    <tr key={`${interest}-${index}`}>
-                                                        <td style={{ fontSize: '13px', padding: '8px 10px', fontFamily: 'MetropolisRegular', color: colorPalette.textColor, textAlign: 'center', border: '.5px solid #eaeaea' }}>
-                                                            {interest?.nome_curso || '-'}
-                                                        </td>
-                                                        <td style={{ fontSize: '13px', padding: '8px 10px', fontFamily: 'MetropolisRegular', color: colorPalette.textColor, textAlign: 'center', border: '.5px solid #eaeaea' }}>
-                                                            {interest?.nome_turma || '-'}
-                                                        </td>
-                                                        <td style={{ fontSize: '13px', padding: '8px 10px', fontFamily: 'MetropolisRegular', color: colorPalette.textColor, textAlign: 'center', border: '.5px solid #eaeaea' }}>
-                                                            {interest?.periodo_interesse || '-'}
-                                                        </td>
-                                                        <td style={{ fontSize: '13px', padding: '8px 10px', fontFamily: 'MetropolisRegular', color: colorPalette.textColor, textAlign: 'center', border: '.5px solid #eaeaea' }}>
-                                                            {interest?.observacao_int || '-'}
-                                                        </td>
-                                                        <td style={{ fontSize: '13px', padding: '8px 10px', fontFamily: 'MetropolisRegular', color: colorPalette.textColor, textAlign: 'center', border: '.5px solid #eaeaea' }}>
-
-                                                            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                                                                <Button disabled={!isPermissionEdit && true} secondary small text="Editar" sx={{
-                                                                    width: 40,
-                                                                    transition: '.3s',
-                                                                    zIndex: 999999999,
-                                                                    "&:hover": {
-                                                                        opacity: 0.8,
-                                                                        cursor: 'pointer'
-                                                                    }
-                                                                }} onClick={() => {
-                                                                    setValueIdInterst(interest.id_interesse)
-                                                                    getInterestEdit(interest.id_interesse)
-                                                                    setShowSections({ ...showSections, viewInterest: true })
-                                                                }} />
-
-                                                                {interest?.turma_id && <Button disabled={!isPermissionEdit && true} small text="Matricular" sx={{
-                                                                    // width: 25,
-                                                                    transition: '.3s',
-                                                                    zIndex: 999999999,
-                                                                    "&:hover": {
-                                                                        opacity: 0.8,
-                                                                        cursor: 'pointer'
-                                                                    }
-                                                                }} onClick={() => handleEnrollment(interest)} />}
-                                                                {newUser &&
-                                                                    <Box sx={{
-                                                                        backgroundSize: 'cover',
-                                                                        backgroundRepeat: 'no-repeat',
-                                                                        backgroundPosition: 'center',
-                                                                        width: 25,
-                                                                        height: 25,
-                                                                        backgroundImage: `url(/icons/remove_icon.png)`,
-                                                                        transition: '.3s',
-                                                                        zIndex: 999999999,
-                                                                        "&:hover": {
-                                                                            opacity: 0.8,
-                                                                            cursor: 'pointer'
-                                                                        }
-                                                                    }} onClick={() => {
-                                                                        deleteInterest(index)
-                                                                    }} />
-                                                                }
-                                                            </Box>
-                                                        </td>
-                                                    </tr>
-                                                );
-                                            })
-
-                                        }
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            {(!showSections.addInterest && !showSections.viewInterest) &&
-                                <>
-                                    <Divider padding={0} />
-                                    <Box sx={{ display: 'flex', justifyContent: 'start', gap: 1, alignItems: 'center', marginTop: 2 }}>
-                                        <Button disabled={!isPermissionEdit && true} small text='novo' style={{ padding: '5px 6px 5px 6px', width: 100 }} onClick={() => setShowSections({ ...showSections, addInterest: true })} />
-                                    </Box>
-                                </>
-                            }
-
-                            {showSections.addInterest &&
-                                <ContentContainer style={{ overflowY: matches && 'auto' }}>
-                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                        <Text bold style={{ padding: '5px 0px 0px 0px' }}>Novo Interesse</Text>
-                                        <Box sx={{
-                                            ...styles.menuIcon,
-                                            width: 15,
-                                            height: 15,
-                                            backgroundImage: `url(${icons.gray_close})`,
-                                            transition: '.3s',
-                                            zIndex: 999999999,
-                                            "&:hover": {
-                                                opacity: 0.8,
-                                                cursor: 'pointer'
-                                            }
-                                        }} onClick={() => setShowSections({ ...showSections, addInterest: false })} />
-                                    </Box>
-                                    <Divider padding={0} />
-                                    <Box sx={{ ...styles.inputSection, alignItems: 'center' }}>
-                                        <SelectList disabled={!isPermissionEdit && true} fullWidth data={courses} valueSelection={interests?.curso_id} onSelect={(value) => {
-                                            handleChangeInterest(value, 'curso_id')
-                                            listClassesInterest(value)
-                                        }}
-                                            title="Curso" filterOpition="value" sx={{ color: colorPalette.textColor, flex: 1 }}
-                                            inputStyle={{ color: colorPalette.textColor, fontSize: '15px', fontFamily: 'MetropolisBold' }}
-                                        />
-                                        <SelectList disabled={!isPermissionEdit && true} fullWidth data={classesInterest} valueSelection={interests?.turma_id} onSelect={(value) => handleChangeInterest(value, 'turma_id')}
-                                            title="Turma" filterOpition="value" sx={{ color: colorPalette.textColor, flex: 1 }}
-                                            inputStyle={{ color: colorPalette.textColor, fontSize: '15px', fontFamily: 'MetropolisBold' }}
-                                        />
-                                        <SelectList disabled={!isPermissionEdit && true} fullWidth data={interests?.turma_id ? period?.filter(item => item.idClass === interests?.turma_id) : period} valueSelection={interests?.periodo_interesse} onSelect={(value) => setInterests({ ...interests, periodo_interesse: value })}
-                                            title="Periodo" filterOpition="value" sx={{ color: colorPalette.textColor, flex: 1 }}
-                                            inputStyle={{ color: colorPalette.textColor, fontSize: '15px', fontFamily: 'MetropolisBold' }}
-                                        />
-
-                                    </Box>
-                                    <TextInput disabled={!isPermissionEdit && true}
-                                        placeholder='Observação'
-                                        name='observacao_int'
-                                        onChange={handleChangeInterest}
-                                        value={interests?.observacao_int || ''}
-                                        sx={{ flex: 1 }}
-                                        multiline
-                                        maxRows={5}
-                                        rows={3}
-                                    />
-                                    <Divider padding={0} />
-                                    <Button disabled={!isPermissionEdit && true} small text='incluir' style={{ padding: '5px 6px 5px 6px', width: 100 }} onClick={() => {
-                                        newUser ? addInterest() : handleAddInterest()
-                                        setShowSections({ ...showSections, addInterest: false })
-                                    }} />
-                                </ContentContainer>
-                            }
-
-                            {showSections.viewInterest &&
-                                <ContentContainer style={{ overflowY: matches && 'auto' }}>
-                                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                        <Text bold style={{ padding: '5px 0px 0px 0px' }}>Interesse</Text>
-                                        <Box sx={{
-                                            ...styles.menuIcon,
-                                            width: 15,
-                                            height: 15,
-                                            backgroundImage: `url(${icons.gray_close})`,
-                                            transition: '.3s',
-                                            zIndex: 999999999,
-                                            "&:hover": {
-                                                opacity: 0.8,
-                                                cursor: 'pointer'
-                                            }
-                                        }} onClick={() => setShowSections({ ...showSections, viewInterest: false })} />
-                                    </Box>
-                                    <Divider padding={0} />
-                                    <Box sx={{ ...styles.inputSection, alignItems: 'center' }}>
-                                        <SelectList disabled={!isPermissionEdit && true} fullWidth data={courses} valueSelection={interestSelected?.curso_id}
-                                            title="Curso" filterOpition="value" sx={{ color: colorPalette.textColor, flex: 1, }}
-                                            inputStyle={{ color: colorPalette.textColor, fontSize: '15px', fontFamily: 'MetropolisBold' }}
-                                            onSelect={(value) => {
-                                                setInterestSelected({ ...interestSelected, curso_id: value })
-                                                listClassesInterest(value)
-                                            }}
-                                        />
-                                        <SelectList disabled={!isPermissionEdit && true} data={classesInterest} valueSelection={interestSelected?.turma_id}
-                                            title="Turma" filterOpition="value" sx={{ color: colorPalette.textColor, flex: 1, }}
-                                            inputStyle={{ color: colorPalette.textColor, fontSize: '15px', fontFamily: 'MetropolisBold' }}
-                                            onSelect={(value) => setInterestSelected({ ...interestSelected, turma_id: value })}
-                                        />
-                                        <SelectList disabled={!isPermissionEdit && true} data={periodSelected} valueSelection={interestSelected?.periodo_interesse}
-                                            title="Periodo" filterOpition="value" sx={{ color: colorPalette.textColor, flex: 1, }}
-                                            inputStyle={{ color: colorPalette.textColor, fontSize: '15px', fontFamily: 'MetropolisBold' }}
-                                            onSelect={(value) => setInterestSelected({ ...interestSelected, periodo_interesse: value })}
-                                        />
-                                    </Box>
-                                    <TextInput disabled={!isPermissionEdit && true}
-                                        placeholder='Observação'
-                                        name='observacao_int'
-                                        value={interestSelected?.observacao_int || ''}
-                                        sx={{ flex: 1 }}
-                                        onChange={handleChangeInterestSelected}
-                                        multiline
-                                        maxRows={5}
-                                        rows={3}
-                                    />
-                                    <Divider padding={0} />
-                                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                                        <Button disabled={!isPermissionEdit && true} small text="atualizar" style={{ padding: '5px 6px 5px 6px', width: 100 }}
-                                            onClick={() => {
-                                                handleEditInterest(interestSelected?.id_interesse)
-
-                                            }} />
-                                        <Button disabled={!isPermissionEdit && true} small secondary text='excluir' style={{ padding: '5px 6px 5px 6px', width: 100 }} onClick={() => {
-                                            handleDeleteInterest(interestSelected?.id_interesse)
-                                            setShowSections({ ...showSections, viewInterest: false })
-                                        }} />
-                                    </Box>
-
-                                </ContentContainer>}
-                        </ContentContainer>
-                    </ContentContainer>
-                }
-            </Backdrop>
 
             <Backdrop open={showSections.historic} sx={{ zIndex: 99999, }}>
                 {showSections.historic &&

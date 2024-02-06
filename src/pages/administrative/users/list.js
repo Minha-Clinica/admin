@@ -83,10 +83,12 @@ export default function ListUsers(props) {
         setLoading(true)
         try {
             const response = await api.get(`/users`)
+            console.log(response)
             const { data = [] } = response;
             setUsers(data)
         } catch (error) {
             console.log(error)
+            return error
         } finally {
             setLoading(false)
         }
@@ -162,7 +164,7 @@ export default function ListUsers(props) {
     return (
         <>
             <SectionHeader
-                title={`${perfil === 'todos' ? 'Usuários' : (perfil.charAt(0).toUpperCase() + perfil.slice(1))} (${usersList.filter(filter)?.length})`}
+                title={`${perfil === 'todos' ? 'Usuários' : (perfil.charAt(0).toUpperCase() + perfil.slice(1))} (${usersList?.filter(filter)?.length})`}
                 newButton={isPermissionEdit}
                 newButtonAction={() => router.push(`/administrative/${pathname}/new`)}
             />
@@ -172,7 +174,7 @@ export default function ListUsers(props) {
                     <Text bold large>Filtros</Text>
                     <Box sx={{ display: 'flex', gap: 0.5 }}>
                         <Text style={{ color: '#d6d6d6' }} light>Mostrando</Text>
-                        <Text bold style={{ color: '#d6d6d6' }} light>{usersList.filter(filter)?.length || '0'}</Text>
+                        <Text bold style={{ color: '#d6d6d6' }} light>{usersList?.filter(filter)?.length || '0'}</Text>
                         <Text style={{ color: '#d6d6d6' }} light>de</Text>
                         <Text bold style={{ color: '#d6d6d6' }} light>{usersList?.length || 0}</Text>
                         <Text style={{ color: '#d6d6d6' }} light>usuários</Text>

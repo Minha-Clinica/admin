@@ -62,7 +62,7 @@ export const TableOfficeHours = (props) => {
                         {timePeriods.map((periodo, periodoIndex) => (
                             <TableRow key={periodo}>
                                 <TableCell sx={{ backgroundColor: colorPalette.primary, minWidth: '130px', fontFamily: 'MetropolisBold', color: colorPalette.textColor }}>
-                                    {periodoIndex % 2 === 0 ? 'Entrada' : 'Saída'} {Math.floor(periodoIndex / 2) + 1}
+                                {Math.floor(periodoIndex / 2) + 1}º {periodoIndex % 2 === 0 ? 'Horário' : 'até'} 
                                 </TableCell>
                                 {data.map((row, diaIndex) => (
                                     <TableCell key={diaIndex} sx={{ textAlign: 'center', fontFamily: 'MetropolisBold' }}>

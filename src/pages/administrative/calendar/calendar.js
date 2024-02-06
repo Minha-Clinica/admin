@@ -203,8 +203,8 @@ export default function CalendarComponent(props) {
             if (data) {
                 const eventsMap = data?.map((event) => ({
                     id_evento_calendario: event.id_evento_calendario,
-                    start: event.inicio, // Adicione o início e o fim do evento como propriedades start e end
-                    end: event.fim,
+                    start: new Date(event.inicio), // Adicione o início e o fim do evento como propriedades start e end
+                    end: new Date(event.fim),
                     title: event.titulo,
                     description: event.descricao,
                     location: event.local,
@@ -223,32 +223,32 @@ export default function CalendarComponent(props) {
         }
     }
 
-    function handleFilter() {
-        setLoading(true);
-        setYear(yearSelect);
-        setSemester(semesterSelect);
-        setLoading(false);
-    }
+    // function handleFilter() {
+    //     setLoading(true);
+    //     setYear(yearSelect);
+    //     setSemester(semesterSelect);
+    //     setLoading(false);
+    // }
 
-    useEffect(() => {
-        setDefaultRangeDate(defaultYear);
-        const filtered = defaultYear.filter(filter)
-        setFilteredEvents(filtered);
-        listEventsDefault();
-    }, [semester, year]);
+    // useEffect(() => {
+    //     setDefaultRangeDate(defaultYear);
+    //     const filtered = defaultYear.filter(filter)
+    //     setFilteredEvents(filtered);
+    //     listEventsDefault();
+    // }, [semester, year]);
 
-    const messages = {
-        today: "Hoje",
-        previous: "Anterior",
-        next: "Próximo",
-        month: "Mês",
-        week: "Semana",
-        day: "Dia",
-        agenda: "Agenda",
-        date: "Data",
-        time: "Hora",
-        event: "Evento",
-    };
+    // const messages = {
+    //     today: "Hoje",
+    //     previous: "Anterior",
+    //     next: "Próximo",
+    //     month: "Mês",
+    //     week: "Semana",
+    //     day: "Dia",
+    //     agenda: "Agenda",
+    //     date: "Data",
+    //     time: "Hora",
+    //     event: "Evento",
+    // };
 
     const handleCreateEvent = async (event) => {
         setLoading(true)
@@ -288,6 +288,7 @@ export default function CalendarComponent(props) {
         };
         return {
             style,
+            start, end
         };
     };
 
@@ -388,76 +389,46 @@ export default function CalendarComponent(props) {
     ]
 
     const groupPerfil = [
-        { label: 'Funcionários', value: 'Funcionários' },
-        { label: 'Alunos', value: 'Alunos' }
+        { label: 'Profissional', value: 'Profissional' },
+        { label: 'Paciente', value: 'Paciente' }
     ]
 
     return (
         <>
-            <SectionHeader title={`Calendario Geral`} />
-            <ContentContainer>
-                <Box sx={{ display: 'flex', justifyContent: 'start', gap: 2, alignItems: 'center' }}>
-                    <Box sx={{ display: 'flex', gap: 1.5 }}>
-                        <SelectList clean={false} data={groupMonths} valueSelection={semesterSelect} onSelect={(value) => setSemesterSelect(value)}
-                            title="Vizualizar por:" filterOpition="value" sx={{ color: colorPalette.textColor, maxWidth: 280 }}
-                            inputStyle={{ color: colorPalette.textColor, fontSize: '15px', fontFamily: 'MetropolisBold' }}
-                        />
-                        <TextInput
-                            name="year"
-                            value={yearSelect || ''}
-                            label='Ano:'
-                            onChange={(event) => setYearSelect(event.target.value)}
-                            sx={{ flex: 1 }}
-                            type="number"
-                        />
-                    </Box>
-                    <Button small text='filtrar' style={{ height: 30, width: 80 }} onClick={() => handleFilter()} />
-                </Box>
-            </ContentContainer>
+            <SectionHeader title={`Calendário de Agendas`} />
 
-            <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 5, }}>
-                {filteredEvents?.filter(filter).map((month, index) => (
-                    <Box key={`${month}-${index}`} sx={{
-                        marginBottom: 2,
-                        minHeight: 400,
-                        maxWidth: '30%',
-                        minWidth: '30%'
-                    }}>
-                        <Text bold title sx={{ textAlign: 'center' }}>{moment(month?.start).format('MMMM YYYY')} </Text>
-                        <Calendar
-                            localizer={localizer}
-                            defaultDate={month?.start}
-                            culture="pt-br"
-                            events={events} // Use o conjunto de eventos padrão para todos os calendários
-                            startAccessor="start" // Use "start" como acessor para o início do evento
-                            endAccessor="end" // Use "end" como acessor para o fim do evento
-                            selectable
-                            onSelectSlot={(slotInfo) => {
-                                setEventData({
-                                    ...eventData,
-                                    start: slotInfo.start,
-                                    end: slotInfo.end,
-                                });
-                                setSelectedEvent(null);
-                                setShowEventForm(true);
-                            }}
-                            onSelectEvent={handleSelectEvent}
-                            eventPropGetter={eventStyleGetter}
-                            messages={messages}
-                            style={{
-                                fontFamily: 'MetropolisBold',
-                                color: colorPalette.textColor,
-                                backgroundColor: colorPalette.secondary,
-                                borderRadius: '12px',
-                                boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
-                                border: `.5px solid lightgray`,
-                                padding: 10
-                            }}
-                        />
-                    </Box>
-                ))}
-            </Box>
-            <Box sx={{ marginTop: 5 }}>
+                <Calendar
+                    localizer={localizer}
+                    // defaultDate={month?.start}
+                    culture="pt-br"
+                    events={events}
+                    startAccessor="start" 
+                    endAccessor="end" 
+                    selectable
+                    onSelectSlot={(slotInfo) => {
+                        setEventData({
+                            ...eventData,
+                            start: slotInfo.start,
+                            end: slotInfo.end,
+                        });
+                        setSelectedEvent(null);
+                        setShowEventForm(true);
+                    }}
+                    onSelectEvent={handleSelectEvent}
+                    eventPropGetter={eventStyleGetter}
+                    // messages={messages}
+                    style={{
+                        fontFamily: 'MetropolisBold',
+                        color: colorPalette.textColor,
+                        backgroundColor: colorPalette.secondary,
+                        borderRadius: '12px',
+                        boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
+                        border: `.5px solid lightgray`,
+                        padding: 10,
+                        height: 800
+                    }}
+                />
+            {/* <Box sx={{ marginTop: 5 }}>
                 <Text bold sx={{ marginBottom: 3 }}>Legenda</Text>
                 {listEvents.map((item, index) => (
                     <Box key={`${item}-${index}`} sx={{ display: 'flex', gap: 2, alignItems: 'center', marginBottom: '10px' }}>
@@ -469,7 +440,7 @@ export default function CalendarComponent(props) {
 
                     </Box>
                 ))}
-            </Box>
+            </Box> */}
             {
                 showEventForm && (
                     <Backdrop open={showEventForm} sx={{ zIndex: 999 }}>
@@ -578,56 +549,7 @@ export default function CalendarComponent(props) {
                     </Backdrop>
                 )
             }
-            <style>{`
-        .rbc-btn-group > button {
-            color: white; /* Defina a cor do texto dos botões do calendário para pink */
-            background-color: ${colorPalette.buttonColor}
-          }
-          .rbc-btn-group > button:focus {
-            background-color: ${colorPalette.buttonColor + '66'}; /* Defina a cor de fundo do botão quando estiver com foco (ativo) */
-            outline: none; /* Remova a borda de foco padrão */
-          }
-
-          .rbc-toolbar {
-            padding: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: ${colorPalette.textColor};
-            background-color: ${colorPalette.primary};
-            font-size: 18px;
-            display: none;
-
-          }
-
-          /* Estilos para os dias da semana */
-          .rbc-header {
-            background-color: ${colorPalette.primary};
-            color: ${colorPalette.textColor};
-            font-size: 14px;
-            padding: 5px;
-          }
-
-          .rbc-off-range {
-            color: ${colorPalette.textColor}; /* Defina a cor do texto para dias fora do intervalo */
-            background-color: ${colorPalette.primary}; /* Defina a cor de fundo para dias fora do intervalo */
-          }
-
-          .rbc-off-range-bg {
-            background-color: ${colorPalette.primary}; /* Defina a cor de fundo para dias fora do intervalo */
-          }
-
-          .rbc-off {
-            color: ${colorPalette.textColor}; /* Defina a cor do texto para dias fora do intervalo */
-            background-color: ${colorPalette.primary}; /* Defina a cor de fundo para dias fora do intervalo */
-          }
-        
-          /* Adicione estilos para o dia atual */
-          .rbc-today {
-            color: ${colorPalette.textColor}; /* Defina a cor do texto para o dia atual */
-            background-color: ${colorPalette.primary}; /* Defina a cor de fundo para o dia atual */
-          }
-      `}</style>
+           
         </ >
     );
 }

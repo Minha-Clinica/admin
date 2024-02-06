@@ -126,7 +126,7 @@ export default function ListInstitution(props) {
     return (
         <>
             <SectionHeader
-                title={`Instituições/Empresas (${institutionList?.filter(filter)?.length || '0'})`}
+                title={`Empresas (${institutionList?.filter(filter)?.length || '0'})`}
                 newButton={isPermissionEdit}
                 newButtonAction={() => router.push(`/administrative/${pathname}/new`)}
             />

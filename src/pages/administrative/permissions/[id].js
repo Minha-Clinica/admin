@@ -161,9 +161,9 @@ export default function EditPermissions(props) {
         setLoading(true)
         try {
             const response = await api.delete(`/permission/delete/${id}`)
-            if (response?.status == 201) {
-                alert.success('Permissões excluídas com sucesso.');
-                router.push(`/administrative/permission/list`)
+            if (response?.status === 200) {
+                alert.success('Permissão excluída com sucesso.');
+                router.push(`/administrative/permissions/list`)
             }
 
         } catch (error) {

@@ -344,7 +344,7 @@ export default function EditInstitution(props) {
         <>
             <SectionHeader
                 perfil={institutionData?.modalidade_curso}
-                title={institutionData?.nome_curso || `Instituição`}
+                title={institutionData?.nome_curso || `Empresas`}
                 saveButton={isPermissionEdit}
                 saveButtonAction={newInstitution ? handleCreateInstitution : handleEditInstitution}
                 deleteButton={!newInstitution && isPermissionEdit}
