@@ -401,7 +401,7 @@ export const LeftMenu = ({ }) => {
 
             <Box sx={{
                ...styles.icon,
-               backgroundImage: !theme ? `url('/icons/favicon_dark.png')` : `url('/favicon.png')`,
+               backgroundImage: !theme ? `url('/icons/logo-clinica.png')` : `url('/logo-clinica.png')`,
                backgroundSize: 'contain',
                backgroundPosition: 'center',
                width: 1,
