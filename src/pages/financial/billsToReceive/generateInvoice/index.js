@@ -308,12 +308,12 @@ export default function ListInvoices(props) {
                                         sx={{ display: 'flex', maxWidth: 25 }}
                                     />
                                 </th>
+                                <th style={{ padding: '4px 0px', fontSize: '14px', fontFamily: 'MetropolisBold', minWidth: '100px' }}>Profissional</th>
                                 <th style={{ padding: '4px 0px', fontSize: '14px', fontFamily: 'MetropolisBold', minWidth: '100px' }}>Pagante</th>
                                 <th style={{ padding: '4px 0px', fontSize: '14px', fontFamily: 'MetropolisBold', minWidth: '100px' }}>CPF</th>
                                 <th style={{ padding: '4px 0px', fontSize: '14px', fontFamily: 'MetropolisBold', minWidth: '100px' }}>Valor</th>
                                 <th style={{ padding: '4px 0px', fontSize: '14px', fontFamily: 'MetropolisBold', minWidth: '100px' }}>Vencimento</th>
                                 <th style={{ padding: '4px 0px', fontSize: '14px', fontFamily: 'MetropolisBold', minWidth: '55px' }}>Nº parc.</th>
-                                <th style={{ padding: '4px 0px', fontSize: '14px', fontFamily: 'MetropolisBold', minWidth: '100px' }}>C. Custo</th>
                                 <th style={{ padding: '4px 0px', fontSize: '14px', fontFamily: 'MetropolisBold', minWidth: '100px' }}>Parcela Paga</th>
                                 <th style={{ padding: '4px 0px', fontSize: '14px', fontFamily: 'MetropolisBold', minWidth: '100px' }}>Emissão NFSe</th>
                                 <th style={{ padding: '4px 0px', fontSize: '14px', fontFamily: 'MetropolisBold', minWidth: '80px' }}>NFSe PDF</th>
@@ -344,6 +344,9 @@ export default function ListInvoices(props) {
                                             />
                                         </td>
                                         <td style={{ fontSize: '13px', padding: '0px 5px', flex: 1, fontFamily: 'MetropolisRegular', color: colorPalette.textColor, textAlign: 'center', border: '1px solid lightgray' }}>
+                                            Jean Santos
+                                        </td>
+                                        <td style={{ fontSize: '13px', padding: '0px 5px', flex: 1, fontFamily: 'MetropolisRegular', color: colorPalette.textColor, textAlign: 'center', border: '1px solid lightgray' }}>
                                             {item?.pagante || '-'}
                                         </td>
                                         <td style={{ fontSize: '13px', padding: '0px 5px', flex: 1, fontFamily: 'MetropolisRegular', color: colorPalette.textColor, textAlign: 'center', border: '1px solid lightgray' }}>
@@ -357,9 +360,6 @@ export default function ListInvoices(props) {
                                         </td>
                                         <td style={{ fontSize: '13px', padding: '0px 5px', flex: 1, fontFamily: 'MetropolisRegular', color: colorPalette.textColor, textAlign: 'center', border: '1px solid lightgray' }}>
                                             {item?.n_parcela || '-'}
-                                        </td>
-                                        <td style={{ fontSize: '13px', padding: '0px 5px', flex: 1, fontFamily: 'MetropolisRegular', color: colorPalette.textColor, textAlign: 'center', border: '1px solid lightgray' }}>
-                                            {item?.c_custo || '-'}
                                         </td>
                                         <td style={{ fontSize: '13px', padding: '0px 5px', flex: 1, padding: '0px 5px', fontFamily: 'MetropolisRegular', color: colorPalette.textColor, textAlign: 'center', border: '1px solid lightgray' }}>
                                             <Box

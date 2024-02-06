@@ -78,12 +78,10 @@ export default function ListBillsToPay(props) {
         try {
             const response = await api.get('/expenses/allList')
             const { data } = response;
-            const fixedValues = await mapExpenseData(data?.fixed, 'dt_vencimento');
-            const variableValues = await mapExpenseData(data?.variable, 'dt_vencimento');
-            const personalValues = await mapExpenseData(data?.personal, 'dt_pagamento');
+            const fixedValues = await mapExpenseData(data, 'dt_vencimento');
 
-            setBillstToPayData({ fixed: fixedValues, variable: variableValues, personal: personalValues })
-            return { fixed: fixedValues, variable: variableValues, personal: personalValues }
+            setBillstToPayData(fixedValues)
+            return { fixed: fixedValues }
 
         } catch (error) {
             console.log(error)
@@ -114,14 +112,14 @@ export default function ListBillsToPay(props) {
 
 
     const handleCalculationGraph = async (billstReceive, billstPay) => {
-        let billsFixed = billstPay?.fixed?.filter(filter);
-        let billsVariable = billstPay?.variable?.filter(filter);
-        let billsPersonal = billstPay?.personal?.filter(filter);
-
-        let fixed = billsFixed?.map(item => parseFloat(item.valor_desp_f))?.reduce((acc, curr) => acc + curr, 0)
-        let variable = billsVariable?.map(item => parseFloat(item.valor_desp_v))?.reduce((acc, curr) => acc + curr, 0)
-        let personal = billsPersonal?.map(item => parseFloat(item.vl_pagamento))?.reduce((acc, curr) => acc + curr, 0)
-        setTotalPays(fixed + variable + personal)
+        let bills = [];
+        let expense = 0;
+        if (billstPay?.length > 0) {
+            bills = billstPay?.filter(filter);
+            expense = bills?.map(item => parseFloat(item?.valor_desp_f))?.reduce((acc, curr) => acc + curr, 0);
+        }
+        console.log(bills);
+        setTotalPays(expense);
 
         let data = billstReceive?.filter(filter);
         let qntSalesValue = data?.length;
@@ -142,26 +140,6 @@ export default function ListBillsToPay(props) {
             fixedData = billstPay?.fixed?.filter(filter);
             totalFixed = fixedData?.reduce((acc, expense) => acc + expense?.valor_desp_f, 0);
         }
-
-        let variableData = [];
-        let totalVariable = 0;
-        if (billstPay?.variable) {
-            variableData = billstPay?.variable?.filter(filter);
-            totalVariable = variableData?.reduce((acc, expense) => acc + expense?.valor_desp_v, 0);
-        }
-
-        let personalData = [];
-        let totalPersonal = 0;
-        if (billstPay?.personal) {
-            personalData = billstPay?.personal?.filter(filter);
-            totalPersonal = personalData?.reduce((acc, expense) => acc + expense?.vl_pagamento, 0);
-        }
-
-
-        setCategoryExpenseGraph({
-            labels: ['Fixa', 'Variável', 'Folha de pagamento'],
-            series: [totalFixed, totalVariable, totalPersonal]
-        });
 
 
         const monthlyData = processMonthlyData(data);
@@ -193,21 +171,6 @@ export default function ListBillsToPay(props) {
         series: formPaymentGraph?.series || [],
         options: {
             labels: formPaymentGraph?.labels || [],
-            tooltip: {
-                y: {
-                    formatter: function (value) {
-                        return getFormattedValue(value);
-                    }
-                }
-            }
-        },
-
-    };
-
-    const dataPay = {
-        series: categoryExpenseGraph?.series || [],
-        options: {
-            labels: categoryExpenseGraph?.labels || [],
             tooltip: {
                 y: {
                     formatter: function (value) {
@@ -540,31 +503,6 @@ export default function ListBillsToPay(props) {
                                 <GraphChart
                                     options={data?.options}
                                     series={data?.series}
-                                    type="pie"
-                                    height={280}
-                                    width={300}
-                                />
-                            </div>
-                        </ContentContainer>
-
-                        <ContentContainer>
-                            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', }}>
-                                <Box sx={{
-                                    ...styles.menuIcon,
-                                    width: 25,
-                                    height: 25,
-                                    aspectRatio: '1/1',
-                                    backgroundColor: '#fff',
-                                    backgroundImage: `url('/icons/wallet_icon.png')`,
-                                    transition: '.3s',
-                                }} />
-                                <Text bold large>Despesas (Por categoria)</Text>
-                            </Box>
-                            <div style={{ justifyContent: 'center', width: '80%', alignItems: 'center', margin: 'auto' }}>
-
-                                <GraphChart
-                                    options={dataPay?.options}
-                                    series={dataPay?.series}
                                     type="pie"
                                     height={280}
                                     width={300}

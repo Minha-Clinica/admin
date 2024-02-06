@@ -26,9 +26,7 @@ const monthFilter = [
 ]
 
 const menusFilters = [
-    { id: '01', text: 'Despesas Fixas', value: 'Despesas Fixas', key: 'fixed' },
-    { id: '02', text: 'Despesas Variáveis', value: 'Despesas Variáveis', key: 'variable' },
-    { id: '03', text: 'Folha de Pagamento', value: 'Folha de Pagamento', key: 'personal' },
+    { id: '01', text: 'Despesas', value: 'Despesas', key: 'fixed' },
 ]
 
 export default function ListBillsToPay(props) {
@@ -45,7 +43,7 @@ export default function ListBillsToPay(props) {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [billstToReceive, setBillstToReceive] = useState([]);
-    const [menuSelected, setMenuSelected] = useState('Despesas Fixas')
+    const [menuSelected, setMenuSelected] = useState('Despesas')
     const [columnTable, setColumnTable] = useState([])
     const [isPermissionEdit, setIsPermissionEdit] = useState(false)
     const fetchPermissions = async () => {
@@ -77,15 +75,13 @@ export default function ListBillsToPay(props) {
     }
 
     useEffect(() => {
-        if (menuSelected === 'Despesas Fixas') getFixedExpenses('fixed');
-        if (menuSelected === 'Despesas Variáveis') { getVariableExpenses('variable') }
-        if (menuSelected === 'Folha de Pagamento') { getPersonalExpenses('personal') }
+        if (menuSelected === 'Despesas') getFixedExpenses('fixed');
     }, [menuSelected]);
 
 
 
     useEffect(() => {
-        if (menuSelected === 'Despesas Fixas') {
+        if (menuSelected === 'Despesas') {
 
             setColumnTable([
                 { key: 'id_despesa_f', label: 'id' },
@@ -242,9 +238,7 @@ export default function ListBillsToPay(props) {
 
     const pusBillId = async (item) => {
         let itemId = 'new';
-        if (menuSelected === 'Despesas Fixas') itemId = item?.id_despesa_f;
-        if (menuSelected === 'Despesas Variáveis') itemId = item?.id_despesa_v
-        if (menuSelected === 'Folha de Pagamento') itemId = item?.id_pagamento_folha
+        if (menuSelected === 'Despesas') itemId = item?.id_despesa_f;
         const routePush = await menusFilters?.filter(item => item.value === menuSelected)?.map(item => item.id);
         let queryRoute = `/financial/billsToPay/${itemId}?bill=${routePush}`
         router.push(queryRoute)
@@ -477,9 +471,7 @@ export default function ListBillsToPay(props) {
                             }} onClick={() => {
                                 setMenuSelected(item?.value)
                                 setColumnTable(
-                                    (item?.value === 'Despesas Fixas' && columnFixed) ||
-                                    (item?.value === 'Despesas Variáveis' && columnVariable) ||
-                                    (item?.value === 'Folha de Pagamento' && columnPersonal)
+                                    (item?.value === 'Despesas' && columnFixed)
                                 )
                             }}>
                                 <Text large style={{ color: colorPalette.textColor }}>{item?.text}</Text>
