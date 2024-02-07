@@ -329,6 +329,81 @@ function Home() {
                      </Box>
                   </Box>
 
+                  <Box sx={{ display: 'flex', gap: 2, marginTop: 5, flexDirection: 'column' }}>
+                     <Text large bold>Atendimento</Text>
+                     <Box sx={{ display: 'flex', gap: 2, }}>
+
+                        <Box sx={{
+                           display: 'flex', backgroundColor: colorPalette.secondary, padding: '20px',
+                           borderRadius: 2,
+                           alignItems: 'center', gap: 2,
+                           boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
+                           "&:hover": {
+                              opacity: 0.8,
+                              cursor: 'pointer'
+                           }
+                        }} onClick={() => router.push('/administrative/calendar/calendar')}>
+                           <Box sx={{
+                              ...styles.menuIcon,
+                              backgroundImage: `url('/icons/agenda_icon.png')`,
+                              transition: '.3s',
+                              width: 20, height: 20,
+                              "&:hover": {
+                                 opacity: 0.8,
+                                 cursor: 'pointer'
+                              }
+                           }} />
+                           <Text bold>Minha Agenda</Text>
+                        </Box>
+
+                        <Box sx={{
+                           display: 'flex', backgroundColor: colorPalette.secondary, padding: '20px',
+                           borderRadius: 2,
+                           alignItems: 'center', gap: 2,
+                           boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
+                           "&:hover": {
+                              opacity: 0.8,
+                              cursor: 'pointer'
+                           }
+                        }} onClick={() => router.push('/administrative/calendar/calendar')}>
+                           <Box sx={{
+                              ...styles.menuIcon,
+                              backgroundImage: `url('/icons/agenda_espera_icon.png')`,
+                              transition: '.3s',
+                              width: 20, height: 20,
+                              "&:hover": {
+                                 opacity: 0.8,
+                                 cursor: 'pointer'
+                              }
+                           }} />
+                           <Text bold>Lista de Espera</Text>
+                        </Box>
+
+                        <Box sx={{
+                           display: 'flex', backgroundColor: colorPalette.secondary, padding: '20px',
+                           borderRadius: 2,
+                           alignItems: 'center', gap: 2,
+                           boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
+                           "&:hover": {
+                              opacity: 0.8,
+                              cursor: 'pointer'
+                           }
+                        }} onClick={() => router.push('/administrative/calendar/calendar')}>
+                           <Box sx={{
+                              ...styles.menuIcon,
+                              backgroundImage: `url('/icons/include_icon.png')`,
+                              transition: '.3s',
+                              width: 20, height: 20,
+                              "&:hover": {
+                                 opacity: 0.8,
+                                 cursor: 'pointer'
+                              }
+                           }} />
+                           <Text bold>Novo agendamento</Text>
+                        </Box>
+                     </Box>
+                  </Box>
+
 
                   <Box sx={{ display: 'flex', gap: 2, padding: '20px 0px', flexDirection: 'column', marginTop: 4 }}>
                      <Text bold large>Resumo</Text>
@@ -372,7 +447,7 @@ function Home() {
 
                      </Box>
                      <Box sx={{ display: 'flex', gap: 2, }}>
-                        <ContentContainer style={{ display: 'flex', flexDirection: 'row' }}>
+                        <ContentContainer fullWidth style={{ display: 'flex', flexDirection: 'row', minWidth: 800 }}>
                            <Box>
                               <Text bold large style={{ textAlign: 'center' }}>Agenda do Mês</Text>
                               <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
@@ -407,22 +482,26 @@ function Home() {
                            }}>
                               <Box sx={{
                                  display: 'flex', gap: 2, flexDirection: 'column',
-                                 maxHeight: 400, overflowY: 'auto', width: 200
+                                 maxHeight: 400, overflowY: 'auto', width: '100%'
                               }}>
                                  {sortedEvents?.map((item, index) => {
                                     return (
                                        <Box key={index} sx={{
-                                          display: 'flex', gap: 1, flexDirection: 'column',
-                                          backgroundColor: colorPalette.primary, padding: '10px',
+                                          display: 'flex', gap: 1, flexDirection: 'row',
+                                          backgroundColor: colorPalette.primary,
+                                          minWidth: 350
                                        }}>
-                                          <Text bold small>{item?.title}</Text>
-                                          <Text light small>{item?.description}</Text>
-                                          <Text light small>{formatTimeStamp(item?.start, true)}</Text>
+                                          <Box sx={{ display: 'flex', height: '100%', width: 3, backgroundColor: item.color, }} />
+                                          <Box sx={{ padding: '10px' }}>
+                                             <Text bold small>{item?.title}</Text>
+                                             <Text light small>{item?.description}</Text>
+                                             <Text light small>{formatTimeStamp(item?.start, true)}</Text>
+                                          </Box>
                                        </Box>
                                     )
                                  })}
                               </Box>
-                              <Button small text="Ver agenda completa" style={{ height: 30 }} onClick={() => router.push('/administrative/calendar/calendar')}/>
+                              <Button small text="Ver agenda completa" style={{ height: 30 }} onClick={() => router.push('/administrative/calendar/calendar')} />
                            </Box>
                         </ContentContainer>
                         <ContentContainer fullWidth>

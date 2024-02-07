@@ -407,27 +407,76 @@ export default function CalendarComponent(props) {
                         }
                     }} />
 
-                <Box sx={{
-                    display: 'flex', backgroundColor: colorPalette.secondary, padding: '10px 20px', width: 200,
-                    borderRadius: 2,
-                    alignItems: 'center', gap: 2,
-                    boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
-                    "&:hover": {
-                        opacity: 0.8,
-                        cursor: 'pointer'
-                    }
-                }}>
+                <Box sx={{ display: 'flex', gap: 2, }}>
+
                     <Box sx={{
-                        ...styles.menuIcon,
-                        backgroundImage: `url('/icons/include_icon.png')`,
-                        transition: '.3s',
-                        width: 20, height: 20,
+                        display: 'flex', backgroundColor: colorPalette.secondary, padding: '10px 20px',
+                        borderRadius: 2,
+                        alignItems: 'center', gap: 2,
+                        boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
                         "&:hover": {
                             opacity: 0.8,
                             cursor: 'pointer'
                         }
-                    }} />
-                    <Text bold>Novo agendamento</Text>
+                    }}>
+                        <Box sx={{
+                            ...styles.menuIcon,
+                            backgroundImage: `url('/icons/include_icon.png')`,
+                            transition: '.3s',
+                            width: 20, height: 20,
+                            "&:hover": {
+                                opacity: 0.8,
+                                cursor: 'pointer'
+                            }
+                        }} />
+                        <Text bold>Novo agendamento</Text>
+                    </Box>
+
+                    <Box sx={{
+                        display: 'flex', backgroundColor: colorPalette.secondary, padding: '10px 20px',
+                        borderRadius: 2,
+                        alignItems: 'center', gap: 2,
+                        boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
+                        "&:hover": {
+                            opacity: 0.8,
+                            cursor: 'pointer'
+                        }
+                    }}>
+                        <Box sx={{
+                            ...styles.menuIcon,
+                            backgroundImage: `url('/icons/agenda_icon.png')`,
+                            transition: '.3s',
+                            width: 20, height: 20,
+                            "&:hover": {
+                                opacity: 0.8,
+                                cursor: 'pointer'
+                            }
+                        }} />
+                        <Text bold>Minha Agenda</Text>
+                    </Box>
+
+                    <Box sx={{
+                        display: 'flex', backgroundColor: colorPalette.secondary, padding: '10px 20px',
+                        borderRadius: 2,
+                        alignItems: 'center', gap: 2,
+                        boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
+                        "&:hover": {
+                            opacity: 0.8,
+                            cursor: 'pointer'
+                        }
+                    }}>
+                        <Box sx={{
+                            ...styles.menuIcon,
+                            backgroundImage: `url('/icons/agenda_espera_icon.png')`,
+                            transition: '.3s',
+                            width: 20, height: 20,
+                            "&:hover": {
+                                opacity: 0.8,
+                                cursor: 'pointer'
+                            }
+                        }} />
+                        <Text bold>Lista de Espera</Text>
+                    </Box>
                 </Box>
             </Box>
 
@@ -502,7 +551,7 @@ export default function CalendarComponent(props) {
                             </Box>
                             <Divider />
                             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                  <TextInput disabled={!isPermissionEdit && true}
+                                <TextInput disabled={!isPermissionEdit && true}
                                     name="title"
                                     value={eventData?.title || ''}
                                     label='Título'
