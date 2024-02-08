@@ -9,7 +9,7 @@ export const Divider = (props) => {
    return (
       <Box sx={{
          width: '100%',
-         padding: `${8 * distance}px 0px`
+         padding: `${4 * distance}px 0px`
       }}>
          <Box sx={{
             width: '100%',

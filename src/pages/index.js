@@ -342,7 +342,7 @@ function Home() {
                               opacity: 0.8,
                               cursor: 'pointer'
                            }
-                        }} onClick={() => router.push('/administrative/calendar/calendar')}>
+                        }} onClick={() => router.push('/service/calendar')}>
                            <Box sx={{
                               ...styles.menuIcon,
                               backgroundImage: `url('/icons/agenda_icon.png')`,
@@ -365,7 +365,7 @@ function Home() {
                               opacity: 0.8,
                               cursor: 'pointer'
                            }
-                        }} onClick={() => router.push('/administrative/calendar/calendar')}>
+                        }} onClick={() => router.push('/service/calendar')}>
                            <Box sx={{
                               ...styles.menuIcon,
                               backgroundImage: `url('/icons/agenda_espera_icon.png')`,
@@ -388,7 +388,7 @@ function Home() {
                               opacity: 0.8,
                               cursor: 'pointer'
                            }
-                        }} onClick={() => router.push('/administrative/calendar/calendar')}>
+                        }} onClick={() => router.push('/service/calendar')}>
                            <Box sx={{
                               ...styles.menuIcon,
                               backgroundImage: `url('/icons/include_icon.png')`,
@@ -501,7 +501,7 @@ function Home() {
                                     )
                                  })}
                               </Box>
-                              <Button small text="Ver agenda completa" style={{ height: 30 }} onClick={() => router.push('/administrative/calendar/calendar')} />
+                              <Button small text="Ver agenda completa" style={{ height: 30 }} onClick={() => router.push('/service/calendar')} />
                            </Box>
                         </ContentContainer>
                         <ContentContainer fullWidth>

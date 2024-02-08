@@ -126,11 +126,24 @@ export const LeftMenu = ({ }) => {
                      color={'#fff'}
                   />
                </Box>
-               {user?.professor === 1 &&
-                  <Box sx={{ position: 'absolute', top: -20, left: 8, padding: '2px 5px 2px 5px', backgroundColor: colorPalette.buttonColor, justifyContent: 'center', alignItems: 'center' }}>
-                     <Text bold xsmall>Professor</Text>
+               <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+
+                  <Box sx={{
+                     ...styles.icon,
+                     backgroundImage: `url('/icons/logo-clinica-light.png')`,
+                     backgroundSize: 'contain',
+                     width: !showMenuHelp ? '50px' : '107px',
+                     height: !showMenuHelp ? '30px' : '51px',
+                     marginTop: !showMenuHelp ? 3 : 0,
+                     "&:hover": {
+                        cursor: 'pointer', opacity: 0.8
+                     }
+                  }} onClick={() => router.push('/')} />
+                  <Box onClick={() => setShowVersion(true)} sx={{ cursor: 'pointer' }}>
+                     <Text style={{ bottom: 45, left: 10, position: 'absolute', color: 'gray' }}> v{latestVersion?.version}</Text>
                   </Box>
-               }
+               </Box>
+               {/* 
                <Box sx={{ ...styles.userBadgeContainer, ...(!showMenuHelp && { minWidth: !showMenuHelp && 40, marginTop: 4 }) }}>
                   <Box sx={{
                      display: 'flex',
@@ -215,23 +228,8 @@ export const LeftMenu = ({ }) => {
                      </Box>
                   </Box>}
                   <Divider color={'rgb(255 255 255 / 0.1)'} />
-                  {/* {showUserOptions &&
-                     <>
-                        <Box sx={{ ...styles.containerUserOpitions, backgroundColor: colorPalette.buttonColor }}>
-                           <Box onClick={() => {
-                              router.push(`/administrative/employee/${user?.id}`)
-                              setShowUserOptions(!showUserOptions)
-                           }} sx={{ borderRadius: 1, padding: `4px 8px`, "&:hover": { backgroundColor: colorPalette.primary + '22', cursor: 'pointer' }, }}>
-                              <Text bold style={{ ...styles.text, textAlign: 'center', color: '#fff' }}>Editar</Text>
-                           </Box>
-                           <Box sx={{ borderRadius: 1, padding: `4px 8px`, "&:hover": { backgroundColor: colorPalette.primary + '22', cursor: 'pointer' } }}
-                              onClick={logout}>
-                              <Text bold style={{ ...styles.text, textAlign: 'center', color: '#fff' }}>Sair</Text>
-                           </Box>
-                        </Box>
-                     </>
-                  } */}
-               </Box>
+               </Box> */}
+               <Divider distance={4} color={'rgb(255 255 255 / 0.1)'} />
                <Box sx={{ ...styles.boxMenu, ...(showMenuMobile && { overflowY: 'auto' }), ...(!showMenuHelp && { width: 40, marginLeft: 1, gap: 2 }) }}>
                   {menuItems.map((group, index) => {
                      const visibleItems = group.items.filter(item =>
@@ -320,9 +318,16 @@ export const LeftMenu = ({ }) => {
                                        {groupStates[index] && (
                                           <>
                                              {!showMenuHelp &&
-                                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '15px 0px 0px 0px' }}>
-                                                   <Text bold>{group.text}</Text>
-                                                </Box>
+                                                <>
+                                                   <Box sx={{
+                                                      display: 'flex', alignItems: 'start', justifyContent: 'flex-start', padding: '10px 15px 0px 10px',
+                                                      flexDirection: 'column'
+                                                   }}>
+                                                      <Text bold>{group.text}</Text>
+                                                      <Divider distance={2} />
+                                                   </Box>
+                                                </>
+
                                              }
                                              <Divider distance={1} color={'rgb(255 255 255 / 0.1)'} />
 
@@ -375,23 +380,6 @@ export const LeftMenu = ({ }) => {
                   })}
                </Box>
 
-               <Box sx={{
-                  ...styles.icon,
-                  display: !showMenuHelp && 'none',
-                  backgroundImage: `url('/icons/logo-clinica-light.png')`,
-                  backgroundSize: 'contain',
-                  width: '107px',
-                  height: '51px',
-                  bottom: 70,
-                  left: 28,
-                  position: 'absolute',
-                  "&:hover": {
-                     cursor: 'pointer', opacity: 0.8
-                  }
-               }} onClick={() => router.push('/')} />
-               <Box onClick={() => setShowVersion(true)} sx={{ cursor: 'pointer' }}>
-                  <Text style={{ bottom: 45, left: 10, position: 'absolute', color: 'gray' }}> v{latestVersion?.version}</Text>
-               </Box>
             </Box>
          </Box >
 
@@ -649,7 +637,7 @@ const styles = {
       display: 'flex',
       flexDirection: 'column',
       // gap: 1,
-      marginTop: 6,
+      marginTop: 5,
       overflowStyle: 'marquee,panner',
       maxHeight: '480px',
       overflowY: 'auto',

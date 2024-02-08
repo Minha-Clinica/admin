@@ -11,6 +11,7 @@ import { useRef } from "react";
 import { Notifications } from "../notification/notifications";
 import Link from "next/link";
 import { keyframes } from '@emotion/react';
+import { DialogUserEdit } from "../userEdit/dialogEditUser";
 
 const blinkingText = keyframes`
   0% {
@@ -30,10 +31,20 @@ export const UserHeader = (props) => {
     } = props;
 
     const { colorPalette, theme, logout, notificationUser, setNotificationUser, user } = useAppContext()
+    let fotoPerfil = user?.getPhoto?.location || '';
+    const name = user?.nome?.split(' ');
+    const firstName = name[0];
+    const lastName = name[name.length - 1];
+    const userName = `${firstName} ${lastName}`;
     const router = useRouter()
     const routeParts = router.asPath.split('/');
     const lastPage = routeParts[routeParts.length - 1];
     const [showNotification, setShowNotification] = useState(false)
+    const [showUserOptions, setShowUserOptions] = useState(false)
+    const [showDialogEditUser, setShowDialogEditUser] = useState(false)
+    const [showEditUser, setShowEditUser] = useState(false)
+    const containerRef = useRef(null);
+
 
     const handleGoBack = () => {
         if (lastPage > 0) {
@@ -44,6 +55,24 @@ export const UserHeader = (props) => {
             router.back();
         }
     };
+
+
+    useEffect(() => {
+        if (!showEditUser) {
+
+            const handleClickOutside = (event) => {
+                if (containerRef.current && !containerRef.current.contains(event.target)) {
+                    setShowEditUser(false);
+                }
+            };
+
+            document.addEventListener('mousedown', handleClickOutside);
+
+            return () => {
+                document.removeEventListener('mousedown', handleClickOutside);
+            };
+        }
+    }, []);
 
     return (
         <>
@@ -63,70 +92,41 @@ export const UserHeader = (props) => {
                             cursor: 'pointer'
                         }
                     }} onClick={() => router.push('/')} />
-                    {/* Usuário do VALDIR Com botao voltar gigante */}
-                    {user?.id === 71 ?
-                        <Box sx={{
-                            position: 'absolute',
-                            left: 300,
-                            top: -10,
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 0.5,
-                            "&:hover": {
-                                opacity: 0.8,
-                                cursor: 'pointer'
-                            }
-                        }} onClick={() => handleGoBack()}>
-                            <Box sx={{
-                                ...styles.menuIcon,
-                                backgroundImage: `url(${icons.goback})`,
-                                filter: theme ? 'brightness(0) invert(0)' : 'brightness(0) invert(1)',
-                                transition: '.3s',
-                                width: 50, height: 50,
-                                aspectRatio: '1/1'
-                            }} />
-                            <Text bold sx={{ fontSize: 45, color: 'red', animation: `${blinkingText} .8s infinite`  }}>V</Text>
-                            <Text bold sx={{ fontSize: 45, color: 'blue', animation: `${blinkingText} .8s infinite`  }}>o</Text>
-                            <Text bold sx={{ fontSize: 45, color: 'gray', animation: `${blinkingText} .8s infinite`  }}>l</Text>
-                            <Text bold sx={{ fontSize: 45, color: 'pink', animation: `${blinkingText} .8s infinite`  }}>t</Text>
-                            <Text bold sx={{ fontSize: 45, color: 'green', animation: `${blinkingText} .8s infinite`  }}>a</Text>
-                            <Text bold sx={{ fontSize: 45, color: 'black', animation: `${blinkingText} .8s infinite`  }}>r</Text>
-                        </Box>
-                        :
-                        <Box sx={{
-                            position: 'absolute',
-                            left: 290,
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 0.5,
-                            "&:hover": {
-                                opacity: 0.8,
-                                cursor: 'pointer'
-                            }
-                        }} onClick={() => handleGoBack()}>
-                            <Box sx={{
-                                ...styles.menuIcon,
-                                backgroundImage: `url(${icons.goback})`,
-                                filter: theme ? 'brightness(0) invert(0)' : 'brightness(0) invert(1)',
-                                transition: '.3s',
-                                aspectRatio: '1/1'
-                            }} />
-                            <Text small sx={{}}>Voltar</Text>
-                        </Box>}
-                </Box>
-                <Box sx={{ gap: 1, display: 'flex', alignItems: 'center', transition: '.3s', backgroundColor: colorPalette.primary, padding: '5px 8px', borderRadius: 2, cursor: 'pointer', "&:hover": { opacity: 0.6 } }}
-                    onClick={() => router.push('/suport/tasks/list')}>
                     <Box sx={{
-                        ...styles.menuIcon,
-                        backgroundImage: `url('/icons/support-icon.png')`,
-                        filter: theme ? 'brightness(0) invert(0)' : 'brightness(0) invert(1)',
-                        transition: '.3s',
-                        aspectRatio: '1/1'
-                    }} />
-                    <Text bold small>Ajuda</Text>
+                        position: 'absolute',
+                        left: 290,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 0.5,
+                        "&:hover": {
+                            opacity: 0.8,
+                            cursor: 'pointer'
+                        }
+                    }} onClick={() => handleGoBack()}>
+                        <Box sx={{
+                            ...styles.menuIcon,
+                            backgroundImage: `url(${icons.goback})`,
+                            filter: theme ? 'brightness(0) invert(0)' : 'brightness(0) invert(1)',
+                            transition: '.3s',
+                            aspectRatio: '1/1'
+                        }} />
+                        <Text small sx={{}}>Voltar</Text>
+                    </Box>
                 </Box>
                 {/* <IconTheme flex /> */}
-                <Box sx={{ display: 'flex', gap: 3, alignItems: 'center', justifyContent: 'space-around', position: 'relative', }}>
+                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', justifyContent: 'flex-end', position: 'relative', }}>
+                    <Box sx={{ gap: 1, display: 'flex', alignItems: 'center', transition: '.3s', backgroundColor: colorPalette.primary, padding: '5px 8px', borderRadius: 2, cursor: 'pointer', "&:hover": { opacity: 0.6 } }}
+                        onClick={() => router.push('/suport/tasks/list')}>
+                        <Box sx={{
+                            ...styles.menuIcon,
+                            backgroundImage: `url('/icons/support-icon.png')`,
+                            filter: theme ? 'brightness(0) invert(0)' : 'brightness(0) invert(1)',
+                            transition: '.3s',
+                            aspectRatio: '1/1'
+                        }} />
+                        <Text bold small>Ajuda</Text>
+                    </Box>
+
                     <Box sx={{
                         position: 'relative', "&:hover": {
                             opacity: 0.8,
@@ -168,21 +168,118 @@ export const UserHeader = (props) => {
                             </Box>
                         }
                     </Box>
-                    <Box sx={{
-                        ...styles.menuIcon,
-                        backgroundImage: `url(${icons.logout})`,
-                        width: 20,
-                        height: 17,
-                        transition: 'background-color 1s',
-                        "&:hover": {
-                            opacity: 0.8,
-                            cursor: 'pointer'
-                        }
-                    }} onClick={() => logout()} />
 
                     <Notifications showNotification={showNotification} setShowNotification={setShowNotification} />
+
+                    <div ref={containerRef}>
+
+
+                        <Box sx={{ ...styles.userBadgeContainer }}>
+                            <Box sx={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                position: 'relative',
+                                alignItems: 'center',
+                                gap: 1,
+                                borderRadius: 1.5,
+                                boxSizing: 'border-box',
+                                flexDirection: 'row',
+                            }}>
+                                <Avatar
+                                    sx={{ width: '35px', height: '35px', fontSize: 14, border: `1px solid #fff`, cursor: 'pointer', '&hover': { opacity: 0.5 } }}
+                                    src={fotoPerfil || `https://mf-planejados.s3.us-east-1.amazonaws.com/melies/perfil-default.jpg`}
+                                    onClick={() => {
+                                        // router.push(`/administrative/users/${user?.id}`)
+                                        setShowUserOptions(!showUserOptions)
+                                        setShowDialogEditUser(true)
+                                    }} />
+                                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'center', transition: '1s' }}>
+                                    <Text style={{ color: colorPalette.textColor, transition: 'background-color 1s', fontFamily: 'MetropolisSemiBold', }}>{userName}</Text>
+                                    <Box sx={{
+                                        ...styles.menuIcon,
+                                        backgroundImage: `url(${icons.gray_arrow_down})`,
+                                        width: 20,
+                                        transform: !showEditUser ? 'rotate(360deg)' : 'rotate(180deg)',
+                                        height: 17,
+                                        transition: '.4s',
+                                        "&:hover": {
+                                            opacity: 0.8,
+                                            cursor: 'pointer'
+                                        }
+                                    }} onClick={() => setShowEditUser(!showEditUser)} />
+                                </Box>
+                            </Box>
+                            {showEditUser && <Box sx={{
+                                border: `1px solid lightgray`,
+                                display: 'flex', gap: 1, alignItems: 'start',
+                                top: 40,
+                                transition: '.5s',
+                                justifyContent: 'center', flexDirection: 'column', backgroundColor: colorPalette.secondary,
+                                padding: '5px 10px', width: `100%`, borderRadius: 2,
+                                position: 'absolute',
+                                boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
+
+                            }}>
+                                <Box sx={{
+                                    display: 'flex', gap: 1, width: '100%', padding: '3px 8px 0px 8px', "&:hover": {
+                                        opacity: 0.8,
+                                        cursor: 'pointer',
+                                        backgroundColor: colorPalette.third + '11'
+                                    }
+                                }} onClick={() => {
+                                    setShowUserOptions(!showUserOptions)
+                                    setShowDialogEditUser(true)
+                                    setShowEditUser(false)
+                                }}>
+                                    <Box sx={{
+                                        ...styles.menuIcon,
+                                        backgroundImage: `url('https://mf-planejados.s3.amazonaws.com/Icon_user_edit.png')`,
+                                        width: 20,
+                                        height: 15,
+                                        filter: 'brightness(0) invert(0)',
+                                        transition: 'background-color 1s',
+                                        "&:hover": {
+                                            opacity: 0.8,
+                                            cursor: 'pointer',
+                                        }
+                                    }} onClick={() => {
+                                        // router.push(`/administrative/users/${user?.id}`)
+                                    }} />
+                                    <Text bold small style={{ ...styles.text, textAlign: 'center', padding: `2px 5px` }}>Meus dados</Text>
+
+                                </Box>
+                                <Divider distance={0} />
+                                <Box sx={{
+                                    display: 'flex', gap: 1, width: '100%', padding: '0px 8px 3px 8px', "&:hover": {
+                                        opacity: 0.8,
+                                        cursor: 'pointer',
+                                        backgroundColor: colorPalette.third + '11'
+                                    }
+                                }}>
+                                    <Box sx={{
+                                        ...styles.menuIcon,
+                                        backgroundImage: `url(${icons.logout})`,
+                                        width: 20,
+                                        height: 17,
+                                        transition: 'background-color 1s'
+                                    }} onClick={logout} />
+                                    <Text bold small style={{ ...styles.text, textAlign: 'center', padding: `2px 5px` }}>Sair</Text>
+                                </Box>
+                            </Box>}
+                        </Box>
+                    </div>
                 </Box>
             </Box>
+
+
+            {
+                showDialogEditUser && (
+                    <DialogUserEdit
+                        onClick={(value) => setShowDialogEditUser(value)}
+                        value={showDialogEditUser}
+                    />
+                )
+            }
         </>
     )
 }
@@ -227,7 +324,7 @@ const styles = {
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
-        minWidth: 130,
+        // minWidth: 130,
         gap: 1,
         position: 'relative',
         borderRadius: 1.5,
