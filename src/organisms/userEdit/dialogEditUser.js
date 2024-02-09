@@ -118,7 +118,7 @@ export const DialogUserEdit = (props) => {
                maxWidth: { md: '800px', lg: '1980px' }, maxHeight: { md: '90%', lg: '680px', xl: '1280px' }, overflowY: { md: 'scroll', lg: 'auto', xl: matches && 'auto' },
             }}>
                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, alignItems: 'center', width: '100%', position: 'relative' }}>
-                  <Text bold={true} title={true}>Informações pessoais</Text>
+                  <Text bold={true} title={true}>Alterar Senha</Text>
                   <Text>Informe os dados para alteração</Text>
                   <Box sx={{
                      ...styles.menuIcon,

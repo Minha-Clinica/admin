@@ -116,7 +116,7 @@ export const Notifications = ({ showNotification = false, setShowNotification })
             <div ref={containerRef}>
                 {showNotification &&
 
-                    <ContentContainer style={{ position: 'absolute', zIndex: 99999, left: -360, top: 45, width: 415, maxHeight: 600, overflowY: 'auto', padding: 2, display: 'flex', flexDirection: 'column' }}>
+                    <ContentContainer style={{ position: 'absolute', zIndex: 99999, right: 30, top: 45, width: 415, maxHeight: 600, overflowY: 'auto', padding: 2, display: 'flex', flexDirection: 'column' }}>
 
                         <Box>
                             <Text bold>Notificações</Text>

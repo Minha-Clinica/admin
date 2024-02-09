@@ -178,8 +178,12 @@ export default function Login() {
                             <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 3, alignItems: 'center', width: smallWidthDevice ? '80%' : '100%', }}>
                                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, alignItems: 'center', width: smallWidthDevice ? '80%' : '100%', }}>
                                     {/* {!smallWidthDevice ? <></> : <CompanyLogo theme={theme} size={40} />} */}
-                                    <Box sx={{ display: 'flex', flexDirection: 'row', gap: 2, alignItems: 'center', width: '30%', }}>
-                                        <Text bold style={{ color: !theme ? '#fff' : Colors.backgroundPrimary, fontSize: '35px', transition: 'background-color 1s', textAlign: 'center' }}>Login</Text>
+                                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center', width: '90%', }}>
+                                        <Text bold indicator style={{ color: !theme ? '#fff' : Colors.backgroundPrimary, transition: 'background-color 1s', textAlign: 'center' }}>Login</Text>
+                                        <Box sx={{display: 'flex', gap: .5, flexDirection: 'column', alignItems: 'center'}}> 
+                                            <Text large bold style={{ color: !theme ? '#fff' : Colors.backgroundPrimary, transition: 'background-color 1s', textAlign: 'center' }}>Seja Bem Vindo!</Text>
+                                            <Box sx={{ width: 80, height: '2px', backgroundColor: colorPalette.buttonColor }} />
+                                        </Box>
                                         {/* <Box sx={{ backgroundColor: colorPalette.buttonColor, transition: 'background-color 1s', borderRadius: '16px', padding: '2px 12px 2px 12px' }}>
                                             <Text small bold style={{ color: colorPalette.textColor, transition: 'background-color 1s', fontWeight: 'bold' }}>{'ADMIN'}</Text>
                                         </Box> */}
@@ -306,38 +310,6 @@ export default function Login() {
                     </ContentContainer>
                 </Box>
                 {/* <IconTheme left /> */}
-            </Box>
-            <Box sx={{ display: 'flex', position: 'absolute', top: 20, right: 80, flexDirection: 'column', transition: '2s', }} onMouseEnter={() => setShowMenu(true)}
-                onMouseLeave={() => setShowMenu(false)}>
-                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'center' }}>
-                    <Text bold>Portal do desenvolvedor</Text>
-                    <Box sx={{
-                        ...styles.menuIcon,
-                        backgroundImage: `url(${icons.gray_arrow_down})`,
-                        transition: '.3s',
-                        width: 17,
-                        height: 17,
-                        "&:hover": {
-                            opacity: 0.8,
-                        }
-                    }} />
-                </Box>
-                <Box sx={{
-                    display: showMenu ? 'flex' : 'none',
-                    backgroundColor: colorPalette.secondary,
-                    padding: '8px 10px',
-                    marginTop: '5px',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    "&:hover": {
-                        opacity: 0.8,
-                        cursor: 'pointer'
-                    }
-                }}>
-                    <Link href='https://github.com/Sistema-Academico/api' target="_blank">
-                        <Text small>Documentação da API</Text>
-                    </Link>
-                </Box>
             </Box>
 
             <Backdrop open={showRedefinitionPass} sx={{ zIndex: 99999, }}>

@@ -54,20 +54,7 @@ function Home() {
    const { user, colorPalette, theme, setLoading, alert, notificationUser } = useAppContext()
    const [menu, setMenu] = useState(menuItems)
    const [imagesList, setImagesList] = useState([])
-   const [listBirthDay, setListBirthDay] = useState([])
-   const [listClassesDay, setListClassesDay] = useState([])
    const [events, setEvents] = useState([])
-   const [tasksList, setTasksList] = useState([])
-   const [showMessageBirthDay, setShowMessageBirthDay] = useState(false)
-   const [idSelected, setIdSelected] = useState()
-   const [showMenuHelp, setShowMenuHelp] = useState(false)
-   const [showSections, setShowSections] = useState({
-      legend: false,
-      notification: false,
-      tasks: false
-   })
-   let isProfessor = user?.professor === 1 ? true : false;
-   const userId = user?.id;
 
    const router = useRouter();
    moment.locale("pt-br");
@@ -79,37 +66,10 @@ function Home() {
       try {
          const response = await getImageByScreen('Inicio - Banner rotativo')
          if (response.status === 200) {
-            setImagesList(response.data)
+            setImagesList(response?.data)
          }
+         console.log(response)
       } catch (error) {
-         return error
-      } finally {
-         setLoading(false)
-      }
-   }
-
-
-   const handleBirthday = async () => {
-      setLoading(true)
-      try {
-         const response = await api.get(`/user/list/birthdates`)
-         setListBirthDay(response?.data)
-      } catch (error) {
-         return error
-      } finally {
-         setLoading(false)
-      }
-   }
-
-   const handleClassesDay = async () => {
-      setLoading(true)
-      try {
-         const response = await api.get(`/classDay/month/now`)
-         if (response.status === 200) {
-            setListClassesDay(response?.data)
-         }
-      } catch (error) {
-         console.log(error)
          return error
       } finally {
          setLoading(false)
@@ -146,26 +106,9 @@ function Home() {
    }
 
 
-   const getTasks = async () => {
-      setLoading(true)
-      try {
-         const response = await api.get(`/task/user/${user?.id}`)
-         const { data } = response;
-         setTasksList(data?.filter(item => item?.status_chamado === 'Em aberto'))
-      } catch (error) {
-         console.log(error)
-      } finally {
-         setLoading(false)
-      }
-   }
-
-
    useEffect(() => {
       handleImages(imagesList)
-      handleBirthday()
-      handleClassesDay()
       handleEvents()
-      getTasks()
    }, [])
 
    const nowMonth = new Date().toLocaleString('pt-BR', { month: 'long' });
