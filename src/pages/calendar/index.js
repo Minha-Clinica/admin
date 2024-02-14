@@ -3,16 +3,16 @@ import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import "moment/locale/pt-br";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import { Box, Button, ContentContainer, Divider, Text, TextInput } from "../../../atoms";
-import { SectionHeader, SelectList, Holidays, CheckBoxComponent } from "../../../organisms";
+import { Box, Button, ContentContainer, Divider, Text, TextInput } from "../../atoms";
+import { SectionHeader, SelectList, Holidays, CheckBoxComponent } from "../../organisms";
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css"; // Estilo para o recurso de arrastar e soltar (se estiver usando)
 import "react-big-calendar/lib/addons/dragAndDrop"; // Recurso de arrastar e soltar (se estiver usando)
-import { useAppContext } from "../../../context/AppContext";
+import { useAppContext } from "../../context/AppContext";
 import { Backdrop } from "@mui/material";
-import { icons } from "../../../organisms/layout/Colors";
-import { api } from "../../../api/api";
+import { icons } from "../../organisms/layout/Colors";
+import { api } from "../../api/api";
 import { useRouter } from "next/router";
-import { checkUserPermissions } from "../../../validators/checkPermissionUser";
+import { checkUserPermissions } from "../../validators/checkPermissionUser";
 
 
 moment.locale("pt-br");
@@ -397,7 +397,9 @@ export default function CalendarComponent(props) {
 
     return (
         <>
-            <SectionHeader title={`Dtr(a). ${user?.nome}` || `Calendário de Agendas`} />
+            <SectionHeader
+                icon={'/icons/agenda_icon.png'}
+                title={`Dtr(a). ${user?.nome}` || `Calendário de Agendas`} />
 
             <Box sx={{ display: 'flex', gap: 3 }}>
                 <TextInput placeholder="Buscar pelo paciente" name='filterData' type="search" onChange={(event) => setFilterData(event.target.value)} value={filterData} sx={{ flex: 1 }}
@@ -527,7 +529,7 @@ export default function CalendarComponent(props) {
             {
                 showEventForm && (
                     <Backdrop open={showEventForm} sx={{ zIndex: 999 }}>
-                        <ContentContainer style={{ maxWidth: { md: '800px', lg: '1980px' }, marginLeft: { md: '180px', lg: '280px' }, maxHeight: { md: '180px', lg: '1280px' }, overflowY: matches && 'auto', width: 400 }}>
+                        <ContentContainer style={{ maxWidth: { md: '800px', lg: '1980px' }, maxHeight: { md: '180px', lg: '1280px' }, overflowY: matches && 'auto', width: 400 }}>
                             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                                 <Text bold large>{selectedEvent ? eventData?.title : "Adicionar evento"}</Text>
                                 <Box sx={{

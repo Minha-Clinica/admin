@@ -1,14 +1,14 @@
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
-import { Box, Button, ContentContainer, Divider, Text, TextInput } from "../../../atoms"
-import { CheckBoxComponent, SearchBar, SectionHeader, Table_V1 } from "../../../organisms"
-import { api } from "../../../api/api"
-import { useAppContext } from "../../../context/AppContext"
-import { SelectList } from "../../../organisms/select/SelectList"
+import { Box, Button, ContentContainer, Divider, Text, TextInput } from "../../atoms"
+import { CheckBoxComponent, SearchBar, SectionHeader, Table_V1 } from "../../organisms"
+import { api } from "../../api/api"
+import { useAppContext } from "../../context/AppContext"
+import { SelectList } from "../../organisms/select/SelectList"
 import { Backdrop, TablePagination } from "@mui/material"
-import { checkUserPermissions } from "../../../validators/checkPermissionUser"
-import { icons } from "../../../organisms/layout/Colors"
-import { formatTimeStamp } from "../../../helpers"
+import { checkUserPermissions } from "../../validators/checkPermissionUser"
+import { icons } from "../../organisms/layout/Colors"
+import { formatTimeStamp } from "../../helpers"
 import { Paper, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Tooltip, Avatar } from "@mui/material";
 import Link from "next/link"
 import { Divide } from "hamburger-react"
@@ -223,6 +223,7 @@ export default function ListTasks(props) {
         <>
             <SectionHeader
                 // title={`Chamados (${tasksList?.length || '0'})`}
+                icon={'https://mf-planejados.s3.amazonaws.com/Icon_mkt.svg'}
                 title={`Chamados (${tasksList?.filter(filter)?.length || '0'})`}
                 newButton
                 newButtonAction={() => router.push(`/suport/${pathname}/new`)}
@@ -553,7 +554,7 @@ const TableReport = ({ data = [], filters = [], onPress = () => { } }) => {
     const subMenu = router.pathname === '/' ? null : router.asPath.split('/')[2]
 
     const handleRowClick = (id) => {
-        window.open(`/suport/tasks/${id}`, '_blank');
+        window.open(`/tasks/${id}`, '_blank');
         return;
     };
 
@@ -693,7 +694,7 @@ const CardReport = ({ data = [], vizualizedForm }) => {
     const subMenu = router.pathname === '/' ? null : router.asPath.split('/')[2]
 
     const handleRowClick = (id) => {
-        window.open(`/suport/tasks/${id}`, '_blank');
+        window.open(`/tasks/${id}`, '_blank');
         return;
     };
 

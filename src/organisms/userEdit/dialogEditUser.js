@@ -3,7 +3,7 @@ import { useEffect, useState } from "react"
 import { Box, Text, ContentContainer, TextInput, Button, PhoneInputField, Divider } from "../../atoms"
 import { useAppContext } from "../../context/AppContext"
 import { api } from "../../api/api"
-import { EditFile } from "../../pages/administrative/users/[id]"
+import { EditFile } from "../../pages/users/[id]"
 import { icons } from "../layout/Colors"
 
 export const DialogUserEdit = (props) => {

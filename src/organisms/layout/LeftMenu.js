@@ -10,6 +10,7 @@ import { IconTheme } from "../iconTheme/IconTheme"
 import { getImageByScreen } from "../../validators/api-requests"
 import { DialogUserEdit } from "../userEdit/dialogEditUser"
 import { api } from "../../api/api"
+import { menuItems } from "../../permissions"
 
 export const LeftMenu = ({ }) => {
 
@@ -28,27 +29,6 @@ export const LeftMenu = ({ }) => {
    const [showDialogEditUser, setShowDialogEditUser] = useState(false)
    const [showEditUser, setShowEditUser] = useState(false)
    const [showMenuHelp, setShowMenuHelp] = useState(false)
-
-
-   const [menuItems, setMenuItems] = useState([]);
-
-   useEffect(() => {
-      const handleMenuItems = async () => {
-         try {
-            const response = await api.get(`/menuItems`)
-            const { data } = response
-            if (response.status === 200) {
-               setMenuItems(data)
-            }
-         } catch (error) {
-            console.log(error)
-            return error
-         }
-      }
-      handleMenuItems()
-   }, [])
-
-
    const [groupStates, setGroupStates] = useState(menuItems.map(() => false));
    const handleImages = async () => {
       try {
@@ -111,9 +91,9 @@ export const LeftMenu = ({ }) => {
       <>
          <Box sx={{
             ...styles.leftMenuMainContainer, backgroundColor: colorPalette.third, border: `1px solid rgb(255 255 255 / 0.1)`, transition: 'background-color 1s', ...(showMenuMobile && { display: 'flex' }),
-            width: !showMenuHelp ? 70 : { xs: '214px', sm: '214px', md: '180px', lg: '180px', xl: '214px' }, transition: '.3s'
+            width: !showMenuHelp ? 70 : { xs: '214px', sm: '214px', md: '180px', lg: '220px', xl: '220px' }, transition: '.3s'
          }}>
-            <Box sx={{ position: 'fixed', height: '100%', width: !showMenuHelp ? 70 : { xs: '214px', sm: '214px', md: '180px', lg: '180px', xl: '214px' }, padding: { xs: '10px 15px', sm: '10px 15px', md: '8px 10px', lg: '8px 10px', xl: '10px 15px' } }}>
+            <Box sx={{ position: 'fixed', height: '100%', width: !showMenuHelp ? 70 : { xs: '214px', sm: '214px', md: '180px', lg: '220px', xl: '220px' }, padding: { xs: '10px 15px', sm: '10px 15px', md: '8px 10px', lg: showMenuHelp ? '8px 20px' : '8px 10px', xl: '10px 15px' } }}>
                <Box sx={{ display: 'flex', position: 'absolute', right: 10, top: -35 }}>
                   <Hamburger
                      toggled={showMenuHelp}
@@ -143,106 +123,26 @@ export const LeftMenu = ({ }) => {
                      <Text style={{ bottom: 45, left: 10, position: 'absolute', color: 'gray' }}> v{latestVersion?.version}</Text>
                   </Box>
                </Box>
-               {/* 
-               <Box sx={{ ...styles.userBadgeContainer, ...(!showMenuHelp && { minWidth: !showMenuHelp && 40, marginTop: 4 }) }}>
-                  <Box sx={{
-                     display: 'flex',
-                     justifyContent: 'space-between',
-                     alignItems: 'center',
-                     gap: 1,
-                     borderRadius: 1.5,
-                     boxSizing: 'border-box',
-                     flexDirection: 'column',
-                     padding: { md: '0px', lg: '0px', xl: '8px 8px' },
-
-                  }}>
-                     <Avatar
-                        sx={{ width: '35px', height: '35px', fontSize: 14, border: `1px solid #fff`, cursor: 'pointer', '&hover': { opacity: 0.5 } }}
-                        src={fotoPerfil || `https://mf-planejados.s3.us-east-1.amazonaws.com/melies/perfil-default.jpg`}
-                        onClick={() => {
-                           // router.push(`/administrative/users/${user?.id}`)
-                           setShowUserOptions(!showUserOptions)
-                           setShowDialogEditUser(true)
-                        }} />
-                     <Box sx={{ display: showMenuHelp ? 'flex' : 'none', gap: 1, alignItems: 'center', justifyContent: 'center', marginLeft: 3, transition: '1s' }}>
-                        <Text style={{ color: colorPalette.textColor, transition: 'background-color 1s', color: '#FFF', fontFamily: 'MetropolisSemiBold', }}>{userName}</Text>
-                        <Box sx={{
-                           ...styles.menuIcon,
-                           backgroundImage: `url(${icons.gray_arrow_down})`,
-                           width: 20,
-                           height: 17,
-                           transition: 'background-color 1s',
-                           "&:hover": {
-                              opacity: 0.8,
-                              cursor: 'pointer'
-                           }
-                        }} onClick={() => setShowEditUser(!showEditUser)} />
-                     </Box>
-                  </Box>
-                  {showEditUser && <Box sx={{
-                     border: `1px solid rgb(255 255 255 / 0.1)`,
-                     display: 'flex', gap: 1.5, alignItems: 'start',
-                     transition: '.5s',
-                     justifyContent: 'center', flexDirection: 'column', backgroundColor: colorPalette.third + '22', padding: '5px 10px', width: `90%`, borderRadius: 2
-                  }}>
-                     <Box sx={{
-                        display: 'flex', gap: 1, flex: 1, padding: '2px 5px', "&:hover": {
-                           opacity: 0.2,
-                           cursor: 'pointer'
-                        }
-                     }}>
-                        <Box sx={{
-                           ...styles.menuIcon,
-                           backgroundImage: `url(${icons.logout})`,
-                           width: 20,
-                           height: 17,
-                           transition: 'background-color 1s'
-                        }} onClick={logout} />
-                        <Text bold small style={{ ...styles.text, textAlign: 'center', color: '#fff', padding: `2px 5px` }}>Sair</Text>
-                     </Box>
-                     <Box sx={{
-                        display: 'flex', gap: 1, flex: 1, padding: '2px 5px', "&:hover": {
-                           opacity: 0.3,
-                           cursor: 'pointer'
-                        }
-                     }} onClick={() => {
-                        setShowUserOptions(!showUserOptions)
-                        setShowDialogEditUser(true)
-                     }}>
-                        <Box sx={{
-                           ...styles.menuIcon,
-                           backgroundImage: `url('https://mf-planejados.s3.amazonaws.com/Icon_user_edit.png')`,
-                           width: 20,
-                           height: 15,
-                           filter: 'brightness(0) invert(1)',
-                           transition: 'background-color 1s',
-                           "&:hover": {
-                              opacity: 0.8,
-                              cursor: 'pointer'
-                           }
-                        }} onClick={() => {
-                           // router.push(`/administrative/users/${user?.id}`)
-                        }} />
-                        <Text bold small style={{ ...styles.text, textAlign: 'center', color: '#fff', padding: `2px 5px` }}>Meus dados</Text>
-
-                     </Box>
-                  </Box>}
-                  <Divider color={'rgb(255 255 255 / 0.1)'} />
-               </Box> */}
                <Divider distance={4} color={'rgb(255 255 255 / 0.1)'} />
                <Box sx={{ ...styles.boxMenu, ...(showMenuMobile && { overflowY: 'auto' }), ...(!showMenuHelp && { width: 40, marginLeft: 1, gap: 2 }) }}>
                   {menuItems.map((group, index) => {
-                     const visibleItems = group.items.filter(item =>
-                        item.permissoes.some(permission => userPermissions.some(userPerm => userPerm.id_grupo_perm === permission.grupo_perm_id))
-                     );
-                     if (visibleItems.length > 0) {
+
+                     console.log(pathname)
+                     console.log(group.to)
+                     // const visibleItems = group.filter(item =>
+                     //    item.permissoes.some(permission => userPermissions.some(userPerm => userPerm.id_grupo_perm === permission.grupo_perm_id))
+                     // );
+                     const visibleItems = 1;
+                     if (visibleItems > 0) {
                         return (
-                           <Box key={`${group}-${index}`} sx={{ display: 'flex', flexDirection: 'column', gap: 0.3, color: '#f0f0f0' + '77', }}
+                           <Box key={`${group}-${index}`} sx={{ display: 'flex', flexDirection: 'column', gap: 0.3, color: '#f0f0f0' + '77' }}
                               onMouseEnter={() => (!showMenuMobile && !showMenuHelp) && handleGroupMouseEnter(index)}
                               onMouseLeave={() => (!showMenuMobile && !showMenuHelp) && handleGroupMouseLeave(index)}
                               onClick={() => {
-                                 handleGroupClick(index)
+                                 router.push(`/${group.to}`);
+
                               }}>
+                              {(pathname === group.to) && <Box sx={{ display: 'flex', height: '30px', width: 4, borderRadius: '0px 5px 5px 0px', backgroundColor: colorPalette?.buttonColor, position: 'absolute', left: 0 }} />}
 
                               {/* {index !== 0 && <Box sx={{ width: '100%', height: `1px`, backgroundColor: '#e4e4e4', margin: `16px 0px`, }} />} */}
                               <Box sx={{
@@ -261,26 +161,12 @@ export const LeftMenu = ({ }) => {
                                     backgroundColor: '#f0f0f0' + '22'
                                  }
                               }} >
-                                 <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: 1.5, position: 'relative', alignItems: 'center' }}>
-                                    {(groupStates[index]) &&
-                                       < Box sx={{ display: 'flex', height: '40px', width: 4, borderRadius: '0px 5px 5px 0px', backgroundColor: colorPalette?.buttonColor, position: 'absolute', left: -15 }} />}
+                                 <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: 1.5, position: 'relative', alignItems: 'center', position: 'relative' }}>
                                     <Box sx={{ ...styles.icon, backgroundImage: `url(${group?.icon})`, width: group.text === 'Administrativo' ? 15 : 18, height: group.text === 'Administrativo' ? 24 : 18, filter: 'brightness(0) invert(1)', transition: 'background-color 1s' }} />
-                                    {<Text bold style={{ color: (groupStates[index]) ? colorPalette?.buttonColor : '#fff', transition: 'background-color 1s', }}>
-                                       {group.text}
+                                    {<Text bold large style={{ color: (pathname === group.to) ? colorPalette?.buttonColor : '#fff', transition: 'background-color 1s', }}>
+                                       {group?.text}
                                     </Text>}
                                  </Box>
-                                 <Box sx={{
-                                    ...styles.menuIcon,
-                                    backgroundImage: `url(${icons.gray_arrow_down})`,
-                                    transform: groupStates[index] ? 'rotate(-0deg)' : 'rotate(-90deg)',
-                                    transition: '.3s',
-                                    width: 17,
-                                    height: 17,
-                                    "&:hover": {
-                                       opacity: 0.8,
-                                       cursor: 'pointer'
-                                    }
-                                 }} />
                               </Box>
 
                               <Box sx={{
@@ -320,57 +206,18 @@ export const LeftMenu = ({ }) => {
                                              {!showMenuHelp &&
                                                 <>
                                                    <Box sx={{
-                                                      display: 'flex', alignItems: 'start', justifyContent: 'flex-start', padding: '10px 15px 0px 10px',
+                                                      display: 'flex', alignItems: 'start', justifyContent: 'flex-start', padding: '10px 15px',
                                                       flexDirection: 'column'
                                                    }}>
                                                       <Text bold>{group.text}</Text>
-                                                      <Divider distance={2} />
                                                    </Box>
                                                 </>
-
-                                             }
-                                             <Divider distance={1} color={'rgb(255 255 255 / 0.1)'} />
-
-                                             {group.items.filter(item =>
-                                                item.permissoes.some(permission => userPermissions.some(userPerm => userPerm.id_grupo_perm === permission.grupo_perm_id)))
-                                                .map((item, index) => {
-                                                   return (
-                                                      <MenuItem
-                                                         showMenuHelp={showMenuHelp}
-                                                         setShowMenuHelp={setShowMenuHelp}
-                                                         currentPage={item.to === pathname}
-                                                         key={`${index}_${item.to}`}
-                                                         to={item.to}
-                                                         text={item.text}
-                                                         icon={item.icon}
-                                                         onClick={() => setShowMenuMobile(false)}
-                                                         slug={item.to}
-                                                         subitem={item.subitems}
-                                                         pathname={pathname}
-                                                      />
-
-                                                   )
-                                                })
                                              }
                                           </>
                                        )}
                                     </Box>
                                  </Box>
                                  : <>
-                                    {groupStates[index] && (
-                                       group.items.map((item, index) => {
-                                          return (
-                                             <MenuItem
-                                                setShowMenuHelp={setShowMenuHelp}
-                                                currentPage={item.to === pathname}
-                                                key={`${index}_${item.to}`}
-                                                to={item.to}
-                                                text={item.text}
-                                                icon={item.icon}
-                                                onClick={() => setShowMenuMobile(false)}
-                                                slug={item.to}
-                                             />)
-                                       }))}
                                  </>
                               }
 
