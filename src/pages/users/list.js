@@ -1,13 +1,13 @@
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
-import { Box, Button, ContentContainer, Text, TextInput } from "../../../atoms"
-import { SearchBar, SectionHeader, Table_V1 } from "../../../organisms"
-import { getUsersPerfil } from "../../../validators/api-requests"
-import { useAppContext } from "../../../context/AppContext"
-import { SelectList } from "../../../organisms/select/SelectList"
+import { Box, Button, ContentContainer, Text, TextInput } from "../../atoms"
+import { SearchBar, SectionHeader, Table_V1 } from "../../organisms"
+import { getUsersPerfil } from "../../validators/api-requests"
+import { useAppContext } from "../../context/AppContext"
+import { SelectList } from "../../organisms/select/SelectList"
 import { TablePagination } from "@mui/material"
-import { checkUserPermissions } from "../../../validators/checkPermissionUser"
-import { api } from "../../../api/api"
+import { checkUserPermissions } from "../../validators/checkPermissionUser"
+import { api } from "../../api/api"
 
 export default function ListUsers(props) {
     const [usersList, setUsers] = useState([])
@@ -164,6 +164,7 @@ export default function ListUsers(props) {
     return (
         <>
             <SectionHeader
+                icon={'https://mf-planejados.s3.amazonaws.com/icon_adm_dark.svg'}
                 title={`${perfil === 'todos' ? 'Usuários' : (perfil.charAt(0).toUpperCase() + perfil.slice(1))} (${usersList?.filter(filter)?.length})`}
                 newButton={isPermissionEdit}
                 newButtonAction={() => router.push(`/administrative/${pathname}/new`)}

@@ -184,7 +184,7 @@ export const UserHeader = (props) => {
                                     sx={{ width: '35px', height: '35px', fontSize: 14, border: `1px solid #fff`, cursor: 'pointer', '&hover': { opacity: 0.5 } }}
                                     src={fotoPerfil || `https://mf-planejados.s3.us-east-1.amazonaws.com/melies/perfil-default.jpg`}
                                     onClick={() => {
-                                        // router.push(`/administrative/users/${user?.id}`)
+                                        // router.push(`/users/${user?.id}`)
                                         setShowUserOptions(!showUserOptions)
                                         setShowDialogEditUser(true)
                                     }} />
@@ -222,7 +222,7 @@ export const UserHeader = (props) => {
                                     }} onClick={() => {
                                         setShowUserOptions(!showUserOptions)
                                         setShowEditUser(false)
-                                        router.push(`/administrative/users/${user?.id}`)
+                                        router.push(`/users/${user?.id}`)
                                     }}>
                                         <Box sx={{
                                             ...styles.menuIcon,
@@ -236,7 +236,7 @@ export const UserHeader = (props) => {
                                                 cursor: 'pointer',
                                             }
                                         }} onClick={() => {
-                                            // router.push(`/administrative/users/${user?.id}`)
+                                            // router.push(`/users/${user?.id}`)
                                         }} />
                                         <Text bold xsmall style={{ ...styles.text, textAlign: 'center', padding: `2px 0px` }}>Meus dados</Text>
 
@@ -266,7 +266,7 @@ export const UserHeader = (props) => {
                                                 cursor: 'pointer',
                                             }
                                         }} onClick={() => {
-                                            // router.push(`/administrative/users/${user?.id}`)
+                                            // router.push(`/users/${user?.id}`)
                                         }} />
                                         <Text bold xsmall style={{ ...styles.text, textAlign: 'center', padding: `2px 0px` }}>Alterar senha</Text>
 

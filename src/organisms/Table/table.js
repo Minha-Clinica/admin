@@ -35,7 +35,6 @@ export const Table_V1 = (props) => {
     const { colorPalette, theme, setShowConfirmationDialog } = useAppContext()
     const router = useRouter();
     const menu = router.pathname === '/' ? null : router.asPath.split('/')[1]
-    const subMenu = router.pathname === '/' ? null : router.asPath.split('/')[2]
 
     const handleRowClick = (id) => {
         if (route) {
@@ -47,10 +46,10 @@ export const Table_V1 = (props) => {
             return
         }
         if (targetBlank) {
-            window.open(`/${menu}/${subMenu}/${id}${query}`, '_blank');
+            window.open(`/${menu}/${id}${query}`, '_blank');
             return;
         }
-        router.push(`/${menu}/${subMenu}/${id}${query}`);
+        router.push(`/${menu}/${id}${query}`);
     };
 
     const getRowBackground = (index) => {

@@ -1,20 +1,20 @@
 import { useRouter } from "next/router";
-import { Box, Button, ContentContainer, Divider, PhoneInputField, Text, TextInput } from "../../../../atoms";
-import { api } from "../../../../api/api";
+import { Box, Button, ContentContainer, Divider, PhoneInputField, Text, TextInput } from "../../../atoms";
+import { api } from "../../../api/api";
 import { useRef, useEffect, useState } from "react";
-import { CheckBoxComponent, SectionHeader, SelectList } from "../../../../organisms";
+import { CheckBoxComponent, SectionHeader, SelectList } from "../../../organisms";
 import { Backdrop, CircularProgress, useMediaQuery, useTheme } from "@mui/material";
-import { useAppContext } from "../../../../context/AppContext";
-import { calculationAge, emailValidator, findCEP, formatCEP, formatCPF, formatCreditCardNumber, formatDate, formatRg, formatTimeStamp, formattedStringInDate } from "../../../../helpers";
-import { ContractStudentComponent } from "../../../../organisms/contractStudent/contractStudent";
-import { Forbidden } from "../../../../forbiddenPage/forbiddenPage";
+import { useAppContext } from "../../../context/AppContext";
+import { calculationAge, emailValidator, findCEP, formatCEP, formatCPF, formatCreditCardNumber, formatDate, formatRg, formatTimeStamp, formattedStringInDate } from "../../../helpers";
+import { ContractStudentComponent } from "../../../organisms/contractStudent/contractStudent";
+import { Forbidden } from "../../../forbiddenPage/forbiddenPage";
 import Cards from 'react-credit-cards'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
-import { bodyContractEnrollment, responsiblePayerDataTable, userDataTable } from "../../../../helpers/bodyContract";
-import { icons } from "../../../../organisms/layout/Colors";
+import { bodyContractEnrollment, responsiblePayerDataTable, userDataTable } from "../../../helpers/bodyContract";
+import { icons } from "../../../organisms/layout/Colors";
 
 
 

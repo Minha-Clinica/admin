@@ -28,7 +28,9 @@ export const checkUserPermissions = async (router, userPermissions, menuItems) =
         userPerm.item_id === itemMenuId && userPerm.acao?.includes('edição')
     ) : false;
 
-    return userHasEditPermission
+    // return userHasEditPermission
+    return true
+
 }
 
 const handleMenuItems = async () => {

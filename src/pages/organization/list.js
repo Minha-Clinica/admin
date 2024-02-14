@@ -1,12 +1,12 @@
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
-import { Box, Button, ContentContainer, Text, TextInput } from "../../../atoms"
-import { SearchBar, SectionHeader, Table_V1 } from "../../../organisms"
-import { api } from "../../../api/api"
-import { useAppContext } from "../../../context/AppContext"
-import { SelectList } from "../../../organisms/select/SelectList"
+import { Box, Button, ContentContainer, Text, TextInput } from "../../atoms"
+import { SearchBar, SectionHeader, Table_V1 } from "../../organisms"
+import { api } from "../../api/api"
+import { useAppContext } from "../../context/AppContext"
+import { SelectList } from "../../organisms/select/SelectList"
 import { TablePagination } from "@mui/material"
-import { checkUserPermissions } from "../../../validators/checkPermissionUser"
+import { checkUserPermissions } from "../../validators/checkPermissionUser"
 
 export default function ListInstitution(props) {
     const [institutionList, setInstitutionList] = useState([])
@@ -126,9 +126,10 @@ export default function ListInstitution(props) {
     return (
         <>
             <SectionHeader
+                icon={'/icons/enterprise.png'}
                 title={`Empresas (${institutionList?.filter(filter)?.length || '0'})`}
                 newButton={isPermissionEdit}
-                newButtonAction={() => router.push(`/administrative/${pathname}/new`)}
+                newButtonAction={() => router.push(`/${pathname}/new`)}
             />
             <ContentContainer>
                 <Box sx={{ display: 'flex', flex: 1, justifyContent: 'space-between' }}>

@@ -217,6 +217,62 @@ function Home() {
 
    const lengthNotifications = notificationUser?.filter(item => item?.vizualizado === 0)?.length;
 
+
+   const CustomToolbar = (toolbar) => {
+
+      const goToNext = () => {
+         toolbar.onNavigate('NEXT');
+      };
+
+      const goToPrev = () => {
+         toolbar.onNavigate('PREV');
+      };
+
+      const firstLetter = toolbar?.label?.charAt(0).toUpperCase();
+      const restOfMonth = toolbar?.label?.slice(1);
+      const formattedMonth = `${firstLetter}${restOfMonth}`;
+
+
+      return (
+         <div className="rbc-toolbar">
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+               <Box sx={{
+                  ...styles.menuIcon,
+                  padding: '8px',
+                  margin: '0px 5px',
+                  backgroundImage: `url(${icons.gray_arrow_down})`,
+                  // filter: theme ? 'brightness(0) invert(0)' : 'brightness(0) invert(1)',
+                  transform: 'rotate(90deg)',
+                  transition: '.3s',
+                  width: 18, height: 18,
+                  aspectRatio: '1/1',
+                  "&:hover": {
+                     opacity: 0.8,
+                     cursor: 'pointer',
+                     backgroundColor: colorPalette.primary
+                  }
+               }} onClick={goToPrev} />
+               <Text small bold>{formattedMonth}</Text>
+               <Box sx={{
+                  ...styles.menuIcon,
+                  margin: '0px 5px',
+                  backgroundImage: `url(${icons.gray_arrow_down})`,
+                  // filter: theme ? 'brightness(0) invert(0)' : 'brightness(0) invert(1)',
+                  transform: 'rotate(-90deg)',
+                  transition: '.3s',
+                  width: 18, height: 18,
+                  aspectRatio: '1/1',
+                  "&:hover": {
+                     opacity: 0.8,
+                     cursor: 'pointer',
+                     backgroundColor: colorPalette.primary
+                  }
+               }} onClick={goToNext} />
+            </Box>
+         </div>
+      );
+   };
+
    return (
       <>
          <Head>
@@ -254,13 +310,15 @@ function Home() {
                                  display: 'flex', gap: 2, backgroundColor: colorPalette.secondary, padding: '15px', maxWidth: 400, borderRadius: 2,
                                  boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
                               }}>
-                                 <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column', alignItems: 'center', width: 120 }}>
+                                 <Box sx={{
+                                    display: 'flex', gap: 1, flexDirection: 'column', alignItems: 'center', width: 120, justifyContent: 'center',
+                                 }}>
                                     <Avatar src={item?.icon || ''} sx={{
                                        height: { xs: '100%', sm: 45, md: 45, lg: 60 },
                                        width: { xs: '100%', sm: 45, md: 45, lg: 60 },
                                     }} variant="circular"
                                     />
-                                    <Text bold xsmall>{item?.nome}</Text>
+                                    <Text bold xsmall style={{ marginLeft: 2, minWidth: 80, display: 'flex', textAlign: 'center' }}>{item?.nome}</Text>
                                  </Box>
                                  <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column', alignItems: 'start' }}>
                                     <Text bold small>{item?.titulo}</Text>
@@ -274,81 +332,124 @@ function Home() {
 
                   <Box sx={{ display: 'flex', gap: 2, marginTop: 5, flexDirection: 'column' }}>
                      <Text large bold>Atendimento</Text>
-                     <Box sx={{ display: 'flex', gap: 2, }}>
-
+                     <Box sx={{
+                        display: 'flex', gap: 2, backgroundColor: '#fff', padding: '30px',
+                        boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`, borderRadius: 2
+                     }}>
                         <Box sx={{
-                           display: 'flex', backgroundColor: colorPalette.secondary, padding: '20px',
-                           borderRadius: 2,
-                           alignItems: 'center', gap: 2,
-                           boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
-                           "&:hover": {
-                              opacity: 0.8,
-                              cursor: 'pointer'
-                           }
-                        }} onClick={() => router.push('/service/calendar')}>
-                           <Box sx={{
-                              ...styles.menuIcon,
-                              backgroundImage: `url('/icons/agenda_icon.png')`,
-                              transition: '.3s',
-                              width: 20, height: 20,
-                              "&:hover": {
-                                 opacity: 0.8,
-                                 cursor: 'pointer'
-                              }
-                           }} />
-                           <Text bold>Minha Agenda</Text>
-                        </Box>
+                           ...styles.menuIcon,
+                           backgroundImage: `url('/icons/agendamento_icon.png')`,
+                           transition: '.3s',
+                           width: 250, height: 250,
+                        }} />
 
-                        <Box sx={{
-                           display: 'flex', backgroundColor: colorPalette.secondary, padding: '20px',
-                           borderRadius: 2,
-                           alignItems: 'center', gap: 2,
-                           boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
-                           "&:hover": {
-                              opacity: 0.8,
-                              cursor: 'pointer'
-                           }
-                        }} onClick={() => router.push('/service/calendar')}>
-                           <Box sx={{
-                              ...styles.menuIcon,
-                              backgroundImage: `url('/icons/agenda_espera_icon.png')`,
-                              transition: '.3s',
-                              width: 20, height: 20,
-                              "&:hover": {
-                                 opacity: 0.8,
-                                 cursor: 'pointer'
-                              }
-                           }} />
-                           <Text bold>Lista de Espera</Text>
-                        </Box>
+                        <Box sx={{ display: 'flex', height: '250px', width: '1px', backgroundColor: 'lightgray' }} />
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 5, padding: '0px 20px' }}>
+                           <Box sx={{ display: 'flex', gap: 1.5, flexDirection: 'column' }}>
 
-                        <Box sx={{
-                           display: 'flex', backgroundColor: colorPalette.secondary, padding: '20px',
-                           borderRadius: 2,
-                           alignItems: 'center', gap: 2,
-                           boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
-                           "&:hover": {
-                              opacity: 0.8,
-                              cursor: 'pointer'
-                           }
-                        }} onClick={() => router.push('/service/calendar')}>
-                           <Box sx={{
-                              ...styles.menuIcon,
-                              backgroundImage: `url('/icons/include_icon.png')`,
-                              transition: '.3s',
-                              width: 20, height: 20,
-                              "&:hover": {
-                                 opacity: 0.8,
-                                 cursor: 'pointer'
-                              }
-                           }} />
-                           <Text bold>Novo agendamento</Text>
+                              <Box><Text large light>Buscar profissional agora mesmo!</Text></Box>
+                              <Box sx={{
+                                 padding: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                 maxWidth: 220,
+                                 transition: '.5s',
+                                 gap: 2,
+                                 backgroundColor: colorPalette.buttonColor,
+                                 borderRadius: 2,
+                                 "&:hover": {
+                                    opacity: 0.8,
+                                    cursor: 'pointer',
+                                    transform: 'scale(1.1, 1.1)'
+                                 }
+                              }}>
+                                 <Box sx={{
+                                    ...styles.menuIcon,
+                                    backgroundImage: `url('/icons/search_input_icon.png')`,
+                                    filter: 'brightness(0) invert(1)',
+                                    transition: '.3s',
+                                    width: 20, height: 20,
+
+                                 }} />
+
+                                 <Text bold style={{ color: '#fff' }}>BUSCAR TERAPEUTA</Text>
+                              </Box>
+                           </Box>
+                           <Box sx={{ display: 'flex', gap: 2 }}>
+
+                              <Box sx={{
+                                 display: 'flex', backgroundColor: colorPalette.secondary, padding: '20px',
+                                 borderRadius: 2,
+                                 alignItems: 'center', gap: 2,
+                                 boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
+                                 "&:hover": {
+                                    opacity: 0.8,
+                                    cursor: 'pointer'
+                                 }
+                              }} onClick={() => router.push('/calendar')}>
+                                 <Box sx={{
+                                    ...styles.menuIcon,
+                                    backgroundImage: `url('/icons/agenda_icon.png')`,
+                                    transition: '.3s',
+                                    width: 20, height: 20,
+                                    "&:hover": {
+                                       opacity: 0.8,
+                                       cursor: 'pointer'
+                                    }
+                                 }} />
+                                 <Text bold>Minha Agenda</Text>
+                              </Box>
+
+                              <Box sx={{
+                                 display: 'flex', backgroundColor: colorPalette.secondary, padding: '20px',
+                                 borderRadius: 2,
+                                 alignItems: 'center', gap: 2,
+                                 boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
+                                 "&:hover": {
+                                    opacity: 0.8,
+                                    cursor: 'pointer'
+                                 }
+                              }} onClick={() => router.push('/calendar')}>
+                                 <Box sx={{
+                                    ...styles.menuIcon,
+                                    backgroundImage: `url('/icons/agenda_espera_icon.png')`,
+                                    transition: '.3s',
+                                    width: 20, height: 20,
+                                    "&:hover": {
+                                       opacity: 0.8,
+                                       cursor: 'pointer'
+                                    }
+                                 }} />
+                                 <Text bold>Lista de Espera</Text>
+                              </Box>
+
+                              <Box sx={{
+                                 display: 'flex', backgroundColor: colorPalette.secondary, padding: '20px',
+                                 borderRadius: 2,
+                                 alignItems: 'center', gap: 2,
+                                 boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
+                                 "&:hover": {
+                                    opacity: 0.8,
+                                    cursor: 'pointer'
+                                 }
+                              }} onClick={() => router.push('/calendar')}>
+                                 <Box sx={{
+                                    ...styles.menuIcon,
+                                    backgroundImage: `url('/icons/include_icon.png')`,
+                                    transition: '.3s',
+                                    width: 20, height: 20,
+                                    "&:hover": {
+                                       opacity: 0.8,
+                                       cursor: 'pointer'
+                                    }
+                                 }} />
+                                 <Text bold>Novo agendamento</Text>
+                              </Box>
+                           </Box>
                         </Box>
                      </Box>
                   </Box>
 
 
-                  <Box sx={{ display: 'flex', gap: 2, padding: '20px 0px', flexDirection: 'column', marginTop: 4 }}>
+                  {/* <Box sx={{ display: 'flex', gap: 2, padding: '20px 0px', flexDirection: 'column', marginTop: 4 }}>
                      <Text bold large>Resumo</Text>
                      <Box sx={{ display: 'flex', gap: 2 }}>
 
@@ -393,7 +494,7 @@ function Home() {
                         <ContentContainer fullWidth style={{ display: 'flex', flexDirection: 'row', minWidth: 800 }}>
                            <Box>
                               <Text bold large style={{ textAlign: 'center' }}>Agenda do Mês</Text>
-                              <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 5 }}>
+                              <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 5, minWidth: 350 }}>
                                  <Calendar
                                     localizer={localizer}
                                     defaultDate={moment(defaultYear?.start).toDate()}
@@ -404,6 +505,9 @@ function Home() {
                                     selectable
                                     eventPropGetter={eventStyleGetter}
                                     messages={messages}
+                                    components={{
+                                       toolbar: CustomToolbar,
+                                    }}
                                     style={{
                                        fontFamily: 'MetropolisBold',
                                        color: colorPalette.textColor,
@@ -516,63 +620,9 @@ function Home() {
 
                            </Box>
                         </ContentContainer>
-                        {/* <ContentContainer fullWidth>
-                           <Text bold large>Chamados em aberto</Text>
-                           <Box sx={{
-                              width: 200, height: tasksList?.length > 0 ? 400 : 'auto', overflowY: 'auto', width: '100%', gap: 1, display: 'flex', flexDirection: 'column',
-                              scrollbarWidth: 'thin', // para navegadores que não são WebKit
-                              scrollbarColor: 'transparent transparent', // para navegadores que não são WebKit
-                              '&::-webkit-scrollbar': {
-                                 width: '6px',
-                              },
-                              '&::-webkit-scrollbar-thumb': {
-                                 backgroundColor: 'transparent',
-                              },
-                           }}>
-                              {tasksList?.length > 0 ?
-                                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, paddingBottom: 5 }}>
-                                    {tasksList?.sort((a, b) => b.dt_criacao.localeCompare(a.dt_criacao))
-                                       ?.map((item, index) => {
-                                          return (
-                                             <Box key={index} sx={{
-                                                display: 'flex', flexDirection: 'column', gap: 1, position: 'relative', padding: '12px 12px',
-                                                backgroundColor: colorPalette.primary,
-                                                borderRadius: 2,
-                                                maxHeight: 150,
-                                                "&:hover": {
-                                                   backgroundColor: colorPalette.primary + '99',
-                                                   cursor: 'pointer'
-                                                },
-                                             }}>
-                                                <Box sx={{ display: 'flex', gap: 0.5 }}>
-                                                   <Text small bold style={{ color: colorPalette?.buttonColor }}>Aberto por:</Text>
-                                                   <Text small>{item?.autor}</Text>
-                                                </Box>
-                                                <Box sx={{
-                                                   display: 'flex', gap: 0.5, flexDirection: 'column', flex: 1,
-                                                   padding: '10px 0px'
-                                                }}>
-                                                   <Text small bold>{item?.titulo_chamado}</Text>
-                                                   <Text small style={{
-                                                      textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                                                      overflow: 'hidden',
-                                                   }}>{item?.descricao_chamado}</Text>
-                                                </Box>
-                                                <Box sx={{ display: 'flex', gap: 0.5, justifyContent: 'space-between' }}>
-                                                   <Text small style={{ color: '#606060' }}>aberto em: {formatTimeStamp(item?.dt_criacao, true)}</Text>
-                                                   <Button secondary text="visitar" small style={{ height: 20 }} onClick={() => router.push(`/suport/tasks/${item?.id_chamado}`)} />
-                                                </Box>
-                                             </Box>
-                                          )
-                                       })}
-                                 </Box>
-                                 : <Text light small>Você não possui chamados em aberto</Text>
-                              }
-                           </Box>
-                        </ContentContainer> */}
                      </Box>
-                  </Box>
-                  <Box sx={{ display: 'flex', padding: '10px 0px' }}>
+                  </Box> */}
+                  <Box sx={{ display: 'flex', padding: '10px 0px', marginTop: 5 }}>
                      <Text bold>Veja o que está rolando..</Text>
                   </Box>
                   <Carousel

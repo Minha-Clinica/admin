@@ -17,7 +17,8 @@ export const SectionHeader = (props) => {
       resetButtonAction = () => { },
       customButton = false,
       customButtonText = '',
-      customButtonAction = () => { }
+      customButtonAction = () => { },
+      icon = null
    } = props;
 
    const { colorPalette } = useAppContext()
@@ -30,6 +31,17 @@ export const SectionHeader = (props) => {
             alignItems: 'center',
          }}>
             <Box sx={{ display: 'flex', flex: 1, height: '100%', maxWidth: '100%', gap: 2, overflow: 'hidden', position: 'relative', alignItems: 'center' }}>
+            <Box sx={{display: 'flex', height: '45px', width: 5, backgroundColor: colorPalette.buttonColor}}/>
+             {icon &&  <Box sx={{
+                  ...styles.icon,
+                  backgroundImage: `url('${icon}')`,
+                  backgroundSize: 'contain',
+                  backgroundPosition: 'center',
+                  filter: 'brightness(0) invert(0)',
+                  width: 35,
+                  height: 35,
+                  display: 'flex'
+               }} />}
                <Text
                   veryLarge='true'
                   bold='true'
@@ -72,4 +84,16 @@ export const SectionHeader = (props) => {
          </Box>
       </>
    )
+}
+
+const styles = {
+   icon: {
+      backgroundSize: 'cover',
+      backgroundRepeat: 'no-repeat',
+      backgroundPosition: 'center center',
+      width: '15px',
+      height: '15px',
+      marginRight: '0px',
+      backgroundImage: `url('/favicon.svg')`,
+   },
 }

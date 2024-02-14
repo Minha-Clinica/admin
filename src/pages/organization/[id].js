@@ -1,12 +1,12 @@
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
 import { useMediaQuery, useTheme } from "@mui/material"
-import { api } from "../../../api/api"
-import { Box, ContentContainer, TextInput, Text } from "../../../atoms"
-import { RadioItem, SectionHeader } from "../../../organisms"
-import { useAppContext } from "../../../context/AppContext"
-import { formatCEP, formatCNPJ } from "../../../helpers"
-import { checkUserPermissions } from "../../../validators/checkPermissionUser"
+import { api } from "../../api/api"
+import { Box, ContentContainer, TextInput, Text } from "../../atoms"
+import { RadioItem, SectionHeader } from "../../organisms"
+import { useAppContext } from "../../context/AppContext"
+import { formatCEP, formatCNPJ } from "../../helpers"
+import { checkUserPermissions } from "../../validators/checkPermissionUser"
 import axios from "axios"
 
 export default function EditInstitution(props) {
