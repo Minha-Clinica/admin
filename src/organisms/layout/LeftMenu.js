@@ -80,7 +80,6 @@ export const LeftMenu = ({ }) => {
    const handleAttMsgVersion = async () => {
       try {
          const response = await api.patch(`/user/notificationVersion/false/${user?.id}`)
-         console.log(response)
       } catch (error) {
          console.log(error)
          return error
@@ -126,9 +125,6 @@ export const LeftMenu = ({ }) => {
                <Divider distance={4} color={'rgb(255 255 255 / 0.1)'} />
                <Box sx={{ ...styles.boxMenu, ...(showMenuMobile && { overflowY: 'auto' }), ...(!showMenuHelp && { width: 40, marginLeft: 1, gap: 2 }) }}>
                   {menuItems.map((group, index) => {
-
-                     console.log(pathname)
-                     console.log(group.to)
                      // const visibleItems = group.filter(item =>
                      //    item.permissoes.some(permission => userPermissions.some(userPerm => userPerm.id_grupo_perm === permission.grupo_perm_id))
                      // );

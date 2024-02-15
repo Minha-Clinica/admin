@@ -8,11 +8,13 @@ import { SectionHeader, SelectList, Holidays, CheckBoxComponent } from "../../or
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css"; // Estilo para o recurso de arrastar e soltar (se estiver usando)
 import "react-big-calendar/lib/addons/dragAndDrop"; // Recurso de arrastar e soltar (se estiver usando)
 import { useAppContext } from "../../context/AppContext";
-import { Backdrop } from "@mui/material";
+import { Backdrop, Checkbox, Grid, Input } from "@mui/material";
 import { icons } from "../../organisms/layout/Colors";
 import { api } from "../../api/api";
 import { useRouter } from "next/router";
 import { checkUserPermissions } from "../../validators/checkPermissionUser";
+import { CheckBox } from "@mui/icons-material";
+import { formatDate, formatTimeStamp } from "../../helpers";
 
 
 moment.locale("pt-br");
@@ -88,15 +90,17 @@ export default function CalendarComponent(props) {
     const [events, setEvents] = useState([]);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [showEventForm, setShowEventForm] = useState(false);
+    const [showAppointment, setShowAppointment] = useState(false);
+    const [showReservas, setShowReservas] = useState(false);
     const [semester, setSemester] = useState()
     const [semesterSelect, setSemesterSelect] = useState()
     const [year, setYear] = useState(2024)
     const [yearSelect, setYearSelect] = useState(2024)
-    const [defaultRangeDate, setDefaultRangeDate] = useState([])
+    const [reservasAgenda, setReservasAgenda] = useState([])
     const [defaultEvents, setDefaultEvents] = useState([])
-    const [filteredEvents, setFilteredEvents] = useState([]);
     const [filterData, setFilterData] = useState('');
-
+    const [selectedDays, setSelectedDays] = useState([]);
+    const [availability, setAvailability] = useState({});
     const [eventData, setEventData] = useState({
         title: "",
         description: "",
@@ -106,7 +110,8 @@ export default function CalendarComponent(props) {
     const router = useRouter()
     const { setLoading, alert, colorPalette, matches, user, userPermissions, menuItemsList } = useAppContext()
     const [isPermissionEdit, setIsPermissionEdit] = useState(false)
-
+    const [isAvailability, setIsAvailability] = useState(false);
+    const [duration, setDuration] = useState(60);
 
     const fetchPermissions = async () => {
         try {
@@ -384,6 +389,136 @@ export default function CalendarComponent(props) {
         setShowEventForm(false);
     };
 
+    const handleDayToggle = (day) => {
+        day.toLowerCase()
+        if (selectedDays.includes(day)) {
+            setSelectedDays(selectedDays.filter((selectedDay) => selectedDay !== day));
+            setAvailability((prevAvailability) => {
+                const updatedAvailability = { ...prevAvailability };
+                delete updatedAvailability[day];
+                return updatedAvailability;
+            });
+        } else {
+            setSelectedDays([...selectedDays, day]);
+            setAvailability((prevAvailability) => ({
+                ...prevAvailability,
+                [day]: { startTime: "09:00", endTime: "17:00" }, // Define um horário padrão
+            }));
+        }
+    };
+
+    const handleAvailabilityChange = (day, field, value) => {
+        day.toLowerCase()
+        setAvailability((prevAvailability) => ({
+            ...prevAvailability,
+            [day]: {
+                ...prevAvailability[day],
+                [field]: value,
+            },
+        }));
+    };
+    // const handleAvailabilitySubmit = () => {
+    //     const availabilityData = {
+    //         days: selectedDays.map((day) => {
+    //             // Calcular a diferença de minutos entre o início e o término do dia
+    //             const startOfDay = moment(availability[day]?.startTime || "09:00", "HH:mm");
+    //             const endOfDay = moment(availability[day]?.endTime || "17:00", "HH:mm");
+    //             const diffMinutes = endOfDay.diff(startOfDay, "minutes");
+
+    //             // Calcular o número de slots disponíveis com base na duração
+    //             const numSlots = diffMinutes / duration;
+
+    //             // Criar os slots com base na duração
+    //             const slots = Array.from({ length: numSlots }, (_, index) => ({
+    //                 start: startOfDay.clone().add(index * duration, "minutes").format("HH:mm"),
+    //                 end: startOfDay.clone().add((index + 1) * duration, "minutes").format("HH:mm"),
+    //             }));
+
+    //             return {
+    //                 day,
+    //                 slots,
+    //             };
+    //         }),
+    //     };
+
+    //     // Chame a função de callback para enviar os dados ao seu backend ou realizar a lógica necessária
+    //     console.log(availabilityData);
+    // };
+
+    const handleAvailabilitySubmit = () => {
+        const events = [];
+        const currentDayOfMonth = moment().date();
+        const lastDayOfMonth = moment().endOf("month").date();
+
+        for (let dayOfMonth = currentDayOfMonth; dayOfMonth <= lastDayOfMonth; dayOfMonth++) {
+            let dayOfWeek = moment(`${moment().format("YYYY-MM")}-${dayOfMonth}`, "YYYY-MM-DD").format("ddd", { locale: "pt" });
+            dayOfWeek = dayOfWeek.toLowerCase();
+
+            if (selectedDays.map(day => day.toLowerCase()).includes(dayOfWeek)) {
+                const startOfDay = moment(availability[dayOfWeek]?.startTime || "09:00", "HH:mm");
+                const endOfDay = moment(availability[dayOfWeek.toLowerCase()]?.endTime || "17:00", "HH:mm");
+                const diffMinutes = endOfDay.diff(startOfDay, "minutes");
+
+                const numSlots = diffMinutes / duration;
+
+                const slots = Array.from({ length: numSlots }, (_, index) => {
+                    const slotStart = startOfDay.clone().add(index * duration, "minutes");
+                    const slotEnd = slotStart.clone().add(duration, "minutes");
+
+                    // Verifica se o horário final é maior que o fim do dia; se for, ajusta para o fim do dia
+                    if (slotEnd.isAfter(endOfDay)) {
+                        return {
+                            start: slotStart.format("HH:mm"),
+                            end: endOfDay.format("HH:mm"),
+                        };
+                    } else {
+                        return {
+                            start: slotStart.format("HH:mm"),
+                            end: slotEnd.format("HH:mm"),
+                        };
+                    }
+                });
+
+                slots.forEach((slot) => {
+                    const event = {
+                        title: "Reserva de consulta",
+                        description: "Horário disponível para reserva.",
+                        location: "",
+                        color: "#f0f0f0",
+                        start: moment(`${moment().format("YYYY-MM")}-${dayOfMonth} ${slot.start}`, "YYYY-MM-DD HH:mm").toISOString(),
+                        end: moment(`${moment().format("YYYY-MM")}-${dayOfMonth} ${slot.end}`, "YYYY-MM-DD HH:mm").toISOString(),
+                        usuario_agendado: '',
+                        email_agendado: '',
+                        nome_agendado: '',
+                        reservado: 0,
+                    };
+
+                    events.push(event);
+                });
+            } else {
+                console.log(`Day ${dayOfWeek} is not selected`);
+            }
+        }
+        setReservasAgenda(events);
+
+        if (events.length > 0) {
+            alert.success('Lista de reservas criada.')
+            setShowAppointment(false)
+            setShowReservas(true)
+            setAvailability([])
+            setSelectedDays([])
+        } else {
+            alert.error('Houve um erro ao tentar criar a lista de reservas')
+        }
+    };
+
+
+
+
+
+    const handleDurationChange = (value) => {
+        setDuration(parseInt(value, 10));
+    };
 
     const groupMonths = [
         { label: '1º Semestre', value: '1º Semestre' },
@@ -395,11 +530,19 @@ export default function CalendarComponent(props) {
         { label: 'Paciente', value: 'Paciente' }
     ]
 
+    const groupHour = [
+        { label: '1,5 hora', value: 90 },
+        { label: 'Uma hora', value: 60 },
+        { label: '45 Minutos', value: 45 },
+        { label: 'Meia hora', value: 30 },
+    ]
+
+
     return (
         <>
             <SectionHeader
                 icon={'/icons/agenda_icon.png'}
-                title={`Dtr(a). ${user?.nome}` || `Calendário de Agendas`} />
+                title={`${user?.nome}` || `Calendário de Agendas`} />
 
             <Box sx={{ display: 'flex', gap: 3 }}>
                 <TextInput placeholder="Buscar pelo paciente" name='filterData' type="search" onChange={(event) => setFilterData(event.target.value)} value={filterData} sx={{ flex: 1 }}
@@ -434,6 +577,7 @@ export default function CalendarComponent(props) {
                         <Text bold>Novo agendamento</Text>
                     </Box>
 
+
                     <Box sx={{
                         display: 'flex', backgroundColor: colorPalette.secondary, padding: '10px 20px',
                         borderRadius: 2,
@@ -443,7 +587,7 @@ export default function CalendarComponent(props) {
                             opacity: 0.8,
                             cursor: 'pointer'
                         }
-                    }}>
+                    }} onClick={() => setShowAppointment(true)}>
                         <Box sx={{
                             ...styles.menuIcon,
                             backgroundImage: `url('/icons/agenda_icon.png')`,
@@ -454,7 +598,30 @@ export default function CalendarComponent(props) {
                                 cursor: 'pointer'
                             }
                         }} />
-                        <Text bold>Minha Agenda</Text>
+                        <Text bold>Disponibilidade de Reservas</Text>
+                    </Box>
+
+                    <Box sx={{
+                        display: 'flex', backgroundColor: colorPalette.secondary, padding: '10px 20px',
+                        borderRadius: 2,
+                        alignItems: 'center', gap: 2,
+                        boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
+                        "&:hover": {
+                            opacity: 0.8,
+                            cursor: 'pointer'
+                        }
+                    }} onClick={() => setShowReservas(true)}>
+                        <Box sx={{
+                            ...styles.menuIcon,
+                            backgroundImage: `url('/icons/agenda_icon.png')`,
+                            transition: '.3s',
+                            width: 20, height: 20,
+                            "&:hover": {
+                                opacity: 0.8,
+                                cursor: 'pointer'
+                            }
+                        }} />
+                        <Text bold>Lista de Reservas</Text>
                     </Box>
 
                     <Box sx={{
@@ -513,19 +680,6 @@ export default function CalendarComponent(props) {
                     height: 800
                 }}
             />
-            {/* <Box sx={{ marginTop: 5 }}>
-                <Text bold sx={{ marginBottom: 3 }}>Legenda</Text>
-                {listEvents.map((item, index) => (
-                    <Box key={`${item}-${index}`} sx={{ display: 'flex', gap: 2, alignItems: 'center', marginBottom: '10px' }}>
-                        <Box sx={{ width: 10, height: 10, aspectRatio: '1/1', backgroundColor: item.color }} />
-                        <Box sx={{ display: 'flex', gap: 0.5 }}>
-                            <Text small>{item.title}</Text>
-                            {item.description && <Text small>({item?.description})</Text>}
-                        </Box>
-
-                    </Box>
-                ))}
-            </Box> */}
             {
                 showEventForm && (
                     <Backdrop open={showEventForm} sx={{ zIndex: 999 }}>
@@ -630,6 +784,145 @@ export default function CalendarComponent(props) {
                     </Backdrop>
                 )
             }
+
+            <Backdrop open={showAppointment} sx={{ zIndex: 999 }}>
+                <ContentContainer style={{ maxWidth: { md: '800px', lg: '1980px' }, maxHeight: { md: '800px', lg: '1280px' }, overflowY: matches && 'auto', width: 400 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <Text bold large>Dísponibilidade de reserva</Text>
+                        <Box sx={{
+                            ...styles.menuIcon,
+                            backgroundImage: `url(${icons.gray_close})`,
+                            transition: '.3s',
+                            zIndex: 999999999,
+                            "&:hover": {
+                                opacity: 0.8,
+                                cursor: 'pointer'
+                            }
+                        }} onClick={() => {
+                            setShowAppointment(false)
+                        }} />
+                    </Box>
+                    <Divider />
+                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 2 }}>
+                        <Text bold>Duração da Reserva (minutos):</Text>
+                        {/* <Input
+                            type="number"
+                            value={duration}
+                            onChange={handleDurationChange}
+                            sx={{ width: "80px" }}
+                        /> */}
+                        <SelectList fullWidth data={groupHour} valueSelection={duration || ''} onSelect={(value) => handleDurationChange(value)}
+                            filterOpition="value" sx={{ color: colorPalette.textColor, flex: 1 }}
+                            inputStyle={{ color: colorPalette.textColor, fontSize: '15px', fontFamily: 'MetropolisBold' }}
+                        />
+                    </Box>
+                    <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column' }}>
+                        <Text bold>Dias disponíveis:</Text>
+                        <Grid container spacing={1} sx={{ flexDirection: 'column' }}>
+                            {["dom", "seg", "ter", "qua", "qui", "sex", "sáb"].map((day) => (
+                                <Grid item key={day} sx={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                                    <Checkbox
+                                        checked={selectedDays.includes(day)}
+                                        onChange={() => handleDayToggle(day)}
+                                    />
+                                    <Text>{day}</Text>
+                                    {selectedDays.includes(day) && (
+                                        <Box sx={{ display: "flex", flexDirection: "row", gap: 2 }}>
+                                            <Input
+                                                type="time"
+                                                label="Hora de início"
+                                                value={availability[day]?.startTime || "09:00"}
+                                                onChange={(e) => handleAvailabilityChange(day, "startTime", e.target.value)}
+                                            />
+                                            <Input
+                                                type="time"
+                                                label="Hora de término"
+                                                value={availability[day]?.endTime || "17:00"}
+                                                onChange={(e) => handleAvailabilityChange(day, "endTime", e.target.value)}
+                                            />
+                                        </Box>
+                                    )}
+                                </Grid>
+                            ))}
+                        </Grid>
+
+                        <Button onClick={handleAvailabilitySubmit} text="Salvar Disponibilidade" />
+                    </Box>
+                </ContentContainer>
+            </Backdrop>
+
+            <Backdrop open={showReservas} sx={{ zIndex: 999 }}>
+                <ContentContainer style={{ maxWidth: { md: '800px', lg: '1980px' }, maxHeight: { md: '580px', lg: '600px', xl: '960px' }, overflowY: matches && 'auto', width: 400 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <Text bold large>Lista de reserva</Text>
+                        <Box sx={{
+                            ...styles.menuIcon,
+                            backgroundImage: `url(${icons.gray_close})`,
+                            transition: '.3s',
+                            zIndex: 999999999,
+                            "&:hover": {
+                                opacity: 0.8,
+                                cursor: 'pointer'
+                            }
+                        }} onClick={() => {
+                            setShowReservas(false)
+                        }} />
+                    </Box>
+                    <Divider />
+                    {reservasAgenda?.length > 0 ?
+                        <>
+                            <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', maxHeight: 600, overflowY: 'auto', }}>
+                                {reservasAgenda?.map((item, index) => {
+                                    // const date = formatTimeStamp(item?.start, false)
+                                    const date = formatDate(item?.start)
+                                    const horarios = (obj) => {
+                                        const horaMoment = moment(obj);
+                                        const horaFormatada = horaMoment.format("HH:mm");
+                                        return horaFormatada
+                                    }
+                                    const disponivel = item?.reservado === 0
+                                    return (
+                                        <Box key={index} sx={{
+                                            position: 'relative',
+                                            display: 'flex', gap: 2, borderRadius: 2, backgroundColor: colorPalette.primary,
+                                            padding: '10px 12px',
+                                        }}>
+                                            <Box>
+                                                <Text small bold>{date}</Text>
+                                                <Text bold>{item?.title}</Text>
+                                                <Text>{item?.description}</Text>
+                                                <Box sx={{ display: 'flex', gap: .5, alignItems: 'center' }}>
+                                                    <Text small light>{horarios(item?.start)}</Text>
+                                                    <Text small light>-</Text>
+                                                    <Text small light>{horarios(item?.end)}</Text>
+                                                </Box>
+                                                <Box sx={{
+                                                    display: 'flex', padding: '5px 12px', borderRadius: 2, position: 'absolute', bottom: 5, right: 5, backgroundColor: disponivel ? 'green' : 'red', alignItems: 'center',
+                                                    justifyContent: 'center'
+                                                }}>
+                                                    <Text style={{ color: '#fff' }}>
+                                                        {disponivel ? 'disponível' : 'reservado'}
+                                                    </Text>
+                                                </Box>
+                                            </Box>
+                                        </Box>
+                                    )
+                                })}
+                                <Divider />
+                            </Box>
+                            <Box sx={{ display: 'flex', gap: 1, flex: 1, justifyContent: 'center' }}>
+                                <Button text="Cancelar reservas" secondary small onClick={() => {
+                                    setReservasAgenda([])
+                                }} />
+                                <Button text="Salvar reservas" small />
+                            </Box>
+                        </>
+                        :
+                        <Text>Não possui reservas cadastradas</Text>
+
+                    }
+                </ContentContainer>
+            </Backdrop>
 
         </ >
     );
