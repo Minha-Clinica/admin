@@ -159,7 +159,7 @@ export const LeftMenu = ({ }) => {
                               }} >
                                  <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: 1.5, position: 'relative', alignItems: 'center', position: 'relative' }}>
                                     <Box sx={{ ...styles.icon, backgroundImage: `url(${group?.icon})`, width: group.text === 'Administrativo' ? 15 : 18, height: group.text === 'Administrativo' ? 24 : 18, filter: 'brightness(0) invert(1)', transition: 'background-color 1s' }} />
-                                    {<Text bold large style={{ color: (pathname === group.to) ? colorPalette?.buttonColor : '#fff', transition: 'background-color 1s', }}>
+                                    {<Text bold style={{ color: (pathname === group.to) ? colorPalette?.buttonColor : '#fff', transition: 'background-color 1s', }}>
                                        {group?.text}
                                     </Text>}
                                  </Box>
@@ -482,7 +482,7 @@ const styles = {
       // gap: 1,
       marginTop: 5,
       overflowStyle: 'marquee,panner',
-      maxHeight: '480px',
+      maxHeight: { xs: '480px', sm: '480px', md: '480px', lg: '480px', xl: '850px' } ,
       overflowY: 'auto',
       scrollbarWidth: 'thin',
       scrollbarColor: 'gray lightgray',
