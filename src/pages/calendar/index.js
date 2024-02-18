@@ -106,6 +106,17 @@ export default function CalendarComponent(props) {
         description: "",
         location: "",
         color: "#007BFF",
+        start: '',
+        end: '',
+        title: '',
+        description: '',
+        location: '',
+        usuario_agendado: '',
+        email_agendado: '',
+        nome_agendado: '',
+        disponivel: 0,
+        usuario_id: '',
+        allDay: false
     });
     const router = useRouter()
     const { setLoading, alert, colorPalette, matches, user, userPermissions, menuItemsList } = useAppContext()
@@ -205,7 +216,7 @@ export default function CalendarComponent(props) {
     const handleEvents = async () => {
         try {
             setLoading(true)
-            const response = await api.get(`/events`)
+            const response = await api.get(`/event/profissional/agenda/${user?.id}`)
             const { data } = response
             if (data) {
                 const eventsMap = data?.map((event) => ({
@@ -216,7 +227,11 @@ export default function CalendarComponent(props) {
                     description: event.descricao,
                     location: event.local,
                     color: event.color,
-                    perfil_evento: event?.perfil_evento,
+                    usuario_agendado: event?.usuario_agendado,
+                    email_agendado: event?.email_agendado,
+                    nome_agendado: event?.nome_agendado,
+                    disponivel: event?.disponivel,
+                    usuario_id: event?.usuario_id,
                     allDay: false, // Ajuste isso com base no seu caso de uso
 
                 }));
@@ -224,6 +239,7 @@ export default function CalendarComponent(props) {
                 return
             }
         } catch (error) {
+            console.log(error)
             return error
         } finally {
             setLoading(false)
@@ -263,6 +279,23 @@ export default function CalendarComponent(props) {
             const response = await api.post(`/event/create/${user?.id}`, { events: event })
             if (response.status === 201) {
                 alert.success('Evento criado!')
+                handleItems()
+            }
+        } catch (error) {
+            return error
+        } finally {
+            setLoading(false)
+        }
+    };
+
+
+    const handleCreateReservas = async () => {
+        setLoading(true)
+        try {
+            const response = await api.post(`/event/reservas/create/${user?.id}`, { reservasAgenda })
+            const { data } = response
+            if (data?.status === 201) {
+                alert.success('Rerervas criadas!')
                 handleItems()
             }
         } catch (error) {
@@ -383,6 +416,17 @@ export default function CalendarComponent(props) {
             description: "",
             location: "",
             color: "#007BFF",
+            start: '',
+            end: '',
+            title: '',
+            description: '',
+            location: '',
+            usuario_agendado: '',
+            email_agendado: '',
+            nome_agendado: '',
+            disponivel: 0,
+            usuario_id: '',
+            allDay: false
         });
 
         // Fechar o formulário
@@ -481,16 +525,17 @@ export default function CalendarComponent(props) {
 
                 slots.forEach((slot) => {
                     const event = {
-                        title: "Reserva de consulta",
-                        description: "Horário disponível para reserva.",
-                        location: "",
-                        color: "#f0f0f0",
-                        start: moment(`${moment().format("YYYY-MM")}-${dayOfMonth} ${slot.start}`, "YYYY-MM-DD HH:mm").toISOString(),
-                        end: moment(`${moment().format("YYYY-MM")}-${dayOfMonth} ${slot.end}`, "YYYY-MM-DD HH:mm").toISOString(),
+                        titulo: "Reserva de consulta",
+                        descricao: "Horário disponível para reserva.",
+                        local: "",
+                        color: "#808080",
+                        inicio: moment(`${moment().format("YYYY-MM")}-${dayOfMonth} ${slot.start}`, "YYYY-MM-DD HH:mm").toISOString(),
+                        fim: moment(`${moment().format("YYYY-MM")}-${dayOfMonth} ${slot.end}`, "YYYY-MM-DD HH:mm").toISOString(),
                         usuario_agendado: '',
                         email_agendado: '',
                         nome_agendado: '',
-                        reservado: 0,
+                        disponivel: 0,
+                        usuario_id: user?.id
                     };
 
                     events.push(event);
@@ -536,6 +581,12 @@ export default function CalendarComponent(props) {
         { label: '45 Minutos', value: 45 },
         { label: 'Meia hora', value: 30 },
     ]
+
+    const horarios = (obj) => {
+        const horaMoment = moment(obj);
+        const horaFormatada = horaMoment.format("HH:mm");
+        return horaFormatada
+    }
 
 
     return (
@@ -683,7 +734,7 @@ export default function CalendarComponent(props) {
             {
                 showEventForm && (
                     <Backdrop open={showEventForm} sx={{ zIndex: 999 }}>
-                        <ContentContainer style={{ maxWidth: { md: '800px', lg: '1980px' }, maxHeight: { md: '180px', lg: '1280px' }, overflowY: matches && 'auto', width: 400 }}>
+                        <ContentContainer style={{ maxWidth: { md: '1200px', lg: 900, xl: 1500 }, maxHeight: { md: '180px', lg: '600px', xl: '1200px' }, overflowY: 'auto', width: 400 }}>
                             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                                 <Text bold large>{selectedEvent ? eventData?.title : "Adicionar evento"}</Text>
                                 <Box sx={{
@@ -702,11 +753,32 @@ export default function CalendarComponent(props) {
                                         description: "",
                                         location: "",
                                         color: "#007BFF",
+                                        start: '',
+                                        end: '',
+                                        title: '',
+                                        description: '',
+                                        location: '',
+                                        usuario_agendado: '',
+                                        email_agendado: '',
+                                        nome_agendado: '',
+                                        disponivel: 0,
+                                        usuario_id: '',
+                                        allDay: false
                                     });
                                 }} />
                             </Box>
+                            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                                <Box sx={{ display: "flex", flexDirection: "row", gap: .5 }}>
+                                    <Text bold>Inicio:</Text>
+                                    <Text>{horarios(eventData?.start)}</Text>
+                                </Box>
+                                <Box sx={{ display: "flex", flexDirection: "row", gap: .5 }}>
+                                    <Text bold>Fim:</Text>
+                                    <Text>{horarios(eventData?.end)}</Text>
+                                </Box>
+                            </Box>
                             <Divider />
-                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto', maxHeight: 600, paddingTop: 3 }}>
                                 <TextInput disabled={!isPermissionEdit && true}
                                     name="title"
                                     value={eventData?.title || ''}
@@ -738,17 +810,26 @@ export default function CalendarComponent(props) {
                                     value={eventData.color}
                                     onChange={handleEventFormChange}
                                 />
-                                <CheckBoxComponent
-                                    disabled={!isPermissionEdit && true}
-                                    valueChecked={eventData?.perfil_evento}
-                                    boxGroup={groupPerfil}
-                                    title="Mostrar para:"
-                                    horizontal={true}
-                                    onSelect={(value) => setEventData({
-                                        ...eventData,
-                                        perfil_evento: value
-                                    })}
-                                    sx={{ flex: 1, }}
+                                 <TextInput disabled={!isPermissionEdit && true}
+                                    name="email_agendado"
+                                    value={eventData?.email_agendado || ''}
+                                    label='E-mail agendado:'
+                                    onChange={handleEventFormChange}
+                                    sx={{ flex: 1 }}
+                                />
+                                 <TextInput disabled={!isPermissionEdit && true}
+                                    name="nome_agendado"
+                                    value={eventData?.nome_agendado || ''}
+                                    label='Nome agendado:'
+                                    onChange={handleEventFormChange}
+                                    sx={{ flex: 1 }}
+                                />
+                                 <TextInput disabled={!isPermissionEdit && true}
+                                    name="nome_usuario_agendado"
+                                    value={eventData?.nome_usuario_agendado || ''}
+                                    label='Paciente:'
+                                    onChange={handleEventFormChange}
+                                    sx={{ flex: 1 }}
                                 />
                                 <Divider />
                                 <Box sx={{ display: 'flex', justifyContent: 'start', gap: 1, alignItems: 'center', marginTop: 2 }}>
@@ -874,13 +955,13 @@ export default function CalendarComponent(props) {
                             <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', maxHeight: 600, overflowY: 'auto', }}>
                                 {reservasAgenda?.map((item, index) => {
                                     // const date = formatTimeStamp(item?.start, false)
-                                    const date = formatDate(item?.start)
+                                    const date = formatDate(item?.inicio)
                                     const horarios = (obj) => {
                                         const horaMoment = moment(obj);
                                         const horaFormatada = horaMoment.format("HH:mm");
                                         return horaFormatada
                                     }
-                                    const disponivel = item?.reservado === 0
+                                    const disponivel = item?.disponivel === 0
                                     return (
                                         <Box key={index} sx={{
                                             position: 'relative',
@@ -889,12 +970,12 @@ export default function CalendarComponent(props) {
                                         }}>
                                             <Box>
                                                 <Text small bold>{date}</Text>
-                                                <Text bold>{item?.title}</Text>
-                                                <Text>{item?.description}</Text>
+                                                <Text bold>{item?.titulo}</Text>
+                                                <Text>{item?.descricao}</Text>
                                                 <Box sx={{ display: 'flex', gap: .5, alignItems: 'center' }}>
-                                                    <Text small light>{horarios(item?.start)}</Text>
+                                                    <Text small light>{horarios(item?.inicio)}</Text>
                                                     <Text small light>-</Text>
-                                                    <Text small light>{horarios(item?.end)}</Text>
+                                                    <Text small light>{horarios(item?.fim)}</Text>
                                                 </Box>
                                                 <Box sx={{
                                                     display: 'flex', padding: '5px 12px', borderRadius: 2, position: 'absolute', bottom: 5, right: 5, backgroundColor: disponivel ? 'green' : 'red', alignItems: 'center',
@@ -914,7 +995,7 @@ export default function CalendarComponent(props) {
                                 <Button text="Cancelar reservas" secondary small onClick={() => {
                                     setReservasAgenda([])
                                 }} />
-                                <Button text="Salvar reservas" small />
+                                <Button text="Salvar reservas" small onClick={() => handleCreateReservas()} />
                             </Box>
                         </>
                         :

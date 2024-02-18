@@ -20,7 +20,7 @@ export const menuItems = [
    {
       text: 'Buscar Terapeuta',
       icon: '/icons/localized_icon.png',
-      to: '/calendar',
+      to: '/searchProfissional',
       permissions: ['Terapeuta', 'Admin', 'Paciente'],
    },
    {
@@ -44,7 +44,7 @@ export const menuItems = [
    {
       text: 'Planos',
       icon: '/icons/plan_payment.png',
-      to: '/',
+      to: '/assignmentPlan',
       permissions: ['Terapeuta', 'Admin', 'Paciente'],
    },
    {

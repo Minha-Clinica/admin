@@ -55,7 +55,7 @@ function Home() {
    const [menu, setMenu] = useState(menuItems)
    const [imagesList, setImagesList] = useState([])
    const [events, setEvents] = useState([])
-
+   const [planActually, setPlanActually] = useState('free')
    const router = useRouter();
    moment.locale("pt-br");
    const localizer = momentLocalizer(moment);
@@ -217,61 +217,20 @@ function Home() {
 
    const lengthNotifications = notificationUser?.filter(item => item?.vizualizado === 0)?.length;
 
+   const plansAssignment = [
+      {
+         id: '01', nome: 'Free', price: 0.00, description: '', key: 'free', icon: ''
+      },
+      {
+         id: '02', nome: 'Standart', price: 49.90, description: '', key: 'standart', icon: '', preferency: true,
+      }
+   ]
 
-   const CustomToolbar = (toolbar) => {
+   const formatter = new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+   });
 
-      const goToNext = () => {
-         toolbar.onNavigate('NEXT');
-      };
-
-      const goToPrev = () => {
-         toolbar.onNavigate('PREV');
-      };
-
-      const firstLetter = toolbar?.label?.charAt(0).toUpperCase();
-      const restOfMonth = toolbar?.label?.slice(1);
-      const formattedMonth = `${firstLetter}${restOfMonth}`;
-
-
-      return (
-         <div className="rbc-toolbar">
-            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-               <Box sx={{
-                  ...styles.menuIcon,
-                  padding: '8px',
-                  margin: '0px 5px',
-                  backgroundImage: `url(${icons.gray_arrow_down})`,
-                  // filter: theme ? 'brightness(0) invert(0)' : 'brightness(0) invert(1)',
-                  transform: 'rotate(90deg)',
-                  transition: '.3s',
-                  width: 18, height: 18,
-                  aspectRatio: '1/1',
-                  "&:hover": {
-                     opacity: 0.8,
-                     cursor: 'pointer',
-                     backgroundColor: colorPalette.primary
-                  }
-               }} onClick={goToPrev} />
-               <Text small bold>{formattedMonth}</Text>
-               <Box sx={{
-                  ...styles.menuIcon,
-                  margin: '0px 5px',
-                  backgroundImage: `url(${icons.gray_arrow_down})`,
-                  // filter: theme ? 'brightness(0) invert(0)' : 'brightness(0) invert(1)',
-                  transform: 'rotate(-90deg)',
-                  transition: '.3s',
-                  width: 18, height: 18,
-                  aspectRatio: '1/1',
-                  "&:hover": {
-                     opacity: 0.8,
-                     cursor: 'pointer',
-                     backgroundColor: colorPalette.primary
-                  }
-               }} onClick={goToNext} />
-            </Box>
-         </div>
-      );
-   };
 
    return (
       <>
@@ -360,7 +319,7 @@ function Home() {
                                     cursor: 'pointer',
                                     transform: 'scale(1.1, 1.1)'
                                  }
-                              }}>
+                              }} onClick={() => router.push('/searchProfissional')}>
                                  <Box sx={{
                                     ...styles.menuIcon,
                                     backgroundImage: `url('/icons/search_input_icon.png')`,
@@ -448,180 +407,86 @@ function Home() {
                      </Box>
                   </Box>
 
+                  <Box sx={{ display: 'flex', gap: 5, flexDirection: 'column', marginTop: 5, alignItems: 'center' }}>
+                     <Text bold title style={{ textAlign: 'center' }}>Assine agora o plano e aprovaite o melhor da plataforma!</Text>
 
-                  {/* <Box sx={{ display: 'flex', gap: 2, padding: '20px 0px', flexDirection: 'column', marginTop: 4 }}>
-                     <Text bold large>Resumo</Text>
-                     <Box sx={{ display: 'flex', gap: 2 }}>
+                     <Box sx={{ display: 'flex', gap: 5, width: '100%', justifyContent: 'center' }}>
+                        {plansAssignment?.map((item, index) => {
+                           const isPreferency = item?.preferency;
+                           const isPlan = planActually === item?.key;
+                           return (
+                              <Box key={index} sx={{ position: 'relative', display: 'flex', gap: 1 }}>
+                                 <ContentContainer sx={{
+                                    backgroundColor: isPreferency ? colorPalette.third : '#fff',
+                                    transition: '.5s',
+                                    borderRadius: 4,
+                                    "&:hover": {
+                                       // opacity: 0.8,
+                                       transform: 'scale(1.1, 1.1)'
+                                    },
+                                 }}>
+                                    {isPlan && <Box sx={{
+                                       transition: '.5s',
+                                       padding: '8px 12px', alignItems: 'center', display: 'flex', backgroundColor: 'red', borderRadius: 2,
+                                       position: 'absolute', top: 5, left: 5
+                                    }}>
+                                       <Text bold style={{ color: '#fff' }}>Plano atual</Text>
+                                    </Box>}
 
-                        <ContentContainer fullWidth>
-                           <Box>
-                              <Text style={{ fontSize: 30 }}>30</Text>
-                              <Text>
-                                 Pacientes Atendidos
-                              </Text>
-                           </Box>
-                        </ContentContainer>
-
-                        <ContentContainer fullWidth>
-                           <Box>
-                              <Text style={{ fontSize: 30 }}>100</Text>
-                              <Text>
-                                 Consultas Realizadas
-                              </Text>
-                           </Box>
-                        </ContentContainer>
-
-                        <ContentContainer fullWidth>
-                           <Box>
-                              <Text style={{ fontSize: 30, color: 'green' }}>R$ 5.000,80</Text>
-                              <Text>
-                                 Valor Arrecadado
-                              </Text>
-                           </Box>
-                        </ContentContainer>
-
-                        <ContentContainer fullWidth>
-                           <Box>
-                              <Text style={{ fontSize: 30 }}>60</Text>
-                              <Text>
-                                 Consultas Agendadas
-                              </Text>
-                           </Box>
-                        </ContentContainer>
-
-                     </Box>
-                     <Box sx={{ display: 'flex', gap: 2, }}>
-                        <ContentContainer fullWidth style={{ display: 'flex', flexDirection: 'row', minWidth: 800 }}>
-                           <Box>
-                              <Text bold large style={{ textAlign: 'center' }}>Agenda do Mês</Text>
-                              <Box sx={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: 5, minWidth: 350 }}>
-                                 <Calendar
-                                    localizer={localizer}
-                                    defaultDate={moment(defaultYear?.start).toDate()}
-                                    culture="pt-br"
-                                    events={events}
-                                    startAccessor="start"
-                                    endAccessor="end"
-                                    selectable
-                                    eventPropGetter={eventStyleGetter}
-                                    messages={messages}
-                                    components={{
-                                       toolbar: CustomToolbar,
-                                    }}
-                                    style={{
-                                       fontFamily: 'MetropolisBold',
-                                       color: colorPalette.textColor,
-                                       backgroundColor: colorPalette.secondary,
-                                       borderRadius: '12px',
-                                       boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
-                                       // border: `.5px solid lightgray`,
-                                       padding: 5,
-                                       width: '100%',
-                                       height: 380
-                                    }}
-                                    views={['month']}
-                                 />
-                                 <style>{styleCalendar(colorPalette)}</style>
-                              </Box>
-                           </Box>
-                           <Box sx={{
-                              display: 'flex', gap: 2, flexDirection: 'column',
-                           }}>
-                              <Box sx={{
-                                 display: 'flex', gap: 2, flexDirection: 'column',
-                                 maxHeight: 400, overflowY: 'auto', width: '100%'
-                              }}>
-                                 {sortedEvents?.map((item, index) => {
-                                    return (
-                                       <Box key={index} sx={{
-                                          display: 'flex', gap: 1, flexDirection: 'row',
-                                          backgroundColor: colorPalette.primary,
-                                          minWidth: 350
-                                       }}>
-                                          <Box sx={{ display: 'flex', height: '100%', width: 3, backgroundColor: item.color, }} />
-                                          <Box sx={{ padding: '10px' }}>
-                                             <Text bold small>{item?.title}</Text>
-                                             <Text light small>{item?.description}</Text>
-                                             <Text light small>{formatTimeStamp(item?.start, true)}</Text>
-                                          </Box>
-                                       </Box>
-                                    )
-                                 })}
-                              </Box>
-                              <Button small text="Ver agenda completa" style={{ height: 30 }} onClick={() => router.push('/service/calendar')} />
-                           </Box>
-                        </ContentContainer>
-                        <ContentContainer fullWidth>
-                           <Text bold large style={{ textAlign: 'center' }}>Últimas notificações</Text>
-
-                           <Box sx={{
-                              width: 200, height: notificationUser?.filter(item => item.ativo === 1)?.length > 0 ? 400 : 'auto', overflowY: 'auto', width: '100%', gap: 1, display: 'flex', flexDirection: 'column',
-                              scrollbarWidth: 'thin', // para navegadores que não são WebKit
-                              scrollbarColor: 'transparent transparent', // para navegadores que não são WebKit
-                              '&::-webkit-scrollbar': {
-                                 width: '6px',
-                              },
-                              '&::-webkit-scrollbar-thumb': {
-                                 backgroundColor: 'transparent',
-                              },
-                           }}>
-                              {notificationUser?.filter(item => item.ativo === 1)?.length > 0 ? notificationUser
-                                 ?.filter(item => item.ativo === 1)
-                                 ?.sort((a, b) => b.dt_criacao.localeCompare(a.dt_criacao))
-                                 ?.slice(0, 10)
-                                 ?.map((item, index) => {
-                                    const vizualized = item?.vizualizado === 0 ? false : true
-                                    return (
-                                       <Box key={index} sx={{
-                                          display: 'flex', flexDirection: 'column', gap: 1, position: 'relative', padding: '12px 12px',
-                                          backgroundColor: colorPalette.primary,
+                                    <Box sx={{
+                                       display: 'flex', gap: 3, flexDirection: 'column', width: 300, alignItems: 'center',
+                                       color: isPreferency && '#fff'
+                                    }}>
+                                       <Text veryLarge bold style={{ color: 'inherit' }}>{item?.nome}</Text>
+                                       <Text indicator bold style={{ color: 'inherit' }}>{formatter.format(item?.price)}/mês</Text>
+                                       <Box sx={{
+                                          padding: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                          maxWidth: 200,
+                                          marginTop: 2,
+                                          transition: '.5s',
+                                          gap: 2,
+                                          backgroundColor: isPreferency ? colorPalette.buttonColor : colorPalette.buttonColor,
                                           borderRadius: 2,
                                           "&:hover": {
-                                             backgroundColor: colorPalette.primary + '99',
-                                             cursor: 'pointer'
+                                             opacity: 0.8,
+                                             cursor: 'pointer',
+                                             transform: 'scale(1.1, 1.1)'
+                                          }
+                                       }} onClick={() => {
+                                          if (isPlan) {
+                                             alert.info('O plano selecionado já corresponde a seu plano atual.')
+                                          } else {
+                                             setPlanActually(item?.key)
                                           }
                                        }}>
-                                          <Box sx={{ display: 'flex', gap: 2, }}>
-                                             <Avatar src={item?.imagem || item?.location || ''} sx={{
-                                                height: { xs: '100%', sm: 45, md: 45, lg: 60 },
-                                                width: { xs: '100%', sm: 45, md: 45, lg: 60 },
-                                             }} variant="circular"
-                                             />
-                                             <Box sx={{ display: 'flex', gap: 0.5, flexDirection: 'column', flex: 1 }}>
-                                                <Text small bold>{item?.titulo}</Text>
-                                                <Text small>{item?.menssagem}</Text>
-                                                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'space-between' }}>
-                                                   <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                                                      {item?.id_path && <Text bold small>id: {item?.id_path}</Text>}
-                                                      <Text style={{ color: '#606060' }} xsmall>{formatTimeAgo(item?.dt_criacao, true)}</Text>
-                                                      {vizualized ?
-                                                         <>
-                                                            <Text style={{ color: '#606060', marginTop: 2 }} xsmall>-</Text>
-                                                            <Text style={{ color: '#606060', marginTop: 2 }} xsmall>vista</Text>
-                                                         </>
-                                                         :
-                                                         <Box sx={{ backgroundColor: colorPalette.buttonColor, borderRadius: 8, padding: '1px 5px' }}>
-                                                            <Text xsmall style={{ color: '#fff' }}>new</Text>
-                                                         </Box>
-                                                      }
-                                                   </Box>
-                                                   <Button secondary text="visitar" small style={{ height: 20 }} onClick={() => router.push(item?.path)} />
-                                                </Box>
-                                             </Box>
-                                          </Box>
+                                          <Text bold style={{ color: '#fff' }}>Assinar plano {item?.nome}</Text>
                                        </Box>
-                                    )
-                                 })
-                                 :
-                                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, position: 'relative' }}>
-                                    <Text small>Você não possui novas notificações.</Text>
-                                 </Box>
-                              }
-
-                           </Box>
-                        </ContentContainer>
+                                    </Box>
+                                 </ContentContainer>
+                              </Box>
+                           )
+                        })}
                      </Box>
-                  </Box> */}
+
+                     <Box sx={{
+                        padding: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        width: 200,
+                        marginTop: 2,
+                        transition: '.5s',
+                        gap: 2,
+                        backgroundColor: colorPalette.buttonColor,
+                        borderRadius: 2,
+                        "&:hover": {
+                           opacity: 0.8,
+                           cursor: 'pointer',
+                           transform: 'scale(1.1, 1.1)'
+                        }
+                     }} onClick={() => router.push('/assignmentPlan')}>
+                        <Text bold style={{ color: '#fff' }}>VER MAIS PLANOS</Text>
+                     </Box>
+
+                  </Box>
+
                   <Box sx={{ display: 'flex', padding: '10px 0px', marginTop: 5 }}>
                      <Text bold>Veja o que está rolando..</Text>
                   </Box>
@@ -636,32 +501,6 @@ function Home() {
                      width={'auto'}
                   />
                </Box>
-               {/* <ContentContainer style={{ marginTop: '30px', boxShadow: 'none', backgroundColor: 'none', }}>
-                  <Divider />
-                  <Text bold title={true} sx={{ padding: { xs: '0px 0px 20px 20px', xm: '0px 0px 20px 40px', md: '0px 0px 30px 0px', lg: '0px 0px 20px 80px' } }}>
-                     Menu de fácil acesso..</Text>
-                  <Box sx={{ display: 'flex', gap: 5, justifyContent: 'center', flexWrap: { xs: 'wrap', xm: 'wrap', md: 'wrap', lg: 'wrap' }, display: { xs: 'flex', xm: 'flex', md: 'flex', lg: 'flex' } }}>
-
-                     {menu?.map((group, index) =>
-                        <ContentContainer key={`${group}-${index}`} sx={{
-                           alignItems: 'center', backgroundColor: colorPalette.buttonColor,
-                           minWidth: '180px',
-                           transition: '.5s',
-                           "&:hover": {
-                              cursor: 'pointer',
-                              opacity: 0.8,
-                              transform: 'scale(1.1)',
-                           }
-                        }} onClick={() => router.push(group.to)}>
-                           <Box sx={{ ...styles.icon, backgroundImage: `url(${group?.icon_dark})`, width: group?.text === 'Administrativo' ? 15 : 18, height: group.text === 'Administrativo' ? 24 : 18, filter: 'brightness(0) invert(1)', transition: 'background-color 1s' }} />
-                           <Text bold style={{ color: '#fff', transition: 'background-color 1s', }}>
-                              {group.text}
-                           </Text>
-                        </ContentContainer>
-                     )}
-
-                  </Box>
-               </ContentContainer> */}
             </Box>
          </Box>
       </>
