@@ -325,7 +325,7 @@ export default function EditUser() {
                 }
                 if (response?.status === 201) {
                     alert.success('Usuário cadastrado com sucesso.');
-                    if (data?.userId) router.push(`/administrative/users/list`)
+                    if (data?.userId) router.push(`/users/list`)
                 }
             } catch (error) {
                 alert.error('Tivemos um problema ao cadastrar usuário.');
@@ -343,7 +343,7 @@ export default function EditUser() {
             const response = await deleteUser(id)
             if (response?.status == 200) {
                 alert.success('Usuário excluído com sucesso.');
-                router.push(`/administrative/users/list`)
+                router.push(`/users/list`)
             }
         } catch (error) {
             alert.error('Tivemos um problema ao excluir usuário.');

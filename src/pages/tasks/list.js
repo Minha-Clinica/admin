@@ -150,7 +150,6 @@ export default function ListTasks(props) {
             let query = `/tasks`;
             setFilters({ ...filters, status: 'Em aberto, Em análise' })
             const response = await api.get(query)
-            console.log(response)
             const { data } = response;
             setTasksList(data)
         } catch (error) {
@@ -214,8 +213,6 @@ export default function ListTasks(props) {
     const menusFilters = [
         { id: '01', text: 'Atríbuidos a mim', value: 'Atríbuidos a mim' },
         { id: '01', text: 'Abertos por mim', value: 'Abertos por mim' },
-        { id: '02', text: `Chamados da Área`, value: `Chamados da Área` },
-        { id: '01', text: 'Pendente de responsável', value: 'Pendente de responsável' },
     ]
 
 
@@ -226,7 +223,7 @@ export default function ListTasks(props) {
                 icon={'https://mf-planejados.s3.amazonaws.com/Icon_mkt.svg'}
                 title={`Chamados (${tasksList?.filter(filter)?.length || '0'})`}
                 newButton
-                newButtonAction={() => router.push(`/suport/${pathname}/new`)}
+                newButtonAction={() => router.push(`/tasks/new`)}
             />
 
             <Box sx={{ display: 'flex', alignItems: 'end' }}>

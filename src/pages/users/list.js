@@ -65,7 +65,7 @@ export default function ListUsers(props) {
         }
     }
 
-    const pathname = router.pathname === '/' ? null : router.asPath.split('/')[2]
+    const pathname = router.pathname === '/' ? null : router.asPath.split('/')[1]
 
     useEffect(() => {
         getUsers();
@@ -83,7 +83,6 @@ export default function ListUsers(props) {
         setLoading(true)
         try {
             const response = await api.get(`/users`)
-            console.log(response)
             const { data = [] } = response;
             setUsers(data)
         } catch (error) {
@@ -167,7 +166,7 @@ export default function ListUsers(props) {
                 icon={'https://mf-planejados.s3.amazonaws.com/icon_adm_dark.svg'}
                 title={`${perfil === 'todos' ? 'Usuários' : (perfil.charAt(0).toUpperCase() + perfil.slice(1))} (${usersList?.filter(filter)?.length})`}
                 newButton={isPermissionEdit}
-                newButtonAction={() => router.push(`/administrative/${pathname}/new`)}
+                newButtonAction={() => router.push(`/${pathname}/new`)}
             />
             {/* <Text bold>Buscar por: </Text> */}
             <ContentContainer>

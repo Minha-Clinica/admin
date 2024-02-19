@@ -21,7 +21,7 @@ export default function ListProfissionals(props) {
     const [filterAtive, setFilterAtive] = useState('todos')
     const [filterEnrollStatus, setFilterEnrollStatus] = useState('todos')
     const [firstRender, setFirstRender] = useState(true)
-    const [dateSelected, setDateSelected] = useState({ day: '', hour: '', profissionalId: '' })
+    const [dateSelected, setDateSelected] = useState({ day: '', hour: '', profissionalId: '', reserva_id: '' })
     const [filters, setFilters] = useState({
         filterName: 'nome',
         filterOrder: 'asc'
@@ -169,7 +169,7 @@ export default function ListProfissionals(props) {
             <Text title bold style={{ color: colorPalette.buttonColor }}>Veja algum de Nossos profissionais Disponíveis:</Text>
 
             <ProfissionalCard
-                data={profissionalList}
+                data={profissionalList?.filter(filter)}
                 loadingDate={loadingDate}
                 setLoadingDate={setLoadingDate}
                 dateSelected={dateSelected}
@@ -183,8 +183,9 @@ export default function ListProfissionals(props) {
 
 const ProfissionalCard = ({ data, loadingDate, setLoadingDate, dateSelected, setDateSelected }) => {
 
-    const { setLoading, colorPalette, menuItemsList, userPermissions } = useAppContext()
+    const { setLoading, colorPalette, menuItemsList, userPermissions, alert } = useAppContext()
     moment.locale("pt-br");
+    const router = useRouter()
     const [carouselIndex, setCarouselIndex] = useState(0);
 
     const handleNext = (item) => {
@@ -209,9 +210,9 @@ const ProfissionalCard = ({ data, loadingDate, setLoadingDate, dateSelected, set
         setLoadingDate(true)
         try {
             if (dateSelected?.day === value) {
-                setDateSelected({ day: '', hour: '', profissionalId: '' })
+                setDateSelected({ day: '', hour: '', profissionalId: '', reserva_id: '' })
             } else {
-                setDateSelected({ day: value, hour: '', profissionalId: id })
+                setDateSelected({ day: value, hour: '', profissionalId: id, reserva_id: '' })
             }
         } catch (error) {
             return error
@@ -386,7 +387,8 @@ const ProfissionalCard = ({ data, loadingDate, setLoadingDate, dateSelected, set
                                                         }
                                                     }} onClick={() => handlePrev(item?.agenda)} />
                                                     <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'center', maxWidth: 350, overflow: 'hidden' }}>
-                                                        {item?.agenda?.filter(agend => moment(agend.inicio).format("YYYY-MM-DD") === dateSelected?.day)
+                                                        {item?.agenda?.filter(agend => (moment(agend.inicio).format("YYYY-MM-DD") === dateSelected?.day) &&
+                                                            (agend.disponivel === 0))
                                                             .slice(carouselIndex, carouselIndex + 3)?.map((hour, index) => {
                                                                 const hourFormatted = horarios(hour.inicio)
                                                                 const selected = dateSelected?.hour === hourFormatted;
@@ -400,9 +402,9 @@ const ProfissionalCard = ({ data, loadingDate, setLoadingDate, dateSelected, set
                                                                         }
                                                                     }} onClick={() => {
                                                                         if (selected) {
-                                                                            setDateSelected({ ...dateSelected, hour: '' })
+                                                                            setDateSelected({ ...dateSelected, hour: '', reserva_id: '' })
                                                                         } else {
-                                                                            setDateSelected({ ...dateSelected, hour: hourFormatted })
+                                                                            setDateSelected({ ...dateSelected, hour: hourFormatted, reserva_id: hour?.id_evento_calendario })
                                                                         }
                                                                     }}>
                                                                         <Text large bold={selected ? true : false} style={{ color: selected && '#fff' }}>{hourFormatted}</Text>
@@ -445,10 +447,17 @@ const ProfissionalCard = ({ data, loadingDate, setLoadingDate, dateSelected, set
                                     gap: 2,
                                     backgroundColor: colorPalette.buttonColor,
                                     borderRadius: 2,
+                                    opacity: dateSelected?.reserva_id !== '' ? 1 : 0.5,
                                     "&:hover": {
-                                        opacity: 0.8,
+                                        opacity: dateSelected?.reserva_id !== '' ? 1 : 0.5,
                                         cursor: 'pointer',
-                                        transform: 'scale(1.1, 1.1)'
+                                        transform: dateSelected?.reserva_id !== '' ? 'scale(1.1, 1.1)' : 'none'
+                                    }
+                                }} onClick={() => {
+                                    if (dateSelected?.reserva_id === '') {
+                                        alert.info('Selecione um horário antes de continuar.')
+                                    } else {
+                                        router.push(`/searchProfissional/${dateSelected?.reserva_id}?professionalId=${dateSelected?.profissionalId}`)
                                     }
                                 }}>
                                     <Text bold style={{ color: '#fff' }}>Agendar</Text>

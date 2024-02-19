@@ -10,12 +10,13 @@ import { checkUserPermissions } from "../../validators/checkPermissionUser"
 import { Paper, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Tooltip, Avatar } from "@mui/material";
 import { api } from "../../api/api"
 import { icons } from "../../organisms/layout/Colors"
+import { formatTimeStamp } from "../../helpers"
 
 export default function ListConsultions(props) {
     const [consultionList, setConsultion] = useState([])
     const [filterData, setFilterData] = useState('')
     const [perfil, setPerfil] = useState('todos')
-    const { setLoading, colorPalette, menuItemsList, userPermissions } = useAppContext()
+    const { setLoading, colorPalette, menuItemsList, userPermissions, user } = useAppContext()
     const [filterAtive, setFilterAtive] = useState('todos')
     const [filterEnrollStatus, setFilterEnrollStatus] = useState('todos')
     const [firstRender, setFirstRender] = useState(true)
@@ -83,7 +84,15 @@ export default function ListConsultions(props) {
     const getConsultion = async () => {
         setLoading(true)
         try {
-            const response = await api.get(`/consultions`)
+            let query;
+            if (user?.perfil?.includes('profissional')) {
+                query = `/consultation/profissional/${user?.id}`
+            }
+            if (user?.perfil?.includes('paciente')) {
+                query = `/consultation/pacient/${user?.id}`
+            }
+
+            const response = await api.get(query)
             console.log(response)
             const { data = [] } = response;
             setConsultion(data)
@@ -166,9 +175,7 @@ export default function ListConsultions(props) {
         <>
             <SectionHeader
                 icon={'https://minhaclinicatrindade.s3.amazonaws.com/video_conferencia.png'}
-                title={`Consultas (${consultionList?.filter(filter)?.length})`}
-                newButton={isPermissionEdit}
-                newButtonAction={() => router.push(`/${pathname}/new`)}
+                title={`Consultas (${consultionList?.length})`}
             />
             {/* <Text bold>Buscar por: </Text> */}
             <ContentContainer>
@@ -176,7 +183,7 @@ export default function ListConsultions(props) {
                     <Text bold large>Filtros</Text>
                     <Box sx={{ display: 'flex', gap: 0.5 }}>
                         <Text style={{ color: '#d6d6d6' }} light>Mostrando</Text>
-                        <Text bold style={{ color: '#d6d6d6' }} light>{consultionList?.filter(filter)?.length || '0'}</Text>
+                        <Text bold style={{ color: '#d6d6d6' }} light>{consultionList?.length || '0'}</Text>
                         <Text style={{ color: '#d6d6d6' }} light>de</Text>
                         <Text bold style={{ color: '#d6d6d6' }} light>{consultionList?.length || 0}</Text>
                         <Text style={{ color: '#d6d6d6' }} light>consultas</Text>
@@ -188,7 +195,7 @@ export default function ListConsultions(props) {
                     </Box>
                     <TablePagination
                         component="div"
-                        count={sortConsultion()?.filter(filter)?.length}
+                        count={consultionList?.length}
                         page={page}
                         onPageChange={handleChangePage}
                         rowsPerPage={rowsPerPage}
@@ -207,7 +214,7 @@ export default function ListConsultions(props) {
                         <Text bold>Não foi encontrado consultas</Text>
                     </Box>
             } */}
-            <TableConsultion data={sortConsultion()?.filter(filter).slice(startIndex, endIndex)} columns={column} columnId={'id'} enrollmentsCount={true} filters={filters} onPress={(value) => setFilters(value)} onFilter />
+            <TableConsultion data={consultionList?.slice(startIndex, endIndex)} />
 
         </>
     )
@@ -215,12 +222,14 @@ export default function ListConsultions(props) {
 
 const TableConsultion = ({ data = [], filters = [], onPress = () => { } }) => {
     const { setLoading, colorPalette, theme, user } = useAppContext()
+    const isProfissional = user?.perfil?.includes('profissional')
 
     const columns = [
-        { key: 'dt_consulta', label: 'Data' },
-        { key: 'profissional', label: 'Profissional' },
-        { key: 'tipo', label: 'Tipo' },
-        { key: 'situacao', label: 'Status' }
+        { key: 'data', label: 'Data' },
+        { key: isProfissional ? 'paciente' : 'profissional', label: isProfissional ? 'Paciente ' : 'Profissional' },
+        { key: 'preco', label: 'Valor' },
+        { key: 'modalidade', label: 'Tipo' },
+        { key: 'status', label: 'Status' },
     ];
 
     const router = useRouter();
@@ -232,10 +241,16 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { } }) => {
         return;
     };
 
-    const statusColor = (data) => ((data === 'Paciente faltou' && 'yellow') ||
+    const statusColor = (data) => ((data === 'Agendado' && 'yellow') ||
         (data === 'Cancelada' && 'red') ||
         (data === 'Atendida' && 'green') ||
         (data === 'Remarcada' && 'blue'))
+
+
+    const formatter = new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+    });
 
     return (
         <ContentContainer sx={{ display: 'flex', width: '100%', padding: 0, backgroundColor: colorPalette.primary, boxShadow: 'none', borderRadius: 2 }}>
@@ -274,32 +289,38 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { } }) => {
                         {
                             data?.map((item, index) => {
                                 return (
-                                    <TableRow key={`${item}-${index}`} onClick={() => handleRowClick(item?.id_consulta)} sx={{
+                                    <TableRow key={`${item}-${index}`} sx={{
+                                        transition: '.3s',
                                         "&:hover": {
-                                            cursor: 'pointer',
-                                            backgroundColor: colorPalette.primary + '88'
+                                            backgroundColor: colorPalette.primary + '88',
                                         },
                                     }}>
                                         <TableCell sx={{ padding: '8px 10px', textAlign: 'center' }}>
-                                            <Text>{formatTimeStamp(item?.dt_consulta, true) || '-'}</Text>
+                                            <Text>{formatTimeStamp(item?.data, true) || '-'}</Text>
                                         </TableCell>
-                                        <Tooltip title={item?.profissional}>
+                                        <Tooltip title={isProfissional ? item?.paciente : item?.profissional}>
                                             <TableCell sx={{
                                                 padding: '15px 10px', textAlign: 'center',
-                                                textOverflow: 'ellipsis',
-                                                whiteSpace: 'nowrap',
-                                                overflow: 'hidden',
-                                                maxWidth: '180px',
                                             }}>
-                                                <Text style={{
-                                                    textOverflow: 'ellipsis',
-                                                    whiteSpace: 'nowrap',
-                                                    overflow: 'hidden',
-                                                }}>{item?.profissional || '-'}</Text>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'center' }}>
+                                                    <Avatar src={item?.url_foto_prof || ''} sx={{
+                                                        height: { xs: '100%', sm: 30, md: 30, lg: 30 },
+                                                        width: { xs: '100%', sm: 30, md: 30, lg: 30 },
+                                                    }} variant="circular"
+                                                    />
+                                                    <Text style={{
+                                                        textOverflow: 'ellipsis',
+                                                        whiteSpace: 'nowrap',
+                                                        overflow: 'hidden',
+                                                    }}>{isProfissional ? item?.paciente : item?.profissional || '-'}</Text>
+                                                </Box>
                                             </TableCell>
                                         </Tooltip>
                                         <TableCell sx={{ padding: '15px 10px', textAlign: 'center' }}>
-                                            <Text>{item?.tipo || '-'}</Text>
+                                            <Text>{formatter.format(item?.preco) || '-'}</Text>
+                                        </TableCell>
+                                        <TableCell sx={{ padding: '15px 10px', textAlign: 'center' }}>
+                                            <Text>{item?.modalidade || '-'}</Text>
                                         </TableCell>
                                         <TableCell sx={{ padding: '15px 10px', textAlign: 'center' }}>
                                             <Box
@@ -314,8 +335,8 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { } }) => {
                                                     justifyContent: 'start',
                                                 }}
                                             >
-                                                <Box sx={{ display: 'flex', backgroundColor: statusColor(item?.status_consulta), padding: '0px 5px', height: '100%', borderRadius: '8px 0px 0px 8px' }} />
-                                                <Text small bold>{item?.status_consulta}</Text>
+                                                <Box sx={{ display: 'flex', backgroundColor: statusColor(item?.status), padding: '0px 5px', height: '100%', borderRadius: '8px 0px 0px 8px' }} />
+                                                <Text small bold>{item?.status}</Text>
                                             </Box>
                                         </TableCell>
                                     </TableRow>

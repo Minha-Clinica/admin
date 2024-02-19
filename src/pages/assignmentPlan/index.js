@@ -8,6 +8,9 @@ import moment from "moment";
 import "moment/locale/pt-br";
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
+import { Paper, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Tooltip, Avatar } from "@mui/material";
+import { icons } from "../../organisms/layout/Colors"
+
 
 export default function ListProfissionals(props) {
     const [planList, setPlanList] = useState([])
@@ -58,7 +61,7 @@ export default function ListProfissionals(props) {
         {
             id: '02', nome: 'Standart', price: 49.90, description: '', key: 'standart', icon: '', preferency: true,
             listPlans: [
-                { include: 'Simples acesso a plataforma', access: true },
+                { include: 'Acesso total a plataforma', access: true },
                 { include: 'Gestão de Agendas das consultas', access: true },
                 { include: 'Gestão de pagamentos dentro da plataforma', access: true },
                 { include: 'Ofertar diversas formas de pagamento para o paciente', access: true },
@@ -153,7 +156,131 @@ export default function ListProfissionals(props) {
                 })}
             </Box>
 
+            <Box sx={{display: 'flex', gap: 5, marginTop: 8, flexDirection: 'column'}}>
+                <Text veryLarge bold>Assinaturas</Text>
+                <TableAssignments />
+            </Box>
+
         </>
+    )
+}
+
+
+const TableAssignments = ({ data = [], filters = [], onPress = () => { } }) => {
+    const { setLoading, colorPalette, theme, user } = useAppContext()
+
+    const columns = [
+        { key: 'dt_consulta', label: 'Data' },
+        { key: 'profissional', label: 'Plano' },
+        { key: 'tipo', label: 'Valor' },
+        { key: 'situacao', label: 'Status' },
+        { key: 'situacao', label: 'Proxima Renovação' },
+    ];
+
+    const router = useRouter();
+    const menu = router.pathname === '/' ? null : router.asPath.split('/')[1]
+    const subMenu = router.pathname === '/' ? null : router.asPath.split('/')[2]
+
+    const handleRowClick = (id) => {
+        window.open(`/tasks/${id}`, '_blank');
+        return;
+    };
+
+    const statusColor = (data) => ((data === 'Paciente faltou' && 'yellow') ||
+        (data === 'Cancelada' && 'red') ||
+        (data === 'Atendida' && 'green') ||
+        (data === 'Remarcada' && 'blue'))
+
+    return (
+        <ContentContainer sx={{ display: 'flex', width: '100%', padding: 0, backgroundColor: colorPalette.primary, boxShadow: 'none', borderRadius: 2 }}>
+
+            <TableContainer sx={{ borderRadius: '8px', overflow: 'auto' }}>
+                <Table sx={{ borderCollapse: 'collapse', width: '100%' }}>
+                    <TableHead>
+                        <TableRow sx={{ borderBottom: `2px solid ${colorPalette.buttonColor}` }}>
+                            {columns.map((column, index) => (
+                                <TableCell key={index} sx={{ padding: '16px', }}>
+                                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'center' }}>
+                                        <Text bold style={{ textAlign: 'center' }}>{column.label}</Text>
+                                        <Box sx={{
+                                            ...styles.menuIcon,
+                                            backgroundImage: `url(${icons.gray_arrow_down})`,
+                                            transform: filters?.filterName === column.key ? filters?.filterOrder === 'asc' ? 'rotate(-0deg)' : 'rotate(-180deg)' : 'rotate(-0deg)',
+                                            transition: '.3s',
+                                            width: 17,
+                                            height: 17,
+
+                                            "&:hover": {
+                                                opacity: 0.8,
+                                                cursor: 'pointer'
+                                            },
+                                        }}
+                                            onClick={() => onPress({
+                                                filterName: column.key,
+                                                filterOrder: filters?.filterOrder === 'asc' ? 'desc' : 'asc'
+                                            })} />
+                                    </Box>
+                                </TableCell>
+                            ))}
+                        </TableRow>
+                    </TableHead>
+                    <TableBody sx={{ flex: 1, padding: 5, backgroundColor: colorPalette.secondary }}>
+                        {
+                            data?.map((item, index) => {
+                                return (
+                                    <TableRow key={`${item}-${index}`} onClick={() => handleRowClick(item?.id_consulta)} sx={{
+                                        "&:hover": {
+                                            cursor: 'pointer',
+                                            backgroundColor: colorPalette.primary + '88'
+                                        },
+                                    }}>
+                                        <TableCell sx={{ padding: '8px 10px', textAlign: 'center' }}>
+                                            <Text>{formatTimeStamp(item?.dt_consulta, true) || '-'}</Text>
+                                        </TableCell>
+                                        <Tooltip title={item?.profissional}>
+                                            <TableCell sx={{
+                                                padding: '15px 10px', textAlign: 'center',
+                                                textOverflow: 'ellipsis',
+                                                whiteSpace: 'nowrap',
+                                                overflow: 'hidden',
+                                                maxWidth: '180px',
+                                            }}>
+                                                <Text style={{
+                                                    textOverflow: 'ellipsis',
+                                                    whiteSpace: 'nowrap',
+                                                    overflow: 'hidden',
+                                                }}>{item?.profissional || '-'}</Text>
+                                            </TableCell>
+                                        </Tooltip>
+                                        <TableCell sx={{ padding: '15px 10px', textAlign: 'center' }}>
+                                            <Text>{item?.tipo || '-'}</Text>
+                                        </TableCell>
+                                        <TableCell sx={{ padding: '15px 10px', textAlign: 'center' }}>
+                                            <Box
+                                                sx={{
+                                                    display: 'flex',
+                                                    backgroundColor: colorPalette.primary,
+                                                    height: 30,
+                                                    gap: 2,
+                                                    alignItems: 'center',
+                                                    // width: 100,
+                                                    borderRadius: 2,
+                                                    justifyContent: 'start',
+                                                }}
+                                            >
+                                                <Box sx={{ display: 'flex', backgroundColor: statusColor(item?.status_consulta), padding: '0px 5px', height: '100%', borderRadius: '8px 0px 0px 8px' }} />
+                                                <Text small bold>{item?.status_consulta}</Text>
+                                            </Box>
+                                        </TableCell>
+                                    </TableRow>
+                                );
+                            })
+
+                        }
+                    </TableBody>
+                </Table>
+            </TableContainer>
+        </ContentContainer >
     )
 }
 

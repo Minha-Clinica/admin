@@ -180,10 +180,10 @@ export default function Login() {
                         backgroundSize: 'cover',
                         backgroundRepeat: 'no-repeat',
                         backgroundPosition: 'center center',
-                        width: 300,
-                        height: 200,
+                        width: { xs: 200, xm: 200, md: 200, lg: 300, xl: 450 },
+                        height: { xs: 200, xm: 200, md: 200, lg: 200, xl: 300 },
                         display: 'flex',
-                    }}/>
+                    }} />
 
                 </Box>
                 <Box sx={{ display: 'flex', gap: 1, width: 450, height: '100%', backgroundColor: '#fff' }}>
@@ -214,8 +214,8 @@ export default function Login() {
                             width: 130,
                             height: 90,
                             display: 'flex',
-                          
-                        }}/>
+
+                        }} />
 
                         <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 3, alignItems: 'center', width: smallWidthDevice ? '80%' : '100%', }}>
                             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, alignItems: 'center', width: smallWidthDevice ? '80%' : '100%', }}>
@@ -333,7 +333,19 @@ export default function Login() {
                                 <Text small bold style={{ color: colorPalette.buttonColor }}>Redefinir</Text>
                             </Button>
                         </form>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: .5, justifyContent: 'center', width: '100%' }}>
+                            <Text light>Ainda não possuí cadastro?</Text>
+                            <Box sx={{
+                                display: 'flex', "&:hover": {
+                                    opacity: 0.8,
+                                    cursor: 'pointer'
+                                }
+                            }}>
+                                <Text style={{ color: colorPalette.buttonColor }}>Criar conta.</Text>
+                            </Box>
+                        </Box>
                     </Box>
+
                 </Box>
                 <Box sx={{
                     display: 'none',
