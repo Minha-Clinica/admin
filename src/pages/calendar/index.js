@@ -230,6 +230,7 @@ export default function CalendarComponent(props) {
                     usuario_agendado: event?.usuario_agendado,
                     email_agendado: event?.email_agendado,
                     nome_agendado: event?.nome_agendado,
+                    usuario_agendado: event?.usuario_agendado,
                     disponivel: event?.disponivel,
                     usuario_id: event?.usuario_id,
                     allDay: false, // Ajuste isso com base no seu caso de uso

@@ -137,7 +137,6 @@ export default function EditTask(props) {
         try {
             const response = await api.get(`/task/interation/${id}`)
             const { data } = response
-            console.log(data)
             if (data?.length > 0) {
                 setInterationsTask(data)
             }
@@ -304,10 +303,8 @@ export default function EditTask(props) {
         if (description) { newInteration.descr_interacao = description }
         try {
             const response = await api.post(`/task/interation/create`, { newInteration });
-            console.log(response)
             if (response?.status === 201) {
                 const { interationId } = response?.data
-                console.log(interationId)
 
                 if (filesDrop?.length > 0) {
                     for (const uploadedFile of filesDrop) {
@@ -315,7 +312,6 @@ export default function EditTask(props) {
                         formData.append('file', uploadedFile?.file, encodeURIComponent(uploadedFile?.name));
                         try {
                             const response = await api.post(`/task/interation/file/upload?interationId=${interationId}&usuario_id=${user?.id}`, formData, { headers: { 'Authorization': "bearer " + 'token' } })
-                            console.log(response)
                         } catch (error) {
                             console.log(error)
                             alert.error('Tivemos um problema ao adicionar arquivos a Tarefa.');

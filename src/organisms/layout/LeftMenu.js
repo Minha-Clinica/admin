@@ -125,17 +125,18 @@ export const LeftMenu = ({ }) => {
                <Divider distance={4} color={'rgb(255 255 255 / 0.1)'} />
                <Box sx={{ ...styles.boxMenu, ...(showMenuMobile && { overflowY: 'auto' }), ...(!showMenuHelp && { width: 40, marginLeft: 1, gap: 2 }) }}>
                   {menuItems.map((group, index) => {
-                     // const visibleItems = group.filter(item =>
-                     //    item.permissoes.some(permission => userPermissions.some(userPerm => userPerm.id_grupo_perm === permission.grupo_perm_id))
-                     // );
-                     const visibleItems = 1;
-                     if (visibleItems > 0) {
+                     const userProfiles = user?.perfil?.split(',').map(profile => profile.trim()) || [];
+                     const visibleItems = group.permissions?.filter(item =>
+                        userProfiles.some(profile => item.includes(profile))
+                     );
+                     if (visibleItems && visibleItems?.length > 0) {
                         return (
                            <Box key={`${group}-${index}`} sx={{ display: 'flex', flexDirection: 'column', gap: 0.3, color: '#f0f0f0' + '77' }}
                               onMouseEnter={() => (!showMenuMobile && !showMenuHelp) && handleGroupMouseEnter(index)}
                               onMouseLeave={() => (!showMenuMobile && !showMenuHelp) && handleGroupMouseLeave(index)}
                               onClick={() => {
                                  router.push(`/${group.to}`);
+                                 setShowMenuHelp(false)
 
                               }}>
                               {(pathname === group.to) && <Box sx={{ display: 'flex', height: '30px', width: 4, borderRadius: '0px 5px 5px 0px', backgroundColor: colorPalette?.buttonColor, position: 'absolute', left: 0 }} />}
@@ -482,7 +483,7 @@ const styles = {
       // gap: 1,
       marginTop: 5,
       overflowStyle: 'marquee,panner',
-      maxHeight: { xs: '480px', sm: '480px', md: '480px', lg: '480px', xl: '850px' } ,
+      maxHeight: { xs: '480px', sm: '480px', md: '480px', lg: '480px', xl: '850px' },
       overflowY: 'auto',
       scrollbarWidth: 'thin',
       scrollbarColor: 'gray lightgray',

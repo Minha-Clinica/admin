@@ -118,7 +118,6 @@ export default function ListBillsToPay(props) {
             bills = billstPay?.filter(filter);
             expense = bills?.map(item => parseFloat(item?.valor_desp_f))?.reduce((acc, curr) => acc + curr, 0);
         }
-        console.log(bills);
         setTotalPays(expense);
 
         let data = billstReceive?.filter(filter);

@@ -69,7 +69,6 @@ export const AppProvider = ({ children }) => {
                     const response = await api.post('/user/loginToken')
                     const { data } = response;
                     const { userData, getPhoto, notificationsData } = data;
-
                     if (userData) {
                         setUser({ ...userData, getPhoto })
                         setUserPermissions(userData?.permissoes)

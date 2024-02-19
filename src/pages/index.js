@@ -55,10 +55,14 @@ function Home() {
    const [menu, setMenu] = useState(menuItems)
    const [imagesList, setImagesList] = useState([])
    const [events, setEvents] = useState([])
+   const [consultionList, setConsultion] = useState([])
    const [planActually, setPlanActually] = useState('free')
+   const isPacient = user?.perfil?.includes('paciente')
    const router = useRouter();
    moment.locale("pt-br");
    const localizer = momentLocalizer(moment);
+   const [carouselIndex, setCarouselIndex] = useState(0);
+
 
 
    const handleImages = async () => {
@@ -68,8 +72,22 @@ function Home() {
          if (response.status === 200) {
             setImagesList(response?.data)
          }
-         console.log(response)
       } catch (error) {
+         return error
+      } finally {
+         setLoading(false)
+      }
+   }
+
+   const getConsultion = async () => {
+      setLoading(true)
+      try {
+         let query = `/consultation/profissional/${user?.id}`
+         const response = await api.get(query)
+         const { data = [] } = response;
+         setConsultion(data)
+      } catch (error) {
+         console.log(error)
          return error
       } finally {
          setLoading(false)
@@ -109,6 +127,7 @@ function Home() {
    useEffect(() => {
       handleImages(imagesList)
       handleEvents()
+      getConsultion()
    }, [])
 
    const nowMonth = new Date().toLocaleString('pt-BR', { month: 'long' });
@@ -231,6 +250,21 @@ function Home() {
       currency: 'BRL'
    });
 
+   const handleNext = (item) => {
+      const newIndex = Math.min(carouselIndex + 3, item.length - 1);
+      setCarouselIndex(newIndex);
+   };
+
+   const handlePrev = () => {
+      const newIndex = Math.max(carouselIndex - 3, 0);
+      setCarouselIndex(newIndex);
+   };
+
+
+   const statusColor = (data) => ((data === 'Agendado' && 'yellow') ||
+      (data === 'Cancelada' && 'red') ||
+      (data === 'Atendida' && 'green') ||
+      (data === 'Remarcada' && 'blue'))
 
    return (
       <>
@@ -260,7 +294,7 @@ function Home() {
 
                   <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', marginTop: 2 }}>
 
-                     <Text light large>Conheça alguns de nossos Profissionais..</Text>
+                     <Text light large>Conheça parte de nossa equipe de Profissionais..</Text>
                      <Box sx={{ display: 'flex', gap: 2, flexDirection: 'row' }}>
 
                         {equipeProf?.map((item, index) => {
@@ -290,7 +324,7 @@ function Home() {
                   </Box>
 
                   <Box sx={{ display: 'flex', gap: 2, marginTop: 5, flexDirection: 'column' }}>
-                     <Text large bold>Atendimento</Text>
+                     <Text large bold>{isPacient ? 'Atendimento' : 'Consultas'}</Text>
                      <Box sx={{
                         display: 'flex', gap: 2, backgroundColor: '#fff', padding: '30px',
                         boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`, borderRadius: 2
@@ -304,7 +338,7 @@ function Home() {
 
                         <Box sx={{ display: 'flex', height: '250px', width: '1px', backgroundColor: 'lightgray' }} />
                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 5, padding: '0px 20px' }}>
-                           <Box sx={{ display: 'flex', gap: 1.5, flexDirection: 'column' }}>
+                           <Box sx={{ display: isPacient ? 'flex' : 'none', gap: 1.5, flexDirection: 'column' }}>
 
                               <Box><Text large light>Buscar profissional agora mesmo!</Text></Box>
                               <Box sx={{
@@ -332,7 +366,105 @@ function Home() {
                                  <Text bold style={{ color: '#fff' }}>BUSCAR TERAPEUTA</Text>
                               </Box>
                            </Box>
-                           <Box sx={{ display: 'flex', gap: 2 }}>
+
+                           {consultionList?.length > 0 ?
+                              <Box sx={{ display: isPacient ? 'none' : 'flex', gap: 1.5, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+
+                                 <Box sx={{
+                                    ...styles.menuIcon,
+                                    padding: '8px',
+                                    margin: '0px 5px',
+                                    backgroundImage: `url(${icons.gray_arrow_down})`,
+                                    transform: 'rotate(90deg)',
+                                    transition: '.3s',
+                                    width: 18, height: 18,
+                                    aspectRatio: '1/1',
+                                    opacity: carouselIndex <= 0 ? 0.5 : 1,
+                                    pointerEvents: carouselIndex <= 0 ? 'none' : 'auto',
+                                    "&:hover": {
+                                       opacity: carouselIndex <= 0 ? 0.5 : 0.8,
+                                       cursor: carouselIndex <= 0 ? 'not-allowed' : 'pointer',
+                                       backgroundColor: colorPalette.primary
+                                    }
+                                 }} onClick={() => handlePrev(consultionList)} />
+                                 {consultionList
+                                    .slice(carouselIndex, carouselIndex + 3)?.map((item, index) => {
+                                       const name = item?.paciente?.split(' ');
+                                       const firstName = name[0];
+                                       const lastName = name[name.length - 1];
+                                       const userName = `${firstName} ${lastName}`;
+                                       return (
+                                          <Box key={index} sx={{
+                                             display: 'flex', gap: 2, backgroundColor: colorPalette.secondary, padding: '15px', maxWidth: 400, borderRadius: 2,
+                                             boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`, flexDirection: 'column'
+                                          }}>
+                                             <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'space-between' }}>
+
+                                                <Box sx={{
+                                                   display: 'flex', gap: 1, flexDirection: 'row', alignItems: 'center', width: 120, justifyContent: 'center',
+                                                }}>
+                                                   <Avatar src={item?.url_foto_prof || ''} sx={{
+                                                      height: { xs: '100%', sm: 45, md: 45, lg: 40 },
+                                                      width: { xs: '100%', sm: 45, md: 45, lg: 40 },
+                                                   }} variant="circular"
+                                                   />
+                                                   <Text bold xsmall style={{ marginLeft: 2, minWidth: 80, display: 'flex', textAlign: 'center' }}>{userName}</Text>
+                                                </Box>
+                                                <Box sx={{
+                                                   display: 'flex', flexDirection: 'row', gap: .5, justifyContent: 'center', alignItems: 'center',
+                                                   padding: '8px 12px', borderRadius: 2, backgroundColor: colorPalette.primary,
+                                                }}>
+                                                   <Text bold small>Duracão: </Text>
+                                                   <Text bold small style={{ color: colorPalette.buttonColor }}>1 Hora</Text>
+                                                </Box>
+                                             </Box>
+                                             <Box sx={{ display: 'flex', gap: 1, flexDirection: 'row', alignItems: 'center' }}>
+
+                                                <Box sx={{ display: 'flex', gap: 1, minWidth: 180, alignItems: 'center' }}>
+                                                   <Box sx={{
+                                                      ...styles.icon,
+                                                      backgroundImage: `url('/icons/clock.png')`,
+                                                      backgroundSize: 'contain',
+                                                      backgroundPosition: 'center',
+                                                      filter: 'brightness(0) invert(0)',
+                                                      width: 25,
+                                                      height: 25,
+                                                      display: 'flex'
+                                                   }} />
+                                                   <Text bold small>{formatTimeStamp(item?.data, true)}</Text>
+                                                </Box>
+
+                                                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                                                   <Box sx={{ display: 'flex', height: '20px', width: 4, backgroundColor: statusColor(item?.status), alignItems: 'center' }} />
+                                                   <Text light small>{item?.status}</Text>
+                                                </Box>
+                                             </Box>
+                                          </Box>
+                                       )
+                                    })}
+                                 <Box sx={{
+                                    ...styles.menuIcon,
+                                    padding: '8px',
+                                    margin: '0px 5px',
+                                    backgroundImage: `url(${icons.gray_arrow_down})`,
+                                    transform: 'rotate(-90deg)',
+                                    transition: '.3s',
+                                    width: 18, height: 18,
+                                    aspectRatio: '1/1',
+                                    opacity: (carouselIndex * 2) >= consultionList?.length ? 0.5 : 1,
+                                    pointerEvents: (carouselIndex * 2) >= consultionList?.length ? 'none' : 'auto',
+                                    "&:hover": {
+                                       opacity: (carouselIndex * 2) >= consultionList?.length ? 0.5 : 0.8,
+                                       cursor: (carouselIndex * 2) >= consultionList?.length ? 'not-allowed' : 'pointer',
+                                       backgroundColor: colorPalette.primary
+                                    }
+                                 }} onClick={() => handleNext(consultionList)} />
+                              </Box>
+
+                              : <Text light large>Você não possui Consultas agendadas. Disponibilize agora horários para os pacientes agendarem suas consultas!</Text>
+                           }
+
+                           <Box sx={{ display: isPacient ? 'none' : 'flex', gap: 2 }}>
 
                               <Box sx={{
                                  display: 'flex', backgroundColor: colorPalette.secondary, padding: '20px',
@@ -407,7 +539,7 @@ function Home() {
                      </Box>
                   </Box>
 
-                  <Box sx={{ display: 'flex', gap: 5, flexDirection: 'column', marginTop: 5, alignItems: 'center' }}>
+                  <Box sx={{ display: isPacient ? 'none' : 'flex', gap: 5, flexDirection: 'column', marginTop: 5, alignItems: 'center' }}>
                      <Text bold title style={{ textAlign: 'center' }}>Assine agora o plano e aprovaite o melhor da plataforma!</Text>
 
                      <Box sx={{ display: 'flex', gap: 5, width: '100%', justifyContent: 'center' }}>
@@ -452,13 +584,7 @@ function Home() {
                                              cursor: 'pointer',
                                              transform: 'scale(1.1, 1.1)'
                                           }
-                                       }} onClick={() => {
-                                          if (isPlan) {
-                                             alert.info('O plano selecionado já corresponde a seu plano atual.')
-                                          } else {
-                                             setPlanActually(item?.key)
-                                          }
-                                       }}>
+                                       }} onClick={() => router.push('/assignmentPlan')}>
                                           <Text bold style={{ color: '#fff' }}>Assinar plano {item?.nome}</Text>
                                        </Box>
                                     </Box>
@@ -466,23 +592,6 @@ function Home() {
                               </Box>
                            )
                         })}
-                     </Box>
-
-                     <Box sx={{
-                        padding: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        width: 200,
-                        marginTop: 2,
-                        transition: '.5s',
-                        gap: 2,
-                        backgroundColor: colorPalette.buttonColor,
-                        borderRadius: 2,
-                        "&:hover": {
-                           opacity: 0.8,
-                           cursor: 'pointer',
-                           transform: 'scale(1.1, 1.1)'
-                        }
-                     }} onClick={() => router.push('/assignmentPlan')}>
-                        <Text bold style={{ color: '#fff' }}>VER MAIS PLANOS</Text>
                      </Box>
 
                   </Box>
