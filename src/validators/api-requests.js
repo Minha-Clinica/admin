@@ -16,9 +16,9 @@ export const getUsersPerfil = async (perfil) => {
    }
 }
 
-export const createUser = async (userData, usuario_id) => {
+export const createUser = async ({ userData, usuario_id = null }) => {
    try {
-      const response = await api.post(`/user/create/${usuario_id}`, { userData })
+      const response = await api.post(`/user/create`, { userData, usuario_id })
       return response
    } catch (error) {
       return error
@@ -210,7 +210,7 @@ export const uploadFile = async (data) => {
    if (taskId) query += `&taskId=${taskId}`;
    if (matricula_id) query += `&matricula_id=${matricula_id}`;
    if (material_id) query += `&material_id=${material_id}`;
-   
+
    try {
       if (images) {
          const response = await api.post(`/file/image/upload${query}`, formData, { headers: { 'Authorization': "bearer " + 'token' } })
@@ -227,12 +227,12 @@ export const uploadFile = async (data) => {
          return response
       }
 
-      if(matricula_id){
+      if (matricula_id) {
          const response = await api.post(`/student/enrrolments/contract/upload${query}`, formData, { headers: { 'Authorization': "bearer " + 'token' } })
          return response
       }
 
-      if(material_id){
+      if (material_id) {
          const response = await api.post(`/catalog/material/image/upload${query}`, formData, { headers: { 'Authorization': "bearer " + 'token' } })
          return response
       }
@@ -259,7 +259,7 @@ export const deleteFile = async ({ fileId, usuario_id, campo, key, matriculaId }
          const response = await api.delete(`/student/enrrolments/contract/delete/${fileId}${query}`)
          return response
       }
-      
+
       const response = await api.delete(`/file/delete/${fileId}${query}`)
       return response
    } catch (error) {

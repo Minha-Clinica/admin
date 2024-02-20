@@ -638,60 +638,6 @@ export default function EditUser() {
                             <TextInput disabled={!isPermissionEdit && true} placeholder='Confirmar senha' name='confirmar_senha' onChange={handleChange} value={userData?.confirmar_senha || ''} type="password" label='Confirmar senha' sx={{ flex: 1, }} />
                         </Box>}
                         <RadioItem disabled={!isPermissionEdit && true} valueRadio={userData?.admin_sistema} group={groupAdmin} title="Acesso ao Sistema *" horizontal={mobile ? false : true} onSelect={(value) => setUserData({ ...userData, admin_sistema: parseInt(value) })} />
-                        <Box sx={{ display: 'flex', justifyContent: 'start', gap: 1, alignItems: 'start', marginTop: 2, flexDirection: 'column', padding: '0px 0px 20px 12px' }}>
-                            <Button small text='permissões' style={{ padding: '5px 6px 5px 6px', width: 100 }} onClick={() => setShowSections({ ...showSections, permissions: true })} />
-                        </Box>
-
-                        <Backdrop open={showSections.permissions} sx={{ zIndex: 99999, }}>
-
-                            <ContentContainer style={{ maxWidth: { md: '800px', lg: '1980px' }, maxHeight: { md: '180px', lg: '1280px' }, marginLeft: { md: '180px', lg: '0px' }, overflowY: matches && 'auto', marginLeft: { md: '180px', lg: '280px' } }}>
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', zIndex: 999999999 }}>
-                                    <Text bold large>Permissões</Text>
-                                    <Box sx={{
-                                        ...styles.menuIcon,
-                                        backgroundImage: `url(${icons.gray_close})`,
-                                        transition: '.3s',
-                                        zIndex: 999999999,
-                                        "&:hover": {
-                                            opacity: 0.8,
-                                            cursor: 'pointer'
-                                        }
-                                    }} onClick={() => setShowSections({ ...showSections, permissions: false })} />
-                                </Box>
-                                <Divider padding={0} />
-                                <ContentContainer style={{ boxShadow: 'none', display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                    <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'start' }}>
-                                        <Text bold>Grupo de permissões</Text>
-                                        <CheckBoxComponent disabled={!isPermissionEdit && true}
-                                            boxGroup={groupPermissions}
-                                            valueChecked={permissionPerfil || ''}
-                                            horizontal={false}
-                                            onSelect={(value) => {
-                                                setPermissionPerfil(value)
-                                            }}
-                                            sx={{ width: 1 }}
-                                        />
-                                    </Box>
-                                </ContentContainer>
-                                <Divider padding={0} />
-                                <Box style={{ display: 'flex' }}>
-                                    <Button disabled={!isPermissionEdit && true} small
-                                        style={{ width: '50%', marginRight: 1, height: 30 }}
-                                        text='Salvar'
-                                        onClick={() => {
-                                            !newUser ? handleAddPermission() :
-                                                alert.info('Permissões atualizadas')
-                                            setShowSections({ ...showSections, permissions: false })
-                                        }}
-                                    />
-                                    <Button disabled={!isPermissionEdit && true} secondary small
-                                        style={{ width: '50%', height: 30 }}
-                                        text='Cancelar'
-                                        onClick={() => setShowSections({ ...showSections, permissions: false })}
-                                    />
-                                </Box>
-                            </ContentContainer>
-                        </Backdrop>
 
                     </>}
             </ContentContainer>
@@ -750,18 +696,6 @@ export default function EditUser() {
                                         inputStyle={{ color: colorPalette.textColor, fontSize: '15px', fontFamily: 'MetropolisBold' }}
                                     />
                                 </Box>
-
-                                <ContentContainer style={{ boxShadow: 'none' }}>
-                                    <Box sx={{ display: 'flex', gap: 5, flexDirection: 'column' }}>
-                                        <Box sx={{ display: 'flex', gap: 5, alignItems: 'center' }}>
-                                            <Text bold title>Horários de atendimento Disponíveis</Text>
-                                            {officeHours && <Box sx={{ display: 'flex' }}>
-                                                <Button disabled={!isPermissionEdit && true} small text='replicar' style={{ padding: '5px 16px 5px 16px' }} onClick={replicateToDaysWork} />
-                                            </Box>}
-                                        </Box>
-                                        <TableOfficeHours data={officeHours} onChange={handleOfficeHours} />
-                                    </Box>
-                                </ContentContainer>
 
                             </>
                         }
