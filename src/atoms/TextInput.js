@@ -25,7 +25,6 @@ export const TextInput = (props) => {
             sx: {
                transition: 'background-color 1s',
                disableUnderline: true,
-               borderRadius: 2,
                fontSize: small ? '12px' : { xs: '13px', xm: '13px', md: '13px', lg: '14px', xl: '15px' },
                fontFamily: bold ? 'MetropolisBold' : 'MetropolisRegular',
                backgroundColor: colorPalette.inputColor,

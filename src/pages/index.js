@@ -396,7 +396,8 @@ function Home() {
                                        return (
                                           <Box key={index} sx={{
                                              display: 'flex', gap: 2, backgroundColor: colorPalette.secondary, padding: '15px', maxWidth: 400, borderRadius: 2,
-                                             boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`, flexDirection: 'column'
+                                             boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`, flexDirection: 'column',
+                                             transition: `opacity 0.5s ease-in-out`,
                                           }}>
                                              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'space-between' }}>
 

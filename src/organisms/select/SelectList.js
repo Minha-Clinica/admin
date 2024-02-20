@@ -32,7 +32,7 @@ export const SelectList = (props) => {
                 <Select
                     disabled={disabled}
                     sx={{
-                        borderRadius: "8px", backgroundColor: colorPalette.inputColor, height: 45, color: colorPalette.textColor, ...sx, maxHeight: 45, transition: 'background-color 1s',
+                         backgroundColor: colorPalette.inputColor, height: 45, color: colorPalette.textColor, ...sx, maxHeight: 45, transition: 'background-color 1s',
                         fontSize: { xs: '13px', xm: '13px', md: '13px', lg: '14px', xl: '15px' }
                     }}
                     value={valueSelection}
