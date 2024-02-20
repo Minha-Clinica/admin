@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useAppContext } from "../context/AppContext"
-import { emailValidator } from "../helpers"
+import { emailValidator, formatCPF, formatPhone } from "../helpers"
 import { Colors, IconTheme, SelectList } from "../organisms"
 import { Box, ContentContainer, TextInput, Text, Divider } from "../atoms"
 import Button from '@mui/material/Button';
@@ -16,7 +16,17 @@ export const Register = ({ type = `paciente`, setTypeSelected, typeSelected, set
 
     const { login, alert, theme, colorPalette, setLoading, setShowConfirmationDialog } = useAppContext()
     const router = useRouter()
-    const [userData, setUserData] = useState({})
+    const [userData, setUserData] = useState({
+        cpf: null,
+        genero: '',
+        telefone: null,
+        ativo: 1,
+        admin_sistema: 1,
+        login: null,
+        nascimento: null,
+        foto_perfil_id: null,
+        nome_social: null, perfil: type || null
+    })
     const [contract, setContract] = useState({
         funcao: null,
         area: null,
@@ -74,7 +84,7 @@ export const Register = ({ type = `paciente`, setTypeSelected, typeSelected, set
             return false
         }
 
-        if (userData?.nova_senha !== '' && (userData?.nova_senha !== userData?.confirmar_senha)) {
+        if (userData?.senha !== '' && (userData?.senha !== userData?.confirmar_senha)) {
             alert?.error('As senhas não correspondem. Por favor, verifique novamente.')
             return false
         }
@@ -86,7 +96,8 @@ export const Register = ({ type = `paciente`, setTypeSelected, typeSelected, set
         if (checkRequiredFields()) {
             setLoading(true)
             try {
-                const response = await createUser(userData)
+                userData.perfil = type;
+                const response = await api.post('/user/create', { userData })
                 const { data } = response
                 if (type?.includes('profissional')) {
                     await createContract(data?.userId, contract)
@@ -105,7 +116,20 @@ export const Register = ({ type = `paciente`, setTypeSelected, typeSelected, set
         }
     }
 
+    console.log(userData)
+
     const handleChange = (value) => {
+
+        if (value.target.name == 'cpf') {
+            let str = value.target.value;
+            value.target.value = formatCPF(str)
+        }
+
+        if (value.target.name == 'telefone') {
+            let str = value.target.value;
+            value.target.value = formatPhone(str)
+        }
+
         setUserData((prevValues) => ({
             ...prevValues,
             [value.target.name]: value.target.value,

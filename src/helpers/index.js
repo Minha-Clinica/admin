@@ -92,6 +92,15 @@ export const formatRg = (rg) => {
    return formattedRG;
 }
 
+export const formatPhone = (phone) => {
+
+   const cleanedPhone = phone.replace(/\W/g, '');
+   const phoneRegex = /^([0-9a-zA-Z]{2})([0-9a-zA-Z]{5})([0-9a-zA-Z]{4})$/;
+   const formattedPhone = cleanedPhone.replace(phoneRegex, '($1) $2-$3');
+
+   return formattedPhone;
+}
+
 export const formatCEP = (cep) => {
 
    const cleanedCEP = cep.replace(/\D/g, '');
