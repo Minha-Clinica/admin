@@ -506,16 +506,8 @@ export default function EditTask(props) {
     ]
 
     const groupArea = [
-        { label: 'Financeiro', value: 'Financeiro' },
-        { label: 'Biblioteca', value: 'Biblioteca' },
+        { label: 'SAC', value: 'SAC' },
         { label: 'TI - Suporte', value: 'TI - Suporte' },
-        { label: 'RH', value: 'RH' },
-        { label: 'Marketing', value: 'Marketing' },
-        { label: 'Atendimento/Recepção', value: 'Atendimento/Recepção' },
-        { label: 'Secretaria', value: 'Secretaria' },
-        { label: 'Administrativo', value: 'Administrativo' },
-        { label: 'Diretoria', value: 'Diretoria' },
-        { label: 'Acadêmica', value: 'Acadêmica' },
 
     ]
 

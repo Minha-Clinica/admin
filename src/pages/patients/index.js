@@ -2,9 +2,7 @@ import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
 import { Box, Button, ContentContainer, Text, TextInput } from "../../atoms"
 import { SearchBar, SectionHeader, Table_V1 } from "../../organisms"
-import { getConsultionPerfil } from "../../validators/api-requests"
 import { useAppContext } from "../../context/AppContext"
-import { SelectList } from "../../organisms/select/SelectList"
 import { TablePagination } from "@mui/material"
 import { checkUserPermissions } from "../../validators/checkPermissionUser"
 import { Paper, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Tooltip, Avatar } from "@mui/material";
@@ -12,13 +10,10 @@ import { api } from "../../api/api"
 import { icons } from "../../organisms/layout/Colors"
 import { formatTimeStamp } from "../../helpers"
 
-export default function ListConsultions(props) {
-    const [consultionList, setConsultion] = useState([])
+export default function ListPatients(props) {
+    const [patientsList, setPatients] = useState([])
     const [filterData, setFilterData] = useState('')
-    const [perfil, setPerfil] = useState('todos')
     const { setLoading, colorPalette, menuItemsList, userPermissions, user } = useAppContext()
-    const [filterAtive, setFilterAtive] = useState('todos')
-    const [filterEnrollStatus, setFilterEnrollStatus] = useState('todos')
     const [firstRender, setFirstRender] = useState(true)
     const [filters, setFilters] = useState({
         filterName: 'nome',
@@ -33,11 +28,6 @@ export default function ListConsultions(props) {
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const router = useRouter()
     const [isPermissionEdit, setIsPermissionEdit] = useState(false)
-    const userFilterFunctions = {
-        ativo: (item) => filtersField?.status === 'todos' || item.ativo === filtersField?.status,
-        enrollmentSituation: (item) => filtersField?.enrollmentSituation === 'todos' || item?.total_matriculas_em_andamento === filtersField?.enrollmentSituation,
-        perfilUser: (item) => filtersField?.userPerfil === 'todos' || item?.perfil?.includes(filtersField?.userPerfil),
-    };
 
 
     const filter = (item) => {
@@ -45,23 +35,10 @@ export default function ListConsultions(props) {
             return str?.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         };
 
-        let perfil;
-
-        if (user?.perfil?.includes('profissional')) {
-            perfil = item?.paciente;
-        }
-
-        if (user?.perfil?.includes('paciente')) {
-            perfil = item?.profissional;
-        }
-
         const normalizedFilterData = normalizeString(filterData);
 
         return (
-            // Object.values(userFilterFunctions).every(userFilterFunction => userFilterFunction(item)) &&
-            (
-                normalizeString(perfil)?.toLowerCase().includes(normalizedFilterData?.toLowerCase())
-            )
+            normalizeString(item?.paciente)?.toLowerCase().includes(normalizedFilterData?.toLowerCase())
         );
     };
 
@@ -80,7 +57,7 @@ export default function ListConsultions(props) {
     const pathname = router.pathname === '/' ? null : router.asPath.split('/')[2]
 
     useEffect(() => {
-        getConsultion();
+        getPatients();
         fetchPermissions()
         if (window.localStorage.getItem('list-consultion-filters')) {
             const admLocalStorage = JSON.parse(window.localStorage.getItem('list-consultion-filters') || null);
@@ -91,21 +68,13 @@ export default function ListConsultions(props) {
         }
     }, []);
 
-    const getConsultion = async () => {
+    const getPatients = async () => {
         setLoading(true)
         try {
-            let query;
-            if (user?.perfil?.includes('profissional')) {
-                query = `/consultation/profissional/${user?.id}`
-            }
-            if (user?.perfil?.includes('paciente')) {
-                query = `/consultation/pacient/${user?.id}`
-            }
-
-            const response = await api.get(query)
+            const response = await api.get(`/consultation/patients/profissional/${user?.id}`)
             console.log(response)
             const { data = [] } = response;
-            setConsultion(data)
+            setPatients(data)
         } catch (error) {
             console.log(error)
             return error
@@ -126,7 +95,7 @@ export default function ListConsultions(props) {
     const sortConsultion = () => {
         const { filterName, filterOrder } = filters;
 
-        const sortedConsultion = [...consultionList].sort((a, b) => {
+        const sortedConsultion = [...patientsList].sort((a, b) => {
             const valueA = filterName === 'id_consulta' ? Number(a[filterName]) : (a[filterName] || '').toLowerCase();
             const valueB = filterName === 'id_consulta' ? Number(b[filterName]) : (b[filterName] || '').toLowerCase();
 
@@ -185,27 +154,26 @@ export default function ListConsultions(props) {
         <>
             <SectionHeader
                 icon={'https://minhaclinicatrindade.s3.amazonaws.com/video_conferencia.png'}
-                title={`Consultas (${consultionList?.filter(filter)?.length})`}
+                title={`Meus Pacientes (${patientsList?.filter(filter)?.length})`}
             />
-            {/* <Text bold>Buscar por: </Text> */}
             <ContentContainer>
                 <Box sx={{ display: 'flex', flex: 1, justifyContent: 'space-between' }}>
                     <Text bold large>Filtros</Text>
                     <Box sx={{ display: 'flex', gap: 0.5 }}>
                         <Text style={{ color: '#d6d6d6' }} light>Mostrando</Text>
-                        <Text bold style={{ color: '#d6d6d6' }} light>{consultionList?.filter(filter)?.length || '0'}</Text>
+                        <Text bold style={{ color: '#d6d6d6' }} light>{patientsList?.filter(filter)?.length || '0'}</Text>
                         <Text style={{ color: '#d6d6d6' }} light>de</Text>
-                        <Text bold style={{ color: '#d6d6d6' }} light>{consultionList?.length || 0}</Text>
-                        <Text style={{ color: '#d6d6d6' }} light>consultas</Text>
+                        <Text bold style={{ color: '#d6d6d6' }} light>{patientsList?.length || 0}</Text>
+                        <Text style={{ color: '#d6d6d6' }} light>pacientes</Text>
                     </Box>
                 </Box>
                 <Box sx={{ display: 'flex', flex: 1, justifyContent: 'space-between', alignItems: 'center' }}>
                     <Box sx={{ flex: 1, display: 'flex', justifyContent: 'end' }}>
-                        <TextInput placeholder="Buscar pelo profissional.." name='filterData' type="search" onChange={(event) => setFilterData(event.target.value)} value={filterData} sx={{ flex: 1 }} />
+                        <TextInput placeholder="Buscar pelo paciente.." name='filterData' type="search" onChange={(event) => setFilterData(event.target.value)} value={filterData} sx={{ flex: 1 }} />
                     </Box>
                     <TablePagination
                         component="div"
-                        count={consultionList?.filter(filter)?.length}
+                        count={patientsList?.filter(filter)?.length}
                         page={page}
                         onPageChange={handleChangePage}
                         rowsPerPage={rowsPerPage}
@@ -216,15 +184,7 @@ export default function ListConsultions(props) {
                     />
                 </Box>
             </ContentContainer>
-            {/* {
-                consultionList?.filter(filter)?.length > 0 ?
-                    <Table data={sortConsultion()?.filter(filter).slice(startIndex, endIndex)} columns={column} columnId={'id'} enrollmentsCount={true} filters={filters} onPress={(value) => setFilters(value)} onFilter />
-                    :
-                    <Box sx={{ alignItems: 'center', justifyContent: 'center', display: 'flex', padding: '80px 40px 0px 0px' }}>
-                        <Text bold>Não foi encontrado consultas</Text>
-                    </Box>
-            } */}
-            <TableConsultion data={consultionList?.filter(filter)?.slice(startIndex, endIndex)} />
+            <TableConsultion data={patientsList?.filter(filter)?.slice(startIndex, endIndex)} />
 
         </>
     )
@@ -232,35 +192,21 @@ export default function ListConsultions(props) {
 
 const TableConsultion = ({ data = [], filters = [], onPress = () => { } }) => {
     const { setLoading, colorPalette, theme, user } = useAppContext()
-    const isProfissional = user?.perfil?.includes('profissional')
 
-    let columns = []
-
-    if (isProfissional) {
-        columns = [
-            { key: 'data', label: 'Data' },
-            { key: isProfissional ? 'paciente' : 'profissional', label: isProfissional ? 'Paciente ' : 'Profissional' },
-            { key: 'preco', label: 'Valor' },
-            { key: 'modalidade', label: 'Tipo' },
-            { key: 'status', label: 'Status' },
-            { key: 'actions', label: 'Ações' },
-        ];
-    } else {
-        columns = [
-            { key: 'data', label: 'Data' },
-            { key: isProfissional ? 'paciente' : 'profissional', label: isProfissional ? 'Paciente ' : 'Profissional' },
-            { key: 'preco', label: 'Valor' },
-            { key: 'modalidade', label: 'Tipo' },
-            { key: 'status', label: 'Status' },
-        ];
-    }
+    const columns = [
+        { key: 'paciente', label: 'Paciente ' },
+        { key: 'ultima_consulta', label: 'Ultima Consulta' },
+        { key: 'proxima_consulta', label: 'Proxima Consulta' },
+        { key: 'modalidade', label: 'Atendimento' },
+        { key: 'actions', label: 'Ações' },
+    ];
 
     const router = useRouter();
     const menu = router.pathname === '/' ? null : router.asPath.split('/')[1]
     const subMenu = router.pathname === '/' ? null : router.asPath.split('/')[2]
 
     const handleRowClick = (id) => {
-        window.open(`/consultation/${id}`, '_blank');
+        window.open(`/patients/${id}`, '_blank');
         return;
     };
 
@@ -286,23 +232,25 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { } }) => {
                                 <TableCell key={index} sx={{ padding: '16px', }}>
                                     <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'center' }}>
                                         <Text bold style={{ textAlign: 'center' }}>{column.label}</Text>
-                                        {column.key !== "actions" && <Box sx={{
-                                            ...styles.menuIcon,
-                                            backgroundImage: `url(${icons.gray_arrow_down})`,
-                                            transform: filters?.filterName === column.key ? filters?.filterOrder === 'asc' ? 'rotate(-0deg)' : 'rotate(-180deg)' : 'rotate(-0deg)',
-                                            transition: '.3s',
-                                            width: 17,
-                                            height: 17,
+                                        {column.key !== "actions" &&
+                                            <Box sx={{
+                                                ...styles.menuIcon,
+                                                backgroundImage: `url(${icons.gray_arrow_down})`,
+                                                transform: filters?.filterName === column.key ? filters?.filterOrder === 'asc' ? 'rotate(-0deg)' : 'rotate(-180deg)' : 'rotate(-0deg)',
+                                                transition: '.3s',
+                                                width: 17,
+                                                height: 17,
 
-                                            "&:hover": {
-                                                opacity: 0.8,
-                                                cursor: 'pointer'
-                                            },
-                                        }}
-                                            onClick={() => onPress({
-                                                filterName: column.key,
-                                                filterOrder: filters?.filterOrder === 'asc' ? 'desc' : 'asc'
-                                            })} />}
+                                                "&:hover": {
+                                                    opacity: 0.8,
+                                                    cursor: 'pointer'
+                                                },
+                                            }}
+                                                onClick={() => onPress({
+                                                    filterName: column.key,
+                                                    filterOrder: filters?.filterOrder === 'asc' ? 'desc' : 'asc'
+                                                })} />
+                                                }
                                     </Box>
                                 </TableCell>
                             ))}
@@ -318,15 +266,12 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { } }) => {
                                             backgroundColor: colorPalette.primary + '88',
                                         },
                                     }}>
-                                        <TableCell sx={{ padding: '8px 10px', textAlign: 'center' }}>
-                                            <Text>{formatTimeStamp(item?.data, true) || '-'}</Text>
-                                        </TableCell>
-                                        <Tooltip title={isProfissional ? item?.paciente : item?.profissional}>
+                                        <Tooltip title={item?.paciente}>
                                             <TableCell sx={{
                                                 padding: '15px 10px', textAlign: 'center',
                                             }}>
                                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'center' }}>
-                                                    <Avatar src={item?.url_foto_prof || ''} sx={{
+                                                    <Avatar src={item?.avatar || ''} sx={{
                                                         height: { xs: '100%', sm: 30, md: 30, lg: 30 },
                                                         width: { xs: '100%', sm: 30, md: 30, lg: 30 },
                                                     }} variant="circular"
@@ -335,39 +280,24 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { } }) => {
                                                         textOverflow: 'ellipsis',
                                                         whiteSpace: 'nowrap',
                                                         overflow: 'hidden',
-                                                    }}>{isProfissional ? item?.paciente : item?.profissional || '-'}</Text>
+                                                    }}>{item?.paciente || '-'}</Text>
                                                 </Box>
                                             </TableCell>
                                         </Tooltip>
-                                        <TableCell sx={{ padding: '15px 10px', textAlign: 'center' }}>
-                                            <Text>{formatter.format(item?.preco) || '-'}</Text>
+                                        <TableCell sx={{ padding: '8px 10px', textAlign: 'center' }}>
+                                            <Text>{formatTimeStamp(item?.ultima_consulta, true) || '-'}</Text>
+                                        </TableCell>
+                                        <TableCell sx={{ padding: '8px 10px', textAlign: 'center' }}>
+                                            <Text>{formatTimeStamp(item?.proxima_consulta, true) || '-'}</Text>
                                         </TableCell>
                                         <TableCell sx={{ padding: '15px 10px', textAlign: 'center' }}>
                                             <Text>{item?.modalidade || '-'}</Text>
                                         </TableCell>
                                         <TableCell sx={{ padding: '15px 10px', textAlign: 'center' }}>
-                                            <Box
-                                                sx={{
-                                                    display: 'flex',
-                                                    backgroundColor: colorPalette.primary,
-                                                    height: 30,
-                                                    gap: 2,
-                                                    alignItems: 'center',
-                                                    // width: 100,
-                                                    borderRadius: 2,
-                                                    justifyContent: 'start',
-                                                }}
-                                            >
-                                                <Box sx={{ display: 'flex', backgroundColor: statusColor(item?.status), padding: '0px 5px', height: '100%', borderRadius: '8px 0px 0px 8px' }} />
-                                                <Text small bold>{item?.status}</Text>
+                                            <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
+                                                <Button secondary text="prontuário" small />
                                             </Box>
                                         </TableCell>
-                                        {isProfissional && <TableCell sx={{ padding: '15px 10px', textAlign: 'center' }}>
-                                            <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
-                                                <Button secondary text="prontuário" small
-                                                    onClick={() => handleRowClick(item?.id_consulta)} />
-                                            </Box>
-                                        </TableCell>}
                                     </TableRow>
                                 );
                             })

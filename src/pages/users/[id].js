@@ -73,7 +73,7 @@ export default function EditUser() {
         { dia_semana: 'Sábado', ent1: null, sai1: null, ent2: null, sai2: null, ent3: null, sai3: null },
     ]);
     const [isPermissionEdit, setIsPermissionEdit] = useState(false)
-
+    const isAdministrador = user?.perfil?.includes('administrador');
 
     const fetchPermissions = async () => {
         try {
@@ -585,30 +585,33 @@ export default function EditUser() {
                         />
                         <TextInput disabled={!isPermissionEdit && true} placeholder='CPF' name='cpf' onChange={handleChange} value={userData?.cpf || ''} label='CPF' sx={{ flex: 1, }} />
 
-                        <Box sx={{ ...styles.inputSection, justifyContent: 'start', alignItems: 'center', gap: 25 }}>
-                            <CheckBoxComponent disabled={!isPermissionEdit && true}
-                                valueChecked={userData?.perfil}
-                                boxGroup={groupPerfil}
-                                title="Perfil *"
-                                horizontal={mobile ? false : true}
-                                onSelect={(value) => setUserData({
-                                    ...userData,
-                                    perfil: value,
-                                })}
-                                sx={{ flex: 1, }}
-                            />
+                        {isAdministrador &&
+                            <> <Box sx={{ ...styles.inputSection, justifyContent: 'start', alignItems: 'center', gap: 25 }}>
+                                <CheckBoxComponent disabled={!isPermissionEdit && true}
+                                    valueChecked={userData?.perfil}
+                                    boxGroup={groupPerfil}
+                                    title="Perfil *"
+                                    horizontal={mobile ? false : true}
+                                    onSelect={(value) => setUserData({
+                                        ...userData,
+                                        perfil: value,
+                                    })}
+                                    sx={{ flex: 1, }}
+                                />
 
-                        </Box>
-                        <RadioItem disabled={!isPermissionEdit && true} valueRadio={userData?.ativo} group={groupStatus} title="Status *" horizontal={mobile ? false : true} onSelect={(value) => setUserData({
-                            ...userData,
-                            ativo: parseInt(value)
-                        })} />
+                            </Box>
+                                <RadioItem disabled={!isPermissionEdit && true} valueRadio={userData?.ativo} group={groupStatus} title="Status *" horizontal={mobile ? false : true} onSelect={(value) => setUserData({
+                                    ...userData,
+                                    ativo: parseInt(value)
+                                })} />
+                            </>
+                        }
                     </Box>
                 </Box>
             </ContentContainer>
 
 
-            <ContentContainer style={{ ...styles.containerRegister, padding: showSections?.accessData ? '40px' : '25px' }}>
+            {isAdministrador && <ContentContainer style={{ ...styles.containerRegister, padding: showSections?.accessData ? '40px' : '25px' }}>
                 <Box sx={{
                     display: 'flex', alignItems: 'center', gap: 1, padding: showSections?.accessData ? '0px 0px 20px 0px' : '0px', "&:hover": {
                         opacity: 0.8,
@@ -640,7 +643,7 @@ export default function EditUser() {
                         <RadioItem disabled={!isPermissionEdit && true} valueRadio={userData?.admin_sistema} group={groupAdmin} title="Acesso ao Sistema *" horizontal={mobile ? false : true} onSelect={(value) => setUserData({ ...userData, admin_sistema: parseInt(value) })} />
 
                     </>}
-            </ContentContainer>
+            </ContentContainer>}
 
             {/* contrato */}
             {userData.perfil && !userData.perfil.includes('cliente') &&
@@ -669,8 +672,8 @@ export default function EditUser() {
                             <>
                                 <Box sx={styles.inputSection}>
                                     <TextInput disabled={!isPermissionEdit && true} placeholder='Profissão' name='funcao' onChange={handleChangeContract} value={contract?.funcao || ''} label='Profissão:' sx={{ flex: 1, }} />
-                                    <TextInput disabled={!isPermissionEdit && true} placeholder='Início da contratação' name='admissao' type="date" onChange={handleChangeContract} value={(contract?.admissao)?.split('T')[0] || ''} label='Início da contratação' sx={{ flex: 1, }} />
-                                    <TextInput disabled={!isPermissionEdit && true} placeholder='Encerramento' name='desligamento' type="date" onChange={handleChangeContract} value={contract?.desligamento?.split('T')[0] || ''} label='Encerramento da contratação' sx={{ flex: 1, }} onBlur={() => {
+                                    <TextInput disabled={!isAdministrador && true} placeholder='Início da contratação' name='admissao' type="date" onChange={handleChangeContract} value={(contract?.admissao)?.split('T')[0] || ''} label='Início da contratação' sx={{ flex: 1, }} />
+                                    <TextInput disabled={!isAdministrador && true} placeholder='Encerramento' name='desligamento' type="date" onChange={handleChangeContract} value={contract?.desligamento?.split('T')[0] || ''} label='Encerramento da contratação' sx={{ flex: 1, }} onBlur={() => {
                                         new Date(contract?.desligamento) > new Date(1001, 0, 1) &&
                                             setUserData({ ...userData, ativo: 0 })
                                     }} />

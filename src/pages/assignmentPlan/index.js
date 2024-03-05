@@ -2,25 +2,37 @@ import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
 import { Box, Button, ContentContainer, Divider, Text, TextInput } from "../../atoms"
 import { SearchBar, SectionHeader, Table_V1 } from "../../organisms"
+import { CardElement, useStripe, useElements, Elements } from '@stripe/react-stripe-js';
 import { useAppContext } from "../../context/AppContext"
 import { api } from "../../api/api"
 import moment from "moment";
+import Cards from 'react-credit-cards'
 import "moment/locale/pt-br";
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
-import { Paper, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Tooltip, Avatar } from "@mui/material";
+import { Paper, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Tooltip, Avatar, Backdrop } from "@mui/material";
 import { icons } from "../../organisms/layout/Colors"
+import { redirect } from "react-router-dom";
 
 
 export default function ListProfissionals(props) {
     const [planList, setPlanList] = useState([])
+    const [showPayment, setShowPayment] = useState({ active: false, plan: null })
     const [planActually, setPlanActually] = useState('free')
-    const { setLoading, colorPalette, alert } = useAppContext()
+    const { setLoading, colorPalette, alert, user } = useAppContext()
+    const [focusedCreditCard, setFocusedCreditCard] = useState('');
     const router = useRouter()
+    const [error, setError] = useState(null);
     moment.locale("pt-br");
-
+    const stripe = useStripe();
+    const elements = useElements();
     const pathname = router.pathname === '/' ? null : router.asPath.split('/')[2]
-
+    const [creditCard, setCreditCard] = useState({
+        cvc: '',
+        dt_expiracao: '',
+        nome_cartao: '',
+        numero_cartao: '',
+    });
     // useEffect(() => {
     //     getPlans();
     // }, []);
@@ -38,6 +50,33 @@ export default function ListProfissionals(props) {
     //         setLoading(false)
     //     }
     // }
+
+
+    const handleFocused = (event) => {
+        setFocusedCreditCard(event.target.name);
+    }
+
+
+    const handleAssignment = async () => {
+        setLoading(true)
+        try {
+
+            const handle = await api.post(`/assignments/create`, { profissionalId: user?.id })
+            const { url } = handle?.data
+
+            if (url) {
+                window.location.href = url;
+            } else {
+                alert.error('Ocorreu um erro ao fazer checkout. Tente novamente mais tarde')
+            }
+
+        } catch (error) {
+            console.log(error)
+            return error
+        } finally {
+            setLoading(false)
+        }
+    }
 
     const column = [
         { key: 'id', label: 'ID' },
@@ -81,7 +120,6 @@ export default function ListProfissionals(props) {
             <SectionHeader
                 icon={'/icons/plan_payment.png'}
                 title={`Planos de Assinatura`}
-
             />
 
             <Text veryLarge bold style={{ color: colorPalette.buttonColor, textAlign: 'center' }}>Confirma nossos planos disponíveis:</Text>
@@ -90,18 +128,16 @@ export default function ListProfissionals(props) {
                 {plansAssignment?.map((item, index) => {
                     const listIncludes = item?.listPlans;
                     const isPreferency = item?.preferency;
-                    const isPlan = planActually === item?.key;
+                    const actuallyPLan = planActually === item?.key;
                     return (
                         <Box key={index} sx={{ position: 'relative', display: 'flex', gap: 1 }}>
+                            {/* <form action={"/api/create-checkout-session"} method="POST"> */}
                             <ContentContainer sx={{
                                 backgroundColor: isPreferency ? colorPalette.third : '#FFF',
                                 transition: '.5s',
-                                "&:hover": {
-                                    // opacity: 0.8,
-                                    transform: 'scale(1.1, 1.1)'
-                                },
+                                transform: isPreferency && 'scale(1.1, 1.1)'
                             }}>
-                                {isPlan && <Box sx={{
+                                {actuallyPLan && <Box sx={{
                                     transition: '.5s',
                                     padding: '8px 12px', alignItems: 'center', display: 'flex', backgroundColor: 'red', borderRadius: 2,
                                     position: 'absolute', top: 5, left: 5
@@ -129,34 +165,41 @@ export default function ListProfissionals(props) {
                                     <Text indicator bold style={{ color: 'inherit' }}>{formatter.format(item?.price)}/mês</Text>
                                     <Box sx={{
                                         padding: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        maxWidth: 200,
                                         marginTop: 2,
                                         transition: '.5s',
                                         gap: 2,
-                                        backgroundColor: isPreferency ? colorPalette.buttonColor : colorPalette.buttonColor,
+                                        border: actuallyPLan && `1px solid ${colorPalette.buttonColor}`,
+                                        backgroundColor: actuallyPLan ? 'trasnparent' : isPreferency ? colorPalette.buttonColor : colorPalette.buttonColor,
                                         borderRadius: 2,
                                         "&:hover": {
                                             opacity: 0.8,
                                             cursor: 'pointer',
                                             transform: 'scale(1.1, 1.1)'
                                         }
-                                    }} onClick={() => {
-                                        if (isPlan) {
-                                            alert.info('O plano selecionado já corresponde a seu plano atual.')
-                                        } else {
-                                            setPlanActually(item?.key)
-                                        }
-                                    }}>
-                                        <Text bold style={{ color: '#fff' }}>Assinar plano {item?.nome}</Text>
+                                    }} onClick={() => handleAssignment()}>
+                                        <Text bold style={{ color: !actuallyPLan && '#fff' }}>{
+                                            actuallyPLan ? `Cancelar Plano` :
+                                                `Alterar assinatura para ${item?.nome}`}</Text>
+                                        {/* <Text bold style={{ color: '#fff' }}>
+                                                <button type="submit" id="checkout-button" name="userId" value={user?.id} style={{
+                                                    border: 'none',
+                                                    outline: 'none',
+                                                    background: 'none',
+                                                    padding: '0',
+                                                    fontSize: 'inherit',
+                                                    color: 'inherit',// Exemplo: Adicione underline para indicar que é um link
+                                                    cursor: 'pointer',
+                                                }}>Assinar plano {item?.nome}</button></Text> */}
                                     </Box>
                                 </Box>
                             </ContentContainer>
+                            {/* </form> */}
                         </Box>
                     )
                 })}
             </Box>
 
-            <Box sx={{display: 'flex', gap: 5, marginTop: 8, flexDirection: 'column'}}>
+            <Box sx={{ display: 'flex', gap: 5, marginTop: 8, flexDirection: 'column' }}>
                 <Text veryLarge bold>Assinaturas</Text>
                 <TableAssignments />
             </Box>

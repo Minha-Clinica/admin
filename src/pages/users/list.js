@@ -13,7 +13,7 @@ export default function ListUsers(props) {
     const [usersList, setUsers] = useState([])
     const [filterData, setFilterData] = useState('')
     const [perfil, setPerfil] = useState('todos')
-    const { setLoading, colorPalette, menuItemsList, userPermissions } = useAppContext()
+    const { setLoading, colorPalette, menuItemsList, userPermissions, user } = useAppContext()
     const [filterAtive, setFilterAtive] = useState('todos')
     const [filterEnrollStatus, setFilterEnrollStatus] = useState('todos')
     const [firstRender, setFirstRender] = useState(true)
@@ -35,6 +35,12 @@ export default function ListUsers(props) {
         enrollmentSituation: (item) => filtersField?.enrollmentSituation === 'todos' || item?.total_matriculas_em_andamento === filtersField?.enrollmentSituation,
         perfilUser: (item) => filtersField?.userPerfil === 'todos' || item?.perfil?.includes(filtersField?.userPerfil),
     };
+
+    useEffect(() => {
+        if (!user?.perfil?.includes('administrador')) {
+            router.push('/')
+        }
+    }, [])
 
 
     const filter = (item) => {

@@ -234,4 +234,14 @@ export const formatTimeAgo = (timestamp, includeTime = false) => {
    return `${diffInMonths} ${diffInMonths === 1 ? 'mês' : 'meses'} atrás`;
 };
 
+export const calculationAgeUser = (age) => {
+   const dataNascimento = new Date(age);
+   const dataAtual = new Date();
+   const diff = dataAtual - dataNascimento;
+   
+   const idade = Math.floor(diff / (365.25 * 24 * 60 * 60 * 1000)); // considerando ano bissexto
+   
+   return idade;
+}
+
 

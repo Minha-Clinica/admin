@@ -15,6 +15,7 @@ import { useRouter } from "next/router";
 import { checkUserPermissions } from "../../validators/checkPermissionUser";
 import { CheckBox } from "@mui/icons-material";
 import { formatDate, formatTimeStamp } from "../../helpers";
+import Link from "next/link";
 
 
 moment.locale("pt-br");
@@ -101,6 +102,7 @@ export default function CalendarComponent(props) {
     const [filterData, setFilterData] = useState('');
     const [selectedDays, setSelectedDays] = useState([]);
     const [availability, setAvailability] = useState({});
+    const [filterReservas, setFilterReservas] = useState(false)
     const [eventData, setEventData] = useState({
         title: "",
         description: "",
@@ -112,6 +114,7 @@ export default function CalendarComponent(props) {
         description: '',
         location: '',
         usuario_agendado: '',
+        nome_usuario_agendado: '',
         email_agendado: '',
         nome_agendado: '',
         disponivel: 0,
@@ -133,9 +136,9 @@ export default function CalendarComponent(props) {
             return error
         }
     }
-    let date = new Date(year, 6, 1);
+
     const filter = (item) => {
-        return semester === '1º Semestre' ? (item && item.start < date) : (item && item.start >= date);
+        return filterReservas ? (parseInt(item.disponivel) === 1) : (item);
     };
 
     useEffect(() => {
@@ -230,11 +233,12 @@ export default function CalendarComponent(props) {
                     usuario_agendado: event?.usuario_agendado,
                     email_agendado: event?.email_agendado,
                     nome_agendado: event?.nome_agendado,
+                    nome_usuario_agendado: event?.nome_usuario_agendado,
                     usuario_agendado: event?.usuario_agendado,
                     disponivel: event?.disponivel,
                     usuario_id: event?.usuario_id,
                     allDay: false, // Ajuste isso com base no seu caso de uso
-
+                    consulta_id: event?.id_consulta
                 }));
                 setEvents([...eventsMap, ...Holidays]);
                 return
@@ -425,6 +429,7 @@ export default function CalendarComponent(props) {
             usuario_agendado: '',
             email_agendado: '',
             nome_agendado: '',
+            nome_usuario_agendado: '',
             disponivel: 0,
             usuario_id: '',
             allDay: false
@@ -536,7 +541,8 @@ export default function CalendarComponent(props) {
                         email_agendado: '',
                         nome_agendado: '',
                         disponivel: 0,
-                        usuario_id: user?.id
+                        usuario_id: user?.id,
+                        nome_usuario_agendado: ''
                     };
 
                     events.push(event);
@@ -604,9 +610,36 @@ export default function CalendarComponent(props) {
                         }
                     }} />
 
+                <Box sx={{
+                    display: 'flex',
+                    backgroundColor: filterReservas ? colorPalette.buttonColor : colorPalette?.secondary,
+                    padding: '10px 20px',
+                    borderRadius: 2,
+                    alignItems: 'center', gap: 2,
+                    transition: '.4s',
+                    boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
+                    "&:hover": {
+                        opacity: 0.8,
+                        cursor: 'pointer',
+                        transform: 'scale(1.03, 1.03)'
+                    }
+                }} onClick={() => setFilterReservas(!filterReservas)}>
+                    <Box sx={{
+                        ...styles.menuIcon,
+                        backgroundImage: `url('/icons/agenda_espera_icon.png')`,
+                        filter: filterReservas ? 'brightness(0) invert(1)' : 'brightness(0) invert(0)',
+                        width: 20, height: 20,
+                        "&:hover": {
+                            opacity: 0.8,
+                            cursor: 'pointer'
+                        }
+                    }} />
+                    <Text bold style={{ color: filterReservas ? '#fff' : colorPalette?.textColor }}>Vizualizar consultas agendas</Text>
+                </Box>
+
                 <Box sx={{ display: 'flex', gap: 2, }}>
 
-                    <Box sx={{
+                    {/* <Box sx={{
                         display: 'flex', backgroundColor: colorPalette.secondary, padding: '10px 20px',
                         borderRadius: 2,
                         alignItems: 'center', gap: 2,
@@ -627,7 +660,7 @@ export default function CalendarComponent(props) {
                             }
                         }} />
                         <Text bold>Novo agendamento</Text>
-                    </Box>
+                    </Box> */}
 
 
                     <Box sx={{
@@ -650,7 +683,7 @@ export default function CalendarComponent(props) {
                                 cursor: 'pointer'
                             }
                         }} />
-                        <Text bold>Disponibilidade de Reservas</Text>
+                        <Text bold>Criar lista de Reservas</Text>
                     </Box>
 
                     <Box sx={{
@@ -675,29 +708,6 @@ export default function CalendarComponent(props) {
                         }} />
                         <Text bold>Lista de Reservas</Text>
                     </Box>
-
-                    <Box sx={{
-                        display: 'flex', backgroundColor: colorPalette.secondary, padding: '10px 20px',
-                        borderRadius: 2,
-                        alignItems: 'center', gap: 2,
-                        boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
-                        "&:hover": {
-                            opacity: 0.8,
-                            cursor: 'pointer'
-                        }
-                    }}>
-                        <Box sx={{
-                            ...styles.menuIcon,
-                            backgroundImage: `url('/icons/agenda_espera_icon.png')`,
-                            transition: '.3s',
-                            width: 20, height: 20,
-                            "&:hover": {
-                                opacity: 0.8,
-                                cursor: 'pointer'
-                            }
-                        }} />
-                        <Text bold>Lista de Espera</Text>
-                    </Box>
                 </Box>
             </Box>
 
@@ -705,7 +715,7 @@ export default function CalendarComponent(props) {
                 localizer={localizer}
                 // defaultDate={month?.start}
                 culture="pt-br"
-                events={events}
+                events={events?.filter(filter)}
                 startAccessor="start"
                 endAccessor="end"
                 selectable
@@ -762,6 +772,7 @@ export default function CalendarComponent(props) {
                                         usuario_agendado: '',
                                         email_agendado: '',
                                         nome_agendado: '',
+                                        nome_usuario_agendado: '',
                                         disponivel: 0,
                                         usuario_id: '',
                                         allDay: false
@@ -811,21 +822,21 @@ export default function CalendarComponent(props) {
                                     value={eventData.color}
                                     onChange={handleEventFormChange}
                                 />
-                                 <TextInput disabled={!isPermissionEdit && true}
+                                <TextInput disabled={!isPermissionEdit && true}
                                     name="email_agendado"
                                     value={eventData?.email_agendado || ''}
                                     label='E-mail agendado:'
                                     onChange={handleEventFormChange}
                                     sx={{ flex: 1 }}
                                 />
-                                 <TextInput disabled={!isPermissionEdit && true}
+                                <TextInput disabled={!isPermissionEdit && true}
                                     name="nome_agendado"
                                     value={eventData?.nome_agendado || ''}
                                     label='Nome agendado:'
                                     onChange={handleEventFormChange}
                                     sx={{ flex: 1 }}
                                 />
-                                 <TextInput disabled={!isPermissionEdit && true}
+                                <TextInput disabled={!isPermissionEdit && true}
                                     name="nome_usuario_agendado"
                                     value={eventData?.nome_usuario_agendado || ''}
                                     label='Paciente:'
@@ -833,6 +844,19 @@ export default function CalendarComponent(props) {
                                     sx={{ flex: 1 }}
                                 />
                                 <Divider />
+
+                                {eventData?.consulta_id &&
+                                    <Link href={`/consultation/${eventData?.consulta_id}`} target="_blank">
+                                        <Button
+                                            secondary
+                                            disabled={!isPermissionEdit && true}
+                                            small
+                                            text="Prontuário"
+                                            style={{ height: 30, width: 120 }}
+                                        />
+                                    </Link>
+                                }
+
                                 <Box sx={{ display: 'flex', justifyContent: 'start', gap: 1, alignItems: 'center', marginTop: 2 }}>
                                     <Button
                                         disabled={!isPermissionEdit && true}

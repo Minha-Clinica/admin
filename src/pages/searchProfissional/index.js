@@ -1,5 +1,5 @@
 import { useRouter } from "next/router"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Box, Button, ContentContainer, Divider, Text, TextInput } from "../../atoms"
 import { SearchBar, SectionHeader, Table_V1 } from "../../organisms"
 import { useAppContext } from "../../context/AppContext"
@@ -187,6 +187,16 @@ const ProfissionalCard = ({ data, loadingDate, setLoadingDate, dateSelected, set
     moment.locale("pt-br");
     const router = useRouter()
     const [carouselIndex, setCarouselIndex] = useState(0);
+    const [positionItem, setPositionItem] = useState(0);
+
+
+    const handleArrowClick = (direction) => {
+        if (direction === 'previous') {
+            setPositionItem(positionItem - '20%')
+        } else {
+            setPositionItem(positionItem + '20%')
+        }
+    };
 
     const handleNext = (item) => {
         const horariosDisponiveis = item?.filter(agend => moment(agend.inicio).format("YYYY-MM-DD") === dateSelected?.day);
@@ -310,7 +320,7 @@ const ProfissionalCard = ({ data, loadingDate, setLoadingDate, dateSelected, set
                                             display: 'flex', gap: 2, width: '100%', justifyContent: 'center', marginTop: 1,
                                             alignItems: 'center'
                                         }}>
-                                            <Box sx={{
+                                            {/* <Box sx={{
                                                 ...styles.menuIcon,
                                                 padding: '8px',
                                                 margin: '0px 5px',
@@ -324,29 +334,32 @@ const ProfissionalCard = ({ data, loadingDate, setLoadingDate, dateSelected, set
                                                     cursor: 'pointer',
                                                     backgroundColor: colorPalette.primary
                                                 }
-                                            }} />
-                                            {Object.entries(agendasAgrupadas).map(([data, agendas]) => {
-                                                const selected = dateSelected?.day === data && dateSelected?.profissionalId === item?.id;
-                                                const weekName = moment(data).format("ddd");
-                                                const dateFormatted = moment(data).format("DD/MM");
+                                            }} onClick={() => handleArrowClick('next')}
+                                            /> */}
+                                            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'flex-start', maxWidth: 500, overflow: 'auto' }}>
+                                                {Object.entries(agendasAgrupadas).map(([data, agendas]) => {
+                                                    const selected = dateSelected?.day === data && dateSelected?.profissionalId === item?.id;
+                                                    const weekName = moment(data).format("ddd");
+                                                    const dateFormatted = moment(data).format("DD/MM");
 
-                                                return (
-                                                    <Box key={agendas} sx={{
-                                                        display: 'flex', flexDirection: 'column', gap: .5, padding: '5px 12px', borderRadius: 2,
-                                                        backgroundColor: selected ? colorPalette.buttonColor : colorPalette.primary, justifyContent: 'center',
-                                                        "&:hover": {
-                                                            opacity: 0.8,
-                                                            cursor: 'pointer'
-                                                        }
-                                                    }} onClick={() => {
-                                                        handleSelectedDate(data, item?.id);
-                                                    }}>
-                                                        <Text bold large style={{ color: selected && '#fff' }}>{weekName}</Text>
-                                                        <Text large style={{ color: selected && '#fff' }}>{dateFormatted}</Text>
-                                                    </Box>
-                                                );
-                                            })}
-                                            <Box sx={{
+                                                    return (
+                                                        <Box key={agendas} sx={{
+                                                            display: 'flex', flexDirection: 'column', gap: .5, padding: '5px 12px', borderRadius: 2,
+                                                            backgroundColor: selected ? colorPalette.buttonColor : colorPalette.primary, justifyContent: 'center',
+                                                            "&:hover": {
+                                                                opacity: 0.8,
+                                                                cursor: 'pointer'
+                                                            }
+                                                        }} onClick={() => {
+                                                            handleSelectedDate(data, item?.id);
+                                                        }}>
+                                                            <Text bold large style={{ color: selected && '#fff' }}>{weekName}</Text>
+                                                            <Text large style={{ color: selected && '#fff' }}>{dateFormatted}</Text>
+                                                        </Box>
+                                                    );
+                                                })}
+                                            </Box>
+                                            {/* <Box sx={{
                                                 ...styles.menuIcon,
                                                 padding: '8px',
                                                 margin: '0px 5px',
@@ -360,7 +373,8 @@ const ProfissionalCard = ({ data, loadingDate, setLoadingDate, dateSelected, set
                                                     cursor: 'pointer',
                                                     backgroundColor: colorPalette.primary
                                                 }
-                                            }} />
+                                            }} onClick={() => handleArrowClick('previous')}
+                                            /> */}
                                         </Box>
                                         {(dateSelected?.day && dateSelected?.profissionalId === item?.id) ?
                                             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, marginTop: 1, alignItems: 'center', justifyContent: 'center' }}>
