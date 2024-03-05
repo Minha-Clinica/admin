@@ -49,6 +49,50 @@ const birthDate = [
    { id: '04', name: 'Renato Miranda', day: 5, function: 'Gerente Suporte' }
 ]
 
+
+const subMenu = [
+   {
+      id: '01', icon: '/icons/agenda_icon.png',
+      route: '/calendar',
+      title: 'Minha Agenda',
+      permissions: ['profissional', 'administrador'],
+      filter: true,
+      text: 'Vizualize suas agendas confirmadas ou crie sua lista de reservas.'
+   },
+   {
+      id: '02', icon: 'https://minhaclinicatrindade.s3.amazonaws.com/video_conferencia.png',
+      route: '/consultation',
+      title: 'Minhas Consultas',
+      permissions: ['profissional', 'paciente', 'administrador'],
+      filter: true,
+      text: 'Vizualize os prontuários de seus pacientes de consultas agendadas.'
+   },
+   {
+      id: '03', icon: '/icons/search_input_icon.png',
+      route: '/searchProfissional',
+      title: 'Buscar Terapeura',
+      permissions: ['paciente', 'administrador'],
+      filter: true,
+      text: 'Buscar profissionais e marque sua consulta agora mesmo!'
+   },
+   {
+      id: '04', icon: 'https://mf-planejados.s3.amazonaws.com/Icon_financeiro.svg',
+      route: '',
+      title: 'Pagamentos',
+      permissions: ['paciente', 'administrador'],
+      filter: true,
+      text: 'Veja o extrato dos pagamentos de suas consultas realizadas!'
+   },
+   {
+      id: '05', icon: '/icons/plan_payment.png',
+      filter: true,
+      route: '/assignmentPlan',
+      permissions: ['profissional', 'administrador'],
+      title: 'Meus Planos',
+      text: 'Usufrua o melhor da plataforma contratando os melhores planos! E aproveite!'
+   }
+]
+
 function Home() {
 
    const { user, colorPalette, theme, setLoading, alert, notificationUser } = useAppContext()
@@ -93,7 +137,6 @@ function Home() {
          setLoading(false)
       }
    }
-
 
    const handleEvents = async () => {
       try {
@@ -326,215 +369,92 @@ function Home() {
                   <Box sx={{ display: 'flex', gap: 2, marginTop: 5, flexDirection: 'column' }}>
                      <Text large bold>{isPacient ? 'Atendimento' : 'Consultas'}</Text>
                      <Box sx={{
-                        display: 'flex', gap: 2, backgroundColor: '#fff', padding: '30px',
-                        boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`, borderRadius: 2
+                        display: 'flex', gap: 2, padding: '10px',
+                        // boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
+                        borderRadius: 2
                      }}>
                         <Box sx={{
-                           ...styles.menuIcon,
-                           backgroundImage: `url('/icons/agendamento_icon.png')`,
-                           transition: '.3s',
-                           width: 250, height: 250,
-                        }} />
-
-                        <Box sx={{ display: 'flex', height: '250px', width: '1px', backgroundColor: 'lightgray' }} />
-                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 5, padding: '0px 20px' }}>
-                           <Box sx={{ display: isPacient ? 'flex' : 'none', gap: 1.5, flexDirection: 'column' }}>
-
-                              <Box><Text large light>Buscar profissional agora mesmo!</Text></Box>
+                           display: 'flex', gap: 2,
+                        }}>
+                           <Box sx={{
+                              display: 'flex', gap: 2,
+                              backgroundColor: '#fff',
+                              // boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
+                              borderRadius: 2
+                           }}>
                               <Box sx={{
-                                 padding: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                 maxWidth: 220,
-                                 transition: '.5s',
-                                 gap: 2,
-                                 backgroundColor: colorPalette.buttonColor,
-                                 borderRadius: 2,
-                                 "&:hover": {
-                                    opacity: 0.8,
-                                    cursor: 'pointer',
-                                    transform: 'scale(1.1, 1.1)'
-                                 }
-                              }} onClick={() => router.push('/searchProfissional')}>
-                                 <Box sx={{
-                                    ...styles.menuIcon,
-                                    backgroundImage: `url('/icons/search_input_icon.png')`,
-                                    filter: 'brightness(0) invert(1)',
-                                    transition: '.3s',
-                                    width: 20, height: 20,
-
-                                 }} />
-
-                                 <Text bold style={{ color: '#fff' }}>BUSCAR TERAPEUTA</Text>
-                              </Box>
+                                 ...styles.menuIcon,
+                                 backgroundImage: `url('/icons/agendamento_icon.png')`,
+                                 transition: '.3s',
+                                 width: 400, height: 'auto',
+                              }} />
                            </Box>
+                           <Box sx={{ display: 'flex', marginLeft: 2, height: '100%', width: '1px', backgroundColor: 'lightgray' }} />
+                        </Box>
+                        <Box sx={{
+                           display: 'flex', flexDirection: 'column', gap: 5, padding: '0px 20px',
+                           width: '100%'
+                        }}>
+                           <Box sx={{
+                              display: 'flex', gap: 2, flexDirection: 'column',
+                              width: '100%'
+                           }}>
+                              {subMenu?.map((item, index) => {
+                                 const isPermission = item?.permissions?.some(role => user?.perfil?.includes(role))
 
-                           {consultionList?.length > 0 ?
-                              <Box sx={{ display: isPacient ? 'none' : 'flex', gap: 1.5, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-
-                                 <Box sx={{
-                                    ...styles.menuIcon,
-                                    padding: '8px',
-                                    margin: '0px 5px',
-                                    backgroundImage: `url(${icons.gray_arrow_down})`,
-                                    transform: 'rotate(90deg)',
-                                    transition: '.3s',
-                                    width: 18, height: 18,
-                                    aspectRatio: '1/1',
-                                    opacity: carouselIndex <= 0 ? 0.5 : 1,
-                                    pointerEvents: carouselIndex <= 0 ? 'none' : 'auto',
-                                    "&:hover": {
-                                       opacity: carouselIndex <= 0 ? 0.5 : 0.8,
-                                       cursor: carouselIndex <= 0 ? 'not-allowed' : 'pointer',
-                                       backgroundColor: colorPalette.primary
-                                    }
-                                 }} onClick={() => handlePrev(consultionList)} />
-                                 {consultionList
-                                    .slice(carouselIndex, carouselIndex + 3)?.map((item, index) => {
-                                       const name = item?.paciente?.split(' ');
-                                       const firstName = name[0];
-                                       const lastName = name[name.length - 1];
-                                       const userName = `${firstName} ${lastName}`;
-                                       return (
-                                          <Box key={index} sx={{
-                                             display: 'flex', gap: 2, backgroundColor: colorPalette.secondary, padding: '15px', maxWidth: 400, borderRadius: 2,
-                                             boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`, flexDirection: 'column',
-                                             transition: `opacity 0.5s ease-in-out`,
-                                          }}>
-                                             <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'space-between' }}>
-
-                                                <Box sx={{
-                                                   display: 'flex', gap: 1, flexDirection: 'row', alignItems: 'center', width: 120, justifyContent: 'center',
-                                                }}>
-                                                   <Avatar src={item?.url_foto_prof || ''} sx={{
-                                                      height: { xs: '100%', sm: 45, md: 45, lg: 40 },
-                                                      width: { xs: '100%', sm: 45, md: 45, lg: 40 },
-                                                   }} variant="circular"
-                                                   />
-                                                   <Text bold xsmall style={{ marginLeft: 2, minWidth: 80, display: 'flex', textAlign: 'center' }}>{userName}</Text>
-                                                </Box>
-                                                <Box sx={{
-                                                   display: 'flex', flexDirection: 'row', gap: .5, justifyContent: 'center', alignItems: 'center',
-                                                   padding: '8px 12px', borderRadius: 2, backgroundColor: colorPalette.primary,
-                                                }}>
-                                                   <Text bold small>Duracão: </Text>
-                                                   <Text bold small style={{ color: colorPalette.buttonColor }}>1 Hora</Text>
-                                                </Box>
-                                             </Box>
-                                             <Box sx={{ display: 'flex', gap: 1, flexDirection: 'row', alignItems: 'center' }}>
-
-                                                <Box sx={{ display: 'flex', gap: 1, minWidth: 180, alignItems: 'center' }}>
-                                                   <Box sx={{
-                                                      ...styles.icon,
-                                                      backgroundImage: `url('/icons/clock.png')`,
-                                                      backgroundSize: 'contain',
-                                                      backgroundPosition: 'center',
-                                                      filter: 'brightness(0) invert(0)',
-                                                      width: 25,
-                                                      height: 25,
-                                                      display: 'flex'
-                                                   }} />
-                                                   <Text bold small>{formatTimeStamp(item?.data, true)}</Text>
-                                                </Box>
-
-                                                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                                                   <Box sx={{ display: 'flex', height: '20px', width: 4, backgroundColor: statusColor(item?.status), alignItems: 'center' }} />
-                                                   <Text light small>{item?.status}</Text>
-                                                </Box>
+                                 return (
+                                    <Box key={index} sx={{
+                                       display: isPermission ? 'flex' : 'none', gap: 2, flexDirection: 'column',
+                                       width: '100%'
+                                    }}>
+                                       <Box sx={{
+                                          display: 'flex', backgroundColor: colorPalette.secondary, padding: '20px',
+                                          borderRadius: 2,
+                                          alignItems: 'center', gap: 2,
+                                          justifyContent: 'space-between',
+                                          width: '100%',
+                                          transition: '.3s',
+                                          boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
+                                          "&:hover": {
+                                             opacity: 0.8,
+                                             cursor: 'pointer',
+                                             transform: 'scale(1.03, 1.03)'
+                                          }
+                                       }} onClick={() => router.push(item?.route)}>
+                                          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                                             <Box sx={{
+                                                ...styles.menuIcon,
+                                                backgroundImage: `url(${item?.icon})`,
+                                                transition: '.3s',
+                                                filter: item?.filter && 'brightness(0) invert(0)',
+                                                width: 30, height: 30,
+                                                "&:hover": {
+                                                   opacity: 0.8,
+                                                   cursor: 'pointer'
+                                                }
+                                             }} />
+                                             <Box sx={{ display: 'flex', gap: .5, alignItems: 'start', flexDirection: 'column' }}>
+                                                <Text large bold>{item?.title}</Text>
+                                                <Text small light>{item?.text}</Text>
                                              </Box>
                                           </Box>
-                                       )
-                                    })}
-                                 <Box sx={{
-                                    ...styles.menuIcon,
-                                    padding: '8px',
-                                    margin: '0px 5px',
-                                    backgroundImage: `url(${icons.gray_arrow_down})`,
-                                    transform: 'rotate(-90deg)',
-                                    transition: '.3s',
-                                    width: 18, height: 18,
-                                    aspectRatio: '1/1',
-                                    opacity: (carouselIndex * 2) >= consultionList?.length ? 0.5 : 1,
-                                    pointerEvents: (carouselIndex * 2) >= consultionList?.length ? 'none' : 'auto',
-                                    "&:hover": {
-                                       opacity: (carouselIndex * 2) >= consultionList?.length ? 0.5 : 0.8,
-                                       cursor: (carouselIndex * 2) >= consultionList?.length ? 'not-allowed' : 'pointer',
-                                       backgroundColor: colorPalette.primary
-                                    }
-                                 }} onClick={() => handleNext(consultionList)} />
-                              </Box>
 
-                              : <Text light large>Você não possui Consultas agendadas. Disponibilize agora horários para os pacientes agendarem suas consultas!</Text>
-                           }
-
-                           <Box sx={{ display: isPacient ? 'none' : 'flex', gap: 2 }}>
-
-                              <Box sx={{
-                                 display: 'flex', backgroundColor: colorPalette.secondary, padding: '20px',
-                                 borderRadius: 2,
-                                 alignItems: 'center', gap: 2,
-                                 boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
-                                 "&:hover": {
-                                    opacity: 0.8,
-                                    cursor: 'pointer'
-                                 }
-                              }} onClick={() => router.push('/calendar')}>
-                                 <Box sx={{
-                                    ...styles.menuIcon,
-                                    backgroundImage: `url('/icons/agenda_icon.png')`,
-                                    transition: '.3s',
-                                    width: 20, height: 20,
-                                    "&:hover": {
-                                       opacity: 0.8,
-                                       cursor: 'pointer'
-                                    }
-                                 }} />
-                                 <Text bold>Minha Agenda</Text>
-                              </Box>
-
-                              <Box sx={{
-                                 display: 'flex', backgroundColor: colorPalette.secondary, padding: '20px',
-                                 borderRadius: 2,
-                                 alignItems: 'center', gap: 2,
-                                 boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
-                                 "&:hover": {
-                                    opacity: 0.8,
-                                    cursor: 'pointer'
-                                 }
-                              }} onClick={() => router.push('/calendar')}>
-                                 <Box sx={{
-                                    ...styles.menuIcon,
-                                    backgroundImage: `url('/icons/agenda_espera_icon.png')`,
-                                    transition: '.3s',
-                                    width: 20, height: 20,
-                                    "&:hover": {
-                                       opacity: 0.8,
-                                       cursor: 'pointer'
-                                    }
-                                 }} />
-                                 <Text bold>Lista de Espera</Text>
-                              </Box>
-
-                              <Box sx={{
-                                 display: 'flex', backgroundColor: colorPalette.secondary, padding: '20px',
-                                 borderRadius: 2,
-                                 alignItems: 'center', gap: 2,
-                                 boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
-                                 "&:hover": {
-                                    opacity: 0.8,
-                                    cursor: 'pointer'
-                                 }
-                              }} onClick={() => router.push('/calendar')}>
-                                 <Box sx={{
-                                    ...styles.menuIcon,
-                                    backgroundImage: `url('/icons/include_icon.png')`,
-                                    transition: '.3s',
-                                    width: 20, height: 20,
-                                    "&:hover": {
-                                       opacity: 0.8,
-                                       cursor: 'pointer'
-                                    }
-                                 }} />
-                                 <Text bold>Novo agendamento</Text>
-                              </Box>
+                                          <Box sx={{
+                                             ...styles.menuIcon,
+                                             backgroundImage: `url(${icons.gray_arrow_down})`,
+                                             transform: 'rotate(-90deg)',
+                                             transition: '.3s',
+                                             width: 17,
+                                             height: 17,
+                                             "&:hover": {
+                                                opacity: 0.8,
+                                                cursor: 'pointer'
+                                             },
+                                          }} />
+                                       </Box>
+                                    </Box>
+                                 )
+                              })}
                            </Box>
                         </Box>
                      </Box>
@@ -574,7 +494,6 @@ function Home() {
                                        <Text indicator bold style={{ color: 'inherit' }}>{formatter.format(item?.price)}/mês</Text>
                                        <Box sx={{
                                           padding: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                          maxWidth: 200,
                                           marginTop: 2,
                                           transition: '.5s',
                                           gap: 2,

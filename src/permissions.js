@@ -30,6 +30,12 @@ export const menuItems = [
       permissions: ['profissional', 'administrador', 'paciente'],
    },
    {
+      text: 'Meus Pacientes',
+      icon: '/icons/user-2.png',
+      to: '/patients',
+      permissions: ['profissional', 'administrador'],
+   },
+   {
       text: 'Pagamentos',
       icon: 'https://mf-planejados.s3.amazonaws.com/Icon_financeiro.svg',
       to: '/',
