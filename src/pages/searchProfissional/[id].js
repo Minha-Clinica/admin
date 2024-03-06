@@ -132,7 +132,7 @@ export default function ReserveConsultation() {
             </Backdrop>
             <SectionHeader
                 icon={'/icons/localized_icon.png'}
-                title={`Agendamento`}
+                title={`Confirmação de Agendamento`}
             />
             <Box sx={{ display: 'flex' }}>
                 <Box sx={{

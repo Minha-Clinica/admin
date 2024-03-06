@@ -5,7 +5,9 @@ import { SearchBar, SectionHeader, Table_V1 } from "../../organisms"
 import { getConsultionPerfil } from "../../validators/api-requests"
 import { useAppContext } from "../../context/AppContext"
 import { SelectList } from "../../organisms/select/SelectList"
-import { TablePagination } from "@mui/material"
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
+import { Backdrop, CircularProgress, FormControlLabel, Switch, TablePagination } from "@mui/material"
 import { checkUserPermissions } from "../../validators/checkPermissionUser"
 import { Paper, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Tooltip, Avatar } from "@mui/material";
 import { api } from "../../api/api"
@@ -103,7 +105,6 @@ export default function ListConsultions(props) {
             }
 
             const response = await api.get(query)
-            console.log(response)
             const { data = [] } = response;
             setConsultion(data)
         } catch (error) {
@@ -149,6 +150,7 @@ export default function ListConsultions(props) {
         setPage(0);
     };
 
+
     const startIndex = page * rowsPerPage;
     const endIndex = startIndex + rowsPerPage;
 
@@ -187,52 +189,89 @@ export default function ListConsultions(props) {
                 icon={'https://minhaclinicatrindade.s3.amazonaws.com/video_conferencia.png'}
                 title={`Consultas (${consultionList?.filter(filter)?.length})`}
             />
-            {/* <Text bold>Buscar por: </Text> */}
             <ContentContainer>
-                <Box sx={{ display: 'flex', flex: 1, justifyContent: 'space-between' }}>
-                    <Text bold large>Filtros</Text>
-                    <Box sx={{ display: 'flex', gap: 0.5 }}>
-                        <Text style={{ color: '#d6d6d6' }} light>Mostrando</Text>
-                        <Text bold style={{ color: '#d6d6d6' }} light>{consultionList?.filter(filter)?.length || '0'}</Text>
-                        <Text style={{ color: '#d6d6d6' }} light>de</Text>
-                        <Text bold style={{ color: '#d6d6d6' }} light>{consultionList?.length || 0}</Text>
-                        <Text style={{ color: '#d6d6d6' }} light>consultas</Text>
-                    </Box>
-                </Box>
                 <Box sx={{ display: 'flex', flex: 1, justifyContent: 'space-between', alignItems: 'center' }}>
                     <Box sx={{ flex: 1, display: 'flex', justifyContent: 'end' }}>
                         <TextInput placeholder="Buscar pelo profissional.." name='filterData' type="search" onChange={(event) => setFilterData(event.target.value)} value={filterData} sx={{ flex: 1 }} />
                     </Box>
-                    <TablePagination
-                        component="div"
-                        count={consultionList?.filter(filter)?.length}
-                        page={page}
-                        onPageChange={handleChangePage}
-                        rowsPerPage={rowsPerPage}
-                        onRowsPerPageChange={handleChangeRowsPerPage}
-                        style={{ color: colorPalette.textColor }} // Define a cor do texto
-                        backIconButtonProps={{ style: { color: colorPalette.textColor } }} // Define a cor do ícone de voltar
-                        nextIconButtonProps={{ style: { color: colorPalette.textColor } }} // Define a cor do ícone de avançar
-                    />
                 </Box>
             </ContentContainer>
-            {/* {
-                consultionList?.filter(filter)?.length > 0 ?
-                    <Table data={sortConsultion()?.filter(filter).slice(startIndex, endIndex)} columns={column} columnId={'id'} enrollmentsCount={true} filters={filters} onPress={(value) => setFilters(value)} onFilter />
-                    :
-                    <Box sx={{ alignItems: 'center', justifyContent: 'center', display: 'flex', padding: '80px 40px 0px 0px' }}>
-                        <Text bold>Não foi encontrado consultas</Text>
-                    </Box>
-            } */}
-            <TableConsultion data={consultionList?.filter(filter)?.slice(startIndex, endIndex)} />
+            <TableConsultion data={consultionList?.filter(filter)?.slice(startIndex, endIndex)} setConsultion={setConsultion}
+                callBack={() => getConsultion()}
+                filter={filter}
+                setPage={setPage}
+                setRowsPerPage={setRowsPerPage}
+                page={page}
+                rowsPerPage={rowsPerPage} />
 
         </>
     )
 }
 
-const TableConsultion = ({ data = [], filters = [], onPress = () => { } }) => {
-    const { setLoading, colorPalette, theme, user } = useAppContext()
+const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setConsultion, callBack = () => { },
+    filter,
+    setPage,
+    setRowsPerPage,
+    page,
+    rowsPerPage
+}) => {
+    const { setLoading, colorPalette, theme, user, alert } = useAppContext()
     const isProfissional = user?.perfil?.includes('profissional')
+    const [loadingPayment, setLoadingPayment] = useState(false)
+
+    const handleChangePage = (event, newPage) => {
+        setPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (event) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
+    };
+
+
+    const startIndex = page * rowsPerPage;
+    const endIndex = startIndex + rowsPerPage;
+
+    const handleUpdateStatus = async (event, id) => {
+        setLoadingPayment({ active: true, success: false, error: false });
+
+        try {
+            const { checked } = event.target;
+            const valueUpdate = checked === true ? 1 : 0;
+            const response = await api.patch(`/consultation/update/payment/${id}`, { valueUpdate });
+
+            if (response.status === 200) {
+                setTimeout(() => {
+                    setLoadingPayment({ active: true, success: true, error: false });
+                    setTimeout(async () => {
+                        setLoadingPayment({ active: false, success: true, error: false });
+                        await callBack();
+                    }, 2000);
+                    alert.success('Pagamento atualizado.');
+                }, 2000);
+            } else {
+                setTimeout(() => {
+                    setLoadingPayment({ active: true, success: false, error: true });
+                    setTimeout(async () => {
+                        setLoadingPayment({ active: false, success: false, error: true });
+                    }, 3500);
+                    alert.error('Ocorreu um erro ao atualizar pagamento.');
+                }, 3500);
+            }
+        } catch (error) {
+            console.log(error);
+            return error;
+        } finally {
+            setTimeout(() => {
+                setLoadingPayment({ active: false, success: false, error: false });
+            }, 5000);
+        }
+    };
+
+
+
+
+
 
     let columns = []
 
@@ -240,7 +279,6 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { } }) => {
         columns = [
             { key: 'data', label: 'Data' },
             { key: isProfissional ? 'paciente' : 'profissional', label: isProfissional ? 'Paciente ' : 'Profissional' },
-            { key: 'preco', label: 'Valor' },
             { key: 'modalidade', label: 'Tipo' },
             { key: 'status', label: 'Status' },
             { key: 'actions', label: 'Ações' },
@@ -249,7 +287,6 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { } }) => {
         columns = [
             { key: 'data', label: 'Data' },
             { key: isProfissional ? 'paciente' : 'profissional', label: isProfissional ? 'Paciente ' : 'Profissional' },
-            { key: 'preco', label: 'Valor' },
             { key: 'modalidade', label: 'Tipo' },
             { key: 'status', label: 'Status' },
         ];
@@ -276,107 +313,178 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { } }) => {
     });
 
     return (
-        <ContentContainer sx={{ display: 'flex', width: '100%', padding: 0, backgroundColor: colorPalette.primary, boxShadow: 'none', borderRadius: 2 }}>
+        <>
+            <ContentContainer sx={{ display: 'flex', width: '100%', padding: 0, backgroundColor: colorPalette.primary, boxShadow: 'none', borderRadius: 2 }}>
 
-            <TableContainer sx={{ borderRadius: '8px', overflow: 'auto' }}>
-                <Table sx={{ borderCollapse: 'collapse', width: '100%' }}>
-                    <TableHead>
-                        <TableRow sx={{ borderBottom: `2px solid ${colorPalette.buttonColor}` }}>
-                            {columns.map((column, index) => (
-                                <TableCell key={index} sx={{ padding: '16px', }}>
-                                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'center' }}>
-                                        <Text bold style={{ textAlign: 'center' }}>{column.label}</Text>
-                                        {column.key !== "actions" && <Box sx={{
-                                            ...styles.menuIcon,
-                                            backgroundImage: `url(${icons.gray_arrow_down})`,
-                                            transform: filters?.filterName === column.key ? filters?.filterOrder === 'asc' ? 'rotate(-0deg)' : 'rotate(-180deg)' : 'rotate(-0deg)',
+                <TableContainer sx={{ borderRadius: '8px', overflow: 'auto', border: '1px solid lightgray' }}>
+                    <Table sx={{ borderCollapse: 'collapse', width: '100%',  }}>
+                        <TableHead>
+                            <TableRow sx={{ borderBottom: `2px solid ${colorPalette.buttonColor}` }}>
+                                {columns.map((column, index) => (
+                                    <TableCell key={index} sx={{ padding: '16px 20px', }}>
+                                        <Box sx={{
+                                            display: 'flex', gap: 1, alignItems: 'center', justifyContent: column.key !== "actions" ?
+                                                'flex-start' : 'center'
+                                        }}>
+                                            <Text bold style={{ textAlign: 'center' }}>{column.label}</Text>
+                                            {column.key !== "actions" &&
+                                                <Box sx={{
+                                                    ...styles.menuIcon,
+                                                    backgroundImage: `url(${icons.gray_arrow_down})`,
+                                                    transform: filters?.filterName === column.key ? filters?.filterOrder === 'asc' ? 'rotate(-0deg)' : 'rotate(-180deg)' : 'rotate(-0deg)',
+                                                    transition: '.3s',
+                                                    width: 17,
+                                                    height: 17,
+
+                                                    "&:hover": {
+                                                        opacity: 0.8,
+                                                        cursor: 'pointer'
+                                                    },
+                                                }}
+                                                    onClick={() => onPress({
+                                                        filterName: column.key,
+                                                        filterOrder: filters?.filterOrder === 'asc' ? 'desc' : 'asc'
+                                                    })} />}
+                                        </Box>
+                                    </TableCell>
+                                ))}
+                            </TableRow>
+                        </TableHead>
+                        <TableBody sx={{ flex: 1, padding: 5, backgroundColor: colorPalette.secondary }}>
+                            {
+                                data?.map((item, index) => {
+                                    const pay = parseInt(item?.pago) === 1;
+
+                                    return (
+                                        <TableRow key={`${item}-${index}`} sx={{
                                             transition: '.3s',
-                                            width: 17,
-                                            height: 17,
-
                                             "&:hover": {
-                                                opacity: 0.8,
-                                                cursor: 'pointer'
+                                                backgroundColor: colorPalette.primary + '88',
                                             },
-                                        }}
-                                            onClick={() => onPress({
-                                                filterName: column.key,
-                                                filterOrder: filters?.filterOrder === 'asc' ? 'desc' : 'asc'
-                                            })} />}
-                                    </Box>
-                                </TableCell>
-                            ))}
-                        </TableRow>
-                    </TableHead>
-                    <TableBody sx={{ flex: 1, padding: 5, backgroundColor: colorPalette.secondary }}>
-                        {
-                            data?.map((item, index) => {
-                                return (
-                                    <TableRow key={`${item}-${index}`} sx={{
-                                        transition: '.3s',
-                                        "&:hover": {
-                                            backgroundColor: colorPalette.primary + '88',
-                                        },
-                                    }}>
-                                        <TableCell sx={{ padding: '8px 10px', textAlign: 'center' }}>
-                                            <Text>{formatTimeStamp(item?.data, true) || '-'}</Text>
-                                        </TableCell>
-                                        <Tooltip title={isProfissional ? item?.paciente : item?.profissional}>
-                                            <TableCell sx={{
-                                                padding: '15px 10px', textAlign: 'center',
-                                            }}>
-                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'center' }}>
-                                                    <Avatar src={item?.url_foto_prof || ''} sx={{
-                                                        height: { xs: '100%', sm: 30, md: 30, lg: 30 },
-                                                        width: { xs: '100%', sm: 30, md: 30, lg: 30 },
-                                                    }} variant="circular"
-                                                    />
-                                                    <Text style={{
-                                                        textOverflow: 'ellipsis',
-                                                        whiteSpace: 'nowrap',
-                                                        overflow: 'hidden',
-                                                    }}>{isProfissional ? item?.paciente : item?.profissional || '-'}</Text>
+                                        }}>
+                                            <TableCell sx={{ padding: '8px 25px', justifyContent: 'flex-start' }}>
+                                                <Text>{formatTimeStamp(item?.data, true) || '-'}</Text>
+                                            </TableCell>
+                                            <Tooltip title={isProfissional ? item?.paciente : item?.profissional}>
+                                                <TableCell sx={{
+                                                    padding: '15px 10px', textAlign: 'center',
+                                                }}>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'flex-start' }}>
+                                                        <Avatar src={item?.url_foto_prof || ''} sx={{
+                                                            height: { xs: '100%', sm: 30, md: 30, lg: 30 },
+                                                            width: { xs: '100%', sm: 30, md: 30, lg: 30 },
+                                                        }} variant="circular"
+                                                        />
+                                                        <Text style={{
+                                                            textOverflow: 'ellipsis',
+                                                            whiteSpace: 'nowrap',
+                                                            overflow: 'hidden',
+                                                        }}>{isProfissional ? item?.paciente : item?.profissional || '-'}</Text>
+                                                    </Box>
+                                                </TableCell>
+                                            </Tooltip>
+                                            <TableCell sx={{ padding: '15px 10px', justifyContent: 'flex-start' }}>
+                                                <Text>{item?.modalidade || '-'}</Text>
+                                            </TableCell>
+                                            <TableCell sx={{ padding: '15px 10px', justifyContent: 'flex-start' }}>
+                                                <Box
+                                                    sx={{
+                                                        display: 'flex',
+                                                        backgroundColor: colorPalette.primary,
+                                                        height: 30,
+                                                        gap: 2,
+                                                        alignItems: 'center',
+                                                        // width: 100,
+                                                        borderRadius: 2,
+                                                        justifyContent: 'flex-start'
+                                                    }}
+                                                >
+                                                    <Box sx={{ display: 'flex', backgroundColor: statusColor(item?.status), padding: '0px 5px', height: '100%', borderRadius: '8px 0px 0px 8px' }} />
+                                                    <Text small bold>{item?.status}</Text>
                                                 </Box>
                                             </TableCell>
-                                        </Tooltip>
-                                        <TableCell sx={{ padding: '15px 10px', textAlign: 'center' }}>
-                                            <Text>{formatter.format(item?.preco) || '-'}</Text>
-                                        </TableCell>
-                                        <TableCell sx={{ padding: '15px 10px', textAlign: 'center' }}>
-                                            <Text>{item?.modalidade || '-'}</Text>
-                                        </TableCell>
-                                        <TableCell sx={{ padding: '15px 10px', textAlign: 'center' }}>
-                                            <Box
-                                                sx={{
-                                                    display: 'flex',
-                                                    backgroundColor: colorPalette.primary,
-                                                    height: 30,
-                                                    gap: 2,
-                                                    alignItems: 'center',
-                                                    // width: 100,
-                                                    borderRadius: 2,
-                                                    justifyContent: 'start',
-                                                }}
-                                            >
-                                                <Box sx={{ display: 'flex', backgroundColor: statusColor(item?.status), padding: '0px 5px', height: '100%', borderRadius: '8px 0px 0px 8px' }} />
-                                                <Text small bold>{item?.status}</Text>
-                                            </Box>
-                                        </TableCell>
-                                        {isProfissional && <TableCell sx={{ padding: '15px 10px', textAlign: 'center' }}>
-                                            <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
-                                                <Button secondary text="prontuário" small
-                                                    onClick={() => handleRowClick(item?.id_consulta)} />
-                                            </Box>
-                                        </TableCell>}
-                                    </TableRow>
-                                );
-                            })
+                                            {isProfissional &&
+                                                <>
+                                                    <TableCell sx={{ padding: '15px 0px', textAlign: 'center' }}>
+                                                        <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+                                                            <Button secondary text="prontuário" small
+                                                                onClick={() => handleRowClick(item?.id_consulta)}
+                                                            />
+                                                            <Box sx={{ display: 'flex', height: '30px', width: '2px', backgroundColor: colorPalette?.primary }} />
+                                                            <FormControlLabel small
+                                                                control={
+                                                                    <Switch checked={pay} name="pago" size="small" onChange={(e) => handleUpdateStatus(e, item?.id_consulta)} />
+                                                                }
+                                                                label="pago"
+                                                            />
+                                                        </Box>
+                                                    </TableCell>
+                                                </>}
+                                        </TableRow>
+                                    );
+                                })
 
-                        }
-                    </TableBody>
-                </Table>
-            </TableContainer>
-        </ContentContainer >
+                            }
+                        </TableBody>
+
+                    </Table>
+                    <Box sx={{
+                        width: '100%', display: 'flex', gap: 2, backgroundColor: colorPalette?.secondary,
+                        padding: '5px 12px', justifyContent: 'space-between'
+                    }}>
+                        <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+                            <Text light>Mostrando</Text>
+                            <Text bold light>{data?.filter(filter)?.length || '0'}</Text>
+                            <Text light>de</Text>
+                            <Text bold light>{data?.length || 0}</Text>
+                            <Text light>consultas</Text>
+                        </Box>
+                        <TablePagination
+                            component="div"
+                            count={data?.filter(filter)?.length}
+                            page={page}
+                            onPageChange={handleChangePage}
+                            rowsPerPage={rowsPerPage}
+                            onRowsPerPageChange={handleChangeRowsPerPage}
+                            style={{ color: colorPalette.textColor }} // Define a cor do texto
+                            backIconButtonProps={{ style: { color: colorPalette.textColor } }} // Define a cor do ícone de voltar
+                            nextIconButtonProps={{ style: { color: colorPalette.textColor } }} // Define a cor do ícone de avançar
+                        />
+                    </Box>
+                </TableContainer>
+            </ContentContainer >
+
+            <Backdrop open={loadingPayment?.active}>
+                <ContentContainer>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center' }}>
+                        <>
+                            {loadingPayment?.success && (
+                                <>
+                                    <CheckCircleIcon style={{ color: 'green', fontSize: 30 }} />
+                                    <Text bold>Status Alterado com Sucesso.</Text>
+                                </>
+                            )
+                            }
+                            {loadingPayment?.error && (
+                                <>
+                                    <CancelIcon style={{ color: 'red', fontSize: 30 }} />
+                                    <Text bold>Ocorreu um erro ao alterar o status de pagamento. Tente novamente mais tarde.</Text>
+                                </>
+                            )}
+                            {(!loadingPayment.error && !loadingPayment.success) &&
+                                <>
+                                    <CircularProgress />
+                                    <Text bold>Alterando status de pagamento...</Text>
+                                </>
+                            }
+                        </>
+                    </Box>
+                </ContentContainer>
+            </Backdrop>
+
+
+
+        </>
     )
 }
 

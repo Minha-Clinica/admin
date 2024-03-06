@@ -73,10 +73,10 @@ export const Table_V1 = (props) => {
     return (
         <>
             <Paper sx={{ backgroundColor: colorPalette.primary, transition: 'background-color 1s', ...sx }}>
-                <TableContainer sx={{ borderRadius: '8px', overflow: 'auto' }}>
+                <TableContainer sx={{ borderRadius: '8px', overflow: 'auto', border: '1px solid lightgray' }}>
                     <Table>
                         <TableHead>
-                            <TableRow style={{ backgroundColor: colorPalette.buttonColor, transition: 'background-color 1s' }}>
+                            <TableRow sx={{ borderBottom: `2px solid ${colorPalette.buttonColor}` }}>
                                 {columns.map((column) => (
                                     <TableCell key={column?.key} sx={{ ...styles.cell, fontFamily: 'MetropolisBold', }}>
                                         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
@@ -119,7 +119,8 @@ export const Table_V1 = (props) => {
                                 }} sx={{
                                     ...styles.bodyRow,
                                     transition: 'background-color 1s',
-                                    backgroundColor: getRowBackground(index),
+                                    // backgroundColor: getRowBackground(index),
+                                    backgroundColor: colorPalette?.secondary,
                                     "&:hover": {
                                         backgroundColor: colorPalette.primary + '99',
                                         cursor: 'pointer',
@@ -160,7 +161,8 @@ export const Table_V1 = (props) => {
                                                                 <Box
                                                                     sx={{
                                                                         display: 'flex',
-                                                                        backgroundColor: getRowBackground(index + 1),
+                                                                        // backgroundColor: getRowBackground(index + 1),
+                                                                        backgroundColor: colorPalette?.secondary,
                                                                         height: 30,
                                                                         gap: 2,
                                                                         alignItems: 'center',
@@ -186,7 +188,7 @@ export const Table_V1 = (props) => {
                                                         )}
                                                         {(enrollmentsCount && row?.total_matriculas_em_andamento > 0 && column?.matricula) &&
                                                             <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', paddingRight: '1px', backgroundColor: colorPalette?.buttonColor, width: 20, height: 20, borderRadius: 20 }}>
-                                                                <Text style={{textAlign: 'center'}} small bold>M</Text>
+                                                                <Text style={{ textAlign: 'center' }} small bold>M</Text>
                                                             </Box>
 
                                                         }
@@ -244,7 +246,6 @@ export const IconStatus = (props) => {
 
 const styles = {
     cell: {
-        color: '#fff',
         fontWeight: 'bold',
     },
     bodyCell: {

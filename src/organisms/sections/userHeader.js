@@ -47,7 +47,7 @@ export const UserHeader = (props) => {
 
 
     const handleGoBack = () => {
-            router.back();
+        router.back();
 
         // if (lastPage > 0) {
         //     routeParts[routeParts.length - 1] = 'list';
@@ -188,10 +188,9 @@ export const UserHeader = (props) => {
                                     onClick={() => {
                                         // router.push(`/users/${user?.id}`)
                                         setShowUserOptions(!showUserOptions)
-                                        setShowDialogEditUser(true)
                                     }} />
                                 <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'center', transition: '1s' }}>
-                                    <Text style={{ color: colorPalette.textColor, transition: 'background-color 1s', fontFamily: 'MetropolisSemiBold', }}>{userName}</Text>
+                                    {/* <Text style={{ color: colorPalette.textColor, transition: 'background-color 1s', fontFamily: 'MetropolisSemiBold', }}>{userName}</Text> */}
                                     <Box sx={{
                                         ...styles.menuIcon,
                                         backgroundImage: `url(${icons.gray_arrow_down})`,
@@ -207,20 +206,37 @@ export const UserHeader = (props) => {
                                     border: `1px solid lightgray`,
                                     display: 'flex', gap: 1, alignItems: 'start',
                                     top: 40,
+                                    width: 300,
                                     right: 0,
                                     transition: '.5s',
                                     justifyContent: 'center', flexDirection: 'column', backgroundColor: colorPalette.secondary,
-                                    padding: '5px 10px', width: `100%`, borderRadius: 2,
+                                    padding: '5px 10px', borderRadius: 2,
                                     position: 'absolute',
                                     boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
 
                                 }}>
+                                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', }}>
+                                        <Avatar
+                                            sx={{ width: '55px', height: '55px', fontSize: 14, border: `1px solid #fff`, cursor: 'pointer', '&hover': { opacity: 0.5 } }}
+                                            src={fotoPerfil || `https://mf-planejados.s3.us-east-1.amazonaws.com/melies/perfil-default.jpg`}
+                                            onClick={() => {
+                                                // router.push(`/users/${user?.id}`)
+                                                setShowUserOptions(!showUserOptions)
+                                                setShowDialogEditUser(true)
+                                            }} />
+                                        <Box sx={{ display: 'flex', gap: .2, alignItems: 'start', flexDirection: 'column' }}>
+                                            <Text large bold>{userName}</Text>
+                                            <Text style={{ color: 'gray' }}>Código Usuário: {user?.id}</Text>
+                                        </Box>
+                                    </Box>
+                                    <Divider distance={0} />
                                     <Box sx={{
-                                        display: 'flex', gap: 1, width: '100%', padding: '3px 8px 0px 8px', "&:hover": {
+                                        display: 'flex', gap: 1, width: '100%', padding: '12px 8px', "&:hover": {
                                             opacity: 0.8,
                                             cursor: 'pointer',
                                             backgroundColor: colorPalette.third + '11'
-                                        }
+                                        },
+                                        alignItems: 'center'
                                     }} onClick={() => {
                                         setShowUserOptions(!showUserOptions)
                                         setShowEditUser(false)
@@ -229,8 +245,8 @@ export const UserHeader = (props) => {
                                         <Box sx={{
                                             ...styles.menuIcon,
                                             backgroundImage: `url('https://mf-planejados.s3.amazonaws.com/Icon_user_edit.png')`,
-                                            width: 15,
-                                            height: 15,
+                                            width: 20,
+                                            height: 20,
                                             filter: 'brightness(0) invert(0)',
                                             transition: 'background-color 1s',
                                             "&:hover": {
@@ -240,14 +256,12 @@ export const UserHeader = (props) => {
                                         }} onClick={() => {
                                             // router.push(`/users/${user?.id}`)
                                         }} />
-                                        <Text bold xsmall style={{ ...styles.text, textAlign: 'center', padding: `2px 0px` }}>Meus dados</Text>
+                                        <Text light style={{ ...styles.text, textAlign: 'center', padding: `2px 0px` }}>Meus dados</Text>
 
                                     </Box>
 
-                                    <Divider distance={0} />
-
                                     <Box sx={{
-                                        display: 'flex', gap: 1, width: '100%', padding: '3px 8px 0px 8px', "&:hover": {
+                                        display: 'flex', gap: 1, width: '100%', padding: '12px 8px', "&:hover": {
                                             opacity: 0.8,
                                             cursor: 'pointer',
                                             backgroundColor: colorPalette.third + '11'
@@ -260,8 +274,8 @@ export const UserHeader = (props) => {
                                         <Box sx={{
                                             ...styles.menuIcon,
                                             backgroundImage: `url('/icons/padlock_icon.png')`,
-                                            width: 15,
-                                            height: 15,
+                                            width: 20,
+                                            height: 20,
                                             transition: 'background-color 1s',
                                             "&:hover": {
                                                 opacity: 0.8,
@@ -270,14 +284,12 @@ export const UserHeader = (props) => {
                                         }} onClick={() => {
                                             // router.push(`/users/${user?.id}`)
                                         }} />
-                                        <Text bold xsmall style={{ ...styles.text, textAlign: 'center', padding: `2px 0px` }}>Alterar senha</Text>
+                                        <Text light style={{ ...styles.text, textAlign: 'center', padding: `2px 0px` }}>Alterar senha</Text>
 
                                     </Box>
 
-                                    <Divider distance={0} />
-
                                     <Box sx={{
-                                        display: 'flex', gap: 1, width: '100%', padding: '3px 8px 0px 8px', "&:hover": {
+                                        display: 'flex', gap: 1, width: '100%', padding: '12px 8px', "&:hover": {
                                             opacity: 0.8,
                                             cursor: 'pointer',
                                             backgroundColor: colorPalette.third + '11'
@@ -290,8 +302,8 @@ export const UserHeader = (props) => {
                                         <Box sx={{
                                             ...styles.menuIcon,
                                             backgroundImage: `url('/icons/support-icon.png')`,
-                                            width: 15,
-                                            height: 15,
+                                            width: 20,
+                                            height: 20,
                                             filter: 'brightness(0) invert(0)',
                                             transition: 'background-color 1s',
                                             "&:hover": {
@@ -299,27 +311,29 @@ export const UserHeader = (props) => {
                                                 cursor: 'pointer',
                                             }
                                         }} />
-                                        <Text bold xsmall style={{ ...styles.text, textAlign: 'center', padding: `2px 0px` }}>Suporte</Text>
+                                        <Text light style={{ ...styles.text, textAlign: 'center', padding: `2px 0px` }}>Suporte</Text>
 
                                     </Box>
 
-                                    <Divider distance={0} />
-
                                     <Box sx={{
-                                        display: 'flex', gap: 1, width: '100%', padding: '0px 8px 3px 8px', "&:hover": {
+                                        display: 'flex', gap: 1, width: '100%', padding: '10px 8px',
+                                        border: '1px solid red',
+                                        borderRadius: 2,
+                                        justifyContent: 'center',
+                                        "&:hover": {
                                             opacity: 0.8,
                                             cursor: 'pointer',
-                                            backgroundColor: colorPalette.third + '11'
+                                            backgroundColor: 'red' + '11'
                                         }
                                     }} onClick={logout}>
                                         <Box sx={{
                                             ...styles.menuIcon,
                                             backgroundImage: `url(${icons.logout})`,
                                             width: 20,
-                                            height: 17,
+                                            height: 20,
                                             transition: 'background-color 1s'
                                         }} />
-                                        <Text bold xsmall style={{ ...styles.text, textAlign: 'center', padding: `2px 0px` }}>Sair</Text>
+                                        <Text light style={{ ...styles.text, textAlign: 'center', padding: `2px 0px`, color: 'red' }}>Sair</Text>
                                     </Box>
 
                                 </Box>

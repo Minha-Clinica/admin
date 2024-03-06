@@ -72,7 +72,6 @@ export default function ListPatients(props) {
         setLoading(true)
         try {
             const response = await api.get(`/consultation/patients/profissional/${user?.id}`)
-            console.log(response)
             const { data = [] } = response;
             setPatients(data)
         } catch (error) {
@@ -157,49 +156,51 @@ export default function ListPatients(props) {
                 title={`Meus Pacientes (${patientsList?.filter(filter)?.length})`}
             />
             <ContentContainer>
-                <Box sx={{ display: 'flex', flex: 1, justifyContent: 'space-between' }}>
-                    <Text bold large>Filtros</Text>
-                    <Box sx={{ display: 'flex', gap: 0.5 }}>
-                        <Text style={{ color: '#d6d6d6' }} light>Mostrando</Text>
-                        <Text bold style={{ color: '#d6d6d6' }} light>{patientsList?.filter(filter)?.length || '0'}</Text>
-                        <Text style={{ color: '#d6d6d6' }} light>de</Text>
-                        <Text bold style={{ color: '#d6d6d6' }} light>{patientsList?.length || 0}</Text>
-                        <Text style={{ color: '#d6d6d6' }} light>pacientes</Text>
-                    </Box>
-                </Box>
                 <Box sx={{ display: 'flex', flex: 1, justifyContent: 'space-between', alignItems: 'center' }}>
                     <Box sx={{ flex: 1, display: 'flex', justifyContent: 'end' }}>
                         <TextInput placeholder="Buscar pelo paciente.." name='filterData' type="search" onChange={(event) => setFilterData(event.target.value)} value={filterData} sx={{ flex: 1 }} />
                     </Box>
-                    <TablePagination
-                        component="div"
-                        count={patientsList?.filter(filter)?.length}
-                        page={page}
-                        onPageChange={handleChangePage}
-                        rowsPerPage={rowsPerPage}
-                        onRowsPerPageChange={handleChangeRowsPerPage}
-                        style={{ color: colorPalette.textColor }} // Define a cor do texto
-                        backIconButtonProps={{ style: { color: colorPalette.textColor } }} // Define a cor do ícone de voltar
-                        nextIconButtonProps={{ style: { color: colorPalette.textColor } }} // Define a cor do ícone de avançar
-                    />
                 </Box>
             </ContentContainer>
-            <TableConsultion data={patientsList?.filter(filter)?.slice(startIndex, endIndex)} />
+            <TableConsultion data={patientsList?.filter(filter)?.slice(startIndex, endIndex)}
+                filter={filter}
+                setPage={setPage}
+                setRowsPerPage={setRowsPerPage}
+                page={page}
+                rowsPerPage={rowsPerPage} />
 
         </>
     )
 }
 
-const TableConsultion = ({ data = [], filters = [], onPress = () => { } }) => {
+const TableConsultion = ({ data = [], filters = [], onPress = () => { },
+    filter,
+    setPage,
+    setRowsPerPage,
+    page,
+    rowsPerPage }) => {
     const { setLoading, colorPalette, theme, user } = useAppContext()
 
     const columns = [
-        { key: 'paciente', label: 'Paciente ' },
         { key: 'ultima_consulta', label: 'Ultima Consulta' },
         { key: 'proxima_consulta', label: 'Proxima Consulta' },
+        { key: 'paciente', label: 'Paciente ' },
         { key: 'modalidade', label: 'Atendimento' },
         { key: 'actions', label: 'Ações' },
     ];
+
+    const handleChangePage = (event, newPage) => {
+        setPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (event) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
+    };
+
+
+    const startIndex = page * rowsPerPage;
+    const endIndex = startIndex + rowsPerPage;
 
     const router = useRouter();
     const menu = router.pathname === '/' ? null : router.asPath.split('/')[1]
@@ -224,14 +225,17 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { } }) => {
     return (
         <ContentContainer sx={{ display: 'flex', width: '100%', padding: 0, backgroundColor: colorPalette.primary, boxShadow: 'none', borderRadius: 2 }}>
 
-            <TableContainer sx={{ borderRadius: '8px', overflow: 'auto' }}>
+            <TableContainer sx={{ borderRadius: '8px', overflow: 'auto', border: '1px solid lightgray' }}>
                 <Table sx={{ borderCollapse: 'collapse', width: '100%' }}>
                     <TableHead>
-                        <TableRow sx={{ borderBottom: `2px solid ${colorPalette.buttonColor}` }}>
+                        <TableRow sx={{ borderBottom: `2px solid ${colorPalette.buttonColor}`,  }}>
                             {columns.map((column, index) => (
-                                <TableCell key={index} sx={{ padding: '16px', }}>
-                                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'center' }}>
-                                        <Text bold style={{ textAlign: 'center' }}>{column.label}</Text>
+                                <TableCell key={index} sx={{ padding: '16px 20px'}}>
+                                    <Box sx={{
+                                        display: 'flex', gap: 1, alignItems: 'center', justifyContent: column.key !== "actions" ?
+                                            'flex-start' : 'center'
+                                    }}>
+                                        <Text bold>{column.label}</Text>
                                         {column.key !== "actions" &&
                                             <Box sx={{
                                                 ...styles.menuIcon,
@@ -250,7 +254,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { } }) => {
                                                     filterName: column.key,
                                                     filterOrder: filters?.filterOrder === 'asc' ? 'desc' : 'asc'
                                                 })} />
-                                                }
+                                        }
                                     </Box>
                                 </TableCell>
                             ))}
@@ -266,11 +270,17 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { } }) => {
                                             backgroundColor: colorPalette.primary + '88',
                                         },
                                     }}>
+                                        <TableCell sx={{ padding: '8px 25px', justifyContent: 'flex-start' }}>
+                                            <Text>{formatTimeStamp(item?.ultima_consulta, true) || '-'}</Text>
+                                        </TableCell>
+                                        <TableCell sx={{ padding: '8px 25px', justifyContent: 'flex-start' }}>
+                                            <Text>{formatTimeStamp(item?.proxima_consulta, true) || '-'}</Text>
+                                        </TableCell>
                                         <Tooltip title={item?.paciente}>
                                             <TableCell sx={{
-                                                padding: '15px 10px', textAlign: 'center',
+                                                padding: '15px 10px', justifyContent: 'flex-start'
                                             }}>
-                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'center' }}>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'flex-start' }}>
                                                     <Avatar src={item?.avatar || ''} sx={{
                                                         height: { xs: '100%', sm: 30, md: 30, lg: 30 },
                                                         width: { xs: '100%', sm: 30, md: 30, lg: 30 },
@@ -284,13 +294,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { } }) => {
                                                 </Box>
                                             </TableCell>
                                         </Tooltip>
-                                        <TableCell sx={{ padding: '8px 10px', textAlign: 'center' }}>
-                                            <Text>{formatTimeStamp(item?.ultima_consulta, true) || '-'}</Text>
-                                        </TableCell>
-                                        <TableCell sx={{ padding: '8px 10px', textAlign: 'center' }}>
-                                            <Text>{formatTimeStamp(item?.proxima_consulta, true) || '-'}</Text>
-                                        </TableCell>
-                                        <TableCell sx={{ padding: '15px 10px', textAlign: 'center' }}>
+                                        <TableCell sx={{ padding: '15px 10px', justifyContent: 'flex-start' }}>
                                             <Text>{item?.modalidade || '-'}</Text>
                                         </TableCell>
                                         <TableCell sx={{ padding: '15px 10px', textAlign: 'center' }}>
@@ -305,6 +309,29 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { } }) => {
                         }
                     </TableBody>
                 </Table>
+                <Box sx={{
+                    width: '100%', display: 'flex', gap: 2, backgroundColor: colorPalette?.secondary,
+                    padding: '5px 12px', justifyContent: 'space-between'
+                }}>
+                    <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+                        <Text light>Mostrando</Text>
+                        <Text bold light>{data?.filter(filter)?.length || '0'}</Text>
+                        <Text light>de</Text>
+                        <Text bold light>{data?.length || 0}</Text>
+                        <Text light>consultas</Text>
+                    </Box>
+                    <TablePagination
+                        component="div"
+                        count={data?.filter(filter)?.length}
+                        page={page}
+                        onPageChange={handleChangePage}
+                        rowsPerPage={rowsPerPage}
+                        onRowsPerPageChange={handleChangeRowsPerPage}
+                        style={{ color: colorPalette.textColor }} // Define a cor do texto
+                        backIconButtonProps={{ style: { color: colorPalette.textColor } }} // Define a cor do ícone de voltar
+                        nextIconButtonProps={{ style: { color: colorPalette.textColor } }} // Define a cor do ícone de avançar
+                    />
+                </Box>
             </TableContainer>
         </ContentContainer >
     )

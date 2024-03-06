@@ -44,7 +44,6 @@ export const Register = ({ type = `paciente`, setTypeSelected, typeSelected, set
         tipo_conta_2: null
     })
     const [themeName, setThemeName] = useState('')
-    const [showPassword, setShowPassword] = useState(false)
     const [windowWidth, setWindowWidth] = useState(0)
     const smallWidthDevice = windowWidth < 1000
 
@@ -106,8 +105,14 @@ export const Register = ({ type = `paciente`, setTypeSelected, typeSelected, set
                     alert.success('Parabéns! Seu cadastro foi realizado com sucesso!. Faça Login para começar a ultilizar a plataforma!');
                     if (data?.userId) router.push(`/`)
                 }
+                if (response?.status === 422) {
+                    alert.error('Já existe um usuário cadastrado em nossa plataforma, com o e-mail informado.');
+                }
             } catch (error) {
                 alert.error('Tivemos um problema ao criar seu cadastro.');
+                if (error?.response?.status === 422) {
+                    alert.error('Já existe um usuário cadastrado em nossa plataforma, com o e-mail informado.');
+                }
                 console.log(error)
             } finally {
                 setLoading(false)
@@ -116,7 +121,6 @@ export const Register = ({ type = `paciente`, setTypeSelected, typeSelected, set
         }
     }
 
-    console.log(userData)
 
     const handleChange = (value) => {
 
