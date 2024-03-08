@@ -52,7 +52,7 @@ const birthDate = [
 
 const subMenu = [
    {
-      id: '01', icon: '/icons/agenda_icon.png',
+      id: '01', icon: '/icons/calendar.png',
       route: '/calendar',
       title: 'Minha Agenda',
       permissions: ['profissional', 'administrador'],
@@ -60,7 +60,7 @@ const subMenu = [
       text: 'Vizualize suas agendas confirmadas ou crie sua lista de reservas.'
    },
    {
-      id: '02', icon: 'https://minhaclinicatrindade.s3.amazonaws.com/video_conferencia.png',
+      id: '02', icon: '/icons/discussion.png',
       route: '/consultation',
       title: 'Minhas Consultas',
       permissions: ['profissional', 'paciente', 'administrador'],
@@ -68,7 +68,17 @@ const subMenu = [
       text: 'Vizualize os prontuários de seus pacientes de consultas agendadas.'
    },
    {
-      id: '03', icon: '/icons/search_input_icon.png',
+      id: '03', icon: '/icons/creditCard_icon.png',
+      route: '/users',
+      title: 'Definir Preferências de Pagamento',
+      permissions: ['profissional', 'administrador'],
+      queryId: true,
+      queryValue: '?menuScreen=paymentConfig',
+      filter: true,
+      text: 'Defina o seu valor da consulta, o gerenciamento de pagamentos da consulta pela plataforma.'
+   },
+   {
+      id: '04', icon: '/icons/search_input_icon.png',
       route: '/searchProfissional',
       title: 'Buscar Terapeura',
       permissions: ['paciente', 'administrador'],
@@ -76,7 +86,7 @@ const subMenu = [
       text: 'Buscar profissionais e marque sua consulta agora mesmo!'
    },
    {
-      id: '04', icon: 'https://mf-planejados.s3.amazonaws.com/Icon_financeiro.svg',
+      id: '05', icon: '/icons/gateway.png',
       route: '',
       title: 'Pagamentos',
       permissions: ['paciente', 'administrador'],
@@ -84,7 +94,7 @@ const subMenu = [
       text: 'Veja o extrato dos pagamentos de suas consultas realizadas!'
    },
    {
-      id: '05', icon: '/icons/plan_payment.png',
+      id: '06', icon: '/icons/subscription.png',
       filter: true,
       route: '/assignmentPlan',
       permissions: ['profissional', 'administrador'],
@@ -401,6 +411,10 @@ function Home() {
                            }}>
                               {subMenu?.map((item, index) => {
                                  const isPermission = item?.permissions?.some(role => user?.perfil?.includes(role))
+                                 let routeTo = item?.queryId ? `${item?.route}/${user?.id}` : item?.route;
+                                 if (item?.queryValue) {
+                                    routeTo = routeTo += item?.queryValue
+                                 }
 
                                  return (
                                     <Box key={index} sx={{
@@ -420,13 +434,12 @@ function Home() {
                                              cursor: 'pointer',
                                              transform: 'scale(1.03, 1.03)'
                                           }
-                                       }} onClick={() => router.push(item?.route)}>
+                                       }} onClick={() => router.push(routeTo)}>
                                           <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
                                              <Box sx={{
                                                 ...styles.menuIcon,
                                                 backgroundImage: `url(${item?.icon})`,
                                                 transition: '.3s',
-                                                filter: item?.filter && 'brightness(0) invert(0)',
                                                 width: 30, height: 30,
                                                 "&:hover": {
                                                    opacity: 0.8,

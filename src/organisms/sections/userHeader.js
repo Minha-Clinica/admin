@@ -190,7 +190,7 @@ export const UserHeader = (props) => {
                                         setShowUserOptions(!showUserOptions)
                                     }} />
                                 <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'center', transition: '1s' }}>
-                                    {/* <Text style={{ color: colorPalette.textColor, transition: 'background-color 1s', fontFamily: 'MetropolisSemiBold', }}>{userName}</Text> */}
+                                    <Text style={{ color: colorPalette.textColor, transition: 'background-color 1s', fontFamily: 'MetropolisSemiBold', }}>{firstName}</Text>
                                     <Box sx={{
                                         ...styles.menuIcon,
                                         backgroundImage: `url(${icons.gray_arrow_down})`,

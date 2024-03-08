@@ -9,6 +9,7 @@ import { icons } from "../../organisms/layout/Colors"
 import Link from "next/link"
 import moment from "moment";
 import "moment/locale/pt-br";
+import { formatTimeStamp } from "../../helpers"
 
 export default function ReserveConsultation() {
     const { setLoading, alert, colorPalette, user, matches, theme, setShowConfirmationDialog, menuItemsList, userPermissions } = useAppContext()
@@ -19,6 +20,7 @@ export default function ReserveConsultation() {
     const [reservaData, setReserveData] = useState({})
     const [formattedDate, setFormattedDate] = useState()
     const [loadingReservation, setLoadingReservation] = useState(false)
+    const [formPayment, setFormPayment] = useState()
     const [formattedHour, setFormattedHour] = useState()
     const [priceConsultation, setPriceConsultation] = useState(200)
     const themeApp = useTheme()
@@ -118,8 +120,21 @@ export default function ReserveConsultation() {
     });
 
 
+    const formsPayment = [
+        {
+            id: '01', icon: '/icons/pix_icon.png', title: 'Pix', key: 'pix',
+            description: 'Faça o pagamento por Pix, direto com o Terapeuta.'
+        },
+        {
+            id: '02', icon: '/icons/creditCard_icon.png', title: 'Cartão de Crédito', key: 'creditCard',
+            to: `/assignmentPlan/subscriptions`,
+            description: 'Sem dinheiro agora? Sem problemas! Pague pelo cartão de crédito, e não deixe a consulta para depois!'
+        }
+    ]
+
+
     return (
-        <>
+        <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column' }}>
             <Backdrop open={loadingReservation} sx={{ zIndex: 99999 }}>
                 <Box sx={{
                     display: 'flex', gap: 1, alignItems: 'center', padding: '30px', justifyContent: 'center', flexDirection: 'column',
@@ -132,7 +147,7 @@ export default function ReserveConsultation() {
             </Backdrop>
             <SectionHeader
                 icon={'/icons/localized_icon.png'}
-                title={`Confirmação de Agendamento`}
+                title={`Dados do Agendamento`}
             />
             <Box sx={{ display: 'flex' }}>
                 <Box sx={{
@@ -171,13 +186,6 @@ export default function ReserveConsultation() {
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, padding: '10px 12px' }}>
 
                         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'space-around' }}>
-                            <Box sx={{
-                                display: 'flex', gap: .5, alignItems: 'center', flexDirection: 'column', padding: '8px 12px', borderRadius: 2,
-                                backgroundColor: colorPalette.buttonColor, flex: 1
-                            }}>
-                                <Text bold large style={{ color: '#fff' }}>Preço da Consulta:</Text>
-                                <Text bold large style={{ color: '#fff' }}>{formatter.format(priceConsultation)}</Text>
-                            </Box>
                             <Box sx={{
                                 display: 'flex', flexDirection: 'column', gap: 1, justifyContent: 'center', alignItems: 'center',
                                 padding: '8px 12px', borderRadius: 2, backgroundColor: colorPalette.primary, flex: 1
@@ -218,7 +226,7 @@ export default function ReserveConsultation() {
                             </Box>
                         </Box>
                     </Box>
-                    <Box sx={{
+                    {/* <Box sx={{
                         padding: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center',
                         marginTop: 2,
                         transition: '.5s',
@@ -232,10 +240,129 @@ export default function ReserveConsultation() {
                         }
                     }} onClick={() => handleReservation()}>
                         <Text bold large style={{ color: '#fff' }}>CONFIRMAR AGENDAMENTO</Text>
-                    </Box>
+                    </Box> */}
                 </Box>
             </Box>
-        </>
+
+            <Box sx={{
+                display: 'flex', height: '100%', width: 400, backgroundColor: colorPalette?.secondary, position: 'fixed', right: 0, top: 50,
+                boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`, border: `1px solid lightgray`, gap: 2, padding: '20px 20px', flexDirection: 'column'
+            }}>
+                <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%', alignItems: 'center' }}>
+                    <Text bold title style={{ textAlign: 'center' }}>Carrinho:</Text>
+                </Box>
+                <Divider distance={0} />
+                <Box sx={{
+                    display: 'flex', gap: 2, backgroundColor: colorPalette.secondary, borderRadius: 2,
+                    flexDirection: 'column'
+                }}>
+                    <Text large bold>Consulta com:</Text>
+                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                        <Box sx={{
+                            display: 'flex',
+                            alignItems: 'center', gap: 1
+                        }}>
+                            <Avatar src={userData?.location || ''} sx={{
+                                height: { xs: '100%', sm: 45, md: 45, lg: 40 },
+                                width: { xs: '100%', sm: 45, md: 45, lg: 40 },
+                            }} variant="circular"
+                            />
+                            <Text light style={{ color: colorPalette.third }}>{userData?.nome}</Text>
+                        </Box>
+
+                        <Box sx={{ height: '100%', width: '1px', backgroundColor: 'lightgray' }} />
+                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                            <Box sx={{
+                                ...styles.icon,
+                                backgroundImage: `url('/icons/clock.png')`,
+                                backgroundSize: 'contain',
+                                backgroundPosition: 'center',
+                                filter: 'brightness(0) invert(0)',
+                                width: 17,
+                                height: 17,
+                                display: 'flex'
+                            }} />
+                            <Text light>{formatTimeStamp(reservaData?.inicio)} ás {formattedHour}</Text>
+                        </Box>
+                    </Box>
+                </Box>
+                <Box sx={{
+                    display: 'flex', gap: .5, alignItems: 'center', flexDirection: 'column', padding: '8px 12px', borderRadius: 2,
+                    backgroundColor: colorPalette.buttonColor, width: '100%'
+                }}>
+                    <Text bold large style={{ color: '#fff' }}>Preço da Consulta:</Text>
+                    <Text bold title style={{ color: '#fff' }}>{formatter.format(priceConsultation)}</Text>
+                </Box>
+
+                <Divider distance={0} />
+
+                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                    <Text large bold>Forma de Pagamento:</Text>
+                </Box>
+
+                <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column' }}>
+                    {formsPayment?.map((item, index) => {
+                        const isSelected = item?.key === formPayment;
+                        return (
+                            <Box key={index} sx={{
+                                display: 'flex', padding: '25px',
+                                borderRadius: 2,
+                                opacity: isSelected ? 1 : formPayment ? .7 : 1,
+                                backgroundColor: colorPalette.secondary,
+                                border: isSelected && `1px solid ${colorPalette?.buttonColor}`,
+                                boxShadow: theme ? `rgba(149, 157, 165, 0.27) 0px 6px 24px` : `rgba(35, 32, 51, 0.27) 0px 6px 24px`,
+                                alignItems: 'center',
+                                justifyContent: 'flex-start',
+                                gap: 2,
+                                transition: '.3s',
+                                "&:hover": {
+                                    opacity: 0.8,
+                                    cursor: 'pointer',
+                                    transform: 'scale(1.05, 1.05)'
+                                }
+
+                            }} onClick={() => {
+                                if (formPayment === item?.key) {
+                                    setFormPayment()
+                                } else {
+                                    setFormPayment(item?.key)
+                                }
+                            }}>
+                                <Box sx={{
+                                    ...styles.menuIcon,
+                                    width: 30, height: 30, aspectRatio: '1/1',
+                                    backgroundImage: `url('${item?.icon}')`,
+                                    transition: '.3s'
+
+                                }} />
+                                <Box sx={{ display: 'flex', alignItems: 'start', flexDirection: 'column' }}>
+                                    <Text large bold>{item?.title}</Text>
+                                    <Text small light>{item?.description}</Text>
+                                </Box>
+                            </Box>
+                        )
+                    })
+                    }
+                </Box>
+
+                <Box sx={{
+                    padding: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    marginTop: 2,
+                    transition: '.5s',
+                    gap: 2,
+                    backgroundColor: colorPalette.buttonColor,
+                    opacity: formPayment ? 1 : .7,
+                    borderRadius: 2,
+                    "&:hover": {
+                        opacity: formPayment && 0.8,
+                        cursor: 'pointer',
+                        transform: formPayment && 'scale(1.04, 1.04)'
+                    }
+                }} onClick={() => { formPayment && handleReservation() }}>
+                    <Text bold large style={{ color: '#fff' }}>CHECKOUT</Text>
+                </Box>
+            </Box>
+        </Box >
 
     )
 }

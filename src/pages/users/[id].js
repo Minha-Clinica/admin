@@ -1,7 +1,7 @@
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
 import axios from "axios"
-import { Avatar, Backdrop, useMediaQuery, useTheme } from "@mui/material"
+import { Avatar, Backdrop, FormControlLabel, Switch, useMediaQuery, useTheme } from "@mui/material"
 import { api } from "../../api/api"
 import { Box, ContentContainer, TextInput, Text, Button, PhoneInputField, FileInput, Divider } from "../../atoms"
 import { CheckBoxComponent, CustomDropzone, RadioItem, SectionHeader, TableOfficeHours, Table_V1 } from "../../organisms"
@@ -10,6 +10,7 @@ import { icons } from "../../organisms/layout/Colors"
 import { createContract, createEnrollment, createUser, deleteFile, deleteUser, editContract, editeEnrollment, editeUser } from "../../validators/api-requests"
 import { emailValidator, formatCEP, formatCPF, formatDate, formatRg, formatTimeStamp } from "../../helpers"
 import { SelectList } from "../../organisms/select/SelectList"
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import Link from "next/link"
 import { checkUserPermissions } from "../../validators/checkPermissionUser"
 
@@ -17,9 +18,11 @@ export default function EditUser() {
     const { setLoading, alert, colorPalette, user, matches, theme, setShowConfirmationDialog, menuItemsList, userPermissions } = useAppContext()
     const usuario_id = user.id;
     const router = useRouter()
-    const { id, slug } = router.query;
+    const { id, menuScreen } = router.query;
+    const menu = menuScreen ? menuScreen : `userData`;
     const newUser = id === 'new';
     const [fileCallback, setFileCallback] = useState()
+    const [selectedMenu, setSelectedMenu] = useState(menu)
     const [bgPhoto, setBgPhoto] = useState({})
     const [userData, setUserData] = useState({
         cpf: null,
@@ -483,7 +486,7 @@ export default function EditUser() {
                 title={userData?.nome || `Novo ${userData?.perfil === 'profissional' && 'Profissional' || userData?.perfil === 'administrador' && 'Administrador' || userData?.perfil === 'paciente' && 'Paciente' || 'Usuário'}`}
                 saveButton={isPermissionEdit}
                 saveButtonAction={newUser ? handleCreateUser : handleEditUser}
-                deleteButton={!newUser && isPermissionEdit}
+                deleteButton={!newUser && userData?.perfil?.includes('administrador')}
                 deleteButtonAction={(event) => setShowConfirmationDialog({
                     active: true,
                     event,
@@ -493,83 +496,141 @@ export default function EditUser() {
                 })}
             />
 
-            <ContentContainer style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 1.8, padding: 5, }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1, alignItems: 'center' }}>
-                    <Box>
-                        <Text title bold style={{}}>Meu Perfil</Text>
-                    </Box>
-
-                    <EditFile
-                        isPermissionEdit={isPermissionEdit}
-                        columnId="id_foto_perfil"
-                        open={showEditFile.photoProfile}
-                        newUser={newUser}
-                        onSet={(set) => {
-                            setShowEditFiles({ ...showEditFile, photoProfile: set })
-                        }}
-                        title='Foto de perfil'
-                        text='Para alterar sua foto de perfil, clique ou arraste no local desejado.'
-                        textDropzone='Arraste ou clique para selecionar a Foto que deseja'
-                        fileData={bgPhoto}
-                        usuarioId={id}
-                        campo='foto_perfil'
-                        tipo='foto'
-                        bgImage={bgPhoto?.location || fileCallback?.filePreview}
-                        callback={(file) => {
-                            if (file.status === 201 || file.status === 200) {
-                                setFileCallback({
-                                    status: file.status,
-                                    id_foto_perfil: file.fileId,
-                                    filePreview: file.filePreview
-                                })
-                                if (!newUser) { handleItems() }
-                            }
-                        }}
-                    />
-
-                </Box>
-                <Box sx={{ ...styles.inputSection, whiteSpace: 'nowrap', alignItems: 'start', gap: 4 }}>
-                    <Box sx={{
-                        justifyContent: 'center', alignItems: 'center',
-                        width: 300,
-                        gap: 2
-                    }}>
-                        <Avatar src={bgPhoto?.location || fileCallback?.filePreview} sx={{
-                            height: 'auto',
-                            borderRadius: '16px',
-                            width: { xs: 250, sm: 300, md: 300, lg: 300 },
-                            aspectRatio: '1/1',
-                        }} variant="square" />
+            <Box sx={{
+                display: 'flex'
+            }}>
+                <Box sx={{
+                    display: 'flex', padding: '8px 12px', backgroundColor: colorPalette?.secondary, gap: .5,
+                    borderRadius: '8px 8px 0px 0px', flexDirection: 'column', transition: '3s',
+                    boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
+                }}>
+                    <Box sx={{ display: 'flex', gap: 1 }}>
                         <Box sx={{
-                            display: 'flex', gap: 1, justifyContent: 'space-between', alignItems: 'center', backgroundColor: colorPalette.inputColor,
-                            borderRadius: '12px',
-                            padding: '12px 0px 12px 12px',
-                            marginTop: 2, border: '1px solid lightgray',
-                            position: 'relative',
+                            display: 'flex', padding: '15px 12px', transition: '.3s',
+                            // borderBottom: selectedMenu === 'userData' ? `3px solid ${colorPalette?.buttonColor}`
+                            //     : '.5px solid trasnparent',
+                            gap: 2,
                             '&:hover': { opacity: 0.8, cursor: 'pointer' },
-                        }} onClick={() => setShowEditFiles({ ...showEditFile, photoProfile: true })}>
-                            <Text bold small>Selecionar Foto...</Text>
-                            <Box sx={{
-                                display: 'flex', padding: '10px', zIndex: 99, backgroundColor: colorPalette.buttonColor, borderRadius: '0px 11px 11px 0px', border: `1px solid ${colorPalette.buttonColor}`,
-                                position: 'absolute', right: 0, top: 0, bottom: 0
+                        }}
+                            onClick={() => {
+                                setSelectedMenu('userData')
                             }}>
-                                <Box sx={{
-                                    ...styles.menuIcon,
-                                    backgroundImage: `url(/icons/upload.png)`,
-                                    transition: '.3s',
-                                }} />
-                            </Box>
+                            <Text bold title style={{ color: selectedMenu === 'userData' && colorPalette?.buttonColor, transition: '.3s' }}>Meus Dados</Text>
+                        </Box>
+                        <Box sx={{
+                            display: 'flex', transition: '.3s', padding: '15px 12px',
+                            // borderBottom: selectedMenu === 'paymentConfig' ? `3px solid ${colorPalette?.buttonColor}`
+                            //     : '.5px solid trasnparent',
+                            gap: 2,
+                            '&:hover': { opacity: 0.8, cursor: 'pointer' },
+                        }}
+                            onClick={() => {
+                                setSelectedMenu('paymentConfig')
+                            }}>
+                            <Text bold title style={{ color: selectedMenu === 'paymentConfig' && colorPalette?.buttonColor, transition: '.3s' }}>Configurações de Pagamento</Text>
                         </Box>
                     </Box>
-                    <Box sx={{ ...styles.inputSection, flexDirection: 'column', justifyContent: 'flex-start' }}>
-                        <Box sx={{ ...styles.inputSection }}>
-                            <TextInput disabled={!isPermissionEdit && true} placeholder='Nome Completo' name='nome' onChange={handleChange} value={userData?.nome || ''} label='Nome Completo: *' onBlur={autoEmail} sx={{ flex: 1, }} />
-                            <TextInput disabled={!isPermissionEdit && true} placeholder='Apelido' name='apelido' onChange={isPermissionEdit && handleChange} value={userData?.apelido || ''} label='Apelido:' sx={{ flex: 1, }} />
+
+                    <Box sx={{
+                        display: 'flex',
+                        justifyContent: 'flex-start',
+                        transition: 'transform 0.3s', // Adicionando a transição
+                        position: 'relative', // Adicionando position relative
+                    }}>
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                height: '3px',
+                                width: selectedMenu === 'userData' ? '120px' : '240px',
+                                backgroundColor: colorPalette?.buttonColor,
+                                transform: selectedMenu === 'userData' ? 'translateX(0)' : 'translateX(70%)', // Ajuste a posição com base no selectedMenu
+                                transition: 'transform 0.3s', // Adicionando a transição aqui também
+                                position: 'absolute', // Alterando para posição absoluta
+                            }}
+                        />
+                    </Box>
+                </Box>
+            </Box >
+
+            {selectedMenu === 'userData' ?
+                <>
+                    <ContentContainer style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 1.8, padding: 5, }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1, alignItems: 'center' }}>
+                            <Box>
+                                <Text title bold style={{}}>Meu Perfil</Text>
+                            </Box>
+
+                            <EditFile
+                                isPermissionEdit={isPermissionEdit}
+                                columnId="id_foto_perfil"
+                                open={showEditFile.photoProfile}
+                                newUser={newUser}
+                                onSet={(set) => {
+                                    setShowEditFiles({ ...showEditFile, photoProfile: set })
+                                }}
+                                title='Foto de perfil'
+                                text='Para alterar sua foto de perfil, clique ou arraste no local desejado.'
+                                textDropzone='Arraste ou clique para selecionar a Foto que deseja'
+                                fileData={bgPhoto}
+                                usuarioId={id}
+                                campo='foto_perfil'
+                                tipo='foto'
+                                bgImage={bgPhoto?.location || fileCallback?.filePreview}
+                                callback={(file) => {
+                                    if (file.status === 201 || file.status === 200) {
+                                        setFileCallback({
+                                            status: file.status,
+                                            id_foto_perfil: file.fileId,
+                                            filePreview: file.filePreview
+                                        })
+                                        if (!newUser) { handleItems() }
+                                    }
+                                }}
+                            />
+
                         </Box>
-                        <Box sx={{ ...styles.inputSection }}>
-                            <TextInput disabled={!isPermissionEdit && true} placeholder='E-mail' name='email' onChange={handleChange} value={userData?.email || ''} label='E-mail: *' sx={{ flex: 1, }} />
-                            <TextInput disabled={!isPermissionEdit && true} placeholder='Telefone' name='telefone' onChange={handleChange} value={userData?.telefone || ''} label='Telefone: *' sx={{ flex: 1, }} />
-                            {/* <PhoneInputField
+                        <Box sx={{ ...styles.inputSection, whiteSpace: 'nowrap', alignItems: 'start', gap: 4 }}>
+                            <Box sx={{
+                                justifyContent: 'center', alignItems: 'center',
+                                width: 300,
+                                gap: 2
+                            }}>
+                                <Avatar src={bgPhoto?.location || fileCallback?.filePreview} sx={{
+                                    height: 'auto',
+                                    borderRadius: '16px',
+                                    width: { xs: 250, sm: 300, md: 300, lg: 300 },
+                                    aspectRatio: '1/1',
+                                }} variant="square" />
+                                <Box sx={{
+                                    display: 'flex', gap: 1, justifyContent: 'space-between', alignItems: 'center', backgroundColor: colorPalette.inputColor,
+                                    borderRadius: '12px',
+                                    padding: '12px 0px 12px 12px',
+                                    marginTop: 2, border: '1px solid lightgray',
+                                    position: 'relative',
+                                    '&:hover': { opacity: 0.8, cursor: 'pointer' },
+                                }} onClick={() => setShowEditFiles({ ...showEditFile, photoProfile: true })}>
+                                    <Text bold small>Selecionar Foto...</Text>
+                                    <Box sx={{
+                                        display: 'flex', padding: '10px', zIndex: 99, backgroundColor: colorPalette.buttonColor, borderRadius: '0px 11px 11px 0px', border: `1px solid ${colorPalette.buttonColor}`,
+                                        position: 'absolute', right: 0, top: 0, bottom: 0
+                                    }}>
+                                        <Box sx={{
+                                            ...styles.menuIcon,
+                                            backgroundImage: `url(/icons/upload.png)`,
+                                            transition: '.3s',
+                                        }} />
+                                    </Box>
+                                </Box>
+                            </Box>
+                            <Box sx={{ ...styles.inputSection, flexDirection: 'column', justifyContent: 'flex-start' }}>
+                                <Box sx={{ ...styles.inputSection }}>
+                                    <TextInput disabled={!isPermissionEdit && true} placeholder='Nome Completo' name='nome' onChange={handleChange} value={userData?.nome || ''} label='Nome Completo: *' onBlur={autoEmail} sx={{ flex: 1, }} />
+                                    <TextInput disabled={!isPermissionEdit && true} placeholder='Apelido' name='apelido' onChange={isPermissionEdit && handleChange} value={userData?.apelido || ''} label='Apelido:' sx={{ flex: 1, }} />
+                                </Box>
+                                <Box sx={{ ...styles.inputSection }}>
+                                    <TextInput disabled={!isPermissionEdit && true} placeholder='E-mail' name='email' onChange={handleChange} value={userData?.email || ''} label='E-mail: *' sx={{ flex: 1, }} />
+                                    <TextInput disabled={!isPermissionEdit && true} placeholder='Telefone' name='telefone' onChange={handleChange} value={userData?.telefone || ''} label='Telefone: *' sx={{ flex: 1, }} />
+                                    {/* <PhoneInputField
                                 disabled={!isPermissionEdit && true}
                                 label='Telefone *'
                                 name='telefone'
@@ -577,135 +638,410 @@ export default function EditUser() {
                                 value={userData?.telefone}
                                 sx={{ flex: 1, }}
                             /> */}
-                        </Box>
-                        <TextInput disabled={!isPermissionEdit && true} placeholder='Nascimento' name='nascimento' onChange={handleChange} type="date" value={(userData?.nascimento)?.split('T')[0] || ''} label='Nascimento *' sx={{ flex: 1, }} />
-                        <SelectList disabled={!isPermissionEdit && true} fullWidth data={groupGender} valueSelection={userData?.genero || ''} onSelect={(value) => setUserData({ ...userData, genero: value })}
-                            title="Gênero *" filterOpition="value" sx={{ color: colorPalette.textColor, flex: 1 }}
-                            inputStyle={{ color: colorPalette.textColor, fontSize: '15px', fontFamily: 'MetropolisBold' }}
-                        />
-                        <TextInput disabled={!isPermissionEdit && true} placeholder='CPF' name='cpf' onChange={handleChange} value={userData?.cpf || ''} label='CPF' sx={{ flex: 1, }} />
-
-                        {isAdministrador &&
-                            <> <Box sx={{ ...styles.inputSection, justifyContent: 'start', alignItems: 'center', gap: 25 }}>
-                                <CheckBoxComponent disabled={!isPermissionEdit && true}
-                                    valueChecked={userData?.perfil}
-                                    boxGroup={groupPerfil}
-                                    title="Perfil *"
-                                    horizontal={mobile ? false : true}
-                                    onSelect={(value) => setUserData({
-                                        ...userData,
-                                        perfil: value,
-                                    })}
-                                    sx={{ flex: 1, }}
+                                </Box>
+                                <TextInput disabled={!isPermissionEdit && true} placeholder='Nascimento' name='nascimento' onChange={handleChange} type="date" value={(userData?.nascimento)?.split('T')[0] || ''} label='Nascimento *' sx={{ flex: 1, }} />
+                                <SelectList disabled={!isPermissionEdit && true} fullWidth data={groupGender} valueSelection={userData?.genero || ''} onSelect={(value) => setUserData({ ...userData, genero: value })}
+                                    title="Gênero *" filterOpition="value" sx={{ color: colorPalette.textColor, flex: 1 }}
+                                    inputStyle={{ color: colorPalette.textColor, fontSize: '15px', fontFamily: 'MetropolisBold' }}
                                 />
+                                <TextInput disabled={!isPermissionEdit && true} placeholder='CPF' name='cpf' onChange={handleChange} value={userData?.cpf || ''} label='CPF' sx={{ flex: 1, }} />
 
+                                {isAdministrador &&
+                                    <> <Box sx={{ ...styles.inputSection, justifyContent: 'start', alignItems: 'center', gap: 25 }}>
+                                        <CheckBoxComponent disabled={!isPermissionEdit && true}
+                                            valueChecked={userData?.perfil}
+                                            boxGroup={groupPerfil}
+                                            title="Perfil *"
+                                            horizontal={mobile ? false : true}
+                                            onSelect={(value) => setUserData({
+                                                ...userData,
+                                                perfil: value,
+                                            })}
+                                            sx={{ flex: 1, }}
+                                        />
+
+                                    </Box>
+                                        <RadioItem disabled={!isPermissionEdit && true} valueRadio={userData?.ativo} group={groupStatus} title="Status *" horizontal={mobile ? false : true} onSelect={(value) => setUserData({
+                                            ...userData,
+                                            ativo: parseInt(value)
+                                        })} />
+                                    </>
+                                }
                             </Box>
-                                <RadioItem disabled={!isPermissionEdit && true} valueRadio={userData?.ativo} group={groupStatus} title="Status *" horizontal={mobile ? false : true} onSelect={(value) => setUserData({
-                                    ...userData,
-                                    ativo: parseInt(value)
-                                })} />
-                            </>
-                        }
-                    </Box>
-                </Box>
-            </ContentContainer>
+                        </Box>
+                    </ContentContainer>
 
 
-            {isAdministrador && <ContentContainer style={{ ...styles.containerRegister, padding: showSections?.accessData ? '40px' : '25px' }}>
+                    {
+                        isAdministrador && <ContentContainer style={{ ...styles.containerRegister, padding: showSections?.accessData ? '40px' : '25px' }}>
+                            <Box sx={{
+                                display: 'flex', alignItems: 'center', gap: 1, padding: showSections?.accessData ? '0px 0px 20px 0px' : '0px', "&:hover": {
+                                    opacity: 0.8,
+                                    cursor: 'pointer'
+                                },
+                                justifyContent: 'space-between'
+                            }} onClick={() => setShowSections({ ...showSections, accessData: !showSections?.accessData })}>
+                                <Text title bold >Dados de acesso</Text>
+                                <Box sx={{
+                                    ...styles.menuIcon,
+                                    backgroundImage: `url(${icons.gray_arrow_down})`,
+                                    transform: showSections?.accessData ? 'rotate(0deg)' : 'rotate(-90deg)',
+                                    transition: '.3s',
+                                }} />
+                            </Box>
+                            {showSections?.accessData &&
+                                <>
+                                    <Box sx={{ ...styles.inputSection, whiteSpace: 'nowrap', alignItems: 'end', gap: 4 }}>
+                                        <Box sx={{ ...styles.inputSection, flexDirection: 'column', }}>
+                                            <Box sx={{ ...styles.inputSection }}>
+                                                <TextInput disabled={!isPermissionEdit && true} placeholder='Login' name='login' onChange={handleChange} value={userData?.login || ''} label='Login *' sx={{ flex: 1, }} />
+                                            </Box>
+                                        </Box>
+                                    </Box>
+                                    {!newUser && <Box sx={{ flex: 1, display: 'flex', justifyContent: 'space-around', gap: 1.8 }}>
+                                        <TextInput disabled={!isPermissionEdit && true} placeholder='Nova senha' name='nova_senha' onChange={handleChange} value={userData?.nova_senha || ''} type="password" label='Nova senha' sx={{ flex: 1, }} />
+                                        <TextInput disabled={!isPermissionEdit && true} placeholder='Confirmar senha' name='confirmar_senha' onChange={handleChange} value={userData?.confirmar_senha || ''} type="password" label='Confirmar senha' sx={{ flex: 1, }} />
+                                    </Box>}
+                                    <RadioItem disabled={!isPermissionEdit && true} valueRadio={userData?.admin_sistema} group={groupAdmin} title="Acesso ao Sistema *" horizontal={mobile ? false : true} onSelect={(value) => setUserData({ ...userData, admin_sistema: parseInt(value) })} />
+
+                                </>}
+                        </ContentContainer>
+                    }
+
+                    {
+                        userData.perfil && !userData.perfil.includes('cliente') &&
+                        <>
+                            <ContentContainer style={{ ...styles.containerContract, padding: showContract ? '40px' : '25px' }}>
+                                <Box sx={{
+                                    display: 'flex', alignItems: 'center', padding: showContract ? '0px 0px 20px 0px' : '0px', gap: 1, "&:hover": {
+                                        opacity: 0.8,
+                                        cursor: 'pointer'
+                                    },
+                                    justifyContent: 'space-between'
+                                }} onClick={() => setShowContract(!showContract)}>
+                                    <Text title bold >Contrato de Atendimento</Text>
+                                    <Box sx={{
+                                        ...styles.menuIcon,
+                                        backgroundImage: `url(${icons.gray_arrow_down})`,
+                                        transform: showContract ? 'rotate(0deg)' : 'rotate(-90deg)',
+                                        transition: '.3s',
+                                        "&:hover": {
+                                            opacity: 0.8,
+                                            cursor: 'pointer'
+                                        }
+                                    }} />
+                                </Box>
+                                {showContract &&
+                                    <>
+                                        <Box sx={styles.inputSection}>
+                                            <TextInput disabled={!isPermissionEdit && true} placeholder='Profissão' name='funcao' onChange={handleChangeContract} value={contract?.funcao || ''} label='Profissão:' sx={{ flex: 1, }} />
+                                            <TextInput disabled={!isAdministrador && true} placeholder='Início da contratação' name='admissao' type="date" onChange={handleChangeContract} value={(contract?.admissao)?.split('T')[0] || ''} label='Início da contratação' sx={{ flex: 1, }} />
+                                            <TextInput disabled={!isAdministrador && true} placeholder='Encerramento' name='desligamento' type="date" onChange={handleChangeContract} value={contract?.desligamento?.split('T')[0] || ''} label='Encerramento da contratação' sx={{ flex: 1, }} onBlur={() => {
+                                                new Date(contract?.desligamento) > new Date(1001, 0, 1) &&
+                                                    setUserData({ ...userData, ativo: 0 })
+                                            }} />
+                                        </Box>
+                                        <Box sx={styles.inputSection}>
+                                            <SelectList disabled={!isPermissionEdit && true} fullWidth data={groupBank} valueSelection={contract?.banco_1} onSelect={(value) => setContract({ ...contract, banco_1: value })}
+                                                title="Banco" filterOpition="value" sx={{ color: colorPalette.textColor, flex: 1 }}
+                                                inputStyle={{ color: colorPalette.textColor, fontSize: '15px', fontFamily: 'MetropolisBold' }}
+                                            />
+                                            <TextInput disabled={!isPermissionEdit && true} placeholder='Conta' name='conta_1' onChange={handleChangeContract} value={contract?.conta_1 || ''} label='Conta' sx={{ flex: 1, }} />
+                                            <TextInput disabled={!isPermissionEdit && true} placeholder='Agência' name='agencia_1' onChange={handleChangeContract} value={contract?.agencia_1 || ''} label='Agência' sx={{ flex: 1, }} />
+                                            <SelectList disabled={!isPermissionEdit && true} fullWidth data={groupAccount} valueSelection={contract?.tipo_conta_1} onSelect={(value) => setContract({ ...contract, tipo_conta_1: value })}
+                                                title="Tipo de conta" filterOpition="value" sx={{ color: colorPalette.textColor, flex: 1 }}
+                                                inputStyle={{ color: colorPalette.textColor, fontSize: '15px', fontFamily: 'MetropolisBold' }}
+                                            />
+                                        </Box>
+                                        <Box sx={styles.inputSection}>
+                                            <TextInput disabled={!isPermissionEdit && true} placeholder='Banco 2' name='banco_2' onChange={handleChangeContract} value={contract?.banco_2 || ''} label='Banco 2' sx={{ flex: 1, }} />
+                                            <TextInput disabled={!isPermissionEdit && true} placeholder='Conta 2' name='conta_2' onChange={handleChangeContract} value={contract?.conta_2 || ''} label='Conta 2' sx={{ flex: 1, }} />
+                                            <TextInput disabled={!isPermissionEdit && true} placeholder='Agência 2' name='agencia_2' onChange={handleChangeContract} value={contract?.agencia_2 || ''} label='Agência 2' sx={{ flex: 1, }} />
+                                            <SelectList disabled={!isPermissionEdit && true} fullWidth data={groupAccount} valueSelection={contract?.tipo_conta_2} onSelect={(value) => setContract({ ...contract, tipo_conta_2: value })}
+                                                title="Tipo de conta 2" filterOpition="value" sx={{ color: colorPalette.textColor, flex: 1 }}
+                                                inputStyle={{ color: colorPalette.textColor, fontSize: '15px', fontFamily: 'MetropolisBold' }}
+                                            />
+                                        </Box>
+
+                                    </>
+                                }
+                            </ContentContainer>
+
+                        </>
+                    }
+                </>
+                :
+                <PaymentConfigScreen />
+            }
+        </>
+    )
+}
+
+
+const PaymentConfigScreen = () => {
+
+    const { setLoading, alert, colorPalette, user, theme } = useAppContext()
+
+
+    const [showSection, setShowSection] = useState({
+        paymentPlataform: true,
+        consultValues: true,
+        typesPayment: false,
+    })
+    const [consultValues, setConsultValues] = useState({
+        valor_terapeuta: '',
+        valor_final: '',
+        comissao_valor: '',
+        comissao_porcentagem: 10
+    })
+    const [paymentsPreference, setPaymentsPreference] = useState({
+        pagamentos_plataforma: 0,
+        forma_pagamento: {
+            pix: true,
+            boleto: true,
+            creditCard: true
+        },
+    })
+
+    const handleChange = (event) => {
+
+        const rawValue = event.target.value.replace(/[^\d]/g, ''); // Remove todos os caracteres não numéricos
+
+        if (rawValue === '') {
+            event.target.value = '';
+        } else {
+            let intValue = rawValue.slice(0, -2) || '0'; // Parte inteira
+            const decimalValue = rawValue.slice(-2).padStart(2, '0');; // Parte decimal
+
+            if (intValue === '0' && rawValue.length > 2) {
+                intValue = '';
+            }
+
+            const formattedValue = `${parseInt(intValue, 10).toLocaleString()},${decimalValue}`; // Adicionando o separador de milhares
+            event.target.value = formattedValue;
+
+        }
+
+        setConsultValues((prevValues) => ({
+            ...prevValues,
+            [event.target.name]: event.target.value,
+        }));
+
+    }
+
+    const handleCalculateComission = async (consultValues) => {
+        if (consultValues?.valor_terapeuta) {
+            const terapeutaValue = consultValues?.valor_terapeuta?.replace(/\./g, '').replace(',', '.');
+            const comissionPorcent = consultValues?.comissao_porcentagem;
+            const comissionValueCalculate = (parseFloat(terapeutaValue) * parseInt(comissionPorcent)) / 100;
+            const totalValue = parseFloat(terapeutaValue) + comissionValueCalculate;
+
+            setConsultValues((prevValues) => ({
+                ...prevValues,
+                comissao_valor: parseFloat(comissionValueCalculate),
+                valor_final: parseFloat(totalValue),
+            }));
+        }
+    }
+
+
+    const handleFormattedValue = (value) => {
+
+        let valueFinally = value;
+        let intValue = valueFinally.slice(0, -2) || '0'; // Parte inteira
+        const decimalValue = valueFinally.slice(-2).padStart(2, '0');; // Parte decimal
+
+        if (intValue === '0' && value.length > 2) {
+            intValue = '';
+        }
+
+        const formattedValue = `${parseInt(intValue, 10).toLocaleString()},${decimalValue}`; // Adicionando o separador de milhares
+        valueFinally = formattedValue;
+
+        return valueFinally
+
+    }
+
+
+    const handleUpdatePreferences = (event) => {
+        const { checked } = event.target;
+        const paymentPlataform = checked === true ? 1 : 0;
+
+        setPaymentsPreference((prevValues) => ({
+            ...prevValues,
+            pagamentos_plataforma: paymentPlataform
+        }))
+    }
+
+    const handleUpdateFormsPayment = (field) => {
+        setPaymentsPreference((prevValues) => ({
+            ...prevValues,
+            forma_pagamento: {
+                ...prevValues.forma_pagamento,
+                [field]: !prevValues.forma_pagamento[field]
+            }
+        }));
+    };
+
+
+    const formsPayment = [
+        {
+            id: '01', icon: '/icons/pix_icon.png', title: 'Pix', key: 'pix',
+            description: 'Recebimento em até 2 horas.'
+        },
+        {
+            id: '02', icon: '/icons/creditCard_icon.png', title: 'Cartão de Crédito', key: 'creditCard',
+            to: `/assignmentPlan/subscriptions`,
+            description: 'Recebimento em até 7 dias.'
+        },
+        {
+            id: '02', icon: '/icons/barcode.png', title: 'Boleto', key: 'boleto',
+            to: `/assignmentPlan/subscriptions`,
+            description: 'Recebimento em até 72 horas.'
+        },
+    ]
+
+    const formatter = new Intl.NumberFormat('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+    });
+
+    return (
+        <Box sx={{ display: 'flex', gap: 1.8, flexDirection: 'column' }}>
+
+            <ContentContainer>
                 <Box sx={{
-                    display: 'flex', alignItems: 'center', gap: 1, padding: showSections?.accessData ? '0px 0px 20px 0px' : '0px', "&:hover": {
+                    display: 'flex', alignItems: 'center', gap: 1, padding: showSection?.consultValues ? '0px 0px 20px 0px' : '0px', "&:hover": {
                         opacity: 0.8,
                         cursor: 'pointer'
                     },
                     justifyContent: 'space-between'
-                }} onClick={() => setShowSections({ ...showSections, accessData: !showSections?.accessData })}>
-                    <Text title bold >Dados de acesso</Text>
+                }} onClick={() => setShowSection({ ...showSection, consultValues: !showSection?.consultValues })}>
+                    <Text title bold>Valor da Consulta</Text>
                     <Box sx={{
                         ...styles.menuIcon,
                         backgroundImage: `url(${icons.gray_arrow_down})`,
-                        transform: showSections?.accessData ? 'rotate(0deg)' : 'rotate(-90deg)',
+                        transform: showSection?.consultValues ? 'rotate(0deg)' : 'rotate(-90deg)',
                         transition: '.3s',
                     }} />
                 </Box>
-                {showSections?.accessData &&
-                    <>
-                        <Box sx={{ ...styles.inputSection, whiteSpace: 'nowrap', alignItems: 'end', gap: 4 }}>
-                            <Box sx={{ ...styles.inputSection, flexDirection: 'column', }}>
-                                <Box sx={{ ...styles.inputSection }}>
-                                    <TextInput disabled={!isPermissionEdit && true} placeholder='Login' name='login' onChange={handleChange} value={userData?.login || ''} label='Login *' sx={{ flex: 1, }} />
-                                </Box>
+                {showSection?.consultValues &&
+                    <Box>
+                        <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', alignItems: 'start' }}>
+
+                            <Text bold large>Defina o Valor de sua consulta:</Text>
+
+                            <TextInput
+                                placeholder='0,00'
+                                name='valor_terapeuta'
+                                type="coin"
+                                onChange={handleChange}
+                                value={consultValues?.valor_terapeuta || ''}
+                                onBlur={() => handleCalculateComission(consultValues)}
+                            />
+
+                            <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column', alignItems: 'start' }}>
+                                <Text light>Ao definir o valor que será cobrado em suas consultas, geramos automáticamente a taxa cobrada pela plataforma. Fique tranquilo,
+                                    o valor da taxa é "repassado" para o paciente, sem afetar seu lucro líquido.</Text>
+                                <Text light>Os valores podem ser alterado depois, e é possível criar "Cupons" de desconto, caso queira dar algum desconto sobre o valor da consulta para algum paciente.</Text>
+                                <Text bold large style={{ color: colorPalette?.buttonColor, marginTop: '5px' }}>O valor que irá ser disponibilizado para pagamento do paciente, está abaixo (Já incluso na taxa)!</Text>
+                            </Box>
+                            <Box sx={{ display: 'flex', gap: 1, flexDirection: 'row', alignItems: 'center' }}>
+                                <Text bold>Comissão cobrada: </Text>
+                                <Text>{consultValues?.comissao_porcentagem?.toFixed(1)}%</Text>
+                            </Box>
+                            <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column', alignItems: 'center', padding: '8px 12px', border: `1px solid ${colorPalette?.buttonColor}`, borderRadius: 2 }}>
+                                <Text bold>Valor Final para o paciente: </Text>
+                                <Text veryLarge>{formatter.format(consultValues?.valor_final)}</Text>
                             </Box>
                         </Box>
-                        {!newUser && <Box sx={{ flex: 1, display: 'flex', justifyContent: 'space-around', gap: 1.8 }}>
-                            <TextInput disabled={!isPermissionEdit && true} placeholder='Nova senha' name='nova_senha' onChange={handleChange} value={userData?.nova_senha || ''} type="password" label='Nova senha' sx={{ flex: 1, }} />
-                            <TextInput disabled={!isPermissionEdit && true} placeholder='Confirmar senha' name='confirmar_senha' onChange={handleChange} value={userData?.confirmar_senha || ''} type="password" label='Confirmar senha' sx={{ flex: 1, }} />
-                        </Box>}
-                        <RadioItem disabled={!isPermissionEdit && true} valueRadio={userData?.admin_sistema} group={groupAdmin} title="Acesso ao Sistema *" horizontal={mobile ? false : true} onSelect={(value) => setUserData({ ...userData, admin_sistema: parseInt(value) })} />
+                    </Box>
+                }
+            </ContentContainer>
 
-                    </>}
-            </ContentContainer>}
+            <ContentContainer>
+                <Box sx={{
+                    display: 'flex', alignItems: 'center', gap: 1, padding: showSection?.paymentPlataform ? '0px 0px 20px 0px' : '0px', "&:hover": {
+                        opacity: 0.8,
+                        cursor: 'pointer'
+                    },
+                    justifyContent: 'space-between'
+                }} onClick={() => setShowSection({ ...showSection, paymentPlataform: !showSection?.paymentPlataform })}>
+                    <Text title bold >Preferências de Pagamento</Text>
+                    <Box sx={{
+                        ...styles.menuIcon,
+                        backgroundImage: `url(${icons.gray_arrow_down})`,
+                        transform: showSection?.paymentPlataform ? 'rotate(0deg)' : 'rotate(-90deg)',
+                        transition: '.3s',
+                    }} />
+                </Box>
+                {showSection?.paymentPlataform &&
+                    <Box>
+                        <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', alignItems: 'start' }}>
 
-            {/* contrato */}
-            {userData.perfil && !userData.perfil.includes('cliente') &&
-                <>
-                    <ContentContainer style={{ ...styles.containerContract, padding: showContract ? '40px' : '25px' }}>
-                        <Box sx={{
-                            display: 'flex', alignItems: 'center', padding: showContract ? '0px 0px 20px 0px' : '0px', gap: 1, "&:hover": {
-                                opacity: 0.8,
-                                cursor: 'pointer'
-                            },
-                            justifyContent: 'space-between'
-                        }} onClick={() => setShowContract(!showContract)}>
-                            <Text title bold >Contrato de Atendimento</Text>
-                            <Box sx={{
-                                ...styles.menuIcon,
-                                backgroundImage: `url(${icons.gray_arrow_down})`,
-                                transform: showContract ? 'rotate(0deg)' : 'rotate(-90deg)',
-                                transition: '.3s',
-                                "&:hover": {
-                                    opacity: 0.8,
-                                    cursor: 'pointer'
+                            <FormControlLabel small
+                                control={
+                                    <Switch checked={paymentsPreference?.pagamentos_plataforma} name="pagamentos_plataforma" size="small" onChange={(e) => handleUpdatePreferences(e)} />
                                 }
-                            }} />
+                                label="Controlar Pagamentos por meio da Plataforma"
+                            />
+
+                            <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column', alignItems: 'start' }}>
+                                <Text light>Ao optar pelo gerenciamento dos pagamentos pela própria plataforma, nós cuidamos de tudo para você!</Text>
+                                <Text light>Além de não ter a responsabilidade de gerenciar os pagamentos, a nossa plataforma oferece um leque de opcões de pagamento para o paciente, como <strong style={{ color: colorPalette?.buttonColor, fontFamily: 'MetropolisBold' }}>PIX, Boleto e Cartão de Crédito!</strong></Text>
+                                <Text bold large style={{ color: colorPalette?.buttonColor, marginTop: '5px' }}>Nunca mais deixe de dar atendimento por questões de pagamento!</Text>
+                            </Box>
                         </Box>
-                        {showContract &&
-                            <>
-                                <Box sx={styles.inputSection}>
-                                    <TextInput disabled={!isPermissionEdit && true} placeholder='Profissão' name='funcao' onChange={handleChangeContract} value={contract?.funcao || ''} label='Profissão:' sx={{ flex: 1, }} />
-                                    <TextInput disabled={!isAdministrador && true} placeholder='Início da contratação' name='admissao' type="date" onChange={handleChangeContract} value={(contract?.admissao)?.split('T')[0] || ''} label='Início da contratação' sx={{ flex: 1, }} />
-                                    <TextInput disabled={!isAdministrador && true} placeholder='Encerramento' name='desligamento' type="date" onChange={handleChangeContract} value={contract?.desligamento?.split('T')[0] || ''} label='Encerramento da contratação' sx={{ flex: 1, }} onBlur={() => {
-                                        new Date(contract?.desligamento) > new Date(1001, 0, 1) &&
-                                            setUserData({ ...userData, ativo: 0 })
-                                    }} />
-                                </Box>
-                                <Box sx={styles.inputSection}>
-                                    <SelectList disabled={!isPermissionEdit && true} fullWidth data={groupBank} valueSelection={contract?.banco_1} onSelect={(value) => setContract({ ...contract, banco_1: value })}
-                                        title="Banco" filterOpition="value" sx={{ color: colorPalette.textColor, flex: 1 }}
-                                        inputStyle={{ color: colorPalette.textColor, fontSize: '15px', fontFamily: 'MetropolisBold' }}
-                                    />
-                                    <TextInput disabled={!isPermissionEdit && true} placeholder='Conta' name='conta_1' onChange={handleChangeContract} value={contract?.conta_1 || ''} label='Conta' sx={{ flex: 1, }} />
-                                    <TextInput disabled={!isPermissionEdit && true} placeholder='Agência' name='agencia_1' onChange={handleChangeContract} value={contract?.agencia_1 || ''} label='Agência' sx={{ flex: 1, }} />
-                                    <SelectList disabled={!isPermissionEdit && true} fullWidth data={groupAccount} valueSelection={contract?.tipo_conta_1} onSelect={(value) => setContract({ ...contract, tipo_conta_1: value })}
-                                        title="Tipo de conta" filterOpition="value" sx={{ color: colorPalette.textColor, flex: 1 }}
-                                        inputStyle={{ color: colorPalette.textColor, fontSize: '15px', fontFamily: 'MetropolisBold' }}
-                                    />
-                                </Box>
-                                <Box sx={styles.inputSection}>
-                                    <TextInput disabled={!isPermissionEdit && true} placeholder='Banco 2' name='banco_2' onChange={handleChangeContract} value={contract?.banco_2 || ''} label='Banco 2' sx={{ flex: 1, }} />
-                                    <TextInput disabled={!isPermissionEdit && true} placeholder='Conta 2' name='conta_2' onChange={handleChangeContract} value={contract?.conta_2 || ''} label='Conta 2' sx={{ flex: 1, }} />
-                                    <TextInput disabled={!isPermissionEdit && true} placeholder='Agência 2' name='agencia_2' onChange={handleChangeContract} value={contract?.agencia_2 || ''} label='Agência 2' sx={{ flex: 1, }} />
-                                    <SelectList disabled={!isPermissionEdit && true} fullWidth data={groupAccount} valueSelection={contract?.tipo_conta_2} onSelect={(value) => setContract({ ...contract, tipo_conta_2: value })}
-                                        title="Tipo de conta 2" filterOpition="value" sx={{ color: colorPalette.textColor, flex: 1 }}
-                                        inputStyle={{ color: colorPalette.textColor, fontSize: '15px', fontFamily: 'MetropolisBold' }}
-                                    />
-                                </Box>
 
-                            </>
-                        }
-                    </ContentContainer>
+                        {paymentsPreference?.pagamentos_plataforma === 1 && <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', marginTop: 5 }}>
+                            <Text bold large>Escolha as Formas de Pagamento que deseja disponibilizar:</Text>
 
-                </>}
-        </>
+                            <Box sx={{ display: 'flex', gap: 2, flexDirection: 'row' }}>
+                                {formsPayment?.map((item, index) => {
+                                    const isSelected = paymentsPreference?.forma_pagamento[item?.key];
+                                    return (
+                                        <Box key={index} sx={{
+                                            display: 'flex', padding: '25px',
+                                            borderRadius: 2,
+                                            backgroundColor: colorPalette.secondary,
+                                            border: isSelected && `1px solid ${colorPalette?.buttonColor}`,
+                                            boxShadow: theme ? `rgba(149, 157, 165, 0.27) 0px 6px 24px` : `rgba(35, 32, 51, 0.27) 0px 6px 24px`,
+                                            alignItems: 'center',
+                                            justifyContent: 'flex-start',
+                                            position: 'relative',
+                                            gap: 2,
+                                            transition: '.3s',
+                                            "&:hover": {
+                                                opacity: 0.8,
+                                                cursor: 'pointer',
+                                                transform: 'scale(1.05, 1.05)'
+                                            }
+
+                                        }} onClick={() => {
+                                            handleUpdateFormsPayment(item?.key)
+                                        }}>
+                                            {isSelected && <CheckCircleIcon style={{ color: 'green', fontSize: 18, position: 'absolute', top: 5, left: 5 }} />}
+                                            <Box sx={{
+                                                ...styles.menuIcon,
+                                                width: 30, height: 30, aspectRatio: '1/1',
+                                                backgroundImage: `url('${item?.icon}')`,
+                                                transition: '.3s'
+
+                                            }} />
+                                            <Box sx={{ display: 'flex', alignItems: 'start', flexDirection: 'column' }}>
+                                                <Text large bold>{item?.title}</Text>
+                                                <Text small light>{item?.description}</Text>
+                                            </Box>
+                                        </Box>
+                                    )
+                                })
+                                }
+                            </Box>
+                        </Box>}
+                    </Box>
+                }
+            </ContentContainer>
+        </Box>
     )
 }
 
