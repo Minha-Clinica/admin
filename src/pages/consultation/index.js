@@ -1,7 +1,7 @@
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
 import { Box, Button, ContentContainer, Text, TextInput } from "../../atoms"
-import { SearchBar, SectionHeader, Table_V1 } from "../../organisms"
+import { PaginationTable, SearchBar, SectionHeader, Table_V1 } from "../../organisms"
 import { getConsultionPerfil } from "../../validators/api-requests"
 import { useAppContext } from "../../context/AppContext"
 import { SelectList } from "../../organisms/select/SelectList"
@@ -317,7 +317,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
             <ContentContainer sx={{ display: 'flex', width: '100%', padding: 0, backgroundColor: colorPalette.primary, boxShadow: 'none', borderRadius: 2 }}>
 
                 <TableContainer sx={{ borderRadius: '8px', overflow: 'auto', border: '1px solid lightgray' }}>
-                    <Table sx={{ borderCollapse: 'collapse', width: '100%',  }}>
+                    <Table sx={{ borderCollapse: 'collapse', width: '100%', }}>
                         <TableHead>
                             <TableRow sx={{ borderBottom: `2px solid ${colorPalette.buttonColor}` }}>
                                 {columns.map((column, index) => (
@@ -439,7 +439,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                             <Text bold light>{data?.length || 0}</Text>
                             <Text light>consultas</Text>
                         </Box>
-                        <TablePagination
+                        {/* <TablePagination
                             component="div"
                             count={data?.filter(filter)?.length}
                             page={page}
@@ -449,7 +449,12 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                             style={{ color: colorPalette.textColor }} // Define a cor do texto
                             backIconButtonProps={{ style: { color: colorPalette.textColor } }} // Define a cor do ícone de voltar
                             nextIconButtonProps={{ style: { color: colorPalette.textColor } }} // Define a cor do ícone de avançar
-                        />
+                        /> */}
+                        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', padding: '15px 12px', width: '100%', justifyContent: 'space-between' }}>
+                            <PaginationTable data={data?.filter(filter)}
+                                page={page} setPage={setPage} rowsPerPage={rowsPerPage} setRowsPerPage={setRowsPerPage}
+                            />
+                        </Box>
                     </Box>
                 </TableContainer>
             </ContentContainer >

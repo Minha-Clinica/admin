@@ -359,7 +359,7 @@ export default function ReserveConsultation() {
                         transform: formPayment && 'scale(1.04, 1.04)'
                     }
                 }} onClick={() => { formPayment && handleReservation() }}>
-                    <Text bold large style={{ color: '#fff' }}>CHECKOUT</Text>
+                    <Text bold large style={{ color: '#fff' }}>PAGAMENTO</Text>
                 </Box>
             </Box>
         </Box >

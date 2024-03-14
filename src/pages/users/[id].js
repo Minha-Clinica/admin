@@ -66,6 +66,7 @@ export default function EditUser() {
         photoProfile: false,
         cpf: false
     })
+    const isProfissional = user?.perfil?.includes('profissional')
     const [filesUser, setFilesUser] = useState([])
     const [officeHours, setOfficeHours] = useState([
         { dia_semana: '2ª Feira', ent1: null, sai1: null, ent2: null, sai2: null, ent3: null, sai3: null },
@@ -517,7 +518,7 @@ export default function EditUser() {
                             }}>
                             <Text bold title style={{ color: selectedMenu === 'userData' && colorPalette?.buttonColor, transition: '.3s' }}>Meus Dados</Text>
                         </Box>
-                        <Box sx={{
+                       {isProfissional && <Box sx={{
                             display: 'flex', transition: '.3s', padding: '15px 12px',
                             // borderBottom: selectedMenu === 'paymentConfig' ? `3px solid ${colorPalette?.buttonColor}`
                             //     : '.5px solid trasnparent',
@@ -528,7 +529,7 @@ export default function EditUser() {
                                 setSelectedMenu('paymentConfig')
                             }}>
                             <Text bold title style={{ color: selectedMenu === 'paymentConfig' && colorPalette?.buttonColor, transition: '.3s' }}>Configurações de Pagamento</Text>
-                        </Box>
+                        </Box>}
                     </Box>
 
                     <Box sx={{
@@ -624,14 +625,14 @@ export default function EditUser() {
                             </Box>
                             <Box sx={{ ...styles.inputSection, flexDirection: 'column', justifyContent: 'flex-start' }}>
                                 <Box sx={{ ...styles.inputSection }}>
-                                    <TextInput disabled={!isPermissionEdit && true} placeholder='Nome Completo' name='nome' onChange={handleChange} value={userData?.nome || ''} label='Nome Completo: *' onBlur={autoEmail} sx={{ flex: 1, }} />
-                                    <TextInput disabled={!isPermissionEdit && true} placeholder='Apelido' name='apelido' onChange={isPermissionEdit && handleChange} value={userData?.apelido || ''} label='Apelido:' sx={{ flex: 1, }} />
+                                    <TextInput  placeholder='Nome Completo' name='nome' onChange={handleChange} value={userData?.nome || ''} label='Nome Completo: *' onBlur={autoEmail} sx={{ flex: 1, }} />
+                                    <TextInput  placeholder='Apelido' name='apelido' onChange={isPermissionEdit && handleChange} value={userData?.apelido || ''} label='Apelido:' sx={{ flex: 1, }} />
                                 </Box>
                                 <Box sx={{ ...styles.inputSection }}>
-                                    <TextInput disabled={!isPermissionEdit && true} placeholder='E-mail' name='email' onChange={handleChange} value={userData?.email || ''} label='E-mail: *' sx={{ flex: 1, }} />
-                                    <TextInput disabled={!isPermissionEdit && true} placeholder='Telefone' name='telefone' onChange={handleChange} value={userData?.telefone || ''} label='Telefone: *' sx={{ flex: 1, }} />
+                                    <TextInput  placeholder='E-mail' name='email' onChange={handleChange} value={userData?.email || ''} label='E-mail: *' sx={{ flex: 1, }} />
+                                    <TextInput  placeholder='Telefone' name='telefone' onChange={handleChange} value={userData?.telefone || ''} label='Telefone: *' sx={{ flex: 1, }} />
                                     {/* <PhoneInputField
-                                disabled={!isPermissionEdit && true}
+                                
                                 label='Telefone *'
                                 name='telefone'
                                 onChange={(phone) => setUserData({ ...userData, telefone: phone })}
@@ -639,16 +640,16 @@ export default function EditUser() {
                                 sx={{ flex: 1, }}
                             /> */}
                                 </Box>
-                                <TextInput disabled={!isPermissionEdit && true} placeholder='Nascimento' name='nascimento' onChange={handleChange} type="date" value={(userData?.nascimento)?.split('T')[0] || ''} label='Nascimento *' sx={{ flex: 1, }} />
-                                <SelectList disabled={!isPermissionEdit && true} fullWidth data={groupGender} valueSelection={userData?.genero || ''} onSelect={(value) => setUserData({ ...userData, genero: value })}
+                                <TextInput  placeholder='Nascimento' name='nascimento' onChange={handleChange} type="date" value={(userData?.nascimento)?.split('T')[0] || ''} label='Nascimento *' sx={{ flex: 1, }} />
+                                <SelectList  fullWidth data={groupGender} valueSelection={userData?.genero || ''} onSelect={(value) => setUserData({ ...userData, genero: value })}
                                     title="Gênero *" filterOpition="value" sx={{ color: colorPalette.textColor, flex: 1 }}
                                     inputStyle={{ color: colorPalette.textColor, fontSize: '15px', fontFamily: 'MetropolisBold' }}
                                 />
-                                <TextInput disabled={!isPermissionEdit && true} placeholder='CPF' name='cpf' onChange={handleChange} value={userData?.cpf || ''} label='CPF' sx={{ flex: 1, }} />
+                                <TextInput  placeholder='CPF' name='cpf' onChange={handleChange} value={userData?.cpf || ''} label='CPF' sx={{ flex: 1, }} />
 
                                 {isAdministrador &&
                                     <> <Box sx={{ ...styles.inputSection, justifyContent: 'start', alignItems: 'center', gap: 25 }}>
-                                        <CheckBoxComponent disabled={!isPermissionEdit && true}
+                                        <CheckBoxComponent 
                                             valueChecked={userData?.perfil}
                                             boxGroup={groupPerfil}
                                             title="Perfil *"
@@ -661,7 +662,7 @@ export default function EditUser() {
                                         />
 
                                     </Box>
-                                        <RadioItem disabled={!isPermissionEdit && true} valueRadio={userData?.ativo} group={groupStatus} title="Status *" horizontal={mobile ? false : true} onSelect={(value) => setUserData({
+                                        <RadioItem  valueRadio={userData?.ativo} group={groupStatus} title="Status *" horizontal={mobile ? false : true} onSelect={(value) => setUserData({
                                             ...userData,
                                             ativo: parseInt(value)
                                         })} />
@@ -694,22 +695,22 @@ export default function EditUser() {
                                     <Box sx={{ ...styles.inputSection, whiteSpace: 'nowrap', alignItems: 'end', gap: 4 }}>
                                         <Box sx={{ ...styles.inputSection, flexDirection: 'column', }}>
                                             <Box sx={{ ...styles.inputSection }}>
-                                                <TextInput disabled={!isPermissionEdit && true} placeholder='Login' name='login' onChange={handleChange} value={userData?.login || ''} label='Login *' sx={{ flex: 1, }} />
+                                                <TextInput  placeholder='Login' name='login' onChange={handleChange} value={userData?.login || ''} label='Login *' sx={{ flex: 1, }} />
                                             </Box>
                                         </Box>
                                     </Box>
                                     {!newUser && <Box sx={{ flex: 1, display: 'flex', justifyContent: 'space-around', gap: 1.8 }}>
-                                        <TextInput disabled={!isPermissionEdit && true} placeholder='Nova senha' name='nova_senha' onChange={handleChange} value={userData?.nova_senha || ''} type="password" label='Nova senha' sx={{ flex: 1, }} />
-                                        <TextInput disabled={!isPermissionEdit && true} placeholder='Confirmar senha' name='confirmar_senha' onChange={handleChange} value={userData?.confirmar_senha || ''} type="password" label='Confirmar senha' sx={{ flex: 1, }} />
+                                        <TextInput  placeholder='Nova senha' name='nova_senha' onChange={handleChange} value={userData?.nova_senha || ''} type="password" label='Nova senha' sx={{ flex: 1, }} />
+                                        <TextInput  placeholder='Confirmar senha' name='confirmar_senha' onChange={handleChange} value={userData?.confirmar_senha || ''} type="password" label='Confirmar senha' sx={{ flex: 1, }} />
                                     </Box>}
-                                    <RadioItem disabled={!isPermissionEdit && true} valueRadio={userData?.admin_sistema} group={groupAdmin} title="Acesso ao Sistema *" horizontal={mobile ? false : true} onSelect={(value) => setUserData({ ...userData, admin_sistema: parseInt(value) })} />
+                                    <RadioItem  valueRadio={userData?.admin_sistema} group={groupAdmin} title="Acesso ao Sistema *" horizontal={mobile ? false : true} onSelect={(value) => setUserData({ ...userData, admin_sistema: parseInt(value) })} />
 
                                 </>}
                         </ContentContainer>
                     }
 
                     {
-                        userData.perfil && !userData.perfil.includes('cliente') &&
+                        (userData?.perfil && userData?.perfil?.includes('profissional')) &&
                         <>
                             <ContentContainer style={{ ...styles.containerContract, padding: showContract ? '40px' : '25px' }}>
                                 <Box sx={{
@@ -734,7 +735,7 @@ export default function EditUser() {
                                 {showContract &&
                                     <>
                                         <Box sx={styles.inputSection}>
-                                            <TextInput disabled={!isPermissionEdit && true} placeholder='Profissão' name='funcao' onChange={handleChangeContract} value={contract?.funcao || ''} label='Profissão:' sx={{ flex: 1, }} />
+                                            <TextInput  placeholder='Profissão' name='funcao' onChange={handleChangeContract} value={contract?.funcao || ''} label='Profissão:' sx={{ flex: 1, }} />
                                             <TextInput disabled={!isAdministrador && true} placeholder='Início da contratação' name='admissao' type="date" onChange={handleChangeContract} value={(contract?.admissao)?.split('T')[0] || ''} label='Início da contratação' sx={{ flex: 1, }} />
                                             <TextInput disabled={!isAdministrador && true} placeholder='Encerramento' name='desligamento' type="date" onChange={handleChangeContract} value={contract?.desligamento?.split('T')[0] || ''} label='Encerramento da contratação' sx={{ flex: 1, }} onBlur={() => {
                                                 new Date(contract?.desligamento) > new Date(1001, 0, 1) &&
@@ -742,22 +743,22 @@ export default function EditUser() {
                                             }} />
                                         </Box>
                                         <Box sx={styles.inputSection}>
-                                            <SelectList disabled={!isPermissionEdit && true} fullWidth data={groupBank} valueSelection={contract?.banco_1} onSelect={(value) => setContract({ ...contract, banco_1: value })}
+                                            <SelectList  fullWidth data={groupBank} valueSelection={contract?.banco_1} onSelect={(value) => setContract({ ...contract, banco_1: value })}
                                                 title="Banco" filterOpition="value" sx={{ color: colorPalette.textColor, flex: 1 }}
                                                 inputStyle={{ color: colorPalette.textColor, fontSize: '15px', fontFamily: 'MetropolisBold' }}
                                             />
-                                            <TextInput disabled={!isPermissionEdit && true} placeholder='Conta' name='conta_1' onChange={handleChangeContract} value={contract?.conta_1 || ''} label='Conta' sx={{ flex: 1, }} />
-                                            <TextInput disabled={!isPermissionEdit && true} placeholder='Agência' name='agencia_1' onChange={handleChangeContract} value={contract?.agencia_1 || ''} label='Agência' sx={{ flex: 1, }} />
-                                            <SelectList disabled={!isPermissionEdit && true} fullWidth data={groupAccount} valueSelection={contract?.tipo_conta_1} onSelect={(value) => setContract({ ...contract, tipo_conta_1: value })}
+                                            <TextInput  placeholder='Conta' name='conta_1' onChange={handleChangeContract} value={contract?.conta_1 || ''} label='Conta' sx={{ flex: 1, }} />
+                                            <TextInput  placeholder='Agência' name='agencia_1' onChange={handleChangeContract} value={contract?.agencia_1 || ''} label='Agência' sx={{ flex: 1, }} />
+                                            <SelectList  fullWidth data={groupAccount} valueSelection={contract?.tipo_conta_1} onSelect={(value) => setContract({ ...contract, tipo_conta_1: value })}
                                                 title="Tipo de conta" filterOpition="value" sx={{ color: colorPalette.textColor, flex: 1 }}
                                                 inputStyle={{ color: colorPalette.textColor, fontSize: '15px', fontFamily: 'MetropolisBold' }}
                                             />
                                         </Box>
                                         <Box sx={styles.inputSection}>
-                                            <TextInput disabled={!isPermissionEdit && true} placeholder='Banco 2' name='banco_2' onChange={handleChangeContract} value={contract?.banco_2 || ''} label='Banco 2' sx={{ flex: 1, }} />
-                                            <TextInput disabled={!isPermissionEdit && true} placeholder='Conta 2' name='conta_2' onChange={handleChangeContract} value={contract?.conta_2 || ''} label='Conta 2' sx={{ flex: 1, }} />
-                                            <TextInput disabled={!isPermissionEdit && true} placeholder='Agência 2' name='agencia_2' onChange={handleChangeContract} value={contract?.agencia_2 || ''} label='Agência 2' sx={{ flex: 1, }} />
-                                            <SelectList disabled={!isPermissionEdit && true} fullWidth data={groupAccount} valueSelection={contract?.tipo_conta_2} onSelect={(value) => setContract({ ...contract, tipo_conta_2: value })}
+                                            <TextInput  placeholder='Banco 2' name='banco_2' onChange={handleChangeContract} value={contract?.banco_2 || ''} label='Banco 2' sx={{ flex: 1, }} />
+                                            <TextInput  placeholder='Conta 2' name='conta_2' onChange={handleChangeContract} value={contract?.conta_2 || ''} label='Conta 2' sx={{ flex: 1, }} />
+                                            <TextInput  placeholder='Agência 2' name='agencia_2' onChange={handleChangeContract} value={contract?.agencia_2 || ''} label='Agência 2' sx={{ flex: 1, }} />
+                                            <SelectList  fullWidth data={groupAccount} valueSelection={contract?.tipo_conta_2} onSelect={(value) => setContract({ ...contract, tipo_conta_2: value })}
                                                 title="Tipo de conta 2" filterOpition="value" sx={{ color: colorPalette.textColor, flex: 1 }}
                                                 inputStyle={{ color: colorPalette.textColor, fontSize: '15px', fontFamily: 'MetropolisBold' }}
                                             />
@@ -1193,7 +1194,7 @@ export const EditFile = (props) => {
                         <Divider padding={0} />
                         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', gap: 2 }}>
                             <Box sx={{ display: 'flex', justifyContent: 'start', gap: 1, alignItems: 'center', marginTop: 2 }}>
-                                <Button disabled={!isPermissionEdit && true} secondary small text='Remover' style={{ padding: '5px 10px 5px 10px', width: 120 }} onClick={() => {
+                                <Button  secondary small text='Remover' style={{ padding: '5px 10px 5px 10px', width: 120 }} onClick={() => {
                                     newUser ? callback("") : handleDeleteFile()
                                 }} />
                             </Box>

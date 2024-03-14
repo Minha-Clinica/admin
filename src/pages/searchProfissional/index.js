@@ -289,7 +289,7 @@ const ProfissionalCard = ({ data, loadingDate, setLoadingDate, dateSelected, set
                                     cursor: 'pointer',
                                     transform: 'scale(1.1, 1.1)'
                                 }
-                            }}>
+                            }} onClick={() => router.push(`/users/perfil?profissionalId=${item?.id}`)}>
                                 <Text bold style={{ color: '#fff' }}>VER PERFIL</Text>
                             </Box>
                         </Box>
@@ -461,17 +461,19 @@ const ProfissionalCard = ({ data, loadingDate, setLoadingDate, dateSelected, set
                                     gap: 2,
                                     backgroundColor: colorPalette.buttonColor,
                                     borderRadius: 2,
-                                    opacity: dateSelected?.reserva_id !== '' ? 1 : 0.5,
+                                    opacity: (dateSelected?.reserva_id !== '' && dateSelected?.profissionalId === item?.id) ? 1 : 0.5,
                                     "&:hover": {
-                                        opacity: dateSelected?.reserva_id !== '' ? 1 : 0.5,
+                                        opacity: (dateSelected?.reserva_id !== '' && dateSelected?.profissionalId === item?.id) ? 1 : 0.5,
                                         cursor: 'pointer',
-                                        transform: dateSelected?.reserva_id !== '' ? 'scale(1.1, 1.1)' : 'none'
+                                        transform: (dateSelected?.reserva_id !== '' && dateSelected?.profissionalId === item?.id) ? 'scale(1.1, 1.1)' : 'none'
                                     }
                                 }} onClick={() => {
-                                    if (dateSelected?.reserva_id === '') {
-                                        alert.info('Selecione um horário antes de continuar.')
-                                    } else {
-                                        router.push(`/searchProfissional/${dateSelected?.reserva_id}?professionalId=${dateSelected?.profissionalId}`)
+                                    if (dateSelected?.reserva_id !== '' && dateSelected?.profissionalId === item?.id) {
+                                        if (dateSelected?.reserva_id === '') {
+                                            alert.info('Selecione um horário antes de continuar.')
+                                        } else {
+                                            router.push(`/searchProfissional/${dateSelected?.reserva_id}?professionalId=${dateSelected?.profissionalId}`)
+                                        }
                                     }
                                 }}>
                                     <Text bold style={{ color: '#fff' }}>Agendar</Text>
