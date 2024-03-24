@@ -16,7 +16,7 @@ export default function ReserveConsultation() {
     const usuario_id = user.id;
     const router = useRouter()
     const { id, professionalId } = router.query;
-    const [userData, setUserData] = useState({})
+    const [profissionalData, setProfissionalData] = useState({})
     const [reservaData, setReserveData] = useState({})
     const [formattedDate, setFormattedDate] = useState()
     const [loadingReservation, setLoadingReservation] = useState(false)
@@ -28,11 +28,11 @@ export default function ReserveConsultation() {
     moment.locale("pt-br");
 
 
-    const getUserData = async () => {
+    const getProfissionalData = async () => {
         try {
             const response = await api.get(`/user/${professionalId}`)
             const { data } = response
-            setUserData(data.response)
+            setProfissionalData(data.response)
         } catch (error) {
             console.log(error)
             return error
@@ -70,18 +70,24 @@ export default function ReserveConsultation() {
     const handleReservation = async () => {
         setLoadingReservation(true)
         try {
-            const response = await api.post(`consultation/create`, {
+            const response = await api.post(`/consultation/create`, {
                 reservaData,
-                pacientId: user?.id,
                 priceConsultation: priceConsultation,
-                professionalId: professionalId,
-                userData: userData,
-                pacientEmail: user?.email,
-                pacientName: user?.nome
+                profissionalData: profissionalData,
+                consultionData: {
+                    data: formattedDate,
+                    hora: formattedHour
+                },
+                pacientData: {
+                    photo: user?.getPhoto?.location,
+                    email: user?.email,
+                    nome: user?.nome,
+                    id: user?.id,
+                }
             })
             const { status, data } = response
             if (status === 201 && data?.consultation) {
-                alert.success('Consulta criada e agendada com o profissional.')
+                alert.success('Consulta agendada com o profissional.')
                 router.push('/consultation')
             } else {
                 alert.error('Ocorreu um erro ao reservar data e criar a consulta.')
@@ -105,7 +111,7 @@ export default function ReserveConsultation() {
     const handleItems = async () => {
         setLoading(true)
         try {
-            await getUserData()
+            await getProfissionalData()
             await getReserva()
         } catch (error) {
             alert.error('Ocorreu um arro ao carregar Usuarios')
@@ -164,7 +170,7 @@ export default function ReserveConsultation() {
                         <Box sx={{
                             display: 'flex',
                         }}>
-                            <Avatar src={userData?.location || ''} sx={{
+                            <Avatar src={profissionalData?.location || ''} sx={{
                                 height: { xs: '100%', sm: 45, md: 45, lg: 120 },
                                 width: { xs: '100%', sm: 45, md: 45, lg: 120 },
                             }} variant="circular"
@@ -172,7 +178,7 @@ export default function ReserveConsultation() {
                         </Box>
                         <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', flex: 1, }}>
                             <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column', alignItems: 'start', padding: '10px 0px 0px 10px' }}>
-                                <Text veryLarge bold style={{ color: colorPalette.third }}>{userData?.nome}</Text>
+                                <Text veryLarge bold style={{ color: colorPalette.third }}>{profissionalData?.nome}</Text>
                                 <Text light large bold>Formado em Terapia - TRG </Text>
                                 <Text light large>São Paulo - SP </Text>
                             </Box>
@@ -262,12 +268,12 @@ export default function ReserveConsultation() {
                             display: 'flex',
                             alignItems: 'center', gap: 1
                         }}>
-                            <Avatar src={userData?.location || ''} sx={{
+                            <Avatar src={profissionalData?.location || ''} sx={{
                                 height: { xs: '100%', sm: 45, md: 45, lg: 40 },
                                 width: { xs: '100%', sm: 45, md: 45, lg: 40 },
                             }} variant="circular"
                             />
-                            <Text light style={{ color: colorPalette.third }}>{userData?.nome}</Text>
+                            <Text light style={{ color: colorPalette.third }}>{profissionalData?.nome}</Text>
                         </Box>
 
                         <Box sx={{ height: '100%', width: '1px', backgroundColor: 'lightgray' }} />

@@ -11,7 +11,9 @@ import { icons } from "../../organisms/layout/Colors"
 import moment from "moment";
 import "moment/locale/pt-br";
 import { formatDate } from "../../helpers"
-
+import Calendar from "react-calendar"
+import 'react-calendar/dist/Calendar.css';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 export default function ListProfissionals(props) {
     const [profissionalList, setProfissionals] = useState([])
@@ -218,11 +220,12 @@ const ProfissionalCard = ({ data, loadingDate, setLoadingDate, dateSelected, set
 
     const handleSelectedDate = (value, id) => {
         setLoadingDate(true)
+        let date = moment(value).format("YYYY-MM-DD")
         try {
-            if (dateSelected?.day === value) {
+            if (dateSelected?.day === date) {
                 setDateSelected({ day: '', hour: '', profissionalId: '', reserva_id: '' })
             } else {
-                setDateSelected({ day: value, hour: '', profissionalId: id, reserva_id: '' })
+                setDateSelected({ day: date, hour: '', profissionalId: id, reserva_id: '' })
             }
         } catch (error) {
             return error
@@ -232,6 +235,21 @@ const ProfissionalCard = ({ data, loadingDate, setLoadingDate, dateSelected, set
     }
 
 
+    const getAvailableDays = (agendas) => {
+        const uniqueDates = new Set(); // Usando um Set para armazenar as datas únicas
+        agendas.forEach((agend) => {
+            if (agend.disponivel === 0) {
+                uniqueDates.add(moment(agend.inicio).format("YYYY-MM-DD"));
+            }
+        });
+
+        return Array.from(uniqueDates); // Convertendo o Set de datas únicas de volta para um array
+    };
+
+
+    console.log(dateSelected)
+
+
     return (
         <>
             {data?.map((item, index) => {
@@ -239,18 +257,19 @@ const ProfissionalCard = ({ data, loadingDate, setLoadingDate, dateSelected, set
                 const firstName = name[0];
                 const lastName = name[name.length - 1];
                 const userName = `${firstName} ${lastName}`;
+                const availableDays = getAvailableDays(item?.agenda);
+                console.log(availableDays)
+                // const agendasAgrupadas = {};
+                // availableDays?.forEach((agend) => {
+                //     const data = moment(agend.inicio).format("YYYY-MM-DD"); // Formata a data sem o horário
 
-                const agendasAgrupadas = {};
-                item?.agenda?.forEach((agend) => {
-                    const data = moment(agend.inicio).format("YYYY-MM-DD"); // Formata a data sem o horário
-
-                    // Se a data já existir no objeto, adicione esta agenda ao array correspondente
-                    if (agendasAgrupadas[data]) {
-                        agendasAgrupadas[data].push(agend);
-                    } else { // Caso contrário, crie um novo array com esta agenda
-                        agendasAgrupadas[data] = [agend];
-                    }
-                });
+                //     // Se a data já existir no objeto, adicione esta agenda ao array correspondente
+                //     if (agendasAgrupadas[data]) {
+                //         agendasAgrupadas[data].push(agend);
+                //     } else { // Caso contrário, crie um novo array com esta agenda
+                //         agendasAgrupadas[data] = [agend];
+                //     }
+                // });
 
                 return (
                     <Box key={index} sx={{
@@ -301,8 +320,8 @@ const ProfissionalCard = ({ data, loadingDate, setLoadingDate, dateSelected, set
                                     <Text bold large style={{ color: colorPalette.buttonColor, textAlign: 'center' }}>AGENDA DÍSPONIVEL</Text>
                                 </Box>
                                 <Divider />
-                                {item?.agenda?.length > 0 ?
-                                    <>
+                                {availableDays?.length > 0 ?
+                                    <Box sx={{ display: 'flex', gap: 3, flexDirection: 'column' }}>
                                         <Box sx={{ display: 'flex', gap: 2, justifyContent: 'space-between' }}>
                                             <Text bold large style={{ color: colorPalette.buttonColor, textAlign: 'center' }}>
                                                 Selecione uma Data:</Text>
@@ -316,143 +335,81 @@ const ProfissionalCard = ({ data, loadingDate, setLoadingDate, dateSelected, set
                                                     Ver Calendário Completo</Text>
                                             </Box>
                                         </Box>
-                                        <Box sx={{
-                                            display: 'flex', gap: 2, width: '100%', justifyContent: 'center', marginTop: 1,
-                                            alignItems: 'center'
-                                        }}>
-                                            {/* <Box sx={{
-                                                ...styles.menuIcon,
-                                                padding: '8px',
-                                                margin: '0px 5px',
-                                                backgroundImage: `url(${icons.gray_arrow_down})`,
-                                                transform: 'rotate(90deg)',
-                                                transition: '.3s',
-                                                width: 18, height: 18,
-                                                aspectRatio: '1/1',
-                                                "&:hover": {
-                                                    opacity: 0.8,
-                                                    cursor: 'pointer',
-                                                    backgroundColor: colorPalette.primary
-                                                }
-                                            }} onClick={() => handleArrowClick('next')}
-                                            /> */}
-                                            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'flex-start', maxWidth: 500, overflow: 'auto' }}>
-                                                {Object.entries(agendasAgrupadas).map(([data, agendas]) => {
-                                                    const selected = dateSelected?.day === data && dateSelected?.profissionalId === item?.id;
-                                                    const weekName = moment(data).format("ddd");
-                                                    const dateFormatted = moment(data).format("DD/MM");
 
-                                                    return (
-                                                        <Box key={agendas} sx={{
-                                                            display: 'flex', flexDirection: 'column', gap: .5, padding: '5px 12px', borderRadius: 2,
-                                                            backgroundColor: selected ? colorPalette.buttonColor : colorPalette.primary, justifyContent: 'center',
-                                                            "&:hover": {
-                                                                opacity: 0.8,
-                                                                cursor: 'pointer'
-                                                            }
-                                                        }} onClick={() => {
-                                                            handleSelectedDate(data, item?.id);
-                                                        }}>
-                                                            <Text bold large style={{ color: selected && '#fff' }}>{weekName}</Text>
-                                                            <Text large style={{ color: selected && '#fff' }}>{dateFormatted}</Text>
-                                                        </Box>
-                                                    );
-                                                })}
+                                        <Box sx={{ display: 'flex', gap: 2, justifyContent: 'space-between' }}>
+                                            <Box sx={{
+                                                display: 'flex', gap: 2, width: '100%', justifyContent: 'center', marginTop: 1,
+                                                alignItems: 'center'
+                                            }}>
+                                                <Calendar
+                                                    onChange={(date) => handleSelectedDate(date, item?.id)}
+                                                    style={{
+                                                        border: 'none'
+                                                    }}
+                                                    tileDisabled={({ date }) => !availableDays.includes(moment(date).format("YYYY-MM-DD"))}
+                                                />
                                             </Box>
-                                            {/* <Box sx={{
-                                                ...styles.menuIcon,
-                                                padding: '8px',
-                                                margin: '0px 5px',
-                                                backgroundImage: `url(${icons.gray_arrow_down})`,
-                                                transform: 'rotate(-90deg)',
-                                                transition: '.3s',
-                                                width: 18, height: 18,
-                                                aspectRatio: '1/1',
-                                                "&:hover": {
-                                                    opacity: 0.8,
-                                                    cursor: 'pointer',
-                                                    backgroundColor: colorPalette.primary
-                                                }
-                                            }} onClick={() => handleArrowClick('previous')}
-                                            /> */}
-                                        </Box>
-                                        {(dateSelected?.day && dateSelected?.profissionalId === item?.id) ?
-                                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, marginTop: 1, alignItems: 'center', justifyContent: 'center' }}>
-                                                <Text style={{ color: colorPalette.buttonColor }}>Horários Disponíveis para {formatDate(dateSelected?.day)}</Text>
+                                            <Box sx={{ display: 'flex', height: `100%`, width: '2px', backgroundColor: '#eaeaea' }} />
+                                            {(dateSelected?.day && dateSelected?.profissionalId === item?.id) ?
                                                 <Box sx={{
-                                                    display: 'flex', gap: 2, width: '100%', justifyContent: 'center', marginTop: 1,
-                                                    alignItems: 'center'
+                                                    display: 'flex', flexDirection: 'column', gap: 1, marginTop: 1,
+                                                    justifyContent: 'flex-start', width: '100%',
                                                 }}>
-                                                    <Box sx={{
-                                                        ...styles.menuIcon,
-                                                        padding: '8px',
-                                                        margin: '0px 5px',
-                                                        backgroundImage: `url(${icons.gray_arrow_down})`,
-                                                        transform: 'rotate(90deg)',
-                                                        transition: '.3s',
-                                                        width: 18, height: 18,
-                                                        aspectRatio: '1/1',
-                                                        opacity: carouselIndex <= 0 ? 0.5 : 1,
-                                                        pointerEvents: carouselIndex <= 0 ? 'none' : 'auto',
-                                                        "&:hover": {
-                                                            opacity: carouselIndex <= 0 ? 0.5 : 0.8,
-                                                            cursor: carouselIndex <= 0 ? 'not-allowed' : 'pointer',
-                                                            backgroundColor: colorPalette.primary
-                                                        }
-                                                    }} onClick={() => handlePrev(item?.agenda)} />
-                                                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'center', maxWidth: 350, overflow: 'hidden' }}>
-                                                        {item?.agenda?.filter(agend => (moment(agend.inicio).format("YYYY-MM-DD") === dateSelected?.day) &&
-                                                            (agend.disponivel === 0))
-                                                            .slice(carouselIndex, carouselIndex + 3)?.map((hour, index) => {
-                                                                const hourFormatted = horarios(hour.inicio)
-                                                                const selected = dateSelected?.hour === hourFormatted;
-                                                                return (
-                                                                    <Box key={index} sx={{
-                                                                        display: 'flex', flexDirection: 'column', gap: .5, padding: '5px 12px', borderRadius: 2,
-                                                                        backgroundColor: selected ? colorPalette?.buttonColor : colorPalette.primary, justifyContent: 'center',
-                                                                        "&:hover": {
-                                                                            opacity: 0.8,
-                                                                            cursor: 'pointer'
-                                                                        }
-                                                                    }} onClick={() => {
-                                                                        if (selected) {
-                                                                            setDateSelected({ ...dateSelected, hour: '', reserva_id: '' })
-                                                                        } else {
-                                                                            setDateSelected({ ...dateSelected, hour: hourFormatted, reserva_id: hour?.id_evento_calendario })
-                                                                        }
-                                                                    }}>
-                                                                        <Text large bold={selected ? true : false} style={{ color: selected && '#fff' }}>{hourFormatted}</Text>
-                                                                    </Box>
-                                                                )
-                                                            })}
+                                                    <Box sx={{ display: 'flex', padding: '12px 10px', backgroundColor: colorPalette?.primary, justifyContent: 'center' }}>
+                                                        <Text bold style={{ color: colorPalette.buttonColor }}>Selecione um horário:</Text>
                                                     </Box>
                                                     <Box sx={{
-                                                        ...styles.menuIcon,
-                                                        padding: '8px',
-                                                        margin: '0px 5px',
-                                                        backgroundImage: `url(${icons.gray_arrow_down})`,
-                                                        transform: 'rotate(-90deg)',
-                                                        transition: '.3s',
-                                                        width: 18, height: 18,
-                                                        aspectRatio: '1/1',
-                                                        opacity: (carouselIndex * 2) >= item?.agenda?.length ? 0.5 : 1,
-                                                        pointerEvents: (carouselIndex * 2) >= item?.agenda?.length ? 'none' : 'auto',
-                                                        "&:hover": {
-                                                            opacity: (carouselIndex * 2) >= item?.agenda?.length ? 0.5 : 0.8,
-                                                            cursor: (carouselIndex * 2) >= item?.agenda?.length ? 'not-allowed' : 'pointer',
-                                                            backgroundColor: colorPalette.primary
-                                                        }
-                                                    }} onClick={() => handleNext(item.agenda)} />
+                                                        display: 'flex', gap: 2, width: '100%', justifyContent: 'flex-start', marginTop: 1,
+                                                    }}>
+                                                        <Box sx={{
+                                                            display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'flex-start', overflowX: 'auto',
+                                                            maxHeight: 200,
+                                                            width: '100%',
+                                                            padding: '5px 12px',
+                                                            flexDirection: 'column'
+                                                        }}>
+                                                            {item?.agenda?.filter(agend => (moment(agend.inicio).format("YYYY-MM-DD") === dateSelected?.day) &&
+                                                                (agend.disponivel === 0))?.map((hour, index) => {
+                                                                    const hourFormatted = horarios(hour.inicio)
+                                                                    const selected = dateSelected?.hour === hourFormatted;
+                                                                    return (
+                                                                        <Box key={index} sx={{
+                                                                            display: 'flex', gap: .5, padding: '8px 12px', borderRadius: 2,
+                                                                            width: '100%',
+                                                                            backgroundColor: colorPalette.primary,
+                                                                            border: selected && `1px solid ${colorPalette?.buttonColor}`,
+                                                                            justifyContent: 'space-between',
+                                                                            alignItems: 'center',
+                                                                            "&:hover": {
+                                                                                opacity: 0.8,
+                                                                                cursor: 'pointer'
+                                                                            }
+                                                                        }} onClick={() => {
+                                                                            if (selected) {
+                                                                                setDateSelected({ ...dateSelected, hour: '', reserva_id: '' })
+                                                                            } else {
+                                                                                setDateSelected({ ...dateSelected, hour: hourFormatted, reserva_id: hour?.id_evento_calendario })
+                                                                            }
+                                                                        }}>
+                                                                            <Text large bold={selected ? true : false}>{hourFormatted}</Text>
+                                                                            {selected && <CheckCircleIcon style={{ color: 'green', fontSize: 17 }} />}
+                                                                        </Box>
+                                                                    )
+                                                                })}
+                                                        </Box>
+                                                    </Box>
                                                 </Box>
-                                            </Box>
-                                            :
-                                            <></>
-                                        }
-                                    </> :
-                                    <Text light large style={{ textAlign: 'center' }}>Profissional sem agenda disponível</Text>}
+                                                :
+                                                <></>
+                                            }
+                                        </Box>
+                                    </Box>
+                                    :
+                                    <Text light large style={{ textAlign: 'center' }}>Profissional sem agenda disponível</Text>
+                                }
                             </>
                             }
-                            <Box sx={{ display: item?.agenda?.length > 0 ? 'flex' : 'none', width: '100%', justifyContent: 'center' }}>
+                            <Box sx={{ display: availableDays?.length > 0 ? 'flex' : 'none', width: '100%', justifyContent: 'center' }}>
                                 <Box sx={{
                                     padding: '5px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center',
                                     width: 150,

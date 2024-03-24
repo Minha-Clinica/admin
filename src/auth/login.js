@@ -236,6 +236,24 @@ export default function Login() {
                             <Text bold indicator style={{ color: !theme ? '#fff' : Colors.backgroundPrimary, transition: 'background-color 1s', textAlign: 'center' }}>Para seguir com o cadastro,
                                 informe se você é:</Text>
                             <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column', width: '100%', alignItems: 'center' }}>
+
+                                <Box sx={{
+                                    padding: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    marginTop: 2,
+                                    width: '100%',
+                                    transition: '.5s',
+                                    gap: 2,
+                                    backgroundColor: colorPalette.third,
+                                    borderRadius: 2,
+                                    "&:hover": {
+                                        opacity: 0.8,
+                                        cursor: 'pointer',
+                                        transform: 'scale(1.1, 1.1)'
+                                    }
+                                }} onClick={() => handleRegister('parceiro')}>
+                                    <Text bold style={{ color: colorPalette?.primary }}>PARCEIRO</Text>
+                                </Box>
+
                                 <Box sx={{
                                     padding: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center',
                                     marginTop: 2,

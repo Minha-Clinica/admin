@@ -278,7 +278,7 @@ export const Register = ({ type = `paciente`, setTypeSelected, typeSelected, set
                                                     <Text bold style={{ color: colorPalette?.buttonColor }}>{item?.step}</Text>
                                                 </Box>}
                                             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                                                <Text bold style={{color: stepNow && colorPalette?.buttonColor}}>{item?.title}</Text>
+                                                <Text bold style={{ color: stepNow && colorPalette?.buttonColor }}>{item?.title}</Text>
                                                 <Text light small style={{ color: '#gray' }}>{item?.description}</Text>
                                             </Box>
                                         </Box>
@@ -567,34 +567,25 @@ const PaymentConfigScreen = () => {
     });
 
     return (
-        <Box sx={{ display: 'flex', gap: 1.8, flexDirection: 'column' }}>
+        <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column' }}>
 
-            <ContentContainer>
-                <Box sx={{
-                    display: 'flex', alignItems: 'center', gap: 1, padding: '0px 0px 20px 0px',
-                    justifyContent: 'space-between'
-                }}>
-                    <Text title bold>Valor da Consulta</Text>
-                    <Box sx={{
-                        ...styles.menuIcon,
-                        backgroundImage: `url(${icons.gray_arrow_down})`,
-                        transition: '.3s',
-                    }} />
-                </Box>
+            <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', padding: '20px' }}>
+                <Divider />
+                <Text title bold>Valor da Consulta</Text>
                 <Box>
                     <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', alignItems: 'start' }}>
 
-                        <Text bold large>Defina o Valor de sua consulta:</Text>
-
-                        <TextInput
-                            placeholder='0,00'
-                            name='valor_terapeuta'
-                            type="coin"
-                            onChange={handleChange}
-                            value={consultValues?.valor_terapeuta || ''}
-                            onBlur={() => handleCalculateComission(consultValues)}
-                        />
-
+                        <Box sx={{display: 'flex', flexDirection: 'column', gap: 1}}>
+                            <Text large>Defina o Valor de sua consulta:</Text>
+                            <TextInput
+                                placeholder='0,00'
+                                name='valor_terapeuta'
+                                type="coin"
+                                onChange={handleChange}
+                                value={consultValues?.valor_terapeuta || ''}
+                                onBlur={() => handleCalculateComission(consultValues)}
+                            />
+                        </Box>
                         <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column', alignItems: 'start' }}>
                             <Text light>Ao definir o valor que será cobrado em suas consultas, geramos automáticamente a taxa cobrada pela plataforma. Fique tranquilo,
                                 o valor da taxa é "repassado" para o paciente, sem afetar seu lucro líquido.</Text>
@@ -611,20 +602,11 @@ const PaymentConfigScreen = () => {
                         </Box>
                     </Box>
                 </Box>
-            </ContentContainer>
+                <Divider />
+            </Box>
 
-            <ContentContainer>
-                <Box sx={{
-                    display: 'flex', alignItems: 'center', gap: 1, padding: '0px 0px 20px 0px',
-                    justifyContent: 'space-between'
-                }}>
-                    <Text title bold >Preferências de Pagamento</Text>
-                    <Box sx={{
-                        ...styles.menuIcon,
-                        backgroundImage: `url(${icons.gray_arrow_down})`,
-                        transition: '.3s',
-                    }} />
-                </Box>
+            <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', padding: '20px' }}>
+                <Text title bold >Preferências de Pagamento</Text>
                 <Box>
                     <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', alignItems: 'start' }}>
 
@@ -688,7 +670,8 @@ const PaymentConfigScreen = () => {
                         </Box>
                     </Box>}
                 </Box>
-            </ContentContainer>
+                <Divider />
+            </Box>
         </Box>
     )
 }
