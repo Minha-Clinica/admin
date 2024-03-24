@@ -1,7 +1,7 @@
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
 import { Box, Button, ContentContainer, Text, TextInput } from "../../atoms"
-import { SearchBar, SectionHeader, Table_V1 } from "../../organisms"
+import { PaginationTable, SearchBar, SectionHeader, Table_V1 } from "../../organisms"
 import { getConsultionPerfil } from "../../validators/api-requests"
 import { useAppContext } from "../../context/AppContext"
 import { SelectList } from "../../organisms/select/SelectList"
@@ -233,7 +233,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
     const endIndex = startIndex + rowsPerPage;
 
     const handleUpdateStatus = async (event, id) => {
-        setLoadingPayment({ active: true, success: false, error: false });
+        setLoadingPayment({ active: true, success: false, error: false, message: 'Alterando status de pagamento...' });
 
         try {
             const { checked } = event.target;
@@ -242,18 +242,30 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
 
             if (response.status === 200) {
                 setTimeout(() => {
-                    setLoadingPayment({ active: true, success: true, error: false });
+                    setLoadingPayment({
+                        active: true, success: true, error: false,
+                        message: 'Status alterado com Sucesso.'
+                    });
                     setTimeout(async () => {
-                        setLoadingPayment({ active: false, success: true, error: false });
+                        setLoadingPayment({
+                            active: false, success: true, error: false,
+                            message: 'Status alterado com Sucesso.'
+                        });
                         await callBack();
                     }, 2000);
                     alert.success('Pagamento atualizado.');
                 }, 2000);
             } else {
                 setTimeout(() => {
-                    setLoadingPayment({ active: true, success: false, error: true });
+                    setLoadingPayment({
+                        active: true, success: false, error: true,
+                        message: 'Ocorreu um erro ao alterar o status de pagamento. Tente novamente mais tarde.'
+                    });
                     setTimeout(async () => {
-                        setLoadingPayment({ active: false, success: false, error: true });
+                        setLoadingPayment({
+                            active: false, success: false, error: true,
+                            message: 'Ocorreu um erro ao alterar o status de pagamento. Tente novamente mais tarde.'
+                        });
                     }, 3500);
                     alert.error('Ocorreu um erro ao atualizar pagamento.');
                 }, 3500);
@@ -263,13 +275,58 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
             return error;
         } finally {
             setTimeout(() => {
-                setLoadingPayment({ active: false, success: false, error: false });
+                setLoadingPayment({ active: false, success: false, error: false, message: '' });
             }, 5000);
         }
     };
 
 
+    const handleUpdateAppointment = async ({ consultId = null, action = '' }) => {
+        setLoadingPayment({ active: true, success: false, error: false, message: '' });
 
+        try {
+            // const response = await api.patch(`/consultation/update/payment/${id}`, { valueUpdate });
+            const response = { status: 200 }
+
+            if (response.status === 200) {
+                setTimeout(() => {
+                    setLoadingPayment({
+                        active: true, success: true, error: false,
+                        message: `Consulta ${action === 'remarcar' ? 'remarcada' : 'cancelada'} com sucesso.`
+                    });
+                    setTimeout(async () => {
+                        setLoadingPayment({
+                            active: false, success: true, error: false,
+                            message: `Consulta ${action === 'remarcar' ? 'remarcada' : 'cancelada'} com sucesso.`
+                        });
+                        await callBack();
+                    }, 2000);
+                    alert.success('Pagamento atualizado.');
+                }, 2000);
+            } else {
+                setTimeout(() => {
+                    setLoadingPayment({
+                        active: true, success: false, error: true,
+                        message: `Ocorreu um erro ao ${action}. Tente novamente mais tarde.`
+                    });
+                    setTimeout(async () => {
+                        setLoadingPayment({
+                            active: false, success: false, error: true,
+                            message: `Ocorreu um erro ao ${action}. Tente novamente mais tarde.`
+                        });
+                    }, 3500);
+                    alert.error(`Ocorreu um erro ao ${action} consulta.`);
+                }, 3500);
+            }
+        } catch (error) {
+            console.log(error);
+            return error;
+        } finally {
+            setTimeout(() => {
+                setLoadingPayment({ active: false, success: false, error: false, message: '' });
+            })
+        }
+    };
 
 
 
@@ -289,6 +346,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
             { key: isProfissional ? 'paciente' : 'profissional', label: isProfissional ? 'Paciente ' : 'Profissional' },
             { key: 'modalidade', label: 'Tipo' },
             { key: 'status', label: 'Status' },
+            { key: 'actions', label: 'Ações' },
         ];
     }
 
@@ -317,7 +375,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
             <ContentContainer sx={{ display: 'flex', width: '100%', padding: 0, backgroundColor: colorPalette.primary, boxShadow: 'none', borderRadius: 2 }}>
 
                 <TableContainer sx={{ borderRadius: '8px', overflow: 'auto', border: '1px solid lightgray' }}>
-                    <Table sx={{ borderCollapse: 'collapse', width: '100%',  }}>
+                    <Table sx={{ borderCollapse: 'collapse', width: '100%', }}>
                         <TableHead>
                             <TableRow sx={{ borderBottom: `2px solid ${colorPalette.buttonColor}` }}>
                                 {columns.map((column, index) => (
@@ -403,7 +461,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                                                     <Text small bold>{item?.status}</Text>
                                                 </Box>
                                             </TableCell>
-                                            {isProfissional &&
+                                            {isProfissional ?
                                                 <>
                                                     <TableCell sx={{ padding: '15px 0px', textAlign: 'center' }}>
                                                         <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
@@ -419,7 +477,22 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                                                             />
                                                         </Box>
                                                     </TableCell>
-                                                </>}
+                                                </>
+                                                :
+                                                <>
+                                                    <TableCell sx={{ padding: '15px 0px', textAlign: 'center' }}>
+                                                        <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+                                                            <Button text="remarcar" small
+                                                                onClick={() => handleUpdateAppointment({ consultId: item?.id_consulta, action: 'remarcar' })}
+                                                            />
+                                                            <Box sx={{ display: 'flex', height: '30px', width: '2px', backgroundColor: colorPalette?.primary }} />
+                                                            <Button cancel secondary text="cancelar" small
+                                                                onClick={() => handleUpdateAppointment({ consultId: item?.id_consulta, action: 'cancelar' })}
+                                                            />
+                                                        </Box>
+                                                    </TableCell>
+                                                </>
+                                            }
                                         </TableRow>
                                     );
                                 })
@@ -439,17 +512,11 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                             <Text bold light>{data?.length || 0}</Text>
                             <Text light>consultas</Text>
                         </Box>
-                        <TablePagination
-                            component="div"
-                            count={data?.filter(filter)?.length}
-                            page={page}
-                            onPageChange={handleChangePage}
-                            rowsPerPage={rowsPerPage}
-                            onRowsPerPageChange={handleChangeRowsPerPage}
-                            style={{ color: colorPalette.textColor }} // Define a cor do texto
-                            backIconButtonProps={{ style: { color: colorPalette.textColor } }} // Define a cor do ícone de voltar
-                            nextIconButtonProps={{ style: { color: colorPalette.textColor } }} // Define a cor do ícone de avançar
-                        />
+                        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', padding: '15px 12px', width: '100%', justifyContent: 'space-between' }}>
+                            <PaginationTable data={data?.filter(filter)}
+                                page={page} setPage={setPage} rowsPerPage={rowsPerPage} setRowsPerPage={setRowsPerPage}
+                            />
+                        </Box>
                     </Box>
                 </TableContainer>
             </ContentContainer >
@@ -461,20 +528,20 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                             {loadingPayment?.success && (
                                 <>
                                     <CheckCircleIcon style={{ color: 'green', fontSize: 30 }} />
-                                    <Text bold>Status Alterado com Sucesso.</Text>
+                                    <Text bold>{loadingPayment?.message}</Text>
                                 </>
                             )
                             }
                             {loadingPayment?.error && (
                                 <>
                                     <CancelIcon style={{ color: 'red', fontSize: 30 }} />
-                                    <Text bold>Ocorreu um erro ao alterar o status de pagamento. Tente novamente mais tarde.</Text>
+                                    <Text bold>{loadingPayment?.message}</Text>
                                 </>
                             )}
                             {(!loadingPayment.error && !loadingPayment.success) &&
                                 <>
                                     <CircularProgress />
-                                    <Text bold>Alterando status de pagamento...</Text>
+                                    <Text bold>{loadingPayment?.message}</Text>
                                 </>
                             }
                         </>

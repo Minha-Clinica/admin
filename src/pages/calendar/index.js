@@ -892,7 +892,7 @@ export default function CalendarComponent(props) {
             }
 
             <Backdrop open={showAppointment} sx={{ zIndex: 999 }}>
-                <ContentContainer style={{ maxWidth: { md: '800px', lg: '1980px' }, maxHeight: { md: '800px', lg: '1280px' }, overflowY: matches && 'auto', width: 400 }}>
+                <ContentContainer style={{ maxWidth: { md: '800px', lg: '1980px' }, maxHeight: { md: '800px', lg: '700px', xl: '1280px' }, overflowY: matches && 'auto', width: 400 }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                         <Text bold large>Dísponibilidade de reserva</Text>
                         <Box sx={{

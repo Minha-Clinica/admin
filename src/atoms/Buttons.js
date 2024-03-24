@@ -12,6 +12,7 @@ export const Button = (props) => {
       tertiary = false,
       small = false,
       large = false,
+      cancel = false,
       overallSize = 'regular',
       onClick = () => { },
       text = '',
@@ -64,6 +65,17 @@ export const Button = (props) => {
                   cursor: !disabled && 'pointer'
                }
             }),
+
+            ...(cancel && {
+               backgroundColor: 'transparent',
+               color: '#FF0000',
+               border: `1px solid #FF0000`,
+               "&:hover": {
+                  backgroundColor: '#FF0000' + '33',
+                  cursor: !disabled && 'pointer'
+               }
+            }),
+            
             // ...(small && { width: '100%', maxWidth: 130 }),
             ...(large && { width: '100%', maxWidth: 230 }),
             ...style,

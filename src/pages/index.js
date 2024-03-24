@@ -396,7 +396,7 @@ function Home() {
                                  ...styles.menuIcon,
                                  backgroundImage: `url('/icons/agendamento_icon.png')`,
                                  transition: '.3s',
-                                 width: 400, height: 'auto',
+                                 minWidth: 400, height: 'auto', minHeight: 400
                               }} />
                            </Box>
                            <Box sx={{ display: 'flex', marginLeft: 2, height: '100%', width: '1px', backgroundColor: 'lightgray' }} />
