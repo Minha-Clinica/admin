@@ -82,8 +82,6 @@ export default function ListProfissionals(props) {
     }
 
 
-
-
     useEffect(() => {
         if (firstRender) return setFirstRender(false);
         window.localStorage.setItem('list-consultion-filters', JSON.stringify({ filterName: filters.filterName, filterOrder: filters.filterOrder }));
