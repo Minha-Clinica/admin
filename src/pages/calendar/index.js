@@ -602,146 +602,176 @@ export default function CalendarComponent(props) {
                 icon={'/icons/agenda_icon.png'}
                 title={`${user?.nome}` || `Calendário de Agendas`} />
 
-            <Box sx={{ display: 'flex', gap: 3 }}>
-                <TextInput placeholder="Buscar pelo paciente" name='filterData' type="search" onChange={(event) => setFilterData(event.target.value)} value={filterData} sx={{ flex: 1 }}
+            <Box sx={{ display: 'flex', gap: 3, flexDirection: 'column' }}>
+
+                <Box sx={{ display: 'flex', gap: 3 }}>
+                    {/* <TextInput placeholder="Buscar pelo paciente" name='filterData' type="search" onChange={(event) => setFilterData(event.target.value)} value={filterData} sx={{ flex: 1 }}
                     InputProps={{
                         style: {
                             backgroundColor: colorPalette.secondary
                         }
-                    }} />
+                    }} /> */}
 
-                <Box sx={{
-                    display: 'flex',
-                    backgroundColor: filterReservas ? colorPalette.buttonColor : colorPalette?.secondary,
-                    padding: '10px 20px',
-                    borderRadius: 2,
-                    alignItems: 'center', gap: 2,
-                    transition: '.4s',
-                    boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
-                    "&:hover": {
-                        opacity: 0.8,
-                        cursor: 'pointer',
-                        transform: 'scale(1.03, 1.03)'
-                    }
-                }} onClick={() => setFilterReservas(!filterReservas)}>
+                    <Box sx={{ display: 'flex', gap: .2 }}>
+                        <Box sx={{
+                            display: 'flex', backgroundColor: colorPalette.buttonColor, padding: '10px 20px',
+                            borderRadius: '8px 0px 0px 8px',
+                            alignItems: 'center', gap: 2,
+                            boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
+                            "&:hover": {
+                                opacity: 0.8,
+                                cursor: 'pointer'
+                            }
+                        }} onClick={() => setShowAppointment(true)}>
+                            <Box sx={{
+                                ...styles.menuIcon,
+                                backgroundImage: `url('/icons/agenda_icon.png')`,
+                                transition: '.3s',
+                                filter: 'brightness(0) invert(1)',
+                                width: 20, height: 20,
+                                "&:hover": {
+                                    opacity: 0.8,
+                                    cursor: 'pointer'
+                                }
+                            }} />
+                            <Text bold style={{ color: '#fff' }}>Criar lista de Reservas</Text>
+                        </Box>
+                        <Box sx={{
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '5px',
+                            backgroundColor: colorPalette.buttonColor,
+                            transition: '.3s',
+                            borderRadius: '0px 8px 8px 0px',
+                            "&:hover": {
+                                opacity: 0.8,
+                                cursor: 'pointer'
+                            }
+                        }} >
+                            <Box sx={{
+                                ...styles.menuIcon,
+                                backgroundImage: `url(${icons?.gray_arrow_down})`,
+                                transition: '.3s',
+                                filter: 'brightness(0) invert(1)',
+                                width: 20, height: 20,
+                            }} />
+                        </Box>
+                    </Box>
                     <Box sx={{
-                        ...styles.menuIcon,
-                        backgroundImage: `url('/icons/agenda_espera_icon.png')`,
-                        filter: filterReservas ? 'brightness(0) invert(1)' : 'brightness(0) invert(0)',
-                        width: 20, height: 20,
-                        "&:hover": {
-                            opacity: 0.8,
-                            cursor: 'pointer'
-                        }
-                    }} />
-                    <Text bold style={{ color: filterReservas ? '#fff' : colorPalette?.textColor }}>Vizualizar consultas agendas</Text>
-                </Box>
-
-                <Box sx={{ display: 'flex', gap: 2, }}>
-
-                    {/* <Box sx={{
-                        display: 'flex', backgroundColor: colorPalette.secondary, padding: '10px 20px',
+                        display: 'flex',
+                        backgroundColor: filterReservas ? colorPalette.buttonColor : colorPalette?.secondary,
+                        padding: '10px 20px',
                         borderRadius: 2,
                         alignItems: 'center', gap: 2,
+                        transition: '.4s',
                         boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
                         "&:hover": {
                             opacity: 0.8,
-                            cursor: 'pointer'
+                            cursor: 'pointer',
+                            transform: 'scale(1.03, 1.03)'
                         }
-                    }}>
+                    }} onClick={() => setFilterReservas(!filterReservas)}>
                         <Box sx={{
                             ...styles.menuIcon,
-                            backgroundImage: `url('/icons/include_icon.png')`,
-                            transition: '.3s',
+                            backgroundImage: `url('/icons/agenda_espera_icon.png')`,
+                            filter: filterReservas ? 'brightness(0) invert(1)' : 'brightness(0) invert(0)',
                             width: 20, height: 20,
                             "&:hover": {
                                 opacity: 0.8,
                                 cursor: 'pointer'
                             }
                         }} />
-                        <Text bold>Novo agendamento</Text>
-                    </Box> */}
-
-
-                    <Box sx={{
-                        display: 'flex', backgroundColor: colorPalette.secondary, padding: '10px 20px',
-                        borderRadius: 2,
-                        alignItems: 'center', gap: 2,
-                        boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
-                        "&:hover": {
-                            opacity: 0.8,
-                            cursor: 'pointer'
-                        }
-                    }} onClick={() => setShowAppointment(true)}>
-                        <Box sx={{
-                            ...styles.menuIcon,
-                            backgroundImage: `url('/icons/agenda_icon.png')`,
-                            transition: '.3s',
-                            width: 20, height: 20,
-                            "&:hover": {
-                                opacity: 0.8,
-                                cursor: 'pointer'
-                            }
-                        }} />
-                        <Text bold>Criar lista de Reservas</Text>
+                        <Text bold style={{ color: filterReservas ? '#fff' : colorPalette?.textColor }}>Vizualizar consultas agendas</Text>
                     </Box>
 
-                    <Box sx={{
-                        display: 'flex', backgroundColor: colorPalette.secondary, padding: '10px 20px',
-                        borderRadius: 2,
-                        alignItems: 'center', gap: 2,
-                        boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
-                        "&:hover": {
-                            opacity: 0.8,
-                            cursor: 'pointer'
-                        }
-                    }} onClick={() => setShowReservas(true)}>
+                    <Box sx={{ display: 'flex', gap: 2, }}>
+
+
                         <Box sx={{
-                            ...styles.menuIcon,
-                            backgroundImage: `url('/icons/agenda_icon.png')`,
-                            transition: '.3s',
-                            width: 20, height: 20,
+                            display: 'flex', backgroundColor: colorPalette.secondary, padding: '10px 20px',
+                            borderRadius: 2,
+                            alignItems: 'center', gap: 2,
+                            boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
                             "&:hover": {
                                 opacity: 0.8,
                                 cursor: 'pointer'
                             }
+                        }} onClick={() => setShowReservas(true)}>
+                            <Box sx={{
+                                ...styles.menuIcon,
+                                backgroundImage: `url('/icons/agenda_icon.png')`,
+                                transition: '.3s',
+                                width: 20, height: 20,
+                                "&:hover": {
+                                    opacity: 0.8,
+                                    cursor: 'pointer'
+                                }
+                            }} />
+                            <Text bold>Lista de Reservas</Text>
+                        </Box>
+                    </Box>
+                </Box>
+
+                <Calendar
+                    localizer={localizer}
+                    // defaultDate={month?.start}
+                    culture="pt-br"
+                    events={events?.filter(filter)}
+                    startAccessor="start"
+                    endAccessor="end"
+                    selectable
+                    onSelectSlot={(slotInfo) => {
+                        setEventData({
+                            ...eventData,
+                            start: slotInfo.start,
+                            end: slotInfo.end,
+                        });
+                        setSelectedEvent(null);
+                        setShowEventForm(true);
+                    }}
+                    onSelectEvent={handleSelectEvent}
+                    eventPropGetter={eventStyleGetter}
+                    // messages={messages}
+                    style={{
+                        fontFamily: 'MetropolisBold',
+                        color: colorPalette.textColor,
+                        backgroundColor: colorPalette.secondary,
+                        borderRadius: '12px',
+                        boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
+                        border: `.5px solid lightgray`,
+                        padding: 10,
+                        height: 600,
+                        width: '85%'
+                    }}
+                />
+            </Box>
+            <Box sx={{
+                display: 'flex', height: '100%', position: 'fixed', border: '1px solid lightgray',
+                backgroundColor: '#fff', right: 0, top: 51.5, flexDirection: 'column',
+                padding: '12px 8px', gap: 2
+            }}>
+                <Text bold large style={{ textAlign: 'center' }}>Meus agendamentos</Text>
+
+                <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                    <Box sx={{
+                        display: 'flex', gap: 1, flexDirection: 'row',
+                        border: '1px solid lightgray', borderRadius: 2, height: 60
+                    }}>
+                        <Box sx={{
+                            height: '100%', width: '4px', backgroundColor: colorPalette?.buttonColor,
+                            borderRadius: '8px 0px 0px 8px'
                         }} />
-                        <Text bold>Lista de Reservas</Text>
+                        <Box sx={{ display: 'flex', gap: 2, padding: '8px 8px' }}>
+                            <Box sx={{ display: 'flex', gap: .2, flexDirection: 'column' }}>
+                                <Text large>09:00</Text>
+                                <Text small style={{ color: 'gray' }}>30 min</Text>
+                            </Box>
+                            <Box sx={{ display: 'flex', gap: .3, flexDirection: 'column', padding: '0px 8px' }}>
+                                <Text bold>Alinhamento semanal</Text>
+                                <Text light>Marcus Silva</Text>
+                            </Box>
+                        </Box>
                     </Box>
                 </Box>
             </Box>
-
-            <Calendar
-                localizer={localizer}
-                // defaultDate={month?.start}
-                culture="pt-br"
-                events={events?.filter(filter)}
-                startAccessor="start"
-                endAccessor="end"
-                selectable
-                onSelectSlot={(slotInfo) => {
-                    setEventData({
-                        ...eventData,
-                        start: slotInfo.start,
-                        end: slotInfo.end,
-                    });
-                    setSelectedEvent(null);
-                    setShowEventForm(true);
-                }}
-                onSelectEvent={handleSelectEvent}
-                eventPropGetter={eventStyleGetter}
-                // messages={messages}
-                style={{
-                    fontFamily: 'MetropolisBold',
-                    color: colorPalette.textColor,
-                    backgroundColor: colorPalette.secondary,
-                    borderRadius: '12px',
-                    boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
-                    border: `.5px solid lightgray`,
-                    padding: 10,
-                    height: 800
-                }}
-            />
             {
                 showEventForm && (
                     <Backdrop open={showEventForm} sx={{ zIndex: 999 }}>
@@ -846,7 +876,7 @@ export default function CalendarComponent(props) {
                                 <Divider />
 
                                 {eventData?.consulta_id &&
-                                    <Link href={`/consultation/${eventData?.consulta_id}`} target="_blank">
+                                    < Link href={`/consultation/${eventData?.consulta_id}`} target="_blank">
                                         <Button
                                             secondary
                                             disabled={!isPermissionEdit && true}
@@ -866,8 +896,9 @@ export default function CalendarComponent(props) {
                                         style={{ padding: '5px 6px 5px 6px', width: 100 }}
                                         onClick={(event) => handleEventFormSubmit(event)}
                                     />
-                                    {selectedEvent &&
-                                        <Button
+                                    {(selectedEvent && parseInt(eventData?.disponivel) === 0)
+                                        &&
+                                        < Button
                                             disabled={!isPermissionEdit && true}
                                             secondary
                                             small
@@ -887,7 +918,7 @@ export default function CalendarComponent(props) {
                                 </Box>
                             </Box>
                         </ContentContainer>
-                    </Backdrop>
+                    </Backdrop >
                 )
             }
 
