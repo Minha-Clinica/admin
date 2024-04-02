@@ -227,11 +227,11 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
     loadingPayment
 }) => {
     const { setLoading, colorPalette, theme, user, alert } = useAppContext()
-    const [dateSelected, setDateSelected] = useState({ day: '', hour: '', profissionalId: '', reserva_id: '' })
+    const [dateSelected, setDateSelected] = useState({ day: '', hour: '', profissionalId: '', reserva_id: '', consultId: '' })
     const isProfissional = user?.perfil?.includes('profissional')
     const [showAgendas, setShowAgendas] = useState({ active: false, profissionalId: null, profissionalData: {}, consultionDate: '' })
 
-    const getProfissionalAgendas = async (profissionalId, dateConsult) => {
+    const getProfissionalAgendas = async ({ profissionalId, dateConsult, consultId = null }) => {
         setLoading(true)
         try {
             const response = await api.get(`/users/search/profissional/agendas/${profissionalId}`)
@@ -250,6 +250,8 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                 active: true, profissionalId, profissionalData: data,
                 consultionDate: `${formattedDate} ás ${horaFormatada}`
             })
+
+            setDateSelected({ ...dateSelected, consultId: consultId })
         } catch (error) {
             console.log(error)
             return error
@@ -358,13 +360,71 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
     };
 
 
+    const handleRescheduleppointment = async () => {
+        setLoadingPayment({ active: true, success: false, error: false, message: 'Reagendando Consulta...' });
+
+        try {
+            const response = await api.patch(`/consultation/agenda/reagenda/${dateSelected?.consultId}`, {
+                reservaId: dateSelected?.reserva_id,
+                userPacientData: {
+                    nome: user?.nome,
+                    id: user?.id,
+                    email: user?.email
+                }
+            });
+
+            if (response.status === 200) {
+                setTimeout(() => {
+                    setLoadingPayment({
+                        active: true, success: true, error: false,
+                        icon: '/icons/remarcar_icon.png',
+                        message: `Consulta remarcada com sucesso.`
+                    });
+                    setTimeout(async () => {
+                        setLoadingPayment({
+                            active: false, success: true, error: false,
+                            icon: '/icons/remarcar_icon.png',
+                            message: `Consulta remarcada com sucesso.`
+                        });
+                        await callBack();
+                    }, 2000);
+                    alert.success('Consulta remarcada.');
+                }, 2000);
+                setDateSelected({ day: '', hour: '', profissionalId: '', reserva_id: '', consultId: '' })
+                setShowAgendas({ active: false, profissionalId: null, profissionalData: {}, consultionDate: '' })
+            } else {
+                setTimeout(() => {
+                    setLoadingPayment({
+                        active: true, success: false, error: true,
+                        message: `Ocorreu um erro ao remarcar consulta. Tente novamente mais tarde.`
+                    });
+                    setTimeout(async () => {
+                        setLoadingPayment({
+                            active: false, success: false, error: true,
+                            message: `Ocorreu um erro ao remarcar consulta. Tente novamente mais tarde.`
+                        });
+                    }, 3500);
+                    alert.error(`Ocorreu um erro ao remarcar consulta consulta.`);
+                }, 3500);
+            }
+        } catch (error) {
+            console.log(error);
+            return error;
+        } finally {
+            setTimeout(() => {
+                setLoadingPayment({ active: false, success: false, error: false, message: '' });
+            })
+        }
+    };
+
+
     const handleSelectedDate = (value, id) => {
         let date = moment(value).format("YYYY-MM-DD")
         try {
             if (dateSelected?.day === date) {
-                setDateSelected({ day: '', hour: '', profissionalId: '', reserva_id: '' })
+                setDateSelected({ ...dateSelected, day: '', hour: '', profissionalId: '', reserva_id: '' })
             } else {
-                setDateSelected({ day: date, hour: '', profissionalId: id, reserva_id: '' })
+                setDateSelected({ ...dateSelected, day: date, hour: '', profissionalId: id, reserva_id: '' })
             }
         } catch (error) {
             return error
@@ -540,13 +600,70 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                                                 <>
                                                     <TableCell sx={{ padding: '15px 0px', textAlign: 'center' }}>
                                                         <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
-                                                            <Button text="remarcar" small disabled={item?.status === 'Cancelada'}
-                                                                onClick={() => getProfissionalAgendas(item?.profissional_id, item?.data)}
-                                                            />
+                                                            {/* <Button text="remarcar" small disabled={item?.status === 'Cancelada'}
+                                                                onClick={() => {
+                                                                    getProfissionalAgendas(item?.profissional_id, item?.data)
+                                                                    setDateSelected({ ...dateSelected, consultId: item?.id_consulta })
+                                                                }}
+                                                            /> */}
+
+                                                            <Box sx={{
+                                                                display: 'flex', gap: 1, padding: '5px 12px', alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                transition: '.3s',
+                                                                opacity: item?.status == 'Cancelada' && .6,
+                                                                backgroundColor: item?.status !== 'Cancelada' && colorPalette?.buttonColor,
+                                                                border: item?.status === 'Cancelada' && `1px solid ${colorPalette?.buttonColor}`, borderRadius: 2,
+                                                                "&:hover": {
+                                                                    opacity: item?.status !== 'Cancelada' && 0.8,
+                                                                    cursor: item?.status !== 'Cancelada' && 'pointer'
+                                                                }
+                                                            }}
+                                                                onClick={() => {
+                                                                    if (item?.status !== 'Cancelada') {
+                                                                        getProfissionalAgendas({ profissionalId: item?.profissional_id, dateConsult: item?.data, consultId: item?.id_consulta })
+                                                                        setDateSelected({ ...dateSelected, consultId: item?.id_consulta })
+                                                                    }
+                                                                }}>
+                                                                <Box sx={{
+                                                                    ...styles.menuIcon,
+                                                                    width: 14,
+                                                                    height: 14,
+                                                                    backgroundImage: `url('/icons/remarcar_icon.png')`,
+                                                                    transition: '.3s',
+                                                                }} />
+                                                                <Text bold style={{ color: item?.status === 'Cancelada' ? colorPalette?.buttonColor : '#fff' }}>Remarcar</Text>
+                                                            </Box>
+
                                                             <Box sx={{ display: 'flex', height: '30px', width: '2px', backgroundColor: colorPalette?.primary }} />
-                                                            <Button cancel secondary text="cancelar" small disabled={item?.status === 'Cancelada'}
-                                                                onClick={() => handleCancelAppointment({ consultId: item?.id_consulta})}
-                                                            />
+                                                            {/* <Button cancel secondary text="cancelar" small disabled={item?.status === 'Cancelada'}
+                                                                onClick={() => handleCancelAppointment({ consultId: item?.id_consulta })}
+                                                            /> */}
+                                                            <Box sx={{
+                                                                display: 'flex', gap: 1, padding: '5px 12px', alignItems: 'center',
+                                                                justifyContent: 'center',
+                                                                transition: '.3s',
+                                                                opacity: item?.status == 'Cancelada' && .6,
+                                                                backgroundColor: item?.status !== 'Cancelada' && 'red',
+                                                                border: item?.status == 'Cancelada' && '1px solid red', borderRadius: 2,
+                                                                "&:hover": {
+                                                                    opacity: item?.status !== 'Cancelada' && 0.8,
+                                                                    cursor: item?.status !== 'Cancelada' && 'pointer'
+                                                                }
+                                                            }} onClick={() => {
+                                                                if (item?.status !== 'Cancelada') {
+                                                                    handleCancelAppointment({ consultId: item?.id_consulta })
+                                                                }
+                                                            }}>
+                                                                <Box sx={{
+                                                                    ...styles.menuIcon,
+                                                                    width: 14,
+                                                                    height: 14,
+                                                                    backgroundImage: `url('/icons/cancelar_icon.png')`,
+                                                                    transition: '.3s',
+                                                                }} />
+                                                                <Text bold style={{ color: item?.status === 'Cancelada' ? 'red' : '#fff' }}>Cancelar</Text>
+                                                            </Box>
                                                         </Box>
                                                     </TableCell>
                                                 </>
@@ -579,7 +696,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                 </TableContainer>
             </ContentContainer >
 
-            <Backdrop open={loadingPayment?.active}>
+            <Backdrop open={loadingPayment?.active} sx={{zIndex: 99999999999999}}>
                 <ContentContainer>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center' }}>
                         <>
@@ -587,6 +704,13 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                                 <>
                                     <CheckCircleIcon style={{ color: 'green', fontSize: 30 }} />
                                     <Text bold>{loadingPayment?.message}</Text>
+                                    {loadingPayment.icon && <Box sx={{
+                                        ...styles.menuIcon,
+                                        width: 32,
+                                        height: 32,
+                                        backgroundImage: `url(${loadingPayment.icon})`,
+                                        transition: '.3s',
+                                    }} />}
                                 </>
                             )
                             }
@@ -779,8 +903,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                                         if (dateSelected?.reserva_id === '') {
                                             alert.info('Selecione um horário antes de continuar.')
                                         } else {
-                                            alert.success('Consulta remarcada.')
-                                            console.log(`reserva: ${dateSelected?.reserva_id},professionalId: ${dateSelected?.profissionalId}`)
+                                            handleRescheduleppointment()
                                         }
                                     }
                                 }}>

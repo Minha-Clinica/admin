@@ -340,6 +340,7 @@ const ProfissionalCard = ({ data, loadingDate, setLoadingDate, dateSelected, set
                                                 alignItems: 'center'
                                             }}>
                                                 <Calendar
+                                                    defaultActiveStartDate={new Date()}
                                                     onChange={(date) => handleSelectedDate(date, item?.id)}
                                                     style={{
                                                         border: 'none'

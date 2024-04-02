@@ -528,7 +528,7 @@ export default function EditUser() {
                             onClick={() => {
                                 setSelectedMenu('paymentConfig')
                             }}>
-                            <Text bold title style={{ color: selectedMenu === 'paymentConfig' && colorPalette?.buttonColor, transition: '.3s' }}>Configurações de Pagamento</Text>
+                            <Text bold title style={{ color: selectedMenu === 'paymentConfig' && colorPalette?.buttonColor, transition: '.3s' }}>Preferências de Pagamento</Text>
                         </Box>}
                     </Box>
 
