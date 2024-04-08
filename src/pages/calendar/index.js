@@ -596,6 +596,22 @@ export default function CalendarComponent(props) {
     }
 
 
+    const formatterHours = (date) => {
+        const data = new Date(date);
+
+        const mesesAbreviados = [
+            'jan', 'fev', 'mar', 'abr', 'mai', 'jun',
+            'jul', 'ago', 'set', 'out', 'nov', 'dez'
+        ];
+
+        const dia = data.getDate();
+        const mes = mesesAbreviados[data.getMonth()];
+        const dataFormatada = `${dia} ${mes}.`;
+
+        return dataFormatada
+    }
+
+
     return (
         <>
             <SectionHeader
@@ -739,38 +755,48 @@ export default function CalendarComponent(props) {
                         border: `.5px solid lightgray`,
                         padding: 10,
                         height: 600,
-                        width: '85%'
+                        width: '80%'
                     }}
                 />
             </Box>
             <Box sx={{
                 display: 'flex', height: '100%', position: 'fixed', border: '1px solid lightgray',
                 backgroundColor: '#fff', right: 0, top: 51.5, flexDirection: 'column',
-                padding: '12px 8px', gap: 2
+                padding: '12px 12px', gap: 2, zIndex: 99999
             }}>
                 <Text bold large style={{ textAlign: 'center' }}>Meus agendamentos</Text>
 
-                <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                    <Box sx={{
-                        display: 'flex', gap: 1, flexDirection: 'row',
-                        border: '1px solid lightgray', borderRadius: 2, height: 60
-                    }}>
-                        <Box sx={{
-                            height: '100%', width: '4px', backgroundColor: colorPalette?.buttonColor,
-                            borderRadius: '8px 0px 0px 8px'
-                        }} />
-                        <Box sx={{ display: 'flex', gap: 2, padding: '8px 8px' }}>
-                            <Box sx={{ display: 'flex', gap: .2, flexDirection: 'column' }}>
-                                <Text large>09:00</Text>
-                                <Text small style={{ color: 'gray' }}>30 min</Text>
-                            </Box>
-                            <Box sx={{ display: 'flex', gap: .3, flexDirection: 'column', padding: '0px 8px' }}>
-                                <Text bold>Alinhamento semanal</Text>
-                                <Text light>Marcus Silva</Text>
-                            </Box>
-                        </Box>
+                {events?.filter(item => item.disponivel === 1)?.length > 0 ?
+                    <Box sx={{ display: 'flex', flexDirection: 'column', maxHeight: 600, overflowY: 'auto', gap: .5, maxWidth: 280 }}>
+                        {events?.filter(item => item.disponivel === 1)?.map((item, index) => {
+
+                            return (
+                                <Box sx={{
+                                    display: 'flex', gap: 1, flexDirection: 'row',
+                                    border: '1px solid lightgray', borderRadius: 2, height: 90
+                                }} key={index}>
+                                    <Box sx={{
+                                        height: '100%', width: '4px', backgroundColor: colorPalette?.buttonColor,
+                                        borderRadius: '8px 0px 0px 8px'
+                                    }} />
+                                    <Box sx={{ display: 'flex', gap: 2, padding: '8px 8px', alignItems: 'center' }}>
+                                        <Box sx={{ display: 'flex', gap: .2, flexDirection: 'column' }}>
+                                            <Text large>{horarios(item?.start)}</Text>
+                                            <Text small style={{ color: 'gray' }}>1 hora</Text>
+                                        </Box>
+                                        <Box sx={{ display: 'flex', gap: .3, flexDirection: 'column', padding: '0px 8px' }}>
+                                            <Text bold>{item?.title}</Text>
+                                            <Text light>{item?.nome_agendado}</Text>
+                                        </Box>
+                                        <Text bold large>{formatterHours(item?.start)}</Text>
+                                    </Box>
+                                </Box>
+                            )
+                        })}
                     </Box>
-                </Box>
+                    :
+                    <Text>Você não possúi agendamentos.</Text>
+                }
             </Box>
             {
                 showEventForm && (

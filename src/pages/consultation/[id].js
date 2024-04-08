@@ -7,6 +7,8 @@ import { RadioItem, SectionHeader } from "../../organisms"
 import { useAppContext } from "../../context/AppContext"
 import { calculationAgeUser, formatTimeStamp } from "../../helpers"
 import { icons } from "../../organisms/layout/Colors"
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+
 
 export default function ConsultationRecord(props) {
     const { setLoading, alert, colorPalette, user, setShowConfirmationDialog, userPermissions, menuItemsList } = useAppContext()
@@ -16,10 +18,15 @@ export default function ConsultationRecord(props) {
     const newConsultRecord = id === 'new';
     const [cronologicData, setCronologicData] = useState([]);
     const [somaticData, setSomaticData] = useState([]);
+    const [discomfortLevel, setDiscomfortLevel] = useState([]);
     const [patientNotes, setPatientNotes] = useState('')
     const [arrayTematic, setArrayTematic] = useState([])
     const [tematicName, setTematicName] = useState({ tema: '' })
     const [showTematic, setShowTematic] = useState(false)
+    const [opitionsMark, setOpitionsMark] = useState({
+        microfase: false,
+        threeP: false
+    })
     const [consultRecordData, setConsultRecordData] = useState({
     })
     const [selectedConditions, setSelectedConditions] = useState([])
@@ -74,6 +81,9 @@ export default function ConsultationRecord(props) {
         // }
         return true
     }
+
+    console.log(discomfortLevel)
+    console.log(cronologicData)
 
     const handleCreateInstitution = async () => {
         setLoading(true)
@@ -154,10 +164,6 @@ export default function ConsultationRecord(props) {
     };
 
     const toggleCondition = (value) => {
-        if (value === 'tematico') {
-            setShowTematic(true)
-            return
-        }
         if (selectedConditions.includes(value)) {
             setSelectedConditions(selectedConditions.filter((condition) => condition !== value));
         } else {
@@ -165,16 +171,33 @@ export default function ConsultationRecord(props) {
         }
     };
 
-    const handleInputSomaticChange = (cronoIndex, somaticIndex, key, value, type) => {
-        const newData = [...somaticData];
-        newData[somaticIndex][key] = value;
-        setSomaticData(newData);
+    const handleInputDiscomfortChange = (discomfortIndex, key, value) => {
+        const newData = [...discomfortLevel];
+        newData[discomfortIndex][key] = value;
+        setDiscomfortLevel(newData);
     };
 
+    const removeDiscomfortData = (index) => {
+        const newData = [...discomfortLevel];
+        newData.splice(index, 1);
+        setDiscomfortLevel(newData);
+    };
+
+    // const handleInputSomaticChange = (cronoIndex, somaticIndex, key, value, type) => {
+    //     const newData = [...somaticData];
+    //     newData[somaticIndex][key] = value;
+    //     setSomaticData(newData);
+    // };
+
     const addNewCronologicData = () => {
-        const newCronoData = { idade_inicial: 0, idade_final: 5, id: generateUniqueId() }; // Adiciona um ID único
+        let cronologicKeyId = generateUniqueId()
+        const newCronoData = { idade_inicial: 0, idade_final: 5, id: cronologicKeyId }; // Adiciona um ID único
         setCronologicData([...cronologicData, newCronoData]);
-        // setSomaticData([...somaticData, { nivel_sintoma: 10, parentId: newCronoData.id }]);
+        setDiscomfortLevel([...discomfortLevel, {
+            nivel_desc: 10, parentId: cronologicKeyId,
+            microfase: opitionsMark?.microfase,
+            threeP: opitionsMark?.threeP
+        }]);
     };
 
     const removeCronologicData = (index) => {
@@ -187,7 +210,13 @@ export default function ConsultationRecord(props) {
         setSomaticData(newSomaticData);
     };
 
-    // ...
+    const addNewDiscomfortData = (parentId) => {
+        setDiscomfortLevel([...discomfortLevel, {
+            nivel_desc: 10, parentId,
+            microfase: opitionsMark?.microfase,
+            threeP: opitionsMark?.threeP
+        }]);
+    };
 
     const addNewSomaticData = (parentId) => {
         setSomaticData([...somaticData, { nivel_sintoma: 10, parentId }]);
@@ -237,7 +266,7 @@ export default function ConsultationRecord(props) {
 
 
     const groupCondition = [
-        { label: 'Cronológico', value: 'cronologico' },
+        { label: 'Cronológico', value: 'cronologico', icon: 'cronologico' },
         { label: 'Somático', value: 'somatico' },
         { label: 'Temático', value: 'tematico' },
         { label: 'Futuro', value: 'futuro' },
@@ -268,8 +297,27 @@ export default function ConsultationRecord(props) {
             <SectionHeader
                 perfil={consultRecordData?.paciente}
                 title={`${consultRecordData?.paciente} (${calculationAgeUser(consultRecordData?.nascimento)} Anos) - 1º Sessão (${formatTimeStamp(consultRecordData?.data)})` || `Novo Prontuário da Consulta`}
-                saveButton={true}
             />
+            <Button text="Finalizar sessão" style={{ position: 'absolute', top: 130, right: 100 }} />
+            <Box sx={{
+                display: 'flex', position: 'fixed', bottom: 30, right: 30, padding: '8px 12px',
+                alignItems: 'center', justifyContent: 'center', gap: 1, border: `1px solid green`,
+                borderRadius: 2,
+                transition: '.3s',
+                "&:hover": {
+                    opacity: 0.8,
+                    cursor: 'pointer',
+                    transform: 'scale(1.03, 1.03)'
+                }
+            }}>
+                <Box sx={{
+                    ...styles.menuIcon,
+                    backgroundImage: `url('/icons/include_icon.png')`,
+                    transition: '.3s',
+                    width: 25, height: 25,
+                }} />
+                <Text>Salvar Etapa</Text>
+            </Box>
 
             {/* usuario */}
             <Box style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 1.8, padding: 5, }}>
@@ -278,10 +326,10 @@ export default function ConsultationRecord(props) {
                         const selected = selectedConditions?.includes(item.value);
                         return (
                             <Box key={index} sx={{
-                                display: 'flex', gap: 2, width: '100%', padding: '10px 12px', borderRadius: 2,
-                                border: `1px solid ${colorPalette?.buttonColor}`,
+                                display: 'flex', gap: .5, width: '120px', padding: '10px 12px', borderRadius: 4,
                                 alignItems: 'center', justifyContent: 'center',
                                 transition: '.3s',
+                                flexDirection: 'column',
                                 backgroundColor: selected ? colorPalette?.buttonColor : 'transparent',
                                 "&:hover": {
                                     opacity: 0.8,
@@ -289,19 +337,17 @@ export default function ConsultationRecord(props) {
                                     transform: 'scale(1.1, 1.1)'
                                 },
                             }} onClick={() => toggleCondition(item?.value)}>
-                                {item?.value === 'tematico' &&
-                                    <Box sx={{
-                                        ...styles.menuIcon,
-                                        backgroundImage: `url('/icons/include_icon.png')`,
-                                        transition: '.3s',
-                                        width: 20, height: 20,
-                                        "&:hover": {
-                                            opacity: 0.8,
-                                            cursor: 'pointer'
-                                        }
-                                    }} />
-                                }
-                                <Text large style={{ color: selected ? '#fff' : colorPalette?.buttonColor }}>{item?.label}</Text>
+                                <Box sx={{
+                                    ...styles.menuIcon,
+                                    backgroundImage: `url('/icons/${item?.value}_anaminese.png')`,
+                                    transition: '.3s',
+                                    width: 30, height: 30,
+                                    "&:hover": {
+                                        opacity: 0.8,
+                                        cursor: 'pointer'
+                                    }
+                                }} />
+                                <Text style={{ color: selected ? '#fff' : colorPalette?.buttonColor }}>{item?.label}</Text>
                             </Box>
                         )
                     })}
@@ -309,9 +355,46 @@ export default function ConsultationRecord(props) {
 
                 <Box sx={{
                     display: 'flex', width: '100%', padding: '30px', flexDirection: 'column',
-                    backgroundColor: '#fff', marginTop: 2,
+                    backgroundColor: '#fff', marginTop: 2, gap: 2,
                     boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
                 }}>
+
+                    <Box sx={{
+                        display: 'flex', gap: 1, justifyContent: 'flex-start', width: '100%'
+                    }}>
+
+                        <Box sx={{
+                            display: 'flex', gap: 1, flexDirection: 'column', padding: '10px 20px', border: `1px solid ${colorPalette?.buttonColor}`,
+                            borderRadius: 2
+                        }}>
+                            <Box sx={{ display: 'flex', gap: 4, justifyContent: 'space-between', alignItems: 'center' }}>
+                                <Text bold style={{ color: colorPalette?.buttonColor }}>Temas salvos</Text>
+                                <Button small text="Novo tema" onClick={() => setShowTematic(true)} />
+                            </Box>
+                            <Box sx={{ display: 'flex', gap: 1.8, justifyContent: 'flex-start', flexDirection: 'row', flexWrap: `wrap` }}>
+                                {arrayTematic?.map((item, tematicIndex) => (
+                                    <Box key={tematicIndex} sx={{
+                                        display: 'flex', gap: 2, alignItems: 'center', justifyContent: 'center',
+                                        backgroundColor: colorPalette?.primary, padding: '12px 15px'
+                                    }}>
+                                        <Text bold>{item?.tema}</Text>
+                                        <Box sx={{
+                                            ...styles.menuIcon,
+                                            backgroundImage: `url('/icons/remove_icon.png')`,
+                                            width: 13,
+                                            height: 13,
+                                            "&:hover": {
+                                                opacity: 0.8,
+                                                cursor: 'pointer',
+                                                transform: 'scale(1.1, 1.1)'
+                                            },
+                                        }} onClick={() => deleteTematicName(tematicIndex)} text="Remover" />
+                                    </Box>
+                                ))}
+                            </Box>
+                        </Box>
+
+                    </Box>
 
                     <TextInput
                         label="Anotações do paciente:"
@@ -354,7 +437,121 @@ export default function ConsultationRecord(props) {
                                             <Button secondary onClick={() => removeCronologicData(index)} text="Remover" />
                                         </Box>
 
-                                        {selectedConditions.includes('somatico') &&
+                                        <Box sx={{ display: 'flex', gap: 1.8, justifyContent: 'flex-start', flexDirection: 'column' }}>
+                                            <Box sx={{ display: 'flex', gap: 1.8, alignItems: 'center' }}>
+                                                <Box sx={{ display: 'flex', gap: 1.8, alignItems: 'center' }}>
+                                                    <Text bold>Nível de Disconforto - Filme:</Text>
+                                                    <Box sx={{
+                                                        ...styles.menuIcon,
+                                                        backgroundImage: `url('/icons/include_icon.png')`,
+                                                        transition: '.3s',
+                                                        width: 22,
+                                                        height: 22,
+                                                        "&:hover": {
+                                                            opacity: 0.8,
+                                                            cursor: 'pointer',
+                                                            transform: 'scale(1.1, 1.1)'
+                                                        },
+                                                    }} onClick={() => addNewDiscomfortData(data.id)} />
+                                                </Box>
+
+                                                <Box sx={{
+                                                    display: 'flex', gap: 1.5, border: `1px solid ${colorPalette?.buttonColor}`, padding: '8px 12px',
+                                                    flexDirection: 'row'
+                                                }}>
+                                                    <Text bold>Marcadores:</Text>
+                                                    <Box sx={{ display: 'flex', gap: 2 }}>
+                                                        <Box sx={{
+                                                            display: 'flex', gap: 1.8, alignItems: 'center',
+                                                        }}>
+                                                            <Box sx={{
+                                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                                '&:hover': {
+                                                                    opacity: .7,
+                                                                    cursor: 'pointer',
+                                                                    backgroundColor: 'green' + '77'
+                                                                }
+                                                            }} onClick={() => setOpitionsMark({ ...opitionsMark, microfase: !opitionsMark?.microfase })}>
+                                                                {opitionsMark?.microfase ?
+                                                                    <CheckCircleIcon style={{ color: 'green', fontSize: 20 }} />
+                                                                    :
+                                                                    <Box sx={{
+                                                                        display: 'flex', border: `1px solid black`,
+                                                                        width: 17, height: 17, borderRadius: 17,
+                                                                        transition: '.3s',
+                                                                    }} />
+                                                                }
+                                                            </Box>
+                                                            <Text light>MicroFase (MF)</Text>
+                                                        </Box>
+                                                        <Box sx={{
+                                                            display: 'flex', gap: 1.8, alignItems: 'center',
+                                                        }}>
+                                                            <Box sx={{
+                                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                                '&:hover': {
+                                                                    opacity: .7,
+                                                                    cursor: 'pointer',
+                                                                    backgroundColor: 'green' + '77'
+                                                                }
+                                                            }} onClick={() => setOpitionsMark({ ...opitionsMark, threeP: !opitionsMark?.threeP })}>
+                                                                {opitionsMark?.threeP ?
+                                                                    <CheckCircleIcon style={{ color: 'green', fontSize: 20 }} />
+                                                                    :
+                                                                    <Box sx={{
+                                                                        display: 'flex', border: `1px solid black`,
+                                                                        width: 17, height: 17, borderRadius: 17,
+                                                                        transition: '.3s'
+                                                                    }} />
+                                                                }
+                                                            </Box>
+                                                            <Text light>3P</Text>
+                                                        </Box>
+                                                    </Box>
+                                                </Box>
+                                            </Box>
+
+                                            <Box sx={{
+                                                display: 'flex', gap: 1.8, justifyContent: 'flex-start', flexDirection: 'row', flexWrap: `wrap`,
+                                                backgroundColor: colorPalette?.buttonColor + '77', padding: '5px 8px'
+                                            }}>
+                                                {discomfortLevel?.map((data, discomfortIndex) => (
+                                                    data.parentId === cronologicData[index].id && (
+                                                        <Box key={discomfortIndex} sx={{
+                                                            display: 'flex', gap: 2, alignItems: 'center', justifyContent: 'flex-start',
+                                                            padding: '8px 12px',
+                                                            // backgroundColor: colorPalette?.buttonColor + '66',
+                                                            backgroundColor: colorPalette?.secondary,
+                                                            borderRadius: 2,
+                                                            boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
+                                                        }}>
+                                                            {data?.microfase && <Box sx={{ display: 'flex', padding: '2px 4px', backgroundColor: 'orange' }}><Text>{data?.microfase && 'MF'}</Text></Box>}
+                                                            {data?.threeP && <Box sx={{ display: 'flex', padding: '2px 4px', backgroundColor: 'lightgreen' }}><Text>{data?.threeP && '3P'}</Text></Box>}
+                                                            <TextInput
+                                                                type="number"
+                                                                value={data?.nivel_desc}
+                                                                onChange={(e) => handleInputDiscomfortChange(discomfortIndex, 'nivel_desc', parseInt(e.target.value))}
+                                                                sx={{ width: 80 }}
+                                                            />
+                                                            <Box sx={{
+                                                                ...styles.menuIcon,
+                                                                backgroundImage: `url('/icons/remove_icon.png')`,
+                                                                transition: '.3s',
+                                                                width: 13,
+                                                                height: 13,
+                                                                "&:hover": {
+                                                                    opacity: 0.8,
+                                                                    cursor: 'pointer',
+                                                                    transform: 'scale(1.1, 1.1)'
+                                                                },
+                                                            }} onClick={() => removeDiscomfortData(discomfortIndex)} text="Remover" />
+                                                        </Box>
+                                                    )
+                                                ))}
+                                            </Box>
+                                        </Box>
+
+                                        {/* {selectedConditions.includes('somatico') &&
                                             <Box sx={{ display: 'flex', gap: 1.8, justifyContent: 'flex-start', flexDirection: 'column' }}>
                                                 <Box sx={{ display: 'flex', gap: 1.8, alignItems: 'center' }}>
                                                     <Text bold>Nível de Sintoma:</Text>
@@ -400,56 +597,20 @@ export default function ConsultationRecord(props) {
                                                     </Box>
                                                 }
                                             </Box>
-                                        }
+                                        } */}
                                     </Box>
                                 ))}
                             </Box >
                         </Box>
                     }
                     <Divider distance={5} />
-
-                    <Box sx={{
-                        display: 'flex', gap: 1, justifyContent: 'flex-end', width: '100%'
-                    }}>
-
-                        {arrayTematic?.length > 0 &&
-                            <Box sx={{
-                                display: 'flex', gap: 1, flexDirection: 'column', padding: '20px 20px', border: `1px solid ${colorPalette?.buttonColor}`,
-                                width: '500px'
-                            }}>
-                                <Text title bold style={{ color: colorPalette?.buttonColor }}>Temático</Text>
-                                <Box sx={{ display: 'flex', gap: 1.8, justifyContent: 'flex-start', flexDirection: 'row', flexWrap: `wrap` }}>
-                                    {arrayTematic?.map((item, tematicIndex) => (
-                                        <Box key={tematicIndex} sx={{
-                                            display: 'flex', gap: 2, alignItems: 'center', justifyContent: 'center',
-                                            backgroundColor: colorPalette?.primary, padding: '12px 15px'
-                                        }}>
-                                            <Text bold>{item?.tema}</Text>
-                                            <Box sx={{
-                                                ...styles.menuIcon,
-                                                backgroundImage: `url('/icons/remove_icon.png')`,
-                                                width: 13,
-                                                height: 13,
-                                                "&:hover": {
-                                                    opacity: 0.8,
-                                                    cursor: 'pointer',
-                                                    transform: 'scale(1.1, 1.1)'
-                                                },
-                                            }} onClick={() => deleteTematicName(tematicIndex)} text="Remover" />
-                                        </Box>
-                                    ))}
-                                </Box>
-                            </Box>
-                        }
-
-                    </Box>
                 </Box>
             </Box>
 
             <Backdrop open={showTematic}>
                 <ContentContainer>
                     <Box sx={{ display: 'flex', gap: 3, justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Text bold large>Adicionar Tema (Temático)</Text>
+                        <Text bold large>Adicionar Tema</Text>
                         <Box sx={{
                             ...styles.menuIcon,
                             backgroundImage: `url(${icons.gray_close})`,

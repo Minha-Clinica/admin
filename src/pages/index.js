@@ -93,14 +93,15 @@ const subMenu = [
       filter: true,
       text: 'Veja o extrato dos pagamentos de suas consultas realizadas!'
    },
-   {
-      id: '06', icon: '/icons/subscription.png',
-      filter: true,
-      route: '/assignmentPlan',
-      permissions: ['profissional', 'administrador'],
-      title: 'Meus Planos',
-      text: 'Usufrua o melhor da plataforma contratando os melhores planos! E aproveite!'
-   }
+   //Primeira fase
+   // {
+   //    id: '06', icon: '/icons/subscription.png',
+   //    filter: true,
+   //    route: '/assignmentPlan',
+   //    permissions: ['profissional', 'administrador'],
+   //    title: 'Meus Planos',
+   //    text: 'Usufrua o melhor da plataforma contratando os melhores planos! E aproveite!'
+   // }
 ]
 
 function Home() {
@@ -473,7 +474,8 @@ function Home() {
                      </Box>
                   </Box>
 
-                  <Box sx={{ display: isPacient ? 'none' : 'flex', gap: 5, flexDirection: 'column', marginTop: 5, alignItems: 'center' }}>
+                  {/* Primeira fase */}
+                  {/* <Box sx={{ display: isPacient ? 'none' : 'flex', gap: 5, flexDirection: 'column', marginTop: 5, alignItems: 'center' }}>
                      <Text bold title style={{ textAlign: 'center' }}>Assine agora o plano e aprovaite o melhor da plataforma!</Text>
 
                      <Box sx={{ display: 'flex', gap: 5, width: '100%', justifyContent: 'center' }}>
@@ -527,7 +529,7 @@ function Home() {
                         })}
                      </Box>
 
-                  </Box>
+                  </Box> */}
 
                   <Box sx={{ display: 'flex', padding: '10px 0px', marginTop: 5 }}>
                      <Text bold>Veja o que está rolando..</Text>
