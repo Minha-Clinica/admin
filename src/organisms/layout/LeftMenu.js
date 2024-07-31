@@ -109,11 +109,12 @@ export const LeftMenu = ({ }) => {
 
                   <Box sx={{
                      ...styles.icon,
-                     backgroundImage: `url('/icons/logo-clinica-light.png')`,
-                     backgroundSize: 'contain',
-                     width: !showMenuHelp ? '50px' : '107px',
-                     height: !showMenuHelp ? '30px' : '51px',
-                     marginTop: !showMenuHelp ? 3 : 0,
+                     transition: 0,
+                     backgroundImage: !showMenuHelp ? `url('/icons/afectu_icon_menu.png')` : `url('/icons/afectu_icon.png')`,
+                     backgroundSize: 'cover',
+                     width: !showMenuHelp ? '103px' : '140px',
+                     height: !showMenuHelp ? '70px' : '90px',
+                     marginTop: !showMenuHelp ? 1 : 0,
                      "&:hover": {
                         cursor: 'pointer', opacity: 0.8
                      }
@@ -233,11 +234,11 @@ export const LeftMenu = ({ }) => {
 
             <Box sx={{
                ...styles.icon,
-               backgroundImage: !theme ? `url('/icons/logo-clinica.png')` : `url('/logo-clinica.png')`,
-               backgroundSize: 'contain',
+               backgroundImage: `url('/icons/afectu_icon_menu.png')`,
+               backgroundSize: 'cover',
                backgroundPosition: 'center',
-               width: 1,
-               height: 35,
+               width: 30,
+               height: 15,
                display: 'flex',
                // flex: 1,
                "&:hover": {
@@ -545,7 +546,10 @@ const styles = {
       width: '100%',
       backgroundColor: '#f9f9f9',
       borderBottom: `2px solid #00000010`,
-      padding: `30px`,
+      paddingLeft: `15px`,
+      paddingTop: 3,
+      paddingBottom: 3,
+      paddingRight: '15px',
       alignItems: 'center',
       justifyContent: 'space-around',
       zIndex: 99999999,

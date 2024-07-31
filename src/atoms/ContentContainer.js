@@ -63,6 +63,6 @@ const styles = {
       flexDirection: 'column',
       padding: `30px`,
       borderRadius: `4px`,
-      boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
+      boxShadow: `rgba(149, 157, 165, 0.6) 0px 6px 24px`,
    }
 }

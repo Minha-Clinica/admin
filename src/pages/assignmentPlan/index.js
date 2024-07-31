@@ -118,7 +118,7 @@ export default function MenuAssignment(props) {
                             "&:hover": {
                                 opacity: 0.8,
                                 cursor: 'pointer',
-                                transform: 'scale(1.05, 1.05)'
+                                transform: 'scale(1.03, 1.03)'
                             }
 
                         }} onClick={() => router.push(routePush)}>

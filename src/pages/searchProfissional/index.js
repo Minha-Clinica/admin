@@ -272,7 +272,7 @@ const ProfissionalCard = ({ data, loadingDate, setLoadingDate, dateSelected, set
                 return (
                     <Box key={index} sx={{
                         display: 'flex', gap: 6, backgroundColor: colorPalette.secondary, padding: '15px', borderRadius: 2,
-                        boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`, position: 'relative', flexDirection: 'row'
+                        boxShadow: `rgba(149, 157, 165, 0.6) 0px 6px 24px`, position: 'relative', flexDirection: 'row'
                     }}>
                         <Box sx={{
                             display: 'flex',

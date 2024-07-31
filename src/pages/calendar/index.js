@@ -764,11 +764,11 @@ export default function CalendarComponent(props) {
                 backgroundColor: '#fff', right: 0, top: 51.5, flexDirection: 'column',
                 padding: '12px 12px', gap: 2, zIndex: 99999
             }}>
-                <Text bold large style={{ textAlign: 'center' }}>Meus agendamentos</Text>
+                <Text bold large style={{ textAlign: 'center' }}>Minhas próximas agendas</Text>
 
-                {events?.filter(item => item.disponivel === 1)?.length > 0 ?
+                {events?.filter(item => item.disponivel === 1 && (new Date(item?.start) >= new Date()))?.length > 0 ?
                     <Box sx={{ display: 'flex', flexDirection: 'column', maxHeight: 600, overflowY: 'auto', gap: .5, maxWidth: 280 }}>
-                        {events?.filter(item => item.disponivel === 1)?.map((item, index) => {
+                        {events?.filter(item => item.disponivel === 1 && (new Date(item?.start) >= new Date()))?.map((item, index) => {
 
                             return (
                                 <Box sx={{
@@ -785,8 +785,8 @@ export default function CalendarComponent(props) {
                                             <Text small style={{ color: 'gray' }}>1 hora</Text>
                                         </Box>
                                         <Box sx={{ display: 'flex', gap: .3, flexDirection: 'column', padding: '0px 8px' }}>
-                                            <Text bold>{item?.title}</Text>
-                                            <Text light>{item?.nome_agendado}</Text>
+                                            <Text small bold>{item?.title}</Text>
+                                            <Text small light>{item?.nome_agendado}</Text>
                                         </Box>
                                         <Text bold large>{formatterHours(item?.start)}</Text>
                                     </Box>
@@ -795,7 +795,7 @@ export default function CalendarComponent(props) {
                         })}
                     </Box>
                     :
-                    <Text>Você não possúi agendamentos.</Text>
+                    <Text>Você não possúi agendamentos futuros.</Text>
                 }
             </Box>
             {

@@ -35,18 +35,18 @@ export const menuItems = [
       to: '/patients',
       permissions: ['profissional', 'administrador'],
    },
-   {
-      text: 'Pagamentos',
-      icon: 'https://mf-planejados.s3.amazonaws.com/Icon_financeiro.svg',
-      to: '/',
-      permissions: ['profissional', 'administrador', 'paciente'],
-   },
-   {
-      text: 'Contratos',
-      icon: '/icons/contract_icon.png',
-      to: '/',
-      permissions: ['profissional', 'administrador', 'paciente'],
-   },
+   // {
+   //    text: 'Pagamentos',
+   //    icon: 'https://mf-planejados.s3.amazonaws.com/Icon_financeiro.svg',
+   //    to: '/',
+   //    permissions: ['profissional', 'administrador', 'paciente'],
+   // },
+   // {
+   //    text: 'Contratos',
+   //    icon: '/icons/contract_icon.png',
+   //    to: '/',
+   //    permissions: ['profissional', 'administrador', 'paciente'],
+   // },
    {
       text: 'Planos',
       icon: '/icons/plan_payment.png',

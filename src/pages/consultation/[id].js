@@ -437,10 +437,13 @@ export default function ConsultationRecord(props) {
                                             <Button secondary onClick={() => removeCronologicData(index)} text="Remover" />
                                         </Box>
 
-                                        <Box sx={{ display: 'flex', gap: 1.8, justifyContent: 'flex-start', flexDirection: 'column' }}>
+                                        <Box sx={{
+                                            display: 'flex', gap: 1.8, justifyContent: 'flex-start', flexDirection: 'column', border: `1px solid #eaeaea`,
+                                            padding: '15px 12px', borderRadius: 2
+                                        }}>
                                             <Box sx={{ display: 'flex', gap: 1.8, alignItems: 'center' }}>
                                                 <Box sx={{ display: 'flex', gap: 1.8, alignItems: 'center' }}>
-                                                    <Text bold>Nível de Disconforto - Filme:</Text>
+                                                    <Text bold>Nível de Desconforto - Filme:</Text>
                                                     <Box sx={{
                                                         ...styles.menuIcon,
                                                         backgroundImage: `url('/icons/include_icon.png')`,
@@ -513,7 +516,8 @@ export default function ConsultationRecord(props) {
 
                                             <Box sx={{
                                                 display: 'flex', gap: 1.8, justifyContent: 'flex-start', flexDirection: 'row', flexWrap: `wrap`,
-                                                backgroundColor: colorPalette?.buttonColor + '77', padding: '5px 8px'
+                                                // backgroundColor: colorPalette?.buttonColor + '77',
+                                                padding: '5px 8px'
                                             }}>
                                                 {discomfortLevel?.map((data, discomfortIndex) => (
                                                     data.parentId === cronologicData[index].id && (
@@ -522,6 +526,7 @@ export default function ConsultationRecord(props) {
                                                             padding: '8px 12px',
                                                             // backgroundColor: colorPalette?.buttonColor + '66',
                                                             backgroundColor: colorPalette?.secondary,
+                                                            border: `1px solid #eaeaea`,
                                                             borderRadius: 2,
                                                             boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
                                                         }}>
@@ -551,10 +556,14 @@ export default function ConsultationRecord(props) {
                                             </Box>
                                         </Box>
 
-                                        {/* {selectedConditions.includes('somatico') &&
-                                            <Box sx={{ display: 'flex', gap: 1.8, justifyContent: 'flex-start', flexDirection: 'column' }}>
+                                        {selectedConditions.includes('somatico') &&
+
+                                            <Box sx={{
+                                                display: 'flex', gap: 1.8, justifyContent: 'flex-start', flexDirection: 'column', border: `1px solid #eaeaea`,
+                                                padding: '15px 12px', borderRadius: 2
+                                            }}>
                                                 <Box sx={{ display: 'flex', gap: 1.8, alignItems: 'center' }}>
-                                                    <Text bold>Nível de Sintoma:</Text>
+                                                    <Text bold>Nível de Desconforto - Corpo:</Text>
                                                     <Box sx={{
                                                         ...styles.menuIcon,
                                                         backgroundImage: `url('/icons/include_icon.png')`,
@@ -567,6 +576,61 @@ export default function ConsultationRecord(props) {
                                                             transform: 'scale(1.1, 1.1)'
                                                         },
                                                     }} onClick={() => addNewSomaticData(data.id)} />
+
+                                                    <Box sx={{
+                                                        display: 'flex', gap: 1.5, border: `1px solid ${colorPalette?.buttonColor}`, padding: '8px 12px',
+                                                        flexDirection: 'row'
+                                                    }}>
+                                                        <Text bold>Marcadores:</Text>
+                                                        <Box sx={{ display: 'flex', gap: 2 }}>
+                                                            <Box sx={{
+                                                                display: 'flex', gap: 1.8, alignItems: 'center',
+                                                            }}>
+                                                                <Box sx={{
+                                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                                    '&:hover': {
+                                                                        opacity: .7,
+                                                                        cursor: 'pointer',
+                                                                        backgroundColor: 'green' + '77'
+                                                                    }
+                                                                }} onClick={() => setOpitionsMark({ ...opitionsMark, microfase: !opitionsMark?.microfase })}>
+                                                                    {opitionsMark?.microfase ?
+                                                                        <CheckCircleIcon style={{ color: 'green', fontSize: 20 }} />
+                                                                        :
+                                                                        <Box sx={{
+                                                                            display: 'flex', border: `1px solid black`,
+                                                                            width: 17, height: 17, borderRadius: 17,
+                                                                            transition: '.3s',
+                                                                        }} />
+                                                                    }
+                                                                </Box>
+                                                                <Text light>MicroFase (MF)</Text>
+                                                            </Box>
+                                                            <Box sx={{
+                                                                display: 'flex', gap: 1.8, alignItems: 'center',
+                                                            }}>
+                                                                <Box sx={{
+                                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                                    '&:hover': {
+                                                                        opacity: .7,
+                                                                        cursor: 'pointer',
+                                                                        backgroundColor: 'green' + '77'
+                                                                    }
+                                                                }} onClick={() => setOpitionsMark({ ...opitionsMark, threeP: !opitionsMark?.threeP })}>
+                                                                    {opitionsMark?.threeP ?
+                                                                        <CheckCircleIcon style={{ color: 'green', fontSize: 20 }} />
+                                                                        :
+                                                                        <Box sx={{
+                                                                            display: 'flex', border: `1px solid black`,
+                                                                            width: 17, height: 17, borderRadius: 17,
+                                                                            transition: '.3s'
+                                                                        }} />
+                                                                    }
+                                                                </Box>
+                                                                <Text light>3P</Text>
+                                                            </Box>
+                                                        </Box>
+                                                    </Box>
                                                 </Box>
                                                 {selectedConditions.includes('cronologico') &&
                                                     <Box sx={{ display: 'flex', gap: 1.8, justifyContent: 'flex-start', flexDirection: 'row', flexWrap: `wrap` }}>
@@ -597,7 +661,7 @@ export default function ConsultationRecord(props) {
                                                     </Box>
                                                 }
                                             </Box>
-                                        } */}
+                                        }
                                     </Box>
                                 ))}
                             </Box >

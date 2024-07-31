@@ -33,7 +33,7 @@ const styles = {
         backgroundSize: 'cover',
         backgroundRepeat: 'no-repeat',
         backgroundPosition: 'center center',
-        backgroundImage: `url('/icons/logo-clinica-light.png')`,
+        backgroundImage: `url('/icons/afectu_icon_menu.png')`,
         backgroundSize: 'contain',
         width: 180,
         height: 120,

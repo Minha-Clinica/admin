@@ -530,6 +530,8 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                             {
                                 data?.sort((a, b) => new Date(b.data) - new Date(a.data))?.map((item, index) => {
                                     const pay = parseInt(item?.pago) === 1;
+                                    const currentDate = new Date()
+                                    const canUncheck = (item?.status !== 'Cancelada') && (new Date(item?.data) > currentDate);
 
                                     return (
                                         <TableRow key={`${item}-${index}`} sx={{
@@ -600,7 +602,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                                                 <>
                                                     <TableCell sx={{ padding: '15px 0px', textAlign: 'center' }}>
                                                         <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
-                                                            {/* <Button text="remarcar" small disabled={item?.status === 'Cancelada'}
+                                                            {/* <Button text="remarcar" small disabled={!canUncheck}
                                                                 onClick={() => {
                                                                     getProfissionalAgendas(item?.profissional_id, item?.data)
                                                                     setDateSelected({ ...dateSelected, consultId: item?.id_consulta })
@@ -611,16 +613,16 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                                                                 display: 'flex', gap: 1, padding: '5px 12px', alignItems: 'center',
                                                                 justifyContent: 'center',
                                                                 transition: '.3s',
-                                                                opacity: item?.status == 'Cancelada' && .6,
-                                                                backgroundColor: item?.status !== 'Cancelada' && colorPalette?.buttonColor,
-                                                                border: item?.status === 'Cancelada' && `1px solid ${colorPalette?.buttonColor}`, borderRadius: 2,
+                                                                opacity: !canUncheck && .6,
+                                                                backgroundColor: canUncheck && colorPalette?.buttonColor,
+                                                                border: !canUncheck && `1px solid ${colorPalette?.buttonColor}`, borderRadius: 2,
                                                                 "&:hover": {
-                                                                    opacity: item?.status !== 'Cancelada' && 0.8,
-                                                                    cursor: item?.status !== 'Cancelada' && 'pointer'
+                                                                    opacity: canUncheck && 0.8,
+                                                                    cursor: canUncheck && 'pointer'
                                                                 }
                                                             }}
                                                                 onClick={() => {
-                                                                    if (item?.status !== 'Cancelada') {
+                                                                    if (canUncheck) {
                                                                         getProfissionalAgendas({ profissionalId: item?.profissional_id, dateConsult: item?.data, consultId: item?.id_consulta })
                                                                         setDateSelected({ ...dateSelected, consultId: item?.id_consulta })
                                                                     }
@@ -632,26 +634,26 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                                                                     backgroundImage: `url('/icons/remarcar_icon.png')`,
                                                                     transition: '.3s',
                                                                 }} />
-                                                                <Text bold style={{ color: item?.status === 'Cancelada' ? colorPalette?.buttonColor : '#fff' }}>Remarcar</Text>
+                                                                <Text bold style={{ color: !canUncheck ? colorPalette?.buttonColor : '#fff' }}>Remarcar</Text>
                                                             </Box>
 
                                                             <Box sx={{ display: 'flex', height: '30px', width: '2px', backgroundColor: colorPalette?.primary }} />
-                                                            {/* <Button cancel secondary text="cancelar" small disabled={item?.status === 'Cancelada'}
+                                                            {/* <Button cancel secondary text="cancelar" small disabled={!canUncheck}
                                                                 onClick={() => handleCancelAppointment({ consultId: item?.id_consulta })}
                                                             /> */}
                                                             <Box sx={{
                                                                 display: 'flex', gap: 1, padding: '5px 12px', alignItems: 'center',
                                                                 justifyContent: 'center',
                                                                 transition: '.3s',
-                                                                opacity: item?.status == 'Cancelada' && .6,
-                                                                backgroundColor: item?.status !== 'Cancelada' && 'red',
-                                                                border: item?.status == 'Cancelada' && '1px solid red', borderRadius: 2,
+                                                                opacity: !canUncheck && .6,
+                                                                backgroundColor: canUncheck && 'red',
+                                                                border: !canUncheck && '1px solid red', borderRadius: 2,
                                                                 "&:hover": {
-                                                                    opacity: item?.status !== 'Cancelada' && 0.8,
-                                                                    cursor: item?.status !== 'Cancelada' && 'pointer'
+                                                                    opacity: canUncheck && 0.8,
+                                                                    cursor: canUncheck && 'pointer'
                                                                 }
                                                             }} onClick={() => {
-                                                                if (item?.status !== 'Cancelada') {
+                                                                if (canUncheck) {
                                                                     handleCancelAppointment({ consultId: item?.id_consulta })
                                                                 }
                                                             }}>
@@ -662,7 +664,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                                                                     backgroundImage: `url('/icons/cancelar_icon.png')`,
                                                                     transition: '.3s',
                                                                 }} />
-                                                                <Text bold style={{ color: item?.status === 'Cancelada' ? 'red' : '#fff' }}>Cancelar</Text>
+                                                                <Text bold style={{ color: !canUncheck ? 'red' : '#fff' }}>Cancelar</Text>
                                                             </Box>
                                                         </Box>
                                                     </TableCell>
@@ -696,7 +698,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                 </TableContainer>
             </ContentContainer >
 
-            <Backdrop open={loadingPayment?.active} sx={{zIndex: 99999999999999}}>
+            <Backdrop open={loadingPayment?.active} sx={{ zIndex: 99999999999999 }}>
                 <ContentContainer>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center' }}>
                         <>
