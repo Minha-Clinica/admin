@@ -9,15 +9,12 @@ import { menuItems } from '../permissions'
 import { useRouter } from 'next/router'
 import { getImageByScreen } from '../validators/api-requests'
 import { api } from '../api/api'
-import { Avatar, Backdrop } from '@mui/material'
-import { formatDate, formatTimeAgo, formatTimeStamp } from '../helpers'
-import { Calendar, momentLocalizer } from "react-big-calendar";
+import { Avatar, Backdrop, CircularProgress } from '@mui/material'
 import moment from "moment";
 import "moment/locale/pt-br";
-import "react-big-calendar/lib/css/react-big-calendar.css";
-import "react-big-calendar/lib/addons/dragAndDrop/styles.css"; // Estilo para o recurso de arrastar e soltar (se estiver usando)
-import "react-big-calendar/lib/addons/dragAndDrop"; // Recurso de arrastar e soltar (se estiver usando)
-import Hamburger from 'hamburger-react'
+import Calendar from "react-calendar"
+import 'react-calendar/dist/Calendar.css';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -62,7 +59,7 @@ const subMenu = [
    {
       id: '02', icon: '/icons/discussion.png',
       route: '/consultation',
-      title: 'Minhas Consultas',
+      title: 'Minhas Sessões',
       permissions: ['profissional', 'paciente', 'administrador'],
       filter: true,
       text: 'Vizualize os prontuários de seus pacientes de consultas agendadas.'
@@ -81,7 +78,7 @@ const subMenu = [
       id: '04', icon: '/icons/search_input_icon.png',
       route: '/searchProfissional',
       title: 'Buscar Terapeura',
-      permissions: ['paciente', 'administrador'],
+      permissions: ['administrador'],
       filter: true,
       text: 'Buscar profissionais e marque sua consulta agora mesmo!'
    },
@@ -89,9 +86,17 @@ const subMenu = [
       id: '05', icon: '/icons/gateway.png',
       route: '',
       title: 'Pagamentos',
-      permissions: ['paciente', 'administrador'],
+      permissions: ['administrador'],
       filter: true,
       text: 'Veja o extrato dos pagamentos de suas consultas realizadas!'
+   },
+   {
+      id: '06', icon: '/icons/gateway.png',
+      route: '',
+      title: 'Continuar a preencher minha Anamnêse',
+      permissions: ['paciente'],
+      filter: true,
+      text: 'Não esqueça de preencher seu formulário.'
    },
    //Primeira fase
    // {
@@ -111,15 +116,14 @@ function Home() {
    const [imagesList, setImagesList] = useState([])
    const [events, setEvents] = useState([])
    const [consultionList, setConsultion] = useState([])
-   const [planActually, setPlanActually] = useState('free')
    const isPacient = user?.perfil?.includes('paciente')
    const router = useRouter();
    moment.locale("pt-br");
-   const localizer = momentLocalizer(moment);
-   const [carouselIndex, setCarouselIndex] = useState(0);
-
-
-
+   const [dateSelected, setDateSelected] = useState({ day: '', hour: '', profissionalId: '', reserva_id: '' })
+   const [calendarSessions, setCalendarSessions] = useState([])
+   const [calendarHours, setCalendarHours] = useState([])
+   const [loadingDate, setLoadingDate] = useState(false)
+   const profissionalId = 1;
    const handleImages = async () => {
       setLoading(true)
       try {
@@ -141,6 +145,39 @@ function Home() {
          const response = await api.get(query)
          const { data = [] } = response;
          setConsultion(data)
+      } catch (error) {
+         console.log(error)
+         return error
+      } finally {
+         setLoading(false)
+      }
+   }
+
+   const horarios = (obj) => {
+      const horaMoment = moment(obj);
+      const horaFormatada = horaMoment.format("HH:mm");
+      return horaFormatada
+   }
+
+   const getAvailableDays = async (agendas) => {
+      const uniqueDates = new Set(); // Usando um Set para armazenar as datas únicas
+      agendas.forEach((agend) => {
+         if (agend.disponivel === 0) {
+            uniqueDates.add(moment(agend.inicio).format("YYYY-MM-DD"));
+         }
+      });
+
+      return Array.from(uniqueDates); // Convertendo o Set de datas únicas de volta para um array
+   };
+
+   const getSessionsCalendar = async () => {
+      setLoading(true)
+      try {
+         const response = await api.get(`/users/search/agendas`)
+         const { data = [] } = response;
+         const agendas = await getAvailableDays(data)
+         setCalendarSessions(data)
+         setCalendarHours(agendas)
       } catch (error) {
          console.log(error)
          return error
@@ -182,6 +219,7 @@ function Home() {
       handleImages(imagesList)
       handleEvents()
       getConsultion()
+      getSessionsCalendar()
    }, [])
 
    const nowMonth = new Date().toLocaleString('pt-BR', { month: 'long' });
@@ -220,76 +258,6 @@ function Home() {
       time: "Hora",
       event: "Evento",
    };
-
-   const listEvents = [
-      {
-         id: '01',
-         title: "Feriado",
-         description: "Escola fechada para todos, não tem aula nem funciona o adm",
-         location: "",
-         color: "#FF0000",
-      },
-      {
-         id: '02',
-         title: "Emenda de feriado",
-         description: "Não tem aula, adm funciona normalmente",
-         location: "",
-         color: "#FF8C00",
-      },
-      {
-         id: '03',
-         title: "Férias/recesso de professores e alunos",
-         description: "Adm funciona das 9h ás 18h",
-         location: "",
-         color: "#FFD700",
-      },
-      {
-         id: '04',
-         title: "Inicio das aulas do semestre",
-         description: "",
-         location: "",
-         color: "#008000",
-      },
-      {
-         id: '05',
-         title: "Evento",
-         description: "",
-         location: "",
-         color: "#FFC0CB",
-      },
-      {
-         id: '06',
-         title: "Avaliação",
-         description: "",
-         location: "",
-         color: "#87CEFA",
-      },
-      {
-         id: '07',
-         title: "Semana de substitutiva",
-         description: "",
-         location: "",
-         color: "#86b8f5",
-      },
-      {
-         id: '08',
-         title: "Semana de exame",
-         description: "",
-         location: "",
-         color: "#5b969b",
-      },
-      {
-         id: '09',
-         title: "Divulgação de resultados final",
-         description: "",
-         location: "",
-         color: "#1e5a8c",
-      },
-   ]
-   const sortedEvents = events.slice().sort((a, b) => new Date(b.start) - new Date(a.start));
-
-   const lengthNotifications = notificationUser?.filter(item => item?.vizualizado === 0)?.length;
-
    const plansAssignment = [
       {
          id: '01', nome: 'Free', price: 0.00, description: '', key: 'free', icon: ''
@@ -299,21 +267,23 @@ function Home() {
       }
    ]
 
-   const formatter = new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-   });
+   const handleSelectedDate = (value, id) => {
+      setLoadingDate(true)
+      let date = moment(value).format("YYYY-MM-DD")
+      try {
+         if (dateSelected?.day === date) {
+            setDateSelected({ day: '', hour: '', profissionalId: '', reserva_id: '' })
+         } else {
+            setDateSelected({ day: date, hour: '', profissionalId: id, reserva_id: '' })
+         }
+      } catch (error) {
+         return error
+      } finally {
+         setLoadingDate(false)
+      }
+   }
 
-   const handleNext = (item) => {
-      const newIndex = Math.min(carouselIndex + 3, item.length - 1);
-      setCarouselIndex(newIndex);
-   };
-
-   const handlePrev = () => {
-      const newIndex = Math.max(carouselIndex - 3, 0);
-      setCarouselIndex(newIndex);
-   };
-
+   console.log(dateSelected)
 
    const statusColor = (data) => ((data === 'Agendado' && 'yellow') ||
       (data === 'Cancelada' && 'red') ||
@@ -346,7 +316,7 @@ function Home() {
                      </Text>
                   </Box>
 
-                  <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', marginTop: 2 }}>
+                  {/* <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', marginTop: 2 }}>
 
                      <Text light large>Conheça parte de nossa equipe de Profissionais..</Text>
                      <Box sx={{ display: 'flex', gap: 2, flexDirection: 'row' }}>
@@ -375,7 +345,7 @@ function Home() {
                            )
                         })}
                      </Box>
-                  </Box>
+                  </Box> */}
 
 
                   {isPacient &&
@@ -395,47 +365,190 @@ function Home() {
                               // boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
                               borderRadius: 2
                            }}>
-                              <Box sx={{
-                                 ...styles.menuIcon,
-                                 backgroundImage: `url('/icons/agendamento_icon.png')`,
-                                 transition: '.3s',
-                                 minWidth: 330, height: 'auto', minHeight: 330
-                              }} />
+                              <Box sx={{ display: 'flex', width: '100%', flexDirection: 'column', gap: 1 }}>
+                                 {loadingDate ? <CircularProgress /> : <>
+                                    <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                                       <Text bold large style={{ color: colorPalette.buttonColor, textAlign: 'center' }}>AGENDA DÍSPONIVEL</Text>
+                                    </Box>
+                                    <Divider />
+                                    {calendarSessions?.length > 0 ?
+                                       <Box sx={{ display: 'flex', gap: 3, flexDirection: 'column' }}>
+                                          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'space-between' }}>
+                                             <Box sx={{
+                                                display: 'flex', gap: 2, width: '100%', justifyContent: 'center', marginTop: 1,
+                                                alignItems: 'center'
+                                             }}>
+                                                <Calendar
+                                                   defaultActiveStartDate={new Date()}
+                                                   onChange={(date) => handleSelectedDate(date, profissionalId)}
+                                                   style={{
+                                                      border: 'none'
+                                                   }}
+                                                   tileDisabled={({ date }) =>
+                                                      !calendarHours.includes(moment(date).format("YYYY-MM-DD")
+                                                      )
+                                                   }
+                                                />
+                                             </Box>
+                                             <Box sx={{ display: 'flex', height: `100%`, width: '2px', backgroundColor: '#eaeaea' }} />
+                                             {(dateSelected?.day && dateSelected?.profissionalId === profissionalId) ?
+                                                <Box sx={{
+                                                   display: 'flex', flexDirection: 'column', gap: 1, marginTop: 1,
+                                                   justifyContent: 'flex-start', width: '100%', minWidth: 200
+                                                }}>
+                                                   <Box sx={{ display: 'flex', padding: '12px 10px', backgroundColor: colorPalette?.primary, justifyContent: 'center' }}>
+                                                      <Text bold style={{ color: colorPalette.buttonColor }}>Selecione um horário:</Text>
+                                                   </Box>
+                                                   <Box sx={{
+                                                      display: 'flex', gap: 2, width: '100%', justifyContent: 'flex-start', marginTop: 1,
+                                                   }}>
+                                                      <Box sx={{
+                                                         display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'flex-start', overflowX: 'auto',
+                                                         maxHeight: 200,
+                                                         width: '100%',
+                                                         padding: '5px 12px',
+                                                         flexDirection: 'column'
+                                                      }}>
+                                                         {calendarSessions?.filter(agend => (moment(agend.inicio).format("YYYY-MM-DD") === dateSelected?.day) &&
+                                                            (agend.disponivel === 0))?.map((hour, index) => {
+                                                               const hourFormatted = horarios(hour.inicio)
+                                                               const selected = dateSelected?.hour === hourFormatted;
+                                                               return (
+                                                                  <Box key={index} sx={{
+                                                                     display: 'flex', gap: .5, padding: '8px 12px', borderRadius: 2,
+                                                                     width: '100%',
+                                                                     backgroundColor: colorPalette.primary,
+                                                                     border: selected && `1px solid ${colorPalette?.buttonColor}`,
+                                                                     justifyContent: 'space-between',
+                                                                     alignItems: 'center',
+                                                                     "&:hover": {
+                                                                        opacity: 0.8,
+                                                                        cursor: 'pointer'
+                                                                     }
+                                                                  }} onClick={() => {
+                                                                     if (selected) {
+                                                                        setDateSelected({ ...dateSelected, hour: '', reserva_id: '' })
+                                                                     } else {
+                                                                        setDateSelected({ ...dateSelected, hour: hourFormatted, reserva_id: hour?.id_evento_calendario })
+                                                                     }
+                                                                  }}>
+                                                                     <Text large bold={selected ? true : false}>{hourFormatted}</Text>
+                                                                     {selected && <CheckCircleIcon style={{ color: 'green', fontSize: 17 }} />}
+                                                                  </Box>
+                                                               )
+                                                            })}
+                                                      </Box>
+                                                   </Box>
+                                                </Box>
+                                                :
+                                                <></>
+                                             }
+                                          </Box>
+                                       </Box>
+                                       :
+                                       <Text light large style={{ textAlign: 'center' }}>Profissional sem agenda disponível</Text>
+                                    }
+                                 </>
+                                 }
+                                 <Box sx={{ display: calendarSessions?.length > 0 ? 'flex' : 'none', width: '100%', justifyContent: 'center' }}>
+                                    <Box sx={{
+                                       padding: '5px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                       width: 150,
+                                       marginTop: 3,
+                                       transition: '.5s',
+                                       gap: 2,
+                                       backgroundColor: colorPalette.buttonColor,
+                                       borderRadius: 2,
+                                       opacity: (dateSelected?.reserva_id !== '' && dateSelected?.profissionalId === profissionalId) ? 1 : 0.5,
+                                       "&:hover": {
+                                          opacity: (dateSelected?.reserva_id !== '' && dateSelected?.profissionalId === profissionalId) ? 1 : 0.5,
+                                          cursor: 'pointer',
+                                          transform: (dateSelected?.reserva_id !== '' && dateSelected?.profissionalId === profissionalId) ? 'scale(1.1, 1.1)' : 'none'
+                                       }
+                                    }} onClick={() => {
+                                       if (dateSelected?.reserva_id !== '' && dateSelected?.profissionalId === profissionalId) {
+                                          if (dateSelected?.reserva_id === '') {
+                                             alert.info('Selecione um horário antes de continuar.')
+                                          } else {
+                                             router.push(`/searchProfissional/${dateSelected?.reserva_id}?professionalId=${dateSelected?.profissionalId}`)
+                                          }
+                                       }
+                                    }}>
+                                       <Text bold style={{ color: '#fff' }}>Agendar</Text>
+                                    </Box>
+                                 </Box>
+                              </Box>
                            </Box>
                            <Box sx={{ display: 'flex', marginLeft: 2, height: '100%', width: '1px', backgroundColor: 'lightgray' }} />
                            <Box sx={{ display: 'block', width: '100%' }}>
                               <Box sx={{
-                                 display: 'flex', gap: 2, flexDirection: 'column', width: '100%', justifyContent: 'flex-start',
-                                 padding: '15px 20px', backgroundColor: colorPalette?.buttonColor + '33', borderRadius: 2
+                                 display: 'flex', flexDirection: 'column', gap: 5, padding: '0px 20px',
+                                 width: '100%'
                               }}>
-                                 <Text bold large>{consultionList?.length > 0 ? 'Veja as suas consultas marcadas!' :
-                                    'Você não possuí consultas agendadas. Busque por um profissional e agenda agora mesmo!'}</Text>
                                  <Box sx={{
-                                    display: 'flex', gap: 3, padding: '10px 12px', borderRadius: 2, backgroundColor: colorPalette?.third, alignItems: 'center',
-                                    width: 400, justifyContent: 'center', '&:hover': {
-                                       opacity: .8,
-                                       cursor: 'pointer'
-                                    }
-                                 }} onClick={() => {
-                                    if (consultionList?.length > 0) {
-                                       router.push('/consultation')
-                                    } else {
-                                       router.push('/searchProfissional')
-                                    }
+                                    display: 'flex', gap: 2, flexDirection: 'column',
+                                    width: '100%'
                                  }}>
-                                    <Box sx={{
-                                       ...styles.menuIcon,
-                                       backgroundImage: `url('/icons/search_input_icon.png')`,
-                                       transition: '.3s',
-                                       minWidth: 22, minHeight: 22,
-                                       filter: 'brightness(0) invert(1)',
+                                    {subMenu?.map((item, index) => {
+                                       const isPermission = item?.permissions?.some(role => user?.perfil?.includes(role))
+                                       let routeTo = item?.queryId ? `${item?.route}/${user?.id}` : item?.route;
+                                       if (item?.queryValue) {
+                                          routeTo = routeTo += item?.queryValue
+                                       }
 
-                                    }} />
+                                       return (
+                                          <Box key={index} sx={{
+                                             display: isPermission ? 'flex' : 'none', gap: 2, flexDirection: 'column',
+                                             width: '100%'
+                                          }}>
+                                             <Box sx={{
+                                                display: 'flex', backgroundColor: colorPalette.secondary, padding: '20px',
+                                                borderRadius: 2,
+                                                alignItems: 'center', gap: 2,
+                                                justifyContent: 'space-between',
+                                                width: '100%',
+                                                transition: '.3s',
+                                                boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
+                                                "&:hover": {
+                                                   opacity: 0.8,
+                                                   cursor: 'pointer',
+                                                   transform: 'scale(1.03, 1.03)'
+                                                }
+                                             }} onClick={() => router.push(routeTo)}>
+                                                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                                                   <Box sx={{
+                                                      ...styles.menuIcon,
+                                                      backgroundImage: `url(${item?.icon})`,
+                                                      transition: '.3s',
+                                                      width: 30, height: 30,
+                                                      "&:hover": {
+                                                         opacity: 0.8,
+                                                         cursor: 'pointer'
+                                                      }
+                                                   }} />
+                                                   <Box sx={{ display: 'flex', gap: .5, alignItems: 'start', flexDirection: 'column' }}>
+                                                      <Text large bold>{item?.title}</Text>
+                                                      <Text small light>{item?.text}</Text>
+                                                   </Box>
+                                                </Box>
 
-                                    <Text title bold style={{ color: '#fff' }}>{consultionList?.length > 0 ? 'Minhas Consultas' :
-                                       'Buscar Profissional'}</Text>
+                                                <Box sx={{
+                                                   ...styles.menuIcon,
+                                                   backgroundImage: `url(${icons.gray_arrow_down})`,
+                                                   transform: 'rotate(-90deg)',
+                                                   transition: '.3s',
+                                                   width: 17,
+                                                   height: 17,
+                                                   "&:hover": {
+                                                      opacity: 0.8,
+                                                      cursor: 'pointer'
+                                                   },
+                                                }} />
+                                             </Box>
+                                          </Box>
+                                       )
+                                    })}
                                  </Box>
-
                               </Box>
                            </Box>
                         </Box>
