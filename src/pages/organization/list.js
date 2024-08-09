@@ -126,7 +126,7 @@ export default function ListCompany(props) {
             <SectionHeader
                 icon={'/icons/enterprise.png'}
                 title={`Empresas (${companyList?.filter(filter)?.length || '0'})`}
-                newButton={isPermissionEdit}
+                // newButton={isPermissionEdit}
                 newButtonAction={() => router.push(`/${pathname}/new`)}
             />
             <ContentContainer>
