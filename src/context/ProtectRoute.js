@@ -2,7 +2,7 @@ import { useRouter } from "next/router";
 import { Box } from "../atoms";
 import Login from "../auth/login";
 import { useAppContext } from "./AppContext";
-import { RegisterFromCompany } from "../pages/company";
+import RegisterFromCompany from "../pages/company";
 
 export const ProtectRoute = ({ children }) => {
    const { isAuthenticated, loading } = useAppContext()

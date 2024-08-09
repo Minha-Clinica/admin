@@ -12,7 +12,7 @@ import { Backdrop, FormControlLabel, Switch } from "@mui/material"
 import { useRouter } from "next/router"
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
-export const RegisterFromCompany = ({ companyCode }) => {
+export default function RegisterFromCompany ({ companyCode }) {
 
     const { login, alert, theme, colorPalette, setLoading, setShowConfirmationDialog } = useAppContext()
     const router = useRouter()
