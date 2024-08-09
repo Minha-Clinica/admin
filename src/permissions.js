@@ -6,7 +6,7 @@ export const menuItems = [
       permissions: ['administrador'],
    },
    {
-      text: 'Empresa',
+      text: 'Empresas',
       icon: '/icons/enterprise.png',
       to: '/organization/list',
       permissions: ['administrador'],
@@ -18,13 +18,7 @@ export const menuItems = [
       permissions: ['profissional', 'administrador'],
    },
    {
-      text: 'Buscar profissional',
-      icon: '/icons/localized_icon.png',
-      to: '/searchProfissional',
-      permissions: ['administrador', 'paciente'],
-   },
-   {
-      text: 'Consultas',
+      text: 'Sessões',
       icon: 'https://minhaclinicatrindade.s3.amazonaws.com/video_conferencia.png',
       to: '/consultation',
       permissions: ['profissional', 'administrador', 'paciente'],

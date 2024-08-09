@@ -1,5 +1,27 @@
 import axios from "axios";
 
+
+export const horarios = (obj) => {
+   const horaMoment = moment(obj);
+   const horaFormatada = horaMoment.format("HH:mm");
+   return horaFormatada
+}
+
+export const formatterHours = (date) => {
+   const data = new Date(date);
+
+   const mesesAbreviados = [
+      'jan', 'fev', 'mar', 'abr', 'mai', 'jun',
+      'jul', 'ago', 'set', 'out', 'nov', 'dez'
+   ];
+
+   const dia = data.getDate();
+   const mes = mesesAbreviados[data.getMonth()];
+   const dataFormatada = `${dia} ${mes}.`;
+
+   return dataFormatada
+}
+
 export const getRandomInt = (min, max) => {
    min = Math.ceil(min);
    max = Math.floor(max);
@@ -238,9 +260,9 @@ export const calculationAgeUser = (age) => {
    const dataNascimento = new Date(age);
    const dataAtual = new Date();
    const diff = dataAtual - dataNascimento;
-   
+
    const idade = Math.floor(diff / (365.25 * 24 * 60 * 60 * 1000)); // considerando ano bissexto
-   
+
    return idade;
 }
 

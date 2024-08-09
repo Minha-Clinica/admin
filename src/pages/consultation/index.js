@@ -313,6 +313,15 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
     };
 
 
+    const currentDate = new Date();
+
+    const isWithin24Hours = (consultationDate) => {
+        const consultationDateObj = new Date(consultationDate);
+        const timeDifference = consultationDateObj - currentDate;
+        const hoursDifference = timeDifference / (1000 * 60 * 60); // Converte milissegundos em horas
+        return hoursDifference < 24;
+    };
+
     const handleCancelAppointment = async ({ consultId = null }) => {
         setLoadingPayment({ active: true, success: false, error: false, message: 'Cancelando Consulta...' });
 
@@ -654,7 +663,11 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                                                                 }
                                                             }} onClick={() => {
                                                                 if (canUncheck) {
-                                                                    handleCancelAppointment({ consultId: item?.id_consulta })
+                                                                    if (!isWithin24Hours(item?.data)) {
+                                                                        handleCancelAppointment({ consultId: item?.id_consulta })
+                                                                    } else {
+                                                                        alert.info('Não é possível cancelar a consulta com menos de 24hrs de antecedência.')
+                                                                    }
                                                                 }
                                                             }}>
                                                                 <Box sx={{

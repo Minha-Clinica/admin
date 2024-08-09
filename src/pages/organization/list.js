@@ -1,15 +1,13 @@
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
-import { Box, Button, ContentContainer, Text, TextInput } from "../../atoms"
-import { SearchBar, SectionHeader, Table_V1 } from "../../organisms"
+import { Box, Button, TablePagination } from "@mui/material"
 import { api } from "../../api/api"
+import { SectionHeader, SelectList, Table_V1 } from "../../organisms"
+import { ContentContainer, Text, TextInput } from "../../atoms"
 import { useAppContext } from "../../context/AppContext"
-import { SelectList } from "../../organisms/select/SelectList"
-import { TablePagination } from "@mui/material"
-import { checkUserPermissions } from "../../validators/checkPermissionUser"
 
-export default function ListInstitution(props) {
-    const [institutionList, setInstitutionList] = useState([])
+export default function ListCompany(props) {
+    const [companyList, setCompanyList] = useState([])
     const [filters, setFilters] = useState({
         status: 'todos'
     })
@@ -20,7 +18,7 @@ export default function ListInstitution(props) {
     const [filterAtive, setFilterAtive] = useState('todos')
     const [firstRender, setFirstRender] = useState(true)
     const [filtersOrders, setFiltersOrders] = useState({
-        filterName: 'nome_instituicao',
+        filterName: 'nome_empresa',
         filterOrder: 'asc'
     })
     const router = useRouter()
@@ -37,7 +35,7 @@ export default function ListInstitution(props) {
         }
     }
 
-    const pathname = router.pathname === '/' ? null : router.asPath.split('/')[2]
+    const pathname = router.pathname === '/' ? null : router.asPath.split('/')[1]
     const filterFunctions = {
         status: (item) => filters.status === 'todos' || item.ativo === filters.status,
     };
@@ -48,7 +46,7 @@ export default function ListInstitution(props) {
 
     useEffect(() => {
         fetchPermissions()
-        getInstitution();
+        getCompany();
         if (window.localStorage.getItem('list-institution-filters')) {
             const admLocalStorage = JSON.parse(window.localStorage.getItem('list-institution-filters') || null);
             setFiltersOrders({
@@ -78,29 +76,30 @@ export default function ListInstitution(props) {
     const endIndex = startIndex + rowsPerPage;
 
 
-    const sortInstitution = () => {
+    const sortCompany = () => {
         const { filterName, filterOrder } = filters;
 
-        const sortedInstitution = [...institutionList].sort((a, b) => {
-            const valueA = filterName === 'id_instituicao' ? Number(a[filterName]) : (a[filterName] || '').toLowerCase();
-            const valueB = filterName === 'id_instituicao' ? Number(b[filterName]) : (b[filterName] || '').toLowerCase();
+        const sortedCompanies = [...companyList].sort((a, b) => {
+            const valueA = filterName === 'id_empresa' ? Number(a[filterName]) : (a[filterName] || '').toLowerCase();
+            const valueB = filterName === 'id_empresa' ? Number(b[filterName]) : (b[filterName] || '').toLowerCase();
 
-            if (filterName === 'id_instituicao') {
+            if (filterName === 'id_empresa') {
                 return filterOrder === 'asc' ? valueA - valueB : valueB - valueA;
             }
 
             return filterOrder === 'asc' ? valueA.localeCompare(valueB) : valueB.localeCompare(valueA);
         });
 
-        return sortedInstitution;
+        return sortedCompanies;
     }
 
-    const getInstitution = async () => {
+    const getCompany = async () => {
         setLoading(true)
         try {
-            const response = await api.get('/institutions')
+            const response = await api.get('/companies')
             const { data = [] } = response;
-            setInstitutionList(data)
+            console.log(response)
+            setCompanyList(data)
         } catch (error) {
             console.log(error)
         } finally {
@@ -109,10 +108,9 @@ export default function ListInstitution(props) {
     }
 
     const column = [
-        { key: 'id_instituicao', label: 'ID' },
-        { key: 'cnpj', label: 'CNPJ' },
-        { key: 'mantenedora', label: 'Mantenedora' },
-        { key: 'mantida', label: 'Mantida' },
+        { key: 'id_empresa', label: 'ID' },
+        { key: 'razao_social', label: 'Razão Social' },
+        { key: 'responsavel', label: 'responsavel' },
         { key: 'dt_criacao', label: 'Criado em', date: true },
 
     ];
@@ -127,7 +125,7 @@ export default function ListInstitution(props) {
         <>
             <SectionHeader
                 icon={'/icons/enterprise.png'}
-                title={`Empresas (${institutionList?.filter(filter)?.length || '0'})`}
+                title={`Empresas (${companyList?.filter(filter)?.length || '0'})`}
                 newButton={isPermissionEdit}
                 newButtonAction={() => router.push(`/${pathname}/new`)}
             />
@@ -136,14 +134,14 @@ export default function ListInstitution(props) {
                     <Text bold large>Filtros</Text>
                     <Box sx={{ display: 'flex', gap: 0.5 }}>
                         <Text style={{ color: '#d6d6d6' }} light>Mostrando</Text>
-                        <Text bold style={{ color: '#d6d6d6' }} light>{institutionList?.filter(filter)?.length || '0'}</Text>
+                        <Text bold style={{ color: '#d6d6d6' }} light>{companyList?.filter(filter)?.length || '0'}</Text>
                         <Text style={{ color: '#d6d6d6' }} light>de</Text>
-                        <Text bold style={{ color: '#d6d6d6' }} light>{institutionList?.length || '0'}</Text>
+                        <Text bold style={{ color: '#d6d6d6' }} light>{companyList?.length || '0'}</Text>
                         <Text style={{ color: '#d6d6d6' }} light>chamados</Text>
                     </Box>
                 </Box>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <TextInput placeholder="Buscar por instituição" name='filterData' type="search" onChange={(event) => setFilterData(event.target.value)} value={filterData} sx={{ flex: 1 }} />
+                    <TextInput placeholder="Buscar por empresa" name='filterData' type="search" onChange={(event) => setFilterData(event.target.value)} value={filterData} sx={{ flex: 1 }} />
                 </Box>
                 <Box sx={{ display: 'flex', justifyContent: 'start', gap: 2, alignItems: 'center', flexDirection: 'row' }}>
                     <SelectList
@@ -163,7 +161,7 @@ export default function ListInstitution(props) {
                     </Box>
                     <TablePagination
                         component="div"
-                        count={institutionList?.filter(filter)?.length}
+                        count={companyList?.filter(filter)?.length}
                         page={page}
                         onPageChange={handleChangePage}
                         rowsPerPage={rowsPerPage}
@@ -174,11 +172,11 @@ export default function ListInstitution(props) {
                     />
                 </Box>
             </ContentContainer >
-            {institutionList?.length >= 1 ?
-                <Table_V1 data={sortInstitution()?.filter(filter)} columns={column} columnId={'id_instituicao'} filters={filtersOrders} onPress={(value) => setFiltersOrders(value)} onFilter />
+            {companyList?.length >= 1 ?
+                <Table_V1 data={sortCompany()?.filter(filter)} columns={column} columnId={'id_empresa'} filters={filtersOrders} onPress={(value) => setFiltersOrders(value)} onFilter />
                 :
                 <Box sx={{ alignItems: 'center', justifyContent: 'center', display: 'flex', padding: '80px 40px 0px 0px' }}>
-                    <Text bold>Não consegui encontrar instituições cadastradas</Text>
+                    <Text bold>Não consegui encontrar empresas cadastradas</Text>
                 </Box>
             }
         </>

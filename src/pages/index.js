@@ -1,7 +1,7 @@
 import Head from 'next/head'
 import { Inter } from 'next/font/google'
 import { Box, Button, ContentContainer, Divider, Text, TextInput } from '../atoms'
-import { Carousel } from '../organisms'
+import { Carousel, Holidays } from '../organisms'
 import { useAppContext } from '../context/AppContext'
 import { icons } from '../organisms/layout/Colors'
 import { useEffect, useState } from 'react'
@@ -15,6 +15,7 @@ import "moment/locale/pt-br";
 import Calendar from "react-calendar"
 import 'react-calendar/dist/Calendar.css';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { formatterHours } from '../helpers'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -74,14 +75,14 @@ const subMenu = [
       filter: true,
       text: 'Defina o seu valor da consulta, o gerenciamento de pagamentos da consulta pela plataforma.'
    },
-   {
-      id: '04', icon: '/icons/search_input_icon.png',
-      route: '/searchProfissional',
-      title: 'Buscar Terapeura',
-      permissions: ['administrador'],
-      filter: true,
-      text: 'Buscar profissionais e marque sua consulta agora mesmo!'
-   },
+   // {
+   //    id: '04', icon: '/icons/search_input_icon.png',
+   //    route: '/searchProfissional',
+   //    title: 'Buscar Terapeura',
+   //    permissions: ['administrador'],
+   //    filter: true,
+   //    text: 'Buscar profissionais e marque sua consulta agora mesmo!'
+   // },
    {
       id: '05', icon: '/icons/gateway.png',
       route: '',
@@ -114,7 +115,7 @@ function Home() {
    const { user, colorPalette, theme, setLoading, alert, notificationUser } = useAppContext()
    const [menu, setMenu] = useState(menuItems)
    const [imagesList, setImagesList] = useState([])
-   const [events, setEvents] = useState([])
+   const [myEvents, setMyEvents] = useState([])
    const [consultionList, setConsultion] = useState([])
    const isPacient = user?.perfil?.includes('paciente')
    const router = useRouter();
@@ -153,6 +154,43 @@ function Home() {
       }
    }
 
+   const handleEvents = async () => {
+      try {
+         setLoading(true)
+         console.log(user?.perfil)
+         const perfil = user?.perfil?.includes('profissional') ? 'profissional' : 'paciente'
+         const response = await api.get(`/event/${perfil}/agenda/${user?.id}`)
+         const { data } = response
+         if (data) {
+            const eventsMap = data?.map((event) => ({
+               id_evento_calendario: event.id_evento_calendario,
+               start: new Date(event.inicio), // Adicione o início e o fim do evento como propriedades start e end
+               end: new Date(event.fim),
+               title: event.titulo,
+               description: event.descricao,
+               location: event.local,
+               color: event.color,
+               usuario_agendado: event?.usuario_agendado,
+               email_agendado: event?.email_agendado,
+               nome_agendado: event?.nome_agendado,
+               nome_usuario_agendado: event?.nome_usuario_agendado,
+               usuario_agendado: event?.usuario_agendado,
+               disponivel: event?.disponivel,
+               usuario_id: event?.usuario_id,
+               allDay: false, // Ajuste isso com base no seu caso de uso
+               consulta_id: event?.id_consulta
+            }));
+            setMyEvents([...eventsMap, ...Holidays]);
+            return
+         }
+      } catch (error) {
+         console.log(error)
+         return error
+      } finally {
+         setLoading(false)
+      }
+   }
+
    const horarios = (obj) => {
       const horaMoment = moment(obj);
       const horaFormatada = horaMoment.format("HH:mm");
@@ -180,34 +218,6 @@ function Home() {
          setCalendarHours(agendas)
       } catch (error) {
          console.log(error)
-         return error
-      } finally {
-         setLoading(false)
-      }
-   }
-
-   const handleEvents = async () => {
-      try {
-         setLoading(true)
-         const response = await api.get(`/events`)
-         const { data } = response
-         if (data) {
-            const eventsMap = data?.map((event) => ({
-               id_evento_calendario: event.id_evento_calendario,
-               start: event.inicio, // Adicione o início e o fim do evento como propriedades start e end
-               end: event.fim,
-               title: event.titulo,
-               description: event.descricao,
-               location: event.local,
-               color: event.color,
-               perfil_evento: event?.perfil_evento,
-               allDay: false, // Ajuste isso com base no seu caso de uso
-
-            }));
-            setEvents([...eventsMap]);
-            return
-         }
-      } catch (error) {
          return error
       } finally {
          setLoading(false)
@@ -316,36 +326,46 @@ function Home() {
                      </Text>
                   </Box>
 
-                  {/* <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', marginTop: 2 }}>
 
-                     <Text light large>Conheça parte de nossa equipe de Profissionais..</Text>
-                     <Box sx={{ display: 'flex', gap: 2, flexDirection: 'row' }}>
+                  <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', marginTop: 2 }}>
 
-                        {equipeProf?.map((item, index) => {
-                           return (
-                              <Box key={index} sx={{
-                                 display: 'flex', gap: 2, backgroundColor: colorPalette.secondary, padding: '15px', maxWidth: 400, borderRadius: 2,
-                                 boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
-                              }}>
-                                 <Box sx={{
-                                    display: 'flex', gap: 1, flexDirection: 'column', alignItems: 'center', width: 120, justifyContent: 'center',
-                                 }}>
-                                    <Avatar src={item?.icon || ''} sx={{
-                                       height: { xs: '100%', sm: 45, md: 45, lg: 60 },
-                                       width: { xs: '100%', sm: 45, md: 45, lg: 60 },
-                                    }} variant="circular"
-                                    />
-                                    <Text bold xsmall style={{ marginLeft: 2, minWidth: 80, display: 'flex', textAlign: 'center' }}>{item?.nome}</Text>
-                                 </Box>
-                                 <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column', alignItems: 'start' }}>
-                                    <Text bold small>{item?.titulo}</Text>
-                                    <Text light small>{item?.text}</Text>
-                                 </Box>
-                              </Box>
-                           )
-                        })}
+                     <Text light large>Minhas próximas Sessões.</Text>
+                     <Box sx={{ display: 'flex', gap: 2, flexDirection: 'row', }}>
+
+                        {myEvents?.filter(item => item.disponivel === 1 && (new Date(item?.start) >= new Date()))?.length > 0 ?
+                           <Box sx={{ display: 'flex', flexDirection: 'row',   gap: .5, width: '100%', }}>
+                              {myEvents?.filter(item => item.disponivel === 1 && (new Date(item?.start) >= new Date()))?.map((item, index) => {
+                                 return (
+                                    <Box sx={{
+                                       display: 'flex', gap: 1, flexDirection: 'row',
+                                       transition: '.2s',
+                                       border: '1px solid lightgray', borderRadius: 2, height: 90, backgroundColor: colorPalette?.secondary,
+                                       width: '350px'
+                                    }} key={index}>
+                                       <Box sx={{
+                                          height: '100%', width: '4px', backgroundColor: colorPalette?.buttonColor,
+                                          borderRadius: '8px 0px 0px 8px'
+                                       }} />
+                                       <Box sx={{ display: 'flex', gap: 2, padding: '8px 8px', alignItems: 'center' }}>
+                                          <Box sx={{ display: 'flex', gap: .2, flexDirection: 'column' }}>
+                                             <Text large>{horarios(item?.start)}</Text>
+                                             <Text small style={{ color: 'gray' }}>1 hora</Text>
+                                          </Box>
+                                          <Box sx={{ display: 'flex', gap: .3, flexDirection: 'column', padding: '0px 8px' }}>
+                                             <Text small bold>{item?.title}</Text>
+                                             <Text small light>{item?.nome_agendado}</Text>
+                                          </Box>
+                                          <Text bold large>{formatterHours(item?.start)}</Text>
+                                       </Box>
+                                    </Box>
+                                 )
+                              })}
+                           </Box>
+                           :
+                           <Text>Você não possúi agendamentos futuros.</Text>
+                        }
                      </Box>
-                  </Box> */}
+                  </Box>
 
 
                   {isPacient &&
@@ -705,124 +725,11 @@ function Home() {
                            )
                         })}
                      </Box>
-
                   </Box> */}
-
-                  {/* <Box sx={{ display: 'flex', padding: '10px 0px', marginTop: 5 }}>
-                     <Text bold>Veja o que está rolando..</Text>
-                  </Box>
-                  <Carousel
-                     data={imagesList || backgroundHome}
-                     style={{
-                        backgroundColor: colorPalette.secondary,
-                        borderRadius: '8px',
-                        boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
-                     }}
-                     heigth={{ xs: 200, xm: 480, md: 200, lg: 450, xl: 400 }}
-                     width={'auto'}
-                  /> */}
                </Box>
             </Box>
          </Box>
       </>
-   )
-
-
-}
-
-
-const BirthDateDiaog = ({ idSelected, setShowMessageBirthDay, userBirthDay }) => {
-
-   const { user, colorPalette, theme, setLoading, alert } = useAppContext()
-
-   const [message, setMessage] = useState('')
-   const nameBirthDay = userBirthDay?.filter(item => item.id === idSelected).map(item => item.nome)
-
-   const handlePushNotification = async (id) => {
-      setLoading(true)
-      try {
-         const notificationData = {
-            titulo: `Parabéns!!`,
-            menssagem: message,
-            vizualizado: 0,
-            usuario_env: user?.id
-         }
-         const response = await api.post(`/notification/create/${id}`, { notificationData })
-         if (response.status === 201) {
-            alert.success('Mensagem de parabéns enviada!')
-            setShowMessageBirthDay(false)
-         }
-      } catch (error) {
-         console.log(error)
-         return error
-      } finally {
-         setLoading(false)
-      }
-   }
-
-   return (
-
-      <ContentContainer style={{ position: 'relative', width: 415, maxHeight: 600, overflowY: 'auto', padding: 4, display: 'flex', flexDirection: 'column' }}>
-
-         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, alignItems: 'start', width: '100%', position: 'relative' }}>
-            <Text bold>Escreva uma mensagem de aniversário</Text>
-            <Box sx={{
-               ...styles.menuIcon,
-               backgroundImage: `url(${icons.gray_close})`,
-               transition: '.3s',
-               zIndex: 999999999,
-               position: 'absolute',
-               right: 5,
-               top: 2,
-               "&:hover": {
-                  opacity: 0.8,
-                  cursor: 'pointer'
-               }
-            }} onClick={() => setShowMessageBirthDay(false)} />
-         </Box>
-
-         <Box sx={{ width: '100%', height: '1px', backgroundColor: '#eaeaea', margin: '0px 0px 20px 0px' }} />
-
-         <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'start', flex: 1 }}>
-            <Text style={{ whiteSpace: 'nowrap' }}>Escreva sua mensagem de aniversário para</Text>
-            <Text style={{ whiteSpace: 'nowrap' }} bold>{nameBirthDay},</Text>
-            <Text style={{ whiteSpace: 'nowrap' }}>ou envie mensagens pré-montadas!</Text>
-         </Box>
-         <Box sx={{ display: 'flex', gap: 1.75, }}>
-            <TextInput
-               placeholder='Feliz aniversário!'
-               name='message'
-               onChange={(e) => setMessage(e.target.value)}
-               value={message || ''}
-               multiline
-               maxRows={6}
-               rows={3}
-               sx={{ flex: 1, }}
-            />
-         </Box>
-
-         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-            <Text bold xsmall>Mensagens pré-montadas:</Text>
-            <Box sx={{
-               display: 'flex', padding: '5px 15px', backgroundColor: colorPalette?.buttonColor, alignItems: 'center', justifyContent: 'center', borderRadius: 8,
-               "&:hover": {
-                  opacity: 0.8,
-                  cursor: 'pointer'
-               }
-            }}
-               onClick={() => setMessage(`${user?.nome} te desejou muitas felicidades no seu dia!`)}>
-               <Text xsmall style={{ color: '#fff', }}>{user?.nome} te desejou muitas felicidades no seu dia!</Text>
-            </Box>
-         </Box>
-         <Divider distance={0} />
-         <Box sx={{ display: 'flex', justifyContent: 'space-around', gap: 1, alignItems: 'center' }}>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-               <Button small text="Enviar" style={{ height: 30, width: 80 }} onClick={() => handlePushNotification(idSelected)} />
-               <Button secondary small text="Apagar" style={{ height: 30, width: 80 }} onClick={() => setMessage('')} />
-            </Box>
-         </Box>
-
-      </ContentContainer>
    )
 }
 

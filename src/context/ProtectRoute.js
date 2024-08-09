@@ -1,17 +1,22 @@
+import { useRouter } from "next/router";
 import { Box } from "../atoms";
 import Login from "../auth/login";
-import Register from "../auth/register";
 import { useAppContext } from "./AppContext";
+import { RegisterFromCompany } from "../pages/company";
 
 export const ProtectRoute = ({ children }) => {
    const { isAuthenticated, loading } = useAppContext()
-
-   // let isAuthenticated = true;
-   // let loading = true;
-
+   const router = useRouter();
+   const { cod_key } = router.query;
+   console.log(cod_key)
+   // Extrair o código da empresa da URL
+   const companyCode = cod_key;
 
    if (isAuthenticated) return children;
    if (loading) return <Loading />
+   if (companyCode && !isAuthenticated) {
+      return <RegisterFromCompany companyCode={companyCode} />;
+   }
    if (!isAuthenticated && !loading) return <Login />;
 }
 

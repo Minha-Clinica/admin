@@ -2,42 +2,30 @@ import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
 import { useMediaQuery, useTheme } from "@mui/material"
 import { api } from "../../api/api"
-import { Box, ContentContainer, TextInput, Text } from "../../atoms"
-import { RadioItem, SectionHeader } from "../../organisms"
+import { Box, ContentContainer, TextInput, Text, Button } from "../../atoms"
+import { RadioItem, SectionHeader, Sectioner } from "../../organisms"
 import { useAppContext } from "../../context/AppContext"
 import { formatCEP, formatCNPJ } from "../../helpers"
 import { checkUserPermissions } from "../../validators/checkPermissionUser"
 import axios from "axios"
+import { CopyAll } from '@mui/icons-material';
 
-export default function EditInstitution(props) {
+export default function EditCompany(props) {
     const { setLoading, alert, colorPalette, user, setShowConfirmationDialog, userPermissions, menuItemsList } = useAppContext()
     let userId = user?.id;
     const router = useRouter()
     const { id } = router.query;
-    const newInstitution = id === 'new';
-    const [arrayRecognitionP, setArrayRecognitionP] = useState([])
-    const [arrayRecognitionEad, setArrayRecognitionEad] = useState([])
-    const [recognitionP, setRecognitionP] = useState({})
-    const [recognitionEad, setRecognitionEad] = useState({})
-    const [institutionData, setInstitutionData] = useState({
-        nome_instituicao: '',
+    const newCompany = id === 'new';
+    const [companyData, setCompanyData] = useState({
+        razao_social: '',
         cnpj: '',
-        mantenedora: '',
-        mantida: '',
-        pt_cred_ead: '',
-        dt_cred_ead: '',
-        pt_rec_ead: '',
-        dt_rec_ead: '',
-        pt_rec_pres: '',
-        dt_rec_pres: '',
-        pt_cred_pres: '',
-        dt_cred_pres: '',
+        responsavel: '',
         ativo: 1,
-        endereco_pres: '',
-        endereco_ead: '',
+        endereco: '',
+        complemento: ''
     })
     const [isPermissionEdit, setIsPermissionEdit] = useState(false)
-
+    const [linkRegisterUser, setLinkRegisterUser] = useState('')
 
     const fetchPermissions = async () => {
         try {
@@ -52,12 +40,14 @@ export default function EditInstitution(props) {
     const themeApp = useTheme()
     const mobile = useMediaQuery(themeApp.breakpoints.down('sm'))
 
-    const getInstitution = async () => {
+    const getCompany = async () => {
         setLoading(true)
         try {
-            const response = await api.get(`/institution/${id}`)
+            const response = await api.get(`/company/${id}`)
             const { data } = response
-            setInstitutionData(data)
+            let linkAcessRegister = `${data?.razao_social.split(' ')[0].toLowerCase()}?${data?.cod_key}`
+            setLinkRegisterUser(linkAcessRegister)
+            setCompanyData(data)
         } catch (error) {
             console.log(error)
             return error
@@ -65,24 +55,9 @@ export default function EditInstitution(props) {
         setLoading(false)
     }
 
-    const getRecognition = async () => {
-        setLoading(true)
-        try {
-            const response = await api.get(`/recognitions/${id}`)
-            const { recognitionEad, recognitionP } = response?.data
-            if (recognitionEad) setArrayRecognitionEad(recognitionEad)
-            if (recognitionP) setArrayRecognitionP(recognitionP)
-        } catch (error) {
-            console.log(error)
-            return error
-        } finally {
-            setLoading(false)
-        }
-    }
-
     useEffect(() => {
         (async () => {
-            if (newInstitution) {
+            if (newCompany) {
                 return
             }
             await handleItems();
@@ -97,10 +72,10 @@ export default function EditInstitution(props) {
     const handleItems = async () => {
         setLoading(true)
         try {
-            await getInstitution()
-            getRecognition()
+            await getCompany()
+
         } catch (error) {
-            alert.error('Ocorreu um arro ao carregar A instituição')
+            alert.error('Ocorreu um arro ao carregar A Empresa')
         } finally {
             setLoading(false)
         }
@@ -118,171 +93,68 @@ export default function EditInstitution(props) {
             value.target.value = formatCEP(str)
         }
 
-        setInstitutionData((prevValues) => ({
+        setCompanyData((prevValues) => ({
             ...prevValues,
             [value.target.name]: value.target.value,
         }))
     }
 
     const checkRequiredFields = () => {
-        // if (!institutionData.nome) {
+        // if (!companyData.nome) {
         //     alert.error('Usuário precisa de nome')
         //     return false
         // }
         return true
     }
 
-    const handleCreateInstitution = async () => {
+    const handleCreateCompany = async () => {
         setLoading(true)
         if (checkRequiredFields()) {
             try {
-                const response = await api.post(`/institution/create/${userId}`, { institutionData, arrayRecognitionP, arrayRecognitionEad });
+                const response = await api.post(`/company/create/${userId}`, { companyData });
                 const { data } = response
 
                 if (response?.status === 201) {
-                    alert.success('Instituição cadastrada com sucesso.');
-                    router.push(`/administrative/institution/list`)
+                    alert.success('Empresa cadastrada com sucesso.');
+                    router.push(`/organization/list`)
                 }
             } catch (error) {
-                alert.error('Tivemos um problema ao cadastrar Instituição.');
+                alert.error('Tivemos um problema ao cadastrar Empresa.');
             } finally {
                 setLoading(false)
             }
         }
     }
 
-    const handleDeleteInstitution = async () => {
+    const handleDeleteCompany = async () => {
         setLoading(true)
         try {
-            const response = await api.delete(`/institution/delete/${id}`)
+            const response = await api.delete(`/company/delete/${id}`)
             if (response?.status == 201) {
-                alert.success('Instituição excluída com sucesso.');
-                router.push(`/administrative/institution/list`)
+                alert.success('Empresa excluída com sucesso.');
+                router.push(`/organization/list`)
             }
 
         } catch (error) {
-            alert.error('Tivemos um problema ao excluir Instituição.');
+            alert.error('Tivemos um problema ao excluir Empresa.');
             console.log(error)
         } finally {
             setLoading(false)
         }
     }
 
-    const handleEditInstitution = async () => {
+    const handleEditCompany = async () => {
         setLoading(true)
         try {
-            const response = await api.patch(`/institution/update/${id}`, { institutionData })
-            if (response?.status === 201) {
-                alert.success('Instituição atualizada com sucesso.');
+            const response = await api.patch(`/company/update/${id}`, { companyData })
+            if (response?.status === 200) {
+                alert.success('Empresa atualizada com sucesso.');
                 handleItems()
                 return
             }
-            alert.error('Tivemos um problema ao atualizar Instituição.');
+            alert.error('Tivemos um problema ao atualizar Empresa.');
         } catch (error) {
-            alert.error('Tivemos um problema ao atualizar Instituição.');
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    const handleChangeRecognitionP = (value) => {
-        setRecognitionP((prevValues) => ({
-            ...prevValues,
-            [value.target.name]: value.target.value,
-        }))
-    };
-
-    const addRecognitionP = () => {
-        setArrayRecognitionP((prevArray) => [...prevArray, { ren_reconhecimento_p: recognitionP.ren_reconhecimento_p, dt_renovacao_rec_p: recognitionP.dt_renovacao_rec_p }])
-        setRecognitionP({ ren_reconhecimento_p: '', dt_renovacao_rec_p: '' })
-    }
-
-    const deleteRecognitionP = (index) => {
-
-        if (newInstitution) {
-            setArrayRecognitionP((prevArray) => {
-                const newArray = [...prevArray];
-                newArray.splice(index, 1);
-                return newArray;
-            });
-        }
-    };
-
-
-    //EAD
-    const handleChangeRecognitionEad = (value) => {
-        setRecognitionEad((prevValues) => ({
-            ...prevValues,
-            [value.target.name]: value.target.value,
-        }))
-    };
-
-    const addRecognitionEad = () => {
-        setArrayRecognitionEad((prevArray) => [...prevArray, { ren_reconhecimento_ead: recognitionEad.ren_reconhecimento_ead, dt_renovacao_rec_ead: recognitionEad.dt_renovacao_rec_ead }])
-        setRecognitionEad({ ren_reconhecimento_ead: '', dt_renovacao_rec_ead: '' })
-    }
-
-    const deleteRecognitionEad = (index) => {
-
-        if (newInstitution) {
-            setArrayRecognitionEad((prevArray) => {
-                const newArray = [...prevArray];
-                newArray.splice(index, 1);
-                return newArray;
-            });
-        }
-    };
-
-    const handleAddRecognition = async () => {
-        setLoading(true)
-        let recognitionData = {};
-
-        try {
-            if (Object.keys(recognitionEad).length > 0) {
-                recognitionData = recognitionEad;
-                const response = await api.post(`/institution/recognition/create/${id}/${userId}?modality=ead`, { recognitionData })
-                if (response?.status === 201) {
-                    alert.success('Renovação adicionada')
-                    setRecognitionEad({ ren_reconhecimento_ead: '', dt_renovacao_rec_ead: '' })
-                    handleItems()
-                }
-            };
-            if (Object.keys(recognitionP).length > 0) {
-                recognitionData = recognitionP;
-                const response = await api.post(`/institution/recognition/create/${id}/${userId}?modality=presencial`, { recognitionData })
-                if (response?.status === 201) {
-                    alert.success('Renovação adicionada')
-                    setRecognitionP({ ren_reconhecimento_p: '', dt_renovacao_rec_p: '' })
-                    handleItems()
-                }
-            }
-        } catch (error) {
-            console.log(error)
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    const handleDeleteRecognition = async (id_renovacao_rec) => {
-        setLoading(true)
-        try {
-            if (recognitionEad) {
-                const response = await api.delete(`/institution/recognition/delete/${id_renovacao_rec}?modality=ead`)
-                if (response?.status === 200) {
-                    alert.success('Renovação excluida.');
-                    handleItems()
-                }
-            }
-            if (recognitionP) {
-                const response = await api.delete(`/institution/recognition/delete/${id_renovacao_rec}?modality=presencial`)
-                if (response?.status === 200) {
-                    alert.success('Renovação excluida.');
-                    handleItems()
-                }
-            }
-        } catch (error) {
-            alert.error('Ocorreu um erro ao remover a Habilidade selecionada.');
-            console.log(error)
+            alert.error('Tivemos um problema ao atualizar Empresa.');
         } finally {
             setLoading(false)
         }
@@ -299,24 +171,13 @@ export default function EditInstitution(props) {
             const response = await axios.get(`https://viacep.com.br/ws/${cep}/json/`)
             const { data } = response;
 
-            let fields = {}
-
-            if (name === 'cep_pres') {
-                fields = {
-                    rua_pres: data.logradouro,
-                    cidade_pres: data.localidade,
-                    uf_pres: data.uf,
-                    bairro_pres: data.bairro
-                }
-            } else {
-                fields = {
-                    rua_ead: data.logradouro,
-                    cidade_ead: data.localidade,
-                    uf_ead: data.uf,
-                    bairro_ead: data.bairro
-                }
+            let fields = {
+                rua: data.logradouro,
+                cidade: data.localidade,
+                uf: data.uf,
+                bairro: data.bairro
             }
-            setInstitutionData((prevValues) => ({
+            setCompanyData((prevValues) => ({
                 ...prevValues,
                 ...fields
             }))
@@ -326,6 +187,32 @@ export default function EditInstitution(props) {
         }
 
     }
+
+    const generateKey = (length = 10) => {
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let result = '';
+        const charactersLength = characters.length;
+        for (let i = 0; i < length; i++) {
+            const randomIndex = Math.floor(Math.random() * charactersLength);
+            result += characters[randomIndex];
+        }
+        setCompanyData({ ...companyData, cod_key: result })
+        let linkAcessRegister;
+        if (companyData?.razao_social) {
+            linkAcessRegister = `${companyData.razao_social.split(' ')[0].toLowerCase()}?${result}`
+        }
+        setLinkRegisterUser(linkAcessRegister)
+    };
+
+    const copyToClipboard = () => {
+        navigator.clipboard.writeText(linkRegisterUser)
+          .then(() => {
+            alert.info('Link copiado para a área de transferência!');
+          })
+          .catch(err => {
+            console.error('Erro ao copiar o link: ', err);
+          });
+      };
 
     const groupStatus = [
         { label: 'ativo', value: 1 },
@@ -338,33 +225,50 @@ export default function EditInstitution(props) {
     });
 
 
-
-
     return (
         <>
             <SectionHeader
-                perfil={institutionData?.modalidade_curso}
-                title={institutionData?.nome_curso || `Empresas`}
+                title={companyData?.razao_social || `Empresas`}
                 saveButton={isPermissionEdit}
-                saveButtonAction={newInstitution ? handleCreateInstitution : handleEditInstitution}
-                deleteButton={!newInstitution && isPermissionEdit}
-                deleteButtonAction={(event) => setShowConfirmationDialog({ active: true, event, acceptAction: handleDeleteInstitution })}
+                saveButtonAction={newCompany ? handleCreateCompany : handleEditCompany}
+                deleteButton={!newCompany && isPermissionEdit}
+                deleteButtonAction={(event) => setShowConfirmationDialog({ active: true, event, acceptAction: handleDeleteCompany })}
             />
-
-            {/* usuario */}
             <ContentContainer style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 1.8, padding: 5, }}>
                 <Box>
-                    <Text title bold style={{ padding: '0px 0px 20px 0px' }}>Dados da Instituição</Text>
+                    <Text title bold style={{ padding: '0px 0px 20px 0px' }}>Dados da Empresa</Text>
                 </Box>
                 <Box sx={styles.inputSection}>
-                    <TextInput disabled={!isPermissionEdit && true} placeholder='Mantenedora' name='mantenedora' onChange={handleChange} value={institutionData?.mantenedora || ''} label='Mantenedora' sx={{ flex: 1, }} />
-                    <TextInput disabled={!isPermissionEdit && true} placeholder='Mantida' name='mantida' onChange={handleChange} value={institutionData?.mantida || ''} label='Mantida' sx={{ flex: 1, }} />
+                    <TextInput disabled={!isPermissionEdit && true} placeholder='Nome da Empresa' name='razao_social' onChange={handleChange} value={companyData?.razao_social || ''} label='Nome da Empresa' sx={{ flex: 1, }} />
+                    <TextInput disabled={!isPermissionEdit && true} placeholder='Responsável' name='responsavel' onChange={handleChange} value={companyData?.responsavel || ''} label='Responsável' sx={{ flex: 1, }} />
                 </Box>
                 <Box sx={styles.inputSection}>
-                    <TextInput disabled={!isPermissionEdit && true} placeholder='CNPJ' name='cnpj' onChange={handleChange} value={institutionData?.cnpj || ''} label='CNPJ' sx={{ flex: 1, }} />
-                    <TextInput disabled={!isPermissionEdit && true} placeholder='Código' name='cod_inep' onChange={handleChange} value={institutionData?.cod_inep || ''} label='Código' sx={{ flex: 1, }} />
+                    <TextInput disabled={!isPermissionEdit && true} placeholder='CNPJ' name='cnpj' onChange={handleChange} value={companyData?.cnpj || ''} label='CNPJ' sx={{ flex: 1, }} />
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                        <TextInput disabled={!isPermissionEdit && true} placeholder='Código de Acesso' name='cod_key' onChange={handleChange} value={companyData?.cod_key || ''} label='Código de Acesso' sx={{ flex: 1, }} />
+                        <Button text="Gerar chave" onClick={() => generateKey(12)} />
+                    </Box>
                 </Box>
-                <RadioItem disabled={!isPermissionEdit && true} valueRadio={institutionData?.ativo} group={groupStatus} title="Status" horizontal={mobile ? false : true} onSelect={(value) => setInstitutionData({ ...institutionData, ativo: parseInt(value) })} />
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Box sx={{
+                        display: 'flex', padding: '10px', borderRadius: 2, backgroundColor: '#f0f0f0', alignItems: 'center',
+                        justifyContent: 'center'
+                    }}>
+                        <Text light>Link para cadastro de funcionário: <strong>{linkRegisterUser}</strong></Text>
+                    </Box>
+                    <Box sx={{
+                        ...styles.icon,
+                        transition: '.2s',
+                        backgroundImage: `url('/icons/copy.png')`,
+                        backgroundSize: 'cover',
+                        width: 22,
+                        height: 22,
+                        "&:hover": {
+                            cursor: 'pointer', opacity: 0.8
+                        }
+                    }} onClick={() => copyToClipboard()} />
+                </Box>
+                <RadioItem disabled={!isPermissionEdit && true} valueRadio={companyData?.ativo} group={groupStatus} title="Status" horizontal={mobile ? false : true} onSelect={(value) => setCompanyData({ ...companyData, ativo: parseInt(value) })} />
 
             </ContentContainer>
 
@@ -372,15 +276,15 @@ export default function EditInstitution(props) {
                 <Text bold >Endereço</Text>
 
                 <Box sx={styles.inputSection}>
-                    <TextInput disabled={!isPermissionEdit && true} placeholder='CEP' name='cep_pres' onChange={handleChange} value={institutionData?.cep_pres || ''} label='CEP *' onBlur={handleBlurCEP} sx={{ flex: 1, }} />
-                    <TextInput disabled={!isPermissionEdit && true} placeholder='Endereço' name='rua_pres' onChange={handleChange} value={institutionData?.rua_pres || ''} label='Endereço *' sx={{ flex: 1, }} />
-                    <TextInput disabled={!isPermissionEdit && true} placeholder='Nº' name='numero_pres' onChange={handleChange} value={institutionData?.numero_pres || ''} label='Nº *' sx={{ flex: 1, }} />
+                    <TextInput disabled={!isPermissionEdit && true} placeholder='CEP' name='cep' onChange={handleChange} value={companyData?.cep || ''} label='CEP *' onBlur={handleBlurCEP} sx={{ flex: 1, }} />
+                    <TextInput disabled={!isPermissionEdit && true} placeholder='Endereço' name='rua' onChange={handleChange} value={companyData?.rua || ''} label='Endereço *' sx={{ flex: 1, }} />
+                    <TextInput disabled={!isPermissionEdit && true} placeholder='Nº' name='numero' onChange={handleChange} value={companyData?.numero || ''} label='Nº *' sx={{ flex: 1, }} />
                 </Box>
                 <Box sx={styles.inputSection}>
-                    <TextInput disabled={!isPermissionEdit && true} placeholder='Cidade' name='cidade_pres' onChange={handleChange} value={institutionData?.cidade_pres || ''} label='Cidade *' sx={{ flex: 1, }} />
-                    <TextInput disabled={!isPermissionEdit && true} placeholder='UF' name='uf_pres' onChange={handleChange} value={institutionData?.uf_pres || ''} label='UF *' sx={{ flex: 1, }} />
-                    <TextInput disabled={!isPermissionEdit && true} placeholder='Bairro' name='bairro_pres' onChange={handleChange} value={institutionData?.bairro_pres || ''} label='Bairro *' sx={{ flex: 1, }} />
-                    <TextInput disabled={!isPermissionEdit && true} placeholder='Complemento' name='complemento_pres' onChange={handleChange} value={institutionData?.complemento_pres || ''} label='Complemento' sx={{ flex: 1, }} />
+                    <TextInput disabled={!isPermissionEdit && true} placeholder='Cidade' name='cidade' onChange={handleChange} value={companyData?.cidade || ''} label='Cidade *' sx={{ flex: 1, }} />
+                    <TextInput disabled={!isPermissionEdit && true} placeholder='UF' name='uf' onChange={handleChange} value={companyData?.uf || ''} label='UF *' sx={{ flex: 1, }} />
+                    <TextInput disabled={!isPermissionEdit && true} placeholder='Bairro' name='bairro' onChange={handleChange} value={companyData?.bairro || ''} label='Bairro *' sx={{ flex: 1, }} />
+                    <TextInput disabled={!isPermissionEdit && true} placeholder='Complemento' name='complemento' onChange={handleChange} value={companyData?.complemento || ''} label='Complemento' sx={{ flex: 1, }} />
                 </Box>
             </ContentContainer>
         </>

@@ -88,7 +88,7 @@ export default function ReserveConsultation() {
             const { status, data } = response
             if (status === 201 && data?.consultation) {
                 alert.success('Consulta agendada com o profissional.')
-                router.push('/consultation')
+                router.push('/')
             } else {
                 alert.error('Ocorreu um erro ao reservar data e criar a consulta.')
             }
@@ -232,7 +232,7 @@ export default function ReserveConsultation() {
                             </Box>
                         </Box>
                     </Box>
-                    {/* <Box sx={{
+                    <Box sx={{
                         padding: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center',
                         marginTop: 2,
                         transition: '.5s',
@@ -242,15 +242,15 @@ export default function ReserveConsultation() {
                         "&:hover": {
                             opacity: 0.8,
                             cursor: 'pointer',
-                            transform: 'scale(1.1, 1.1)'
+                            transform: 'scale(1.03, 1.03)'
                         }
                     }} onClick={() => handleReservation()}>
                         <Text bold large style={{ color: '#fff' }}>CONFIRMAR AGENDAMENTO</Text>
-                    </Box> */}
+                    </Box>
                 </Box>
             </Box>
 
-            <Box sx={{
+            {/* <Box sx={{
                 display: 'flex', height: '100%', width: 400, backgroundColor: colorPalette?.secondary, position: 'fixed', right: 0, top: 50,
                 boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`, border: `1px solid lightgray`, gap: 2, padding: '20px 20px', flexDirection: 'column'
             }}>
@@ -367,7 +367,7 @@ export default function ReserveConsultation() {
                 }} onClick={() => { formPayment && handleReservation() }}>
                     <Text bold large style={{ color: '#fff' }}>PAGAMENTO</Text>
                 </Box>
-            </Box>
+            </Box> */}
         </Box >
 
     )

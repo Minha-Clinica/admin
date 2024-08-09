@@ -13,10 +13,11 @@ import { Backdrop, FormControlLabel, Switch } from "@mui/material"
 import { useRouter } from "next/router"
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
-export const Register = ({ type = `paciente`, setTypeSelected, typeSelected, setShowRegisterType }) => {
+export const Register = ({ type = `paciente`, setTypeSelected, typeSelected, setShowRegisterType, companyCode }) => {
 
     const { login, alert, theme, colorPalette, setLoading, setShowConfirmationDialog } = useAppContext()
     const router = useRouter()
+    const cod_key = companyCode
     const [userData, setUserData] = useState({
         cpf: null,
         genero: '',
@@ -45,10 +46,13 @@ export const Register = ({ type = `paciente`, setTypeSelected, typeSelected, set
         tipo_conta_2: null
     })
     const [themeName, setThemeName] = useState('')
+    const [company, setCompany] = useState({})
     const [showPreferences, setShowPreferences] = useState(false)
     const [windowWidth, setWindowWidth] = useState(0)
     const [stepSelected, setStepSelected] = useState(1)
     const smallWidthDevice = windowWidth < 1000
+
+    console.log(cod_key)
 
     useEffect(() => {
         const themeAltern = theme ? setThemeName('dark') : setThemeName('clear')
@@ -124,6 +128,19 @@ export const Register = ({ type = `paciente`, setTypeSelected, typeSelected, set
         }
     }
 
+    const handleCompany = async () => {
+        if (cod_key) {
+            try {
+                const response = await api.get(`/company/key/${cod_key}`)
+                if (response?.data) {
+                    setCompany(response?.data)
+                }
+            } catch (error) {
+                console.log(error)
+            }
+        }
+    }
+
 
     const handleChange = (value) => {
 
@@ -152,6 +169,7 @@ export const Register = ({ type = `paciente`, setTypeSelected, typeSelected, set
 
 
     useEffect(() => {
+        handleCompany()
         setWindowWidth(window.innerWidth)
         window.addEventListener('resize', () => setWindowWidth(window.innerWidth))
         document.title = `Admin Meliés`
@@ -244,6 +262,17 @@ export const Register = ({ type = `paciente`, setTypeSelected, typeSelected, set
                             <Text bold indicator style={{ color: !theme ? '#fff' : Colors.backgroundPrimary, transition: 'background-color 1s', textAlign: 'center' }}>Bem vindo </Text>
                             <Text bold indicator style={{ color: colorPalette?.buttonColor, transition: 'background-color 1s', textAlign: 'center' }}> {type === 'profissional' ? 'Terapeuta!' : 'Paciente!'}</Text>
                         </Box>
+
+                        {cod_key &&
+                            <Box sx={{ display: 'flex', flexDirection: 'row', gap: .8, alignItems: 'center', width: '100%', justifyContent: 'center' }}>
+                                <Text bold style={{ color: !theme ? '#fff' : Colors.backgroundPrimary, transition: 'background-color 1s', textAlign: 'center' }}>
+                                    Você está se cadastrando pela empresa
+                                </Text>
+                                <Text bold large style={{ color: colorPalette?.buttonColor, transition: 'background-color 1s', textAlign: 'center' }}>
+                                    {company?.razao_social}
+                                </Text>
+                            </Box>
+                        }
 
                         <Box sx={{ display: 'flex' }}>
                             {steps?.map((item, index) => {
@@ -575,7 +604,7 @@ const PaymentConfigScreen = () => {
                 <Box>
                     <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', alignItems: 'start' }}>
 
-                        <Box sx={{display: 'flex', flexDirection: 'column', gap: 1}}>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                             <Text large>Defina o Valor de sua consulta:</Text>
                             <TextInput
                                 placeholder='0,00'
