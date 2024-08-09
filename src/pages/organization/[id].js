@@ -45,7 +45,7 @@ export default function EditCompany(props) {
         try {
             const response = await api.get(`/company/${id}`)
             const { data } = response
-            let linkAcessRegister = `${data?.razao_social.split(' ')[0].toLowerCase()}?cod_key=${data?.cod_key}`
+            let linkAcessRegister = `https://www.afectu.com/company?cod_key=${data?.cod_key}`
             setLinkRegisterUser(linkAcessRegister)
             setCompanyData(data)
         } catch (error) {
@@ -199,7 +199,7 @@ export default function EditCompany(props) {
         setCompanyData({ ...companyData, cod_key: result })
         let linkAcessRegister;
         if (companyData?.razao_social) {
-            linkAcessRegister = `${companyData.razao_social.split(' ')[0].toLowerCase()}?cod_key=${result}`
+            linkAcessRegister = `https://www.afectu.com/company??cod_key=${result}`
         }
         setLinkRegisterUser(linkAcessRegister)
     };
