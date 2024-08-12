@@ -97,7 +97,7 @@ export default function OurTeamList(props) {
                                 <Avatar src={item?.location} sx={{
                                     height: { xs: '100%', sm: 150, md: 150, lg: 180 },
                                     width: { xs: '100%', sm: 150, md: 150, lg: 180 },
-                                }} variant="circular" />
+                                }} variant="rounded"/>
                                 <Text large bold>{item?.nome}</Text>
                                 <Box sx={{display: 'flex', flexDirection: 'column', justufyContent: 'center', alignItems: 'center'}}>
                                     <Text style={{ color: colorPalette.buttonColor }}>{item?.funcao || 'Administrativo'}</Text>
@@ -150,7 +150,7 @@ export default function OurTeamList(props) {
                                 <Avatar src={item?.location} sx={{
                                     height: { xs: '100%', sm: 150, md: 150, lg: 180 },
                                     width: { xs: '100%', sm: 150, md: 150, lg: 180 },
-                                }} variant="circular" />
+                                }} variant="rounded" />
                                 <Text large bold>{item?.nome}</Text>
                                 <Box sx={{display: 'flex', flexDirection: 'column', justufyContent: 'center', alignItems: 'center'}}>
                                     <Text style={{ color: colorPalette.buttonColor }}>{item?.funcao || 'Professor'}</Text>

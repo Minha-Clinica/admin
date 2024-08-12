@@ -188,18 +188,57 @@ export default function ListConsultions(props) {
     ]
 
     return (
-        <>
-            <SectionHeader
-                icon={'https://minhaclinicatrindade.s3.amazonaws.com/video_conferencia.png'}
-                title={`Consultas (${consultionList?.filter(filter)?.length})`}
-            />
-            <ContentContainer>
-                <Box sx={{ display: 'flex', flex: 1, justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Box sx={{ flex: 1, display: 'flex', justifyContent: 'end' }}>
-                        <TextInput placeholder="Buscar pelo profissional.." name='filterData' type="search" onChange={(event) => setFilterData(event.target.value)} value={filterData} sx={{ flex: 1 }} />
+        <Box sx={{ display: 'flex', gap: 4, flexDirection: 'column', paddingTop: 4 }}>
+            <Box sx={{ display: 'flex', gap: 1, flex: 1, justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text veryLarge bold>Sessões</Text>
+                <Box sx={{ display: 'flex', justifyContent: 'start', gap: 2, alignItems: 'center', flexDirection: 'row' }}>
+                    <TextInput placeholder="Pesquisar por paciente" name='filterData' type="search"
+                        onChange={(event) => setFilterData(event.target.value)} value={filterData}
+                        InputProps={{
+                            style: {
+                                width: 400,
+                                backgroundColor: colorPalette?.secondary,
+                                borderRadius: 16,
+                                borderColor: 'transparent', // Define a cor da borda como transparente
+                                borderStyle: 'none'
+                            }
+                        }} />
+
+                    <Box sx={{
+                        display: 'flex', padding: '12px', borderRadius: 3, backgroundColor: colorPalette?.secondary,
+                        boxShadow: `rgba(149, 157, 165, 0.6) 0px 6px 24px`,
+                        transition: '.3s',
+                        "&:hover": {
+                            opacity: 0.8,
+                            cursor: 'pointer'
+                        }
+                    }}>
+                        <Box sx={{
+                            ...styles.menuIcon,
+                            width: 20,
+                            height: 20,
+                            backgroundImage: `url('/icons/row.png')`,
+                        }} />
+                    </Box>
+
+                    <Box sx={{
+                        display: 'flex', padding: '12px', borderRadius: 3, backgroundColor: colorPalette?.secondary,
+                        transition: '.3s', boxShadow: `rgba(149, 157, 165, 0.6) 0px 6px 24px`,
+                        "&:hover": {
+                            opacity: 0.8,
+                            cursor: 'pointer'
+                        }
+                    }}>
+                        <Box sx={{
+                            ...styles.menuIcon,
+                            width: 20,
+                            height: 20,
+                            backgroundImage: `url('/icons/menu-3.png')`,
+                            transition: '.3s',
+                        }} />
                     </Box>
                 </Box>
-            </ContentContainer>
+            </Box>
             <TableConsultion data={consultionList?.filter(filter)?.slice(startIndex, endIndex)} setConsultion={setConsultion}
                 callBack={() => {
                     getConsultion()
@@ -213,7 +252,7 @@ export default function ListConsultions(props) {
                 page={page}
                 rowsPerPage={rowsPerPage} />
 
-        </>
+        </Box>
     )
 }
 
@@ -501,10 +540,10 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
         <>
             <ContentContainer sx={{ display: 'flex', width: '100%', padding: 0, backgroundColor: colorPalette.primary, boxShadow: 'none', borderRadius: 2 }}>
 
-                <TableContainer sx={{ borderRadius: '8px', overflow: 'auto', border: '1px solid lightgray' }}>
+                <TableContainer sx={{ borderRadius: '8px', overflow: 'auto', }}>
                     <Table sx={{ borderCollapse: 'collapse', width: '100%', }}>
                         <TableHead>
-                            <TableRow sx={{ borderBottom: `2px solid ${colorPalette.buttonColor}` }}>
+                            <TableRow sx={{ borderBottom: `1px solid lightgray`, backgroundColor: colorPalette?.secondary }}>
                                 {columns.map((column, index) => (
                                     <TableCell key={index} sx={{ padding: '16px 20px', }}>
                                         <Box sx={{
@@ -560,7 +599,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                                                         <Avatar src={item?.url_foto_prof || ''} sx={{
                                                             height: { xs: '100%', sm: 30, md: 30, lg: 30 },
                                                             width: { xs: '100%', sm: 30, md: 30, lg: 30 },
-                                                        }} variant="circular"
+                                                        }} variant="rounded"
                                                         />
                                                         <Text style={{
                                                             textOverflow: 'ellipsis',
@@ -781,7 +820,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                                 <Avatar src={showAgendas?.profissionalData?.location || ''} sx={{
                                     height: { xs: '100%', sm: 45, md: 45, lg: 80 },
                                     width: { xs: '100%', sm: 45, md: 45, lg: 80 },
-                                }} variant="circular"
+                                }} variant="rounded"
                                 />
                             </Box>
                             <Box sx={{

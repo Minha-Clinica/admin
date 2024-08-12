@@ -73,10 +73,10 @@ export const Table_V1 = (props) => {
     return (
         <>
             <Paper sx={{ backgroundColor: colorPalette.primary, transition: 'background-color 1s', ...sx }}>
-                <TableContainer sx={{ borderRadius: '8px', overflow: 'auto', border: '1px solid lightgray' }}>
+                <TableContainer sx={{ borderRadius: '8px', overflow: 'auto', border: 'none' }}>
                     <Table>
                         <TableHead>
-                            <TableRow sx={{ borderBottom: `2px solid ${colorPalette.buttonColor}` }}>
+                            <TableRow sx={{ borderBottom: `1px solid lightgray`, backgroundColor: colorPalette?.secondary }}>
                                 {columns.map((column) => (
                                     <TableCell key={column?.key} sx={{ ...styles.cell, fontFamily: 'MetropolisBold', }}>
                                         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
@@ -152,7 +152,7 @@ export const Table_V1 = (props) => {
                                                             overflow: 'hidden',
                                                         }}
                                                     >
-                                                        {column.avatar && <Avatar sx={{ width: 27, height: 27, fontSize: 14 }} src={row[column?.avatarUrl || '']} />}
+                                                        {column.avatar && <Avatar variant="rounded" sx={{ width: 27, height: 27, fontSize: 14 }} src={row[column?.avatarUrl || '']} />}
 
                                                         {typeof row[column.key] === 'object' && row[column?.key || '-'] instanceof Date ? (
                                                             formatTimeStamp(row[column?.key || '-'])

@@ -173,7 +173,7 @@ export default function ReserveConsultation() {
                             <Avatar src={profissionalData?.location || ''} sx={{
                                 height: { xs: '100%', sm: 45, md: 45, lg: 120 },
                                 width: { xs: '100%', sm: 45, md: 45, lg: 120 },
-                            }} variant="circular"
+                            }} variant="rounded"
                             />
                         </Box>
                         <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', flex: 1, }}>

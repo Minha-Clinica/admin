@@ -217,14 +217,75 @@ export default function ListTasks(props) {
 
 
     return (
-        <>
-            <SectionHeader
-                // title={`Chamados (${tasksList?.length || '0'})`}
-                icon={'https://mf-planejados.s3.amazonaws.com/Icon_mkt.svg'}
-                title={`Chamados (${tasksList?.filter(filter)?.length || '0'})`}
-                newButton
-                newButtonAction={() => router.push(`/tasks/new`)}
-            />
+        <Box sx={{ display: 'flex', gap: 4, flexDirection: 'column', paddingTop: 4 }}>
+            <Box sx={{ display: 'flex', gap: 1, flex: 1, justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text veryLarge bold>Meus Tickets</Text>
+                <Box sx={{ display: 'flex', justifyContent: 'start', gap: 2, alignItems: 'center', flexDirection: 'row' }}>
+                    <TextInput placeholder="Pesquisar por nome ou número" name='filterData' type="search"
+                        onChange={(event) => setFilterData(event.target.value)} value={filterData}
+                        InputProps={{
+                            style: {
+                                width: 400,
+                                backgroundColor: colorPalette?.secondary,
+                                borderRadius: 16,
+                                borderColor: 'transparent', // Define a cor da borda como transparente
+                                borderStyle: 'none'
+                            }
+                        }} />
+
+                    <Box sx={{
+                        display: 'flex', padding: '12px', borderRadius: 3, backgroundColor: colorPalette?.secondary,
+                        boxShadow: `rgba(149, 157, 165, 0.6) 0px 6px 24px`,
+                        transition: '.3s',
+                        "&:hover": {
+                            opacity: 0.8,
+                            cursor: 'pointer'
+                        }
+                    }}>
+                        <Box sx={{
+                            ...styles.menuIcon,
+                            width: 20,
+                            height: 20,
+                            backgroundImage: `url('/icons/row.png')`,
+                        }} />
+                    </Box>
+
+                    <Box sx={{
+                        display: 'flex', padding: '12px', borderRadius: 3, backgroundColor: colorPalette?.secondary,
+                        transition: '.3s', boxShadow: `rgba(149, 157, 165, 0.6) 0px 6px 24px`,
+                        "&:hover": {
+                            opacity: 0.8,
+                            cursor: 'pointer'
+                        }
+                    }}>
+                        <Box sx={{
+                            ...styles.menuIcon,
+                            width: 20,
+                            height: 20,
+                            backgroundImage: `url('/icons/menu-3.png')`,
+                            transition: '.3s',
+                        }} />
+                    </Box>
+
+                    <Box sx={{
+                        display: 'flex', padding: '12px', borderRadius: 3, gap: 2, backgroundColor: colorPalette?.buttonColor,
+                        transition: '.3s', boxShadow: `rgba(149, 157, 165, 0.6) 0px 6px 24px`,
+                        "&:hover": {
+                            opacity: 0.8,
+                            cursor: 'pointer'
+                        }
+                    }} onClick={() => router.push(`/tasks/new`)}>
+                        <Box sx={{
+                            ...styles.menuIcon,
+                            width: 20,
+                            height: 20,
+                            backgroundImage: `url('/icons/task_add.png')`,
+                            transition: '.3s',
+                        }} />
+                        <Text bold style={{ color: '#fff' }}>Novo Ticket</Text>
+                    </Box>
+                </Box>
+            </Box>
 
             <Box sx={{ display: 'flex', alignItems: 'end' }}>
                 <Text light style={{ marginRight: 10 }}>vizualizar por:</Text>
@@ -261,182 +322,6 @@ export default function ListTasks(props) {
                     )
                 })}
             </Box>
-
-            <ContentContainer sx={{ display: { xs: 'none', sm: 'none', md: 'flex', lg: 'flex', xl: 'flex' } }}>
-                <Box sx={{ display: 'flex', flex: 1, justifyContent: 'space-between' }}>
-                    <Text bold large>Filtros</Text>
-                    <Box sx={{ display: 'flex', gap: 0.5 }}>
-                        <Text style={{ color: '#d6d6d6' }} light>Mostrando</Text>
-                        <Text bold style={{ color: '#d6d6d6' }} light>{tasksList.filter(filter)?.length || '0'}</Text>
-                        <Text style={{ color: '#d6d6d6' }} light>de</Text>
-                        <Text bold style={{ color: '#d6d6d6' }} light>{tasksList?.length || '0'}</Text>
-                        <Text style={{ color: '#d6d6d6' }} light>chamados</Text>
-                    </Box>
-                </Box>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <TextInput placeholder="Buscar pelo nome ou numero do chamado" name='filterData' type="search" onChange={(event) => setFilterData(event.target.value)} value={filterData} sx={{ flex: 1 }} />
-                </Box>
-                <Box sx={{ display: 'flex', justifyContent: 'start', gap: 2, alignItems: 'center', flexDirection: 'row' }}>
-                    <SelectList
-                        fullWidth
-                        data={groupPriority}
-                        valueSelection={filters?.priority}
-                        onSelect={(value) => setFilters({ ...filters, priority: value })}
-                        title="Prioridade"
-                        filterOpition="value"
-                        inputStyle={{ color: colorPalette.textColor, fontSize: '15px' }}
-                        clean={false}
-                    />
-                    <SelectList
-                        fullWidth
-                        data={groupType}
-                        valueSelection={filters?.type}
-                        onSelect={(value) => setFilters({ ...filters, type: value })}
-                        title="Tipo"
-                        filterOpition="value"
-                        inputStyle={{ color: colorPalette.textColor, fontSize: '15px' }}
-                        clean={false}
-                    />
-                    <SelectList
-                        fullWidth
-                        data={responsibles}
-                        valueSelection={filters?.responsible}
-                        onSelect={(value) => setFilters({ ...filters, responsible: value })}
-                        title="Executor"
-                        filterOpition="value"
-                        inputStyle={{ color: colorPalette.textColor, fontSize: '15px' }}
-                        clean={false}
-                    />
-                    {/* <SelectList
-                        fullWidth
-                        data={listStatus}
-                        valueSelection={filters?.status}
-                        onSelect={(value) => setFilters({ ...filters, status: value })}
-                        title="Status"
-                        filterOpition="value"
-                        inputStyle={{ color: colorPalette.textColor, fontSize: '15px' }}
-                        clean={false}
-                    /> */}
-                    <Box sx={{ flex: 1, display: 'flex', justifyContent: 'end' }}>
-                        <Button secondary text="Limpar filtros" small style={{ width: 120 }} onClick={() => setFilters({
-                            responsible: 'todos',
-                            status: 'todos',
-                            priority: 'todos',
-                            participant: 'todos',
-                            actor: 'todos',
-                            type: 'todos'
-                        })} />
-                    </Box>
-                    <TablePagination
-                        component="div"
-                        count={sortTasks()?.filter(filter)?.length}
-                        page={page}
-                        onPageChange={handleChangePage}
-                        rowsPerPage={rowsPerPage}
-                        onRowsPerPageChange={handleChangeRowsPerPage}
-                        style={{ color: colorPalette.textColor }} // Define a cor do texto
-                        backIconButtonProps={{ style: { color: colorPalette.textColor } }} // Define a cor do ícone de voltar
-                        nextIconButtonProps={{ style: { color: colorPalette.textColor } }} // Define a cor do ícone de avançar
-                    />
-                </Box>
-                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', justifyContent: 'space-between' }}>
-                    <CheckBoxComponent disabled={!isPermissionEdit && true}
-                        boxGroup={listStatus}
-                        valueChecked={filters?.status || null}
-                        horizontal={true}
-                        onSelect={(value) => {
-                            setFilters({ ...filters, status: value })
-                        }}
-                        sx={{ width: 1 }} />
-
-                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', justifyContent: 'center' }}>
-                        <Text bold xsmall>Vizualizar como: </Text>
-                        <Tooltip title="Card/Grade">
-                            <div>
-                                <Box sx={{
-                                    display: 'flex',
-                                    backgroundColor: vizualizedForm?.cards && colorPalette?.primary,
-                                    transform: vizualizedForm?.cards && 'scale(1.2, 1.2)',
-                                    transition: '.2s',
-                                    borderRadius: 2,
-                                    padding: '5px',
-                                    "&:hover": {
-                                        cursor: 'pointer',
-                                        backgroundColor: colorPalette?.primary + '66',
-                                    },
-                                }} onClick={() => setVizualizedForm({ cards: true, list: false })} >
-                                    <Box sx={{
-                                        ...styles.menuIcon,
-                                        backgroundImage: `url('/icons/icon_card.png')`,
-                                        transition: '.3s',
-                                        width: 22,
-                                        filter: theme ? 'brightness(0) invert(0)' : 'brightness(0) invert(1)',
-                                        height: 22,
-                                        "&:hover": {
-                                            opacity: 0.8,
-                                            cursor: 'pointer'
-                                        },
-                                    }}
-                                    />
-                                </Box>
-                            </div>
-                        </Tooltip>
-                        <Tooltip title="Lista/Tabela">
-                            <div>
-                                <Box sx={{
-                                    display: 'flex',
-                                    backgroundColor: vizualizedForm?.list && colorPalette?.primary,
-                                    transform: vizualizedForm?.list && 'scale(1.2, 1.2)',
-                                    transition: '.2s',
-                                    borderRadius: 2,
-                                    padding: '5px',
-                                    "&:hover": {
-                                        cursor: 'pointer',
-                                        backgroundColor: colorPalette?.primary + '66',
-                                    },
-                                }} onClick={() => setVizualizedForm({ cards: false, list: true })}>
-                                    <Box sx={{
-                                        ...styles.menuIcon,
-                                        filter: theme ? 'brightness(0) invert(0)' : 'brightness(0) invert(1)',
-                                        backgroundImage: `url('/icons/icon_list.png')`,
-                                        transition: '.3s',
-                                        width: 22,
-                                        height: 22,
-                                        "&:hover": {
-                                            opacity: 0.8,
-                                            cursor: 'pointer'
-                                        },
-                                    }}
-                                    />
-                                </Box>
-                            </div>
-                        </Tooltip>
-                    </Box>
-                </Box>
-
-            </ContentContainer >
-
-            <Box sx={{ display: { xs: 'flex', sm: 'flex', md: 'none', lg: 'none', xl: 'none' }, flexDirection: 'column', gap: 2 }}>
-                <TextInput placeholder="Buscar pelo nome ou numero do chamado" name='filterData' type="search" onChange={(event) => setFilterData(event.target.value)} value={filterData} sx={{ flex: 1 }} />
-                <Button secondary style={{ height: 35, borderRadius: 2 }} text="Editar Filtros" onClick={() => setShowFilterMobile(true)} />
-                <Box sx={{ marginTop: 5, alignItems: 'center', justifyContent: 'center', display: 'flex' }}>
-                    <TablePagination
-                        component="div"
-                        count={sortTasks()?.filter(filter)?.length}
-                        page={page}
-                        onPageChange={handleChangePage}
-                        rowsPerPage={rowsPerPage}
-                        onRowsPerPageChange={handleChangeRowsPerPage}
-                        labelRowsPerPage="Items"
-                        style={{ color: colorPalette.textColor }} // Define a cor do texto
-                        backIconButtonProps={{ style: { color: colorPalette.textColor } }} // Define a cor do ícone de voltar
-                        nextIconButtonProps={{ style: { color: colorPalette.textColor } }} // Define a cor do ícone de avançar
-                    />
-                </Box>
-                <Divider distance={0} />
-            </Box>
-
-
             <Backdrop open={showFilterMobile} sx={{ zIndex: 999, width: '100%' }}>
                 <ContentContainer sx={{ height: '100%', position: 'absolute', marginTop: 18, width: '100%' }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', zIndex: 999999999 }}>
@@ -525,7 +410,7 @@ export default function ListTasks(props) {
                 />
             }
             {/* <Table_V1 data={sortTasks().filter(filter).slice(startIndex, endIndex)} columns={column} columnId={'id_chamado'} columnActive={false} filters={filtersOrders} onPress={(value) => setFiltersOrders(value)} onFilter targetBlank /> */}
-        </>
+        </Box>
     )
 }
 

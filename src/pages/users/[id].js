@@ -601,7 +601,7 @@ export default function EditUser() {
                                     borderRadius: '16px',
                                     width: { xs: 250, sm: 300, md: 300, lg: 300 },
                                     aspectRatio: '1/1',
-                                }} variant="square" />
+                                }} variant="rounded" />
                                 <Box sx={{
                                     display: 'flex', gap: 1, justifyContent: 'space-between', alignItems: 'center', backgroundColor: colorPalette.inputColor,
                                     borderRadius: '12px',

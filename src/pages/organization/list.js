@@ -109,9 +109,9 @@ export default function ListCompany(props) {
 
     const column = [
         { key: 'id_empresa', label: 'ID' },
-        { key: 'razao_social', label: 'Razão Social' },
-        { key: 'responsavel', label: 'responsavel' },
         { key: 'dt_criacao', label: 'Criado em', date: true },
+        { key: 'responsavel', label: 'E-mail' },
+        { key: 'razao_social', label: 'Empresa' },
 
     ];
 
@@ -122,56 +122,75 @@ export default function ListCompany(props) {
     ]
 
     return (
-        <>
-            <SectionHeader
-                icon={'/icons/enterprise.png'}
-                title={`Empresas (${companyList?.filter(filter)?.length || '0'})`}
-                // newButton={isPermissionEdit}
-                newButtonAction={() => router.push(`/${pathname}/new`)}
-            />
-            <ContentContainer>
-                <Box sx={{ display: 'flex', flex: 1, justifyContent: 'space-between' }}>
-                    <Text bold large>Filtros</Text>
-                    <Box sx={{ display: 'flex', gap: 0.5 }}>
-                        <Text style={{ color: '#d6d6d6' }} light>Mostrando</Text>
-                        <Text bold style={{ color: '#d6d6d6' }} light>{companyList?.filter(filter)?.length || '0'}</Text>
-                        <Text style={{ color: '#d6d6d6' }} light>de</Text>
-                        <Text bold style={{ color: '#d6d6d6' }} light>{companyList?.length || '0'}</Text>
-                        <Text style={{ color: '#d6d6d6' }} light>chamados</Text>
-                    </Box>
-                </Box>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <TextInput placeholder="Buscar por empresa" name='filterData' type="search" onChange={(event) => setFilterData(event.target.value)} value={filterData} sx={{ flex: 1 }} />
-                </Box>
+        <Box sx={{ display: 'flex', gap: 4, flexDirection: 'column', paddingTop: 4 }}>
+            <Box sx={{ display: 'flex', gap: 1, flex: 1, justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text veryLarge bold>Empresas</Text>
                 <Box sx={{ display: 'flex', justifyContent: 'start', gap: 2, alignItems: 'center', flexDirection: 'row' }}>
-                    <SelectList
-                        fullWidth
-                        data={listAtivo}
-                        valueSelection={filters?.status}
-                        onSelect={(value) => setFilters({ ...filters, status: value })}
-                        title="Status"
-                        filterOpition="value"
-                        inputStyle={{ color: colorPalette.textColor, fontSize: '15px' }}
-                        clean={false}
-                    />
-                    <Box sx={{ flex: 1, display: 'flex', justifyContent: 'end' }}>
-                        <Button secondary text="Limpar filtros" small style={{ width: 120 }} onClick={() => setFilters({
-                            status: 'todos'
-                        })} />
+                    <TextInput placeholder="Pesquisar por empresa" name='filterData' type="search"
+                        onChange={(event) => setFilterData(event.target.value)} value={filterData}
+                        InputProps={{
+                            style: {
+                                width: 400,
+                                backgroundColor: colorPalette?.secondary,
+                                borderRadius: 16,
+                                borderColor: 'transparent', // Define a cor da borda como transparente
+                                borderStyle: 'none'
+                            }
+                        }} />
+
+                    <Box sx={{
+                        display: 'flex', padding: '12px', borderRadius: 3, backgroundColor: colorPalette?.secondary,
+                        boxShadow: `rgba(149, 157, 165, 0.6) 0px 6px 24px`,
+                        transition: '.3s',
+                        "&:hover": {
+                            opacity: 0.8,
+                            cursor: 'pointer'
+                        }
+                    }}>
+                        <Box sx={{
+                            ...styles.menuIcon,
+                            width: 20,
+                            height: 20,
+                            backgroundImage: `url('/icons/row.png')`,
+                        }} />
                     </Box>
-                    <TablePagination
-                        component="div"
-                        count={companyList?.filter(filter)?.length}
-                        page={page}
-                        onPageChange={handleChangePage}
-                        rowsPerPage={rowsPerPage}
-                        onRowsPerPageChange={handleChangeRowsPerPage}
-                        style={{ color: colorPalette.textColor }} // Define a cor do texto
-                        backIconButtonProps={{ style: { color: colorPalette.textColor } }} // Define a cor do ícone de voltar
-                        nextIconButtonProps={{ style: { color: colorPalette.textColor } }} // Define a cor do ícone de avançar
-                    />
+
+                    <Box sx={{
+                        display: 'flex', padding: '12px', borderRadius: 3, backgroundColor: colorPalette?.secondary,
+                        transition: '.3s', boxShadow: `rgba(149, 157, 165, 0.6) 0px 6px 24px`,
+                        "&:hover": {
+                            opacity: 0.8,
+                            cursor: 'pointer'
+                        }
+                    }}>
+                        <Box sx={{
+                            ...styles.menuIcon,
+                            width: 20,
+                            height: 20,
+                            backgroundImage: `url('/icons/menu-3.png')`,
+                            transition: '.3s',
+                        }} />
+                    </Box>
+
+                    <Box sx={{
+                        display: 'flex', padding: '12px', borderRadius: 3, gap: 2, backgroundColor: colorPalette?.buttonColor,
+                        transition: '.3s', boxShadow: `rgba(149, 157, 165, 0.6) 0px 6px 24px`,
+                        "&:hover": {
+                            opacity: 0.8,
+                            cursor: 'pointer'
+                        }
+                    }} onClick={() => router.push(`/${pathname}/new`)}>
+                        <Box sx={{
+                            ...styles.menuIcon,
+                            width: 20,
+                            height: 20,
+                            backgroundImage: `url('/icons/commission.png')`,
+                            transition: '.3s',
+                        }} />
+                        <Text bold style={{ color: '#fff' }}>Nova Empresa</Text>
+                    </Box>
                 </Box>
-            </ContentContainer >
+            </Box>
             {companyList?.length >= 1 ?
                 <Table_V1 data={sortCompany()?.filter(filter)} columns={column} columnId={'id_empresa'} filters={filtersOrders} onPress={(value) => setFiltersOrders(value)} onFilter />
                 :
@@ -179,6 +198,22 @@ export default function ListCompany(props) {
                     <Text bold>Não consegui encontrar empresas cadastradas</Text>
                 </Box>
             }
-        </>
+        </Box>
     )
+}
+const styles = {
+    containerRegister: {
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        gap: 1.5,
+        padding: '40px'
+    },
+    menuIcon: {
+        backgroundSize: 'contain',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center',
+        width: 15,
+        height: 15,
+    },
 }

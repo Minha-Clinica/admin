@@ -223,7 +223,7 @@ export const Notifications = ({ showNotification = false, setShowNotification })
                                             <Avatar src={item?.imagem || item?.location|| ''} sx={{
                                                 height: { xs: '100%', sm: 45, md: 45, lg: 60 },
                                                 width: { xs: '100%', sm: 45, md: 45, lg: 60 },
-                                            }} variant="circular"
+                                            }} variant="rounded"
                                             />
                                             <Box sx={{ display: 'flex', gap: 0.5, flexDirection: 'column', flex: 1 }}>
                                                 <Text small bold>{item?.titulo}</Text>

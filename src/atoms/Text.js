@@ -34,7 +34,7 @@ export const Text = (props) => {
          ...(bold && { fontFamily: 'MetropolisBold' }),
          ...(xsmall && { fontSize: { xs: `10px`, sm: `10px`, md: `10px`, lg: `10px`, xl: '10px' } }),
          ...(small && { fontSize: { xs: `10px`, sm: `10px`, md: `10px`, lg: `11px`, xl: `11px` } }),
-         ...(large && { fontSize: { xs: `14px`, sm: `14px`, md: `14px`, lg: `14px`, xl: `15px` } }),
+         ...(large && { fontSize: { xs: `14px`, sm: `14px`, md: `14px`, lg: `15px`, xl: `17px` } }),
          ...(veryLarge && { fontSize: { xs: `22px`, sm: `18px`, md: `18px`, lg: `20px`, xl: `23px` } }),
          ...(indicator && { fontSize: { xs: `22px`, sm: `25px`, md: `25px`, lg: `28px`, xl: `28px` } }),
          ...(title && { fontSize: { xs: `18px`, sm: `18px`, md: `18px`, lg: `18px`, xl: `18px` } }),

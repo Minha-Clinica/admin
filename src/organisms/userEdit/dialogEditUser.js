@@ -148,7 +148,7 @@ export const DialogUserEdit = (props) => {
                      transition: '.3s',
                      '&hover': { opacity: 0.4 }
                   }}
-                     variant="square" onClick={() => setShowEditFiles({ ...showEditFile, photoProfile: true })}
+                  variant="rounded" onClick={() => setShowEditFiles({ ...showEditFile, photoProfile: true })}
                   />
                   {showEditPhoto &&
                      <Box sx={{ display: 'flex', position: 'absolute', justifyContent: 'center', alignItems: 'center', transition: '.3s', }}>

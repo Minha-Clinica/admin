@@ -201,7 +201,7 @@ function PerfilProfissional() {
                         <Avatar src={userData?.location || ''} sx={{
                             height: { xs: '100%', sm: 45, md: 45, lg: 250 },
                             width: { xs: '100%', sm: 45, md: 45, lg: 250 },
-                        }} variant="circular"
+                        }} variant="rounded"
                         />
                     </Box>
                     <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', flex: 1, }}>
@@ -238,7 +238,7 @@ function PerfilProfissional() {
                                         <Avatar src={item?.location || ''} sx={{
                                             height: { xs: '100%', sm: 45, md: 45, lg: 120 },
                                             width: { xs: '100%', sm: 45, md: 45, lg: 120 },
-                                        }} variant="circular"
+                                        }} variant="rounded"
                                         />
                                     </Box>
 

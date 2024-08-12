@@ -98,9 +98,6 @@ export const UserHeader = (props) => {
                 {/* <IconTheme flex /> */}
 
                 <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'flex-end', position: 'relative', }}>
-                    <Box sx={{ display: 'flex', height: '30px', width: '1px', backgroundColor: 'lightgray' }} />
-
-
                     <Box sx={{
                         position: 'relative', "&:hover": {
                             opacity: 0.8,
@@ -110,19 +107,9 @@ export const UserHeader = (props) => {
                         <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center', justifyContent: 'space-around', padding: '5px 8px', borderRadius: 2, cursor: 'pointer', "&:hover": { opacity: 0.6 } }}>
                             <Box sx={{
                                 ...styles.menuIcon,
-                                backgroundImage: `url('/icons/notification_icon-png.png')`,
+                                backgroundImage: `url('/icons/bell.png')`,
                                 width: 18,
                                 height: 18,
-                                filter: theme ? 'brightness(0) invert(0)' : 'brightness(0) invert(1)',
-                                transition: 'background-color 1s',
-                            }} />
-                            <Box sx={{
-                                ...styles.menuIcon,
-                                backgroundImage: `url('${icons.gray_arrow_down}')`,
-                                width: 13,
-                                height: 13,
-                                aspectRatio: '1/1',
-                                // filter: theme ? 'brightness(0) invert(0)' : 'brightness(0) invert(1)',
                                 transition: 'background-color 1s',
                             }} />
                         </Box>
@@ -142,7 +129,7 @@ export const UserHeader = (props) => {
                             </Box>
                         }
                     </Box>
-                    <Box sx={{ display: 'flex', height: '30px', width: '1px', backgroundColor: 'lightgray' }} />
+                    <Box sx={{ display: 'flex', height: '30px', width: '1px', backgroundColor: '#F0F0F0' }} />
 
                     <Notifications showNotification={showNotification} setShowNotification={setShowNotification} />
 
@@ -163,7 +150,7 @@ export const UserHeader = (props) => {
                                     backgroundColor: colorPalette.third + '11'
                                 }
                             }} onClick={() => setShowEditUser(!showEditUser)}>
-                                <Avatar
+                                <Avatar variant="rounded"
                                     sx={{ width: '35px', height: '35px', fontSize: 14, border: `1px solid #fff`, cursor: 'pointer', '&hover': { opacity: 0.5 } }}
                                     src={fotoPerfil || `https://mf-planejados.s3.us-east-1.amazonaws.com/melies/perfil-default.jpg`}
                                     onClick={() => {
@@ -198,6 +185,7 @@ export const UserHeader = (props) => {
                                 }}>
                                     <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', }}>
                                         <Avatar
+                                        variant="rounded"
                                             sx={{ width: '55px', height: '55px', fontSize: 14, border: `1px solid #fff`, cursor: 'pointer', '&hover': { opacity: 0.5 } }}
                                             src={fotoPerfil || `https://mf-planejados.s3.us-east-1.amazonaws.com/melies/perfil-default.jpg`}
                                             onClick={() => {

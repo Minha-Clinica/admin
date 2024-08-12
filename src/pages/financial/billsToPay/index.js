@@ -562,7 +562,7 @@ export default function ListBillsToPay(props) {
                                                                     opacity: column?.label === 'id' && 0.7
                                                                 }
                                                             }} >
-                                                                {column.avatar && <Avatar sx={{ width: 27, height: 27, fontSize: 14 }} src={item[column?.avatarUrl || '']} />}
+                                                                {column.avatar && <Avatar variant="rounded" sx={{ width: 27, height: 27, fontSize: 14 }} src={item[column?.avatarUrl || '']} />}
 
                                                                 {typeof item[column.key] === 'object' && item[column?.key || '-'] instanceof Date ? (
                                                                     formatTimeStamp(item[column?.key || '-'])

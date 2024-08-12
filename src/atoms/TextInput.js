@@ -74,8 +74,7 @@ export const TextInput = (props) => {
                      <InputAdornment position="start">
                         <Box sx={{
                            ...styles.menuIcon,
-                           filter: 'brightness(0) invert(.7)',
-                           backgroundImage: `url('/icons/search_input_icon.png')`,
+                           backgroundImage: `url('/icons/search_primary.png')`,
                            transition: '.3s',
                            "&:hover": {
                               opacity: 0.8,

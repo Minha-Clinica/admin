@@ -113,7 +113,7 @@ export const DialogNotifications = ({ notification, handleNotification = () => {
                             <Avatar src={notificationData?.imagem || notificationData?.location || ''} sx={{
                                 height: { xs: '100%', sm: 45, md: 45, lg: 60 },
                                 width: { xs: '100%', sm: 45, md: 45, lg: 60 },
-                            }} variant="circular"
+                            }} variant="rounded"
                             />
                             <Box sx={{ display: 'flex', gap: 0.5, flexDirection: 'column', flex: 1 }}>
                                 <Text small>{notificationData?.menssagem}</Text>

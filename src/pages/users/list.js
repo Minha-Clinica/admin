@@ -167,95 +167,113 @@ export default function ListUsers(props) {
     ]
 
     return (
-        <>
-            <SectionHeader
-                icon={'https://mf-planejados.s3.amazonaws.com/icon_adm_dark.svg'}
-                title={`${perfil === 'todos' ? 'Usuários' : (perfil.charAt(0).toUpperCase() + perfil.slice(1))} (${usersList?.filter(filter)?.length})`}
-                newButton={isPermissionEdit}
-                newButtonAction={() => router.push(`/${pathname}/new`)}
-            />
-            {/* <Text bold>Buscar por: </Text> */}
-            <ContentContainer>
-                <Box sx={{ display: 'flex', flex: 1, justifyContent: 'space-between' }}>
-                    <Text bold large>Filtros</Text>
-                    <Box sx={{ display: 'flex', gap: 0.5 }}>
-                        <Text style={{ color: '#d6d6d6' }} light>Mostrando</Text>
-                        <Text bold style={{ color: '#d6d6d6' }} light>{usersList?.filter(filter)?.length || '0'}</Text>
-                        <Text style={{ color: '#d6d6d6' }} light>de</Text>
-                        <Text bold style={{ color: '#d6d6d6' }} light>{usersList?.length || 0}</Text>
-                        <Text style={{ color: '#d6d6d6' }} light>usuários</Text>
-                    </Box>
-                </Box>
-                <TextInput placeholder="Buscar pelo nome.." name='filterData' type="search" onChange={(event) => setFilterData(event.target.value)} value={filterData} sx={{ flex: 1 }} />
-                <Box sx={{ display: 'flex', flex: 1, justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Box sx={{ display: 'flex', justifyContent: 'start', gap: 2, alignItems: 'center', flexDirection: 'row' }}>
-                        <SelectList
-                            data={listUser}
-                            valueSelection={filtersField?.userPerfil}
-                            onSelect={(value) => setFiltersField({ ...filtersField, userPerfil: value })}
-                            title="usuário"
-                            filterOpition="value"
-                            sx={{ flex: 1 }}
-                            inputStyle={{ color: colorPalette.textColor, fontSize: '15px' }}
-                            clean={false}
-                        />
+        <Box sx={{ display: 'flex', gap: 4, flexDirection: 'column', paddingTop: 4 }}>
+            <Box sx={{ display: 'flex', gap: 1, flex: 1, justifyContent: 'space-between', alignItems: 'center' }}>
+                <Text veryLarge bold>Clientes</Text>
+                <Box sx={{ display: 'flex', justifyContent: 'start', gap: 2, alignItems: 'center', flexDirection: 'row' }}>
+                    <TextInput placeholder="Pesquisar por cliente" name='filterData' type="search"
+                        onChange={(event) => setFilterData(event.target.value)} value={filterData}
+                        InputProps={{
+                            style: {
+                                width: 400,
+                                backgroundColor: colorPalette?.secondary,
+                                borderRadius: 16,
+                                borderColor: 'transparent', // Define a cor da borda como transparente
+                                borderStyle: 'none'
+                            }
+                        }} />
 
-                        <SelectList
-                            data={listAtivo}
-                            valueSelection={filtersField?.status}
-                            onSelect={(value) => setFiltersField({ ...filtersField, status: value })}
-                            title="status"
-                            filterOpition="value"
-                            sx={{ flex: 1 }}
-                            inputStyle={{ color: colorPalette.textColor, fontSize: '15px' }}
-                            clean={false}
-                        />
-                        <SelectList
-
-                            data={listEnrollStatus}
-                            valueSelection={filtersField?.enrollmentSituation}
-                            onSelect={(value) => setFiltersField({ ...filtersField, enrollmentSituation: value })}
-                            title="situação/matrícula"
-                            filterOpition="value"
-                            sx={{ flex: 1 }}
-                            inputStyle={{ color: colorPalette.textColor, fontSize: '15px' }}
-                            clean={false}
-                        />
-                    </Box>
-                    <Box sx={{ flex: 1, display: 'flex', justifyContent: 'end' }}>
-                        <Button secondary text="Limpar filtros" small style={{ width: 120, height: '30px' }} onClick={() => {
-                            setPerfil('todos')
-                            setFilterAtive('todos')
-                            setFilterEnrollStatus('todos')
-                            setFiltersField({
-                                enrollmentSituation: 'todos',
-                                status: 'todos',
-                                userPerfil: 'todos'
-                            })
-                            setFilterData('')
+                    <Box sx={{
+                        display: 'flex', padding: '12px', borderRadius: 3, backgroundColor: colorPalette?.secondary,
+                        boxShadow: `rgba(149, 157, 165, 0.6) 0px 6px 24px`,
+                        transition: '.3s',
+                        "&:hover": {
+                            opacity: 0.8,
+                            cursor: 'pointer'
+                        }
+                    }}>
+                        <Box sx={{
+                            ...styles.menuIcon,
+                            width: 20,
+                            height: 20,
+                            backgroundImage: `url('/icons/row.png')`,
                         }} />
                     </Box>
-                    <TablePagination
-                        component="div"
-                        count={sortUsers()?.filter(filter)?.length}
-                        page={page}
-                        onPageChange={handleChangePage}
-                        rowsPerPage={rowsPerPage}
-                        onRowsPerPageChange={handleChangeRowsPerPage}
-                        style={{ color: colorPalette.textColor }} // Define a cor do texto
-                        backIconButtonProps={{ style: { color: colorPalette.textColor } }} // Define a cor do ícone de voltar
-                        nextIconButtonProps={{ style: { color: colorPalette.textColor } }} // Define a cor do ícone de avançar
-                    />
+
+                    <Box sx={{
+                        display: 'flex', padding: '12px', borderRadius: 3, backgroundColor: colorPalette?.secondary,
+                        transition: '.3s', boxShadow: `rgba(149, 157, 165, 0.6) 0px 6px 24px`,
+                        "&:hover": {
+                            opacity: 0.8,
+                            cursor: 'pointer'
+                        }
+                    }}>
+                        <Box sx={{
+                            ...styles.menuIcon,
+                            width: 20,
+                            height: 20,
+                            backgroundImage: `url('/icons/menu-3.png')`,
+                            transition: '.3s',
+                        }} />
+                    </Box>
+
+                    <Box sx={{
+                        display: 'flex', padding: '12px', borderRadius: 3, gap: 2, backgroundColor: colorPalette?.buttonColor,
+                        transition: '.3s', boxShadow: `rgba(149, 157, 165, 0.6) 0px 6px 24px`,
+                        "&:hover": {
+                            opacity: 0.8,
+                            cursor: 'pointer'
+                        }
+                    }} onClick={() => router.push(`/${pathname}/new`)}>
+                        <Box sx={{
+                            ...styles.menuIcon,
+                            width: 20,
+                            height: 20,
+                            backgroundImage: `url('/icons/add-friend.png')`,
+                            transition: '.3s',
+                        }} />
+                        <Text bold style={{ color: '#fff' }}>Novo Cliente</Text>
+                    </Box>
                 </Box>
-            </ContentContainer>
+            </Box>
             {
                 usersList?.filter(filter)?.length > 0 ?
-                    <Table_V1 data={sortUsers()?.filter(filter).slice(startIndex, endIndex)} columns={column} columnId={'id'} enrollmentsCount={true} filters={filters} onPress={(value) => setFilters(value)} onFilter />
+                    <>
+                        <Table_V1 data={sortUsers()?.filter(filter).slice(startIndex, endIndex)} columns={column} columnId={'id'} enrollmentsCount={true} filters={filters} onPress={(value) => setFilters(value)} onFilter />
+                        <TablePagination
+                            component="div"
+                            count={sortUsers()?.filter(filter)?.length}
+                            page={page}
+                            onPageChange={handleChangePage}
+                            rowsPerPage={rowsPerPage}
+                            onRowsPerPageChange={handleChangeRowsPerPage}
+                            style={{ color: colorPalette.textColor }} // Define a cor do texto
+                            backIconButtonProps={{ style: { color: colorPalette.textColor } }} // Define a cor do ícone de voltar
+                            nextIconButtonProps={{ style: { color: colorPalette.textColor } }} // Define a cor do ícone de avançar
+                        />
+                    </>
                     :
                     <Box sx={{ alignItems: 'center', justifyContent: 'center', display: 'flex', padding: '80px 40px 0px 0px' }}>
                         <Text bold>Não foi encontrado usuarios {perfil}</Text>
                     </Box>
             }
-        </>
+        </Box>
     )
+}
+
+const styles = {
+    containerRegister: {
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        gap: 1.5,
+        padding: '40px'
+    },
+    menuIcon: {
+        backgroundSize: 'contain',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center',
+        width: 15,
+        height: 15,
+    },
 }

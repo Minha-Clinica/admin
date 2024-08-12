@@ -599,7 +599,7 @@ export default function EditTask(props) {
                                                         border: `1px solid ${theme ? '#eaeaea' : '#404040'}`
                                                     }} >
                                                         <Box sx={{ display: 'flex', gap: 2, flex: 1, padding: '10px 10px', borderRadius: '8px 8px 0px 0px', alignItems: 'center' }}>
-                                                            <Avatar src={item?.location} sx={{}} />
+                                                            <Avatar variant="rounded" src={item?.location} sx={{}} />
                                                             <Box sx={{
                                                                 display: 'flex', gap: 0.5, flex: 1, borderRadius: '8px 8px 0px 0px', alignItems: 'center',
                                                                 flexDirection: { xs: 'column', md: 'row', lg: 'row', xl: 'row' }
@@ -668,7 +668,7 @@ export default function EditTask(props) {
                                                 flexDirection: { xs: 'column', md: 'row', lg: 'row', xl: 'row' }
                                             }}>
                                                 <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column', alignItems: 'center' }}>
-                                                    <Avatar src={taskData?.foto_autor} />
+                                                    <Avatar variant="rounded" src={taskData?.foto_autor} />
                                                     <Text xsmall style={{ textAlign: 'center' }}>{taskData?.autor?.split(' ')[0]}</Text>
                                                 </Box>
                                                 <TextInput fullWidth
@@ -1164,7 +1164,7 @@ export default function EditTask(props) {
                                         flexDirection: { xs: 'column', md: 'row', lg: 'row', xl: 'row' }
                                     }}>
                                         <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column', alignItems: 'center' }}>
-                                            <Avatar src={taskData?.foto_autor} />
+                                            <Avatar variant="rounded" src={taskData?.foto_autor} />
                                             <Text xsmall style={{ textAlign: 'center' }}>{taskData?.autor?.split(' ')[0]}</Text>
                                         </Box>
                                         <TextInput fullWidth
