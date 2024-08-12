@@ -310,469 +310,470 @@ function Home() {
             <meta charset="utf-8" />
             <link rel="icon" href="https://minhaclinicatrindade.s3.amazonaws.com/Afectu+-+PNG+-+Fundo+Tranparente-8%402x.png" />
          </Head>
-         <Box sx={{ display: 'flex', gap: 1, flexDirection: 'row' }}>
+         <Box sx={{ display: 'flex', gap: 1, flexDirection: { xs: 'column', xm: 'column', md: 'row', lg: 'row' } }}>
 
-            <Box sx={{ display: 'flex', flexDirection: 'column', width: { xs: '100%', xm: '100%', md: '100%', lg: '100%' }, transition: '0.5s', marginTop: 10, padding: '10px 50px' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', width: { xs: '100%', xm: '100%', md: '100%', lg: '100%' },
+             transition: '0.5s', marginTop: { xs: 0, xm: 0, md: 10, lg: 10 }, padding: '10px 50px' }}>
 
-               <Box>
-                  {isPacient &&
-                     <>
-                        <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', marginTop: 2 }}>
+               {isPacient &&
+                  <>
+                     <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', marginTop: 2 }}>
 
-                           <Text light large>Minhas próximas Sessões.</Text>
-                           <Box sx={{ display: 'flex', gap: 2, flexDirection: 'row', }}>
+                        <Text light large>Minhas próximas Sessões.</Text>
+                        <Box sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', xm: 'column', md: 'row', lg: 'row' }}}>
 
-                              {myEvents?.filter(item => item.disponivel === 1 && (new Date(item?.start) >= new Date()))?.length > 0 ?
-                                 <Box sx={{ display: 'flex', flexDirection: 'row', gap: .5, width: '100%', }}>
-                                    {myEvents?.filter(item => item.disponivel === 1 && (new Date(item?.start) >= new Date()))?.map((item, index) => {
-                                       return (
+                           {myEvents?.filter(item => item.disponivel === 1 && (new Date(item?.start) >= new Date()))?.length > 0 ?
+                              <Box sx={{ display: 'flex', flexDirection: 'row', gap: .5, width: '100%', }}>
+                                 {myEvents?.filter(item => item.disponivel === 1 && (new Date(item?.start) >= new Date()))?.map((item, index) => {
+                                    return (
+                                       <Box sx={{
+                                          display: 'flex', gap: 1, flexDirection: 'row',
+                                          transition: '.2s',
+                                          border: '1px solid lightgray', borderRadius: 2, height: 90, backgroundColor: colorPalette?.secondary,
+                                          width: '350px'
+                                       }} key={index}>
                                           <Box sx={{
-                                             display: 'flex', gap: 1, flexDirection: 'row',
-                                             transition: '.2s',
-                                             border: '1px solid lightgray', borderRadius: 2, height: 90, backgroundColor: colorPalette?.secondary,
-                                             width: '350px'
-                                          }} key={index}>
+                                             height: '100%', width: '4px', backgroundColor: colorPalette?.buttonColor,
+                                             borderRadius: '8px 0px 0px 8px'
+                                          }} />
+                                          <Box sx={{ display: 'flex', gap: 2, padding: '8px 8px', alignItems: 'center' }}>
+                                             <Box sx={{ display: 'flex', gap: .2, flexDirection: 'column' }}>
+                                                <Text large>{horarios(item?.start)}</Text>
+                                                <Text small style={{ color: 'gray' }}>1 hora</Text>
+                                             </Box>
+                                             <Box sx={{ display: 'flex', gap: .3, flexDirection: 'column', padding: '0px 8px' }}>
+                                                <Text small bold>{item?.title}</Text>
+                                                <Text small light>{item?.nome_agendado}</Text>
+                                             </Box>
+                                             <Text bold large>{formatterHours(item?.start)}</Text>
+                                          </Box>
+                                       </Box>
+                                    )
+                                 })}
+                              </Box>
+                              :
+                              <Text>Você não possúi agendamentos futuros.</Text>
+                           }
+                        </Box>
+                     </Box>
+
+                     <Box sx={{
+                        display: 'flex', gap: 2, padding: '10px',
+                        marginTop: 5,
+                        backgroundColor: colorPalette?.secondary,
+                        boxShadow: `rgba(149, 157, 165, 0.6) 0px 6px 24px`,
+                        borderRadius: 2
+                     }}>
+                        <Box sx={{
+                           display: 'flex', gap: 2, width: '100%'
+                        }}>
+                           <Box sx={{
+                              display: 'flex', gap: 2,
+                              backgroundColor: '#fff',
+                              // boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
+                              borderRadius: 2
+                           }}>
+                              <Box sx={{ display: 'flex', width: '100%', flexDirection: 'column', gap: 1 }}>
+                                 {loadingDate ? <CircularProgress /> : <>
+                                    <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                                       <Text bold large style={{ color: colorPalette.buttonColor, textAlign: 'center' }}>AGENDA DÍSPONIVEL</Text>
+                                    </Box>
+                                    <Divider />
+                                    {calendarSessions?.length > 0 ?
+                                       <Box sx={{ display: 'flex', gap: 3, flexDirection: 'column' }}>
+                                          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'space-between' }}>
                                              <Box sx={{
-                                                height: '100%', width: '4px', backgroundColor: colorPalette?.buttonColor,
-                                                borderRadius: '8px 0px 0px 8px'
-                                             }} />
-                                             <Box sx={{ display: 'flex', gap: 2, padding: '8px 8px', alignItems: 'center' }}>
-                                                <Box sx={{ display: 'flex', gap: .2, flexDirection: 'column' }}>
-                                                   <Text large>{horarios(item?.start)}</Text>
-                                                   <Text small style={{ color: 'gray' }}>1 hora</Text>
+                                                display: 'flex', gap: 2, width: '100%', justifyContent: 'center', marginTop: 1,
+                                                alignItems: 'center'
+                                             }}>
+                                                <Calendar
+                                                   defaultActiveStartDate={new Date()}
+                                                   onChange={(date) => handleSelectedDate(date, profissionalId)}
+                                                   style={{
+                                                      border: 'none'
+                                                   }}
+                                                   tileDisabled={({ date }) =>
+                                                      !calendarHours.includes(moment(date).format("YYYY-MM-DD")
+                                                      )
+                                                   }
+                                                />
+                                             </Box>
+                                             <Box sx={{ display: 'flex', height: `100%`, width: '2px', backgroundColor: '#eaeaea' }} />
+                                             {(dateSelected?.day && dateSelected?.profissionalId === profissionalId) ?
+                                                <Box sx={{
+                                                   display: 'flex', flexDirection: 'column', gap: 1, marginTop: 1,
+                                                   justifyContent: 'flex-start', width: '100%', minWidth: 200
+                                                }}>
+                                                   <Box sx={{ display: 'flex', padding: '12px 10px', backgroundColor: colorPalette?.primary, justifyContent: 'center' }}>
+                                                      <Text bold style={{ color: colorPalette.buttonColor }}>Selecione um horário:</Text>
+                                                   </Box>
+                                                   <Box sx={{
+                                                      display: 'flex', gap: 2, width: '100%', justifyContent: 'flex-start', marginTop: 1,
+                                                   }}>
+                                                      <Box sx={{
+                                                         display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'flex-start', overflowX: 'auto',
+                                                         maxHeight: 200,
+                                                         width: '100%',
+                                                         padding: '5px 12px',
+                                                         flexDirection: 'column'
+                                                      }}>
+                                                         {calendarSessions?.filter(agend => (moment(agend.inicio).format("YYYY-MM-DD") === dateSelected?.day) &&
+                                                            (agend.disponivel === 0))?.map((hour, index) => {
+                                                               const hourFormatted = horarios(hour.inicio)
+                                                               const selected = dateSelected?.hour === hourFormatted;
+                                                               return (
+                                                                  <Box key={index} sx={{
+                                                                     display: 'flex', gap: .5, padding: '8px 12px', borderRadius: 2,
+                                                                     width: '100%',
+                                                                     backgroundColor: colorPalette.primary,
+                                                                     border: selected && `1px solid ${colorPalette?.buttonColor}`,
+                                                                     justifyContent: 'space-between',
+                                                                     alignItems: 'center',
+                                                                     "&:hover": {
+                                                                        opacity: 0.8,
+                                                                        cursor: 'pointer'
+                                                                     }
+                                                                  }} onClick={() => {
+                                                                     if (selected) {
+                                                                        setDateSelected({ ...dateSelected, hour: '', reserva_id: '' })
+                                                                     } else {
+                                                                        setDateSelected({ ...dateSelected, hour: hourFormatted, reserva_id: hour?.id_evento_calendario })
+                                                                     }
+                                                                  }}>
+                                                                     <Text large bold={selected ? true : false}>{hourFormatted}</Text>
+                                                                     {selected && <CheckCircleIcon style={{ color: 'green', fontSize: 17 }} />}
+                                                                  </Box>
+                                                               )
+                                                            })}
+                                                      </Box>
+                                                   </Box>
                                                 </Box>
-                                                <Box sx={{ display: 'flex', gap: .3, flexDirection: 'column', padding: '0px 8px' }}>
-                                                   <Text small bold>{item?.title}</Text>
-                                                   <Text small light>{item?.nome_agendado}</Text>
+                                                :
+                                                <></>
+                                             }
+                                          </Box>
+                                       </Box>
+                                       :
+                                       <Text light large style={{ textAlign: 'center' }}>Profissional sem agenda disponível</Text>
+                                    }
+                                 </>
+                                 }
+                                 <Box sx={{ display: calendarSessions?.length > 0 ? 'flex' : 'none', width: '100%', justifyContent: 'center' }}>
+                                    <Box sx={{
+                                       padding: '5px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                       width: 150,
+                                       marginTop: 3,
+                                       transition: '.5s',
+                                       gap: 2,
+                                       backgroundColor: colorPalette.buttonColor,
+                                       borderRadius: 2,
+                                       opacity: (dateSelected?.reserva_id !== '' && dateSelected?.profissionalId === profissionalId) ? 1 : 0.5,
+                                       "&:hover": {
+                                          opacity: (dateSelected?.reserva_id !== '' && dateSelected?.profissionalId === profissionalId) ? 1 : 0.5,
+                                          cursor: 'pointer',
+                                          transform: (dateSelected?.reserva_id !== '' && dateSelected?.profissionalId === profissionalId) ? 'scale(1.1, 1.1)' : 'none'
+                                       }
+                                    }} onClick={() => {
+                                       if (dateSelected?.reserva_id !== '' && dateSelected?.profissionalId === profissionalId) {
+                                          if (dateSelected?.reserva_id === '') {
+                                             alert.info('Selecione um horário antes de continuar.')
+                                          } else {
+                                             router.push(`/searchProfissional/${dateSelected?.reserva_id}?professionalId=${dateSelected?.profissionalId}`)
+                                          }
+                                       }
+                                    }}>
+                                       <Text bold style={{ color: '#fff' }}>Agendar</Text>
+                                    </Box>
+                                 </Box>
+                              </Box>
+                           </Box>
+                           <Box sx={{ display: 'flex', marginLeft: 2, height: '100%', width: '1px', backgroundColor: 'lightgray' }} />
+                           <Box sx={{ display: 'block', width: '100%' }}>
+                              <Box sx={{
+                                 display: 'flex', flexDirection: 'column', gap: 5, padding: '0px 20px',
+                                 width: '100%'
+                              }}>
+                                 <Box sx={{
+                                    display: 'flex', gap: 2, flexDirection: 'column',
+                                    width: '100%'
+                                 }}>
+                                    {subMenu?.map((item, index) => {
+                                       const isPermission = item?.permissions?.some(role => user?.perfil?.includes(role))
+                                       let routeTo = item?.queryId ? `${item?.route}/${user?.id}` : item?.route;
+                                       if (item?.queryValue) {
+                                          routeTo = routeTo += item?.queryValue
+                                       }
+
+                                       return (
+                                          <Box key={index} sx={{
+                                             display: isPermission ? 'flex' : 'none', gap: 2, flexDirection: 'column',
+                                             width: '100%'
+                                          }}>
+                                             <Box sx={{
+                                                display: 'flex', backgroundColor: colorPalette.secondary, padding: '20px',
+                                                borderRadius: 2,
+                                                alignItems: 'center', gap: 2,
+                                                justifyContent: 'space-between',
+                                                width: '100%',
+                                                transition: '.3s',
+                                                boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
+                                                "&:hover": {
+                                                   opacity: 0.8,
+                                                   cursor: 'pointer',
+                                                   transform: 'scale(1.03, 1.03)'
+                                                }
+                                             }} onClick={() => router.push(routeTo)}>
+                                                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                                                   <Box sx={{
+                                                      ...styles.menuIcon,
+                                                      backgroundImage: `url(${item?.icon})`,
+                                                      transition: '.3s',
+                                                      width: 30, height: 30,
+                                                      "&:hover": {
+                                                         opacity: 0.8,
+                                                         cursor: 'pointer'
+                                                      }
+                                                   }} />
+                                                   <Box sx={{ display: 'flex', gap: .5, alignItems: 'start', flexDirection: 'column' }}>
+                                                      <Text large bold>{item?.title}</Text>
+                                                      <Text small light>{item?.text}</Text>
+                                                   </Box>
                                                 </Box>
-                                                <Text bold large>{formatterHours(item?.start)}</Text>
+
+                                                <Box sx={{
+                                                   ...styles.menuIcon,
+                                                   backgroundImage: `url(${icons.gray_arrow_down})`,
+                                                   transform: 'rotate(-90deg)',
+                                                   transition: '.3s',
+                                                   width: 17,
+                                                   height: 17,
+                                                   "&:hover": {
+                                                      opacity: 0.8,
+                                                      cursor: 'pointer'
+                                                   },
+                                                }} />
                                              </Box>
                                           </Box>
                                        )
                                     })}
                                  </Box>
-                                 :
-                                 <Text>Você não possúi agendamentos futuros.</Text>
-                              }
+                              </Box>
                            </Box>
                         </Box>
+                     </Box>
+                  </>}
 
+               <Box sx={{ display: isPacient ? 'none' : 'flex', gap: 2, marginTop: 5, flexDirection: 'column' }}>
+                  <Box sx={{
+                     display: 'flex', gap: 2, padding: '10px 0px',
+                     width: '100%',
+                     flexDirection: { xs: 'column', xm: 'column', md: 'row', lg: 'row' },
+                     borderRadius: 2
+                  }}>
+                     <Box sx={{
+                        display: 'flex', flexDirection: 'column', gap: 5, padding: '0px 20px 0px 0px',
+                        width:  { xs: '100%', xm: '100%', md: '40%', lg: '40%' }, alignItems: 'start'
+                     }}>
+                        <Text large bold>{isPacient ? 'Atendimento' : 'Próximas Sessões'}</Text>
                         <Box sx={{
-                           display: 'flex', gap: 2, padding: '10px',
-                           marginTop: 5,
-                           backgroundColor: colorPalette?.secondary,
-                           boxShadow: `rgba(149, 157, 165, 0.6) 0px 6px 24px`,
-                           borderRadius: 2
+                           display: 'flex', gap: 2, flexDirection: 'column',
+                           width: '100%'
                         }}>
-                           <Box sx={{
-                              display: 'flex', gap: 2, width: '100%'
-                           }}>
-                              <Box sx={{
-                                 display: 'flex', gap: 2,
-                                 backgroundColor: '#fff',
-                                 // boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
-                                 borderRadius: 2
-                              }}>
-                                 <Box sx={{ display: 'flex', width: '100%', flexDirection: 'column', gap: 1 }}>
-                                    {loadingDate ? <CircularProgress /> : <>
-                                       <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-                                          <Text bold large style={{ color: colorPalette.buttonColor, textAlign: 'center' }}>AGENDA DÍSPONIVEL</Text>
-                                       </Box>
-                                       <Divider />
-                                       {calendarSessions?.length > 0 ?
-                                          <Box sx={{ display: 'flex', gap: 3, flexDirection: 'column' }}>
-                                             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'space-between' }}>
-                                                <Box sx={{
-                                                   display: 'flex', gap: 2, width: '100%', justifyContent: 'center', marginTop: 1,
-                                                   alignItems: 'center'
-                                                }}>
-                                                   <Calendar
-                                                      defaultActiveStartDate={new Date()}
-                                                      onChange={(date) => handleSelectedDate(date, profissionalId)}
-                                                      style={{
-                                                         border: 'none'
-                                                      }}
-                                                      tileDisabled={({ date }) =>
-                                                         !calendarHours.includes(moment(date).format("YYYY-MM-DD")
-                                                         )
-                                                      }
-                                                   />
-                                                </Box>
-                                                <Box sx={{ display: 'flex', height: `100%`, width: '2px', backgroundColor: '#eaeaea' }} />
-                                                {(dateSelected?.day && dateSelected?.profissionalId === profissionalId) ?
-                                                   <Box sx={{
-                                                      display: 'flex', flexDirection: 'column', gap: 1, marginTop: 1,
-                                                      justifyContent: 'flex-start', width: '100%', minWidth: 200
-                                                   }}>
-                                                      <Box sx={{ display: 'flex', padding: '12px 10px', backgroundColor: colorPalette?.primary, justifyContent: 'center' }}>
-                                                         <Text bold style={{ color: colorPalette.buttonColor }}>Selecione um horário:</Text>
-                                                      </Box>
-                                                      <Box sx={{
-                                                         display: 'flex', gap: 2, width: '100%', justifyContent: 'flex-start', marginTop: 1,
-                                                      }}>
-                                                         <Box sx={{
-                                                            display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'flex-start', overflowX: 'auto',
-                                                            maxHeight: 200,
-                                                            width: '100%',
-                                                            padding: '5px 12px',
-                                                            flexDirection: 'column'
-                                                         }}>
-                                                            {calendarSessions?.filter(agend => (moment(agend.inicio).format("YYYY-MM-DD") === dateSelected?.day) &&
-                                                               (agend.disponivel === 0))?.map((hour, index) => {
-                                                                  const hourFormatted = horarios(hour.inicio)
-                                                                  const selected = dateSelected?.hour === hourFormatted;
-                                                                  return (
-                                                                     <Box key={index} sx={{
-                                                                        display: 'flex', gap: .5, padding: '8px 12px', borderRadius: 2,
-                                                                        width: '100%',
-                                                                        backgroundColor: colorPalette.primary,
-                                                                        border: selected && `1px solid ${colorPalette?.buttonColor}`,
-                                                                        justifyContent: 'space-between',
-                                                                        alignItems: 'center',
-                                                                        "&:hover": {
-                                                                           opacity: 0.8,
-                                                                           cursor: 'pointer'
-                                                                        }
-                                                                     }} onClick={() => {
-                                                                        if (selected) {
-                                                                           setDateSelected({ ...dateSelected, hour: '', reserva_id: '' })
-                                                                        } else {
-                                                                           setDateSelected({ ...dateSelected, hour: hourFormatted, reserva_id: hour?.id_evento_calendario })
-                                                                        }
-                                                                     }}>
-                                                                        <Text large bold={selected ? true : false}>{hourFormatted}</Text>
-                                                                        {selected && <CheckCircleIcon style={{ color: 'green', fontSize: 17 }} />}
-                                                                     </Box>
-                                                                  )
-                                                               })}
-                                                         </Box>
-                                                      </Box>
-                                                   </Box>
-                                                   :
-                                                   <></>
-                                                }
-                                             </Box>
-                                          </Box>
-                                          :
-                                          <Text light large style={{ textAlign: 'center' }}>Profissional sem agenda disponível</Text>
-                                       }
-                                    </>
-                                    }
-                                    <Box sx={{ display: calendarSessions?.length > 0 ? 'flex' : 'none', width: '100%', justifyContent: 'center' }}>
-                                       <Box sx={{
-                                          padding: '5px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                          width: 150,
-                                          marginTop: 3,
-                                          transition: '.5s',
-                                          gap: 2,
-                                          backgroundColor: colorPalette.buttonColor,
-                                          borderRadius: 2,
-                                          opacity: (dateSelected?.reserva_id !== '' && dateSelected?.profissionalId === profissionalId) ? 1 : 0.5,
-                                          "&:hover": {
-                                             opacity: (dateSelected?.reserva_id !== '' && dateSelected?.profissionalId === profissionalId) ? 1 : 0.5,
-                                             cursor: 'pointer',
-                                             transform: (dateSelected?.reserva_id !== '' && dateSelected?.profissionalId === profissionalId) ? 'scale(1.1, 1.1)' : 'none'
-                                          }
-                                       }} onClick={() => {
-                                          if (dateSelected?.reserva_id !== '' && dateSelected?.profissionalId === profissionalId) {
-                                             if (dateSelected?.reserva_id === '') {
-                                                alert.info('Selecione um horário antes de continuar.')
-                                             } else {
-                                                router.push(`/searchProfissional/${dateSelected?.reserva_id}?professionalId=${dateSelected?.profissionalId}`)
-                                             }
-                                          }
-                                       }}>
-                                          <Text bold style={{ color: '#fff' }}>Agendar</Text>
-                                       </Box>
-                                    </Box>
-                                 </Box>
-                              </Box>
-                              <Box sx={{ display: 'flex', marginLeft: 2, height: '100%', width: '1px', backgroundColor: 'lightgray' }} />
-                              <Box sx={{ display: 'block', width: '100%' }}>
-                                 <Box sx={{
-                                    display: 'flex', flexDirection: 'column', gap: 5, padding: '0px 20px',
+                           {subMenu?.map((item, index) => {
+                              const isPermission = item?.permissions?.some(role => user?.perfil?.includes(role))
+                              let routeTo = item?.queryId ? `${item?.route}/${user?.id}` : item?.route;
+                              if (item?.queryValue) {
+                                 routeTo = routeTo += item?.queryValue
+                              }
+
+                              return (
+                                 <Box key={index} sx={{
+                                    display: isPermission ? 'flex' : 'none', gap: 2, flexDirection: 'column',
                                     width: '100%'
                                  }}>
                                     <Box sx={{
-                                       display: 'flex', gap: 2, flexDirection: 'column',
-                                       width: '100%'
-                                    }}>
-                                       {subMenu?.map((item, index) => {
-                                          const isPermission = item?.permissions?.some(role => user?.perfil?.includes(role))
-                                          let routeTo = item?.queryId ? `${item?.route}/${user?.id}` : item?.route;
-                                          if (item?.queryValue) {
-                                             routeTo = routeTo += item?.queryValue
-                                          }
-
-                                          return (
-                                             <Box key={index} sx={{
-                                                display: isPermission ? 'flex' : 'none', gap: 2, flexDirection: 'column',
-                                                width: '100%'
-                                             }}>
-                                                <Box sx={{
-                                                   display: 'flex', backgroundColor: colorPalette.secondary, padding: '20px',
-                                                   borderRadius: 2,
-                                                   alignItems: 'center', gap: 2,
-                                                   justifyContent: 'space-between',
-                                                   width: '100%',
-                                                   transition: '.3s',
-                                                   boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
-                                                   "&:hover": {
-                                                      opacity: 0.8,
-                                                      cursor: 'pointer',
-                                                      transform: 'scale(1.03, 1.03)'
-                                                   }
-                                                }} onClick={() => router.push(routeTo)}>
-                                                   <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                                                      <Box sx={{
-                                                         ...styles.menuIcon,
-                                                         backgroundImage: `url(${item?.icon})`,
-                                                         transition: '.3s',
-                                                         width: 30, height: 30,
-                                                         "&:hover": {
-                                                            opacity: 0.8,
-                                                            cursor: 'pointer'
-                                                         }
-                                                      }} />
-                                                      <Box sx={{ display: 'flex', gap: .5, alignItems: 'start', flexDirection: 'column' }}>
-                                                         <Text large bold>{item?.title}</Text>
-                                                         <Text small light>{item?.text}</Text>
-                                                      </Box>
-                                                   </Box>
-
-                                                   <Box sx={{
-                                                      ...styles.menuIcon,
-                                                      backgroundImage: `url(${icons.gray_arrow_down})`,
-                                                      transform: 'rotate(-90deg)',
-                                                      transition: '.3s',
-                                                      width: 17,
-                                                      height: 17,
-                                                      "&:hover": {
-                                                         opacity: 0.8,
-                                                         cursor: 'pointer'
-                                                      },
-                                                   }} />
-                                                </Box>
-                                             </Box>
-                                          )
-                                       })}
-                                    </Box>
-                                 </Box>
-                              </Box>
-                           </Box>
-                        </Box>
-                     </>}
-
-                  <Box sx={{ display: isPacient ? 'none' : 'flex', gap: 2, marginTop: 5, flexDirection: 'column' }}>
-                     <Box sx={{
-                        display: 'flex', gap: 2, padding: '10px 0px',
-                        width: '100%',
-                        borderRadius: 2
-                     }}>
-                        <Box sx={{
-                           display: 'flex', flexDirection: 'column', gap: 5, padding: '0px 20px 0px 0px',
-                           width: '40%', alignItems: 'start'
-                        }}>
-                           <Text large bold>{isPacient ? 'Atendimento' : 'Próximas Sessões'}</Text>
-                           <Box sx={{
-                              display: 'flex', gap: 2, flexDirection: 'column',
-                              width: '100%'
-                           }}>
-                              {subMenu?.map((item, index) => {
-                                 const isPermission = item?.permissions?.some(role => user?.perfil?.includes(role))
-                                 let routeTo = item?.queryId ? `${item?.route}/${user?.id}` : item?.route;
-                                 if (item?.queryValue) {
-                                    routeTo = routeTo += item?.queryValue
-                                 }
-
-                                 return (
-                                    <Box key={index} sx={{
-                                       display: isPermission ? 'flex' : 'none', gap: 2, flexDirection: 'column',
-                                       width: '100%'
-                                    }}>
-                                       <Box sx={{
-                                          display: 'flex', backgroundColor: colorPalette.secondary, padding: '20px',
-                                          borderRadius: 2,
-                                          alignItems: 'center', gap: 2,
-                                          justifyContent: 'space-between',
-                                          width: '100%',
-                                          transition: '.3s',
-                                          boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
-                                          "&:hover": {
-                                             opacity: 0.8,
-                                             cursor: 'pointer',
-                                             transform: 'scale(1.03, 1.03)'
-                                          }
-                                       }} onClick={() => router.push(routeTo)}>
-                                          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                                             <Box sx={{
-                                                ...styles.menuIcon,
-                                                backgroundImage: `url(${item?.icon})`,
-                                                transition: '.3s',
-                                                width: 30, height: 30,
-                                                aspectRatio: '1/1',
-                                                "&:hover": {
-                                                   opacity: 0.8,
-                                                   cursor: 'pointer'
-                                                }
-                                             }} />
-                                             <Box sx={{ display: 'flex', gap: .5, alignItems: 'start', flexDirection: 'column' }}>
-                                                <Text large bold>{item?.title}</Text>
-                                                <Text small light>{item?.text}</Text>
-                                             </Box>
-                                          </Box>
-
+                                       display: 'flex', backgroundColor: colorPalette.secondary, padding: '20px',
+                                       borderRadius: 2,
+                                       alignItems: 'center', gap: 2,
+                                       justifyContent: 'space-between',
+                                       width: '100%',
+                                       transition: '.3s',
+                                       boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
+                                       "&:hover": {
+                                          opacity: 0.8,
+                                          cursor: 'pointer',
+                                          transform: 'scale(1.03, 1.03)'
+                                       }
+                                    }} onClick={() => router.push(routeTo)}>
+                                       <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
                                           <Box sx={{
                                              ...styles.menuIcon,
-                                             backgroundImage: `url(${icons.gray_arrow_down})`,
-                                             transform: 'rotate(-90deg)',
+                                             backgroundImage: `url(${item?.icon})`,
                                              transition: '.3s',
-                                             width: 17,
-                                             height: 17,
+                                             width: 30, height: 30,
+                                             aspectRatio: '1/1',
                                              "&:hover": {
                                                 opacity: 0.8,
                                                 cursor: 'pointer'
-                                             },
+                                             }
                                           }} />
+                                          <Box sx={{ display: 'flex', gap: .5, alignItems: 'start', flexDirection: 'column' }}>
+                                             <Text large bold>{item?.title}</Text>
+                                             <Text small light>{item?.text}</Text>
+                                          </Box>
                                        </Box>
+
+                                       <Box sx={{
+                                          ...styles.menuIcon,
+                                          backgroundImage: `url(${icons.gray_arrow_down})`,
+                                          transform: 'rotate(-90deg)',
+                                          transition: '.3s',
+                                          width: 17,
+                                          height: 17,
+                                          "&:hover": {
+                                             opacity: 0.8,
+                                             cursor: 'pointer'
+                                          },
+                                       }} />
                                     </Box>
-                                 )
-                              })}
-                           </Box>
-                        </Box>
-
-                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'start', gap: 5, width: '100%' }}>
-                           <Text large bold>Calendário</Text>
-
-                           <BigCalendar
-                              localizer={localizer}
-                              // defaultDate={month?.start}
-                              culture="pt-br"
-                              events={myEvents?.filter(item => item.disponivel === 1)}
-                              startAccessor="start"
-                              endAccessor="end"
-                              selectable
-                              onSelectSlot={(slotInfo) => {
-                                 setEventData({
-                                    ...eventData,
-                                    start: slotInfo.start,
-                                    end: slotInfo.end,
-                                 });
-                                 setSelectedEvent(null);
-                                 setShowEventForm(true);
-                              }}
-                              onSelectEvent={handleSelectEvent}
-                              eventPropGetter={eventStyleGetter}
-                              // messages={messages}
-                              style={{
-                                 fontFamily: 'MetropolisBold',
-                                 color: colorPalette.textColor,
-                                 backgroundColor: colorPalette.secondary,
-                                 borderRadius: '12px',
-                                 boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
-                                 padding: 10,
-                                 height: 600,
-                                 width: '100%'
-                              }}
-                           />
+                                 </Box>
+                              )
+                           })}
                         </Box>
                      </Box>
+
+                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'start', gap: 5, width: '100%' }}>
+                        <Text large bold>Calendário</Text>
+
+                        <BigCalendar
+                           localizer={localizer}
+                           // defaultDate={month?.start}
+                           culture="pt-br"
+                           events={myEvents?.filter(item => item.disponivel === 1)}
+                           startAccessor="start"
+                           endAccessor="end"
+                           selectable
+                           onSelectSlot={(slotInfo) => {
+                              setEventData({
+                                 ...eventData,
+                                 start: slotInfo.start,
+                                 end: slotInfo.end,
+                              });
+                              setSelectedEvent(null);
+                              setShowEventForm(true);
+                           }}
+                           onSelectEvent={handleSelectEvent}
+                           eventPropGetter={eventStyleGetter}
+                           // messages={messages}
+                           style={{
+                              fontFamily: 'MetropolisBold',
+                              color: colorPalette.textColor,
+                              backgroundColor: colorPalette.secondary,
+                              borderRadius: '12px',
+                              boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
+                              padding: 10,
+                              height: 600,
+                              width: '100%'
+                           }}
+                        />
+                     </Box>
                   </Box>
+               </Box>
 
-                  {
-                     showEventForm && (
-                        <Backdrop open={showEventForm} sx={{ zIndex: 999 }}>
-                           <ContentContainer style={{ maxWidth: { md: '1200px', lg: 900, xl: 1500 }, maxHeight: { md: '180px', lg: '600px', xl: '1200px' }, overflowY: 'auto', width: 400 }}>
-                              <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                                 <Text bold large>{eventData?.title}</Text>
-                                 <Box sx={{
-                                    ...styles.menuIcon,
-                                    backgroundImage: `url(${icons.gray_close})`,
-                                    transition: '.3s',
-                                    zIndex: 999999999,
-                                    "&:hover": {
-                                       opacity: 0.8,
-                                       cursor: 'pointer'
-                                    }
-                                 }} onClick={() => {
-                                    setShowEventForm(false)
-                                    setEventData({
-                                       title: "",
-                                       description: "",
-                                       location: "",
-                                       color: "#007BFF",
-                                       start: '',
-                                       end: '',
-                                       title: '',
-                                       description: '',
-                                       location: '',
-                                       usuario_agendado: '',
-                                       email_agendado: '',
-                                       nome_agendado: '',
-                                       nome_usuario_agendado: '',
-                                       disponivel: 0,
-                                       usuario_id: '',
-                                       allDay: false
-                                    });
-                                 }} />
-                              </Box>
-                              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                                 <Box sx={{ display: "flex", flexDirection: "row", gap: .5 }}>
-                                    <Text bold>Inicio:</Text>
-                                    <Text>{horarios(eventData?.start)}</Text>
-                                 </Box>
-                                 <Box sx={{ display: "flex", flexDirection: "row", gap: .5 }}>
-                                    <Text bold>Fim:</Text>
-                                    <Text>{horarios(eventData?.end)}</Text>
-                                 </Box>
-                              </Box>
-                              <Divider />
-                              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto', maxHeight: 600, paddingTop: 3 }}>
-                                 <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
-                                    <Text bold>Titulo: </Text>
-                                    <Text>{eventData?.title || ''}</Text>
-                                 </Box>
-                                 <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
-                                    <Text bold>Descrição do evento: </Text>
-                                    <Text>{eventData.description || ''}</Text>
-                                 </Box>
-                                 <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
-                                    <Text bold>Localização do evento: </Text>
-                                    <Text>{eventData.location || ''}</Text>
-                                 </Box>
-                                 <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
-                                    <Text bold>E-mail agendado: </Text>
-                                    <Text>{eventData?.email_agendado || ''}</Text>
-                                 </Box>
-                                 <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
-                                    <Text bold>Nome agendado: </Text>
-                                    <Text>{eventData?.nome_agendado || ''}</Text>
-                                 </Box>
-                                 <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
-                                    <Text bold>Paciente: </Text>
-                                    <Text>{eventData?.nome_usuario_agendado || ''}</Text>
-                                 </Box>
-
-                                 <Divider />
-
-                                 {eventData?.consulta_id &&
-                                    <Link href={`/consultation/${eventData?.consulta_id}`} target="_blank">
-                                       <Button
-                                          secondary
-                                          small
-                                          text="Prontuário"
-                                          style={{ height: 30, width: 120 }}
-                                       />
-                                    </Link>
+               {
+                  showEventForm && (
+                     <Backdrop open={showEventForm} sx={{ zIndex: 999 }}>
+                        <ContentContainer style={{ maxWidth: { md: '1200px', lg: 900, xl: 1500 }, maxHeight: { md: '180px', lg: '600px', xl: '1200px' }, overflowY: 'auto', width: 400 }}>
+                           <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                              <Text bold large>{eventData?.title}</Text>
+                              <Box sx={{
+                                 ...styles.menuIcon,
+                                 backgroundImage: `url(${icons.gray_close})`,
+                                 transition: '.3s',
+                                 zIndex: 999999999,
+                                 "&:hover": {
+                                    opacity: 0.8,
+                                    cursor: 'pointer'
                                  }
+                              }} onClick={() => {
+                                 setShowEventForm(false)
+                                 setEventData({
+                                    title: "",
+                                    description: "",
+                                    location: "",
+                                    color: "#007BFF",
+                                    start: '',
+                                    end: '',
+                                    title: '',
+                                    description: '',
+                                    location: '',
+                                    usuario_agendado: '',
+                                    email_agendado: '',
+                                    nome_agendado: '',
+                                    nome_usuario_agendado: '',
+                                    disponivel: 0,
+                                    usuario_id: '',
+                                    allDay: false
+                                 });
+                              }} />
+                           </Box>
+                           <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                              <Box sx={{ display: "flex", flexDirection: "row", gap: .5 }}>
+                                 <Text bold>Inicio:</Text>
+                                 <Text>{horarios(eventData?.start)}</Text>
                               </Box>
-                           </ContentContainer>
-                        </Backdrop >
-                     )
-                  }
+                              <Box sx={{ display: "flex", flexDirection: "row", gap: .5 }}>
+                                 <Text bold>Fim:</Text>
+                                 <Text>{horarios(eventData?.end)}</Text>
+                              </Box>
+                           </Box>
+                           <Divider />
+                           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto', maxHeight: 600, paddingTop: 3 }}>
+                              <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                                 <Text bold>Titulo: </Text>
+                                 <Text>{eventData?.title || ''}</Text>
+                              </Box>
+                              <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                                 <Text bold>Descrição do evento: </Text>
+                                 <Text>{eventData.description || ''}</Text>
+                              </Box>
+                              <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                                 <Text bold>Localização do evento: </Text>
+                                 <Text>{eventData.location || ''}</Text>
+                              </Box>
+                              <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                                 <Text bold>E-mail agendado: </Text>
+                                 <Text>{eventData?.email_agendado || ''}</Text>
+                              </Box>
+                              <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                                 <Text bold>Nome agendado: </Text>
+                                 <Text>{eventData?.nome_agendado || ''}</Text>
+                              </Box>
+                              <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                                 <Text bold>Paciente: </Text>
+                                 <Text>{eventData?.nome_usuario_agendado || ''}</Text>
+                              </Box>
 
-                  {/* Primeira fase */}
-                  {/* <Box sx={{ display: isPacient ? 'none' : 'flex', gap: 5, flexDirection: 'column', marginTop: 5, alignItems: 'center' }}>
+                              <Divider />
+
+                              {eventData?.consulta_id &&
+                                 <Link href={`/consultation/${eventData?.consulta_id}`} target="_blank">
+                                    <Button
+                                       secondary
+                                       small
+                                       text="Prontuário"
+                                       style={{ height: 30, width: 120 }}
+                                    />
+                                 </Link>
+                              }
+                           </Box>
+                        </ContentContainer>
+                     </Backdrop >
+                  )
+               }
+
+               {/* Primeira fase */}
+               {/* <Box sx={{ display: isPacient ? 'none' : 'flex', gap: 5, flexDirection: 'column', marginTop: 5, alignItems: 'center' }}>
                      <Text bold title style={{ textAlign: 'center' }}>Assine agora o plano e aprovaite o melhor da plataforma!</Text>
 
                      <Box sx={{ display: 'flex', gap: 5, width: '100%', justifyContent: 'center' }}>
@@ -826,7 +827,6 @@ function Home() {
                         })}
                      </Box>
                   </Box> */}
-               </Box>
             </Box>
          </Box>
       </>
