@@ -89,11 +89,27 @@ export const LeftMenu = ({ }) => {
    return (
       <>
          <Box sx={{
-            ...styles.leftMenuMainContainer, backgroundColor: colorPalette.third, border: `1px solid rgb(255 255 255 / 0.1)`, transition: 'background-color 1s', ...(showMenuMobile && { display: 'flex' }),
+            ...styles.leftMenuMainContainer, backgroundColor: colorPalette.secondary, border: `1px solid rgb(255 255 255 / 0.1)`, transition: 'background-color 1s', ...(showMenuMobile && { display: 'flex' }),
             width: !showMenuHelp ? 70 : { xs: '214px', sm: '214px', md: '180px', lg: '220px', xl: '220px' }, transition: '.3s'
          }}>
+
+            <Box sx={{
+               ...styles.icon,
+               display: !showMenuHelp ? 'none' : 'flex',
+               transition: 0,
+               top: 0,
+               left: 0,
+               backgroundImage: `url('/icons/afectu_dark.png')`,
+               backgroundSize: 'cover',
+               position: 'absolute',
+               width: '180px',
+               height: '65px',
+               "&:hover": {
+                  cursor: 'pointer', opacity: 0.8
+               }
+            }} onClick={() => router.push('/')} />
             <Box sx={{ position: 'fixed', height: '100%', width: !showMenuHelp ? 70 : { xs: '214px', sm: '214px', md: '180px', lg: '220px', xl: '220px' }, padding: { xs: '10px 15px', sm: '10px 15px', md: '8px 10px', lg: showMenuHelp ? '8px 20px' : '8px 10px', xl: '10px 15px' } }}>
-               <Box sx={{ display: 'flex', position: 'absolute', right: 10, top: -35 }}>
+               <Box sx={{ display: 'flex', position: 'absolute', right: 10, top: -28 }}>
                   <Hamburger
                      toggled={showMenuHelp}
                      toggle={() => {
@@ -102,15 +118,16 @@ export const LeftMenu = ({ }) => {
                      }}
                      duration={0.5}
                      size={20}
-                     color={'#fff'}
+                  // color={'#fff'}
                   />
                </Box>
                <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
 
                   <Box sx={{
                      ...styles.icon,
+                     display: showMenuHelp ? 'none' : 'flex',
                      transition: 0,
-                     backgroundImage: !showMenuHelp ? `url('/icons/afectu_icon_menu.png')` : `url('/icons/afectu_icon.png')`,
+                     backgroundImage: !showMenuHelp ? `url('/icons/afectu_icon_menu.png')` : `url('/icons/afectu_dark.png')`,
                      backgroundSize: 'cover',
                      width: !showMenuHelp ? '103px' : '140px',
                      height: !showMenuHelp ? '70px' : '90px',
@@ -124,7 +141,8 @@ export const LeftMenu = ({ }) => {
                   </Box>
                </Box>
                <Divider distance={4} color={'rgb(255 255 255 / 0.1)'} />
-               <Box sx={{ ...styles.boxMenu, ...(showMenuMobile && { overflowY: 'auto' }), ...(!showMenuHelp && { width: 40, marginLeft: 1, gap: 2 }) }}>
+               <Box sx={{ ...styles.boxMenu, marginTop: 2, ...(showMenuMobile && { overflowY: 'auto' }), ...(!showMenuHelp && { width: 40, marginLeft: 1, gap: 2 }) }}>
+                  {showMenuHelp && <Text light large style={{ color: 'gray', padding: '15px 10px' }}>Menu</Text>}
                   {menuItems.map((group, index) => {
                      const userProfiles = user?.perfil?.split(',').map(profile => profile.trim()) || [];
                      const visibleItems = group.permissions?.filter(item =>
@@ -160,8 +178,12 @@ export const LeftMenu = ({ }) => {
                                  }
                               }} >
                                  <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: 1.5, position: 'relative', alignItems: 'center', position: 'relative' }}>
-                                    <Box sx={{ ...styles.icon, backgroundImage: `url(${group?.icon})`, width: group.text === 'Administrativo' ? 15 : 18, height: group.text === 'Administrativo' ? 24 : 18, filter: 'brightness(0) invert(1)', transition: 'background-color 1s' }} />
-                                    {<Text bold style={{ color: (pathname === group.to) ? colorPalette?.buttonColor : '#fff', transition: 'background-color 1s', }}>
+                                    <Box sx={{
+                                       ...styles.icon, backgroundImage: `url(${group?.icon})`, width: group.text === 'Administrativo' ? 15 : 18,
+                                       height: 18, 
+                                       transition: 'background-color 1s'
+                                    }} />
+                                    {<Text bold style={{ color: (pathname === group.to) ? colorPalette?.buttonColor : 'gray', transition: 'background-color 1s', }}>
                                        {group?.text}
                                     </Text>}
                                  </Box>
@@ -184,7 +206,10 @@ export const LeftMenu = ({ }) => {
                                     backgroundColor: '#f0f0f0' + '22'
                                  }
                               }} >
-                                 <Box sx={{ ...styles.icon, backgroundImage: `url(${group?.icon})`, width: group.text === 'Administrativo' ? 15 : 18, height: group.text === 'Administrativo' ? 24 : 18, filter: 'brightness(0) invert(1)', transition: 'background-color 1s' }} />
+                                 <Box sx={{
+                                    ...styles.icon, backgroundImage: `url(${group?.icon})`, width: group.text === 'Administrativo' ? 15 : 18, height: group.text === 'Administrativo' ? 24 : 18,
+                                     transition: 'background-color 1s'
+                                 }} />
                               </Box>
 
                               {!showMenuMobile ?
@@ -477,12 +502,13 @@ const styles = {
       gap: 1,
       zIndex: 999999999,
       position: { xs: 'fixed', sm: 'absolute', md: 'relative', lg: 'relative' },
+      boxShadow: `rgba(149, 157, 165, 0.6) 0px 6px 24px`,
+
    },
    boxMenu: {
       display: 'flex',
       flexDirection: 'column',
       // gap: 1,
-      marginTop: 5,
       overflowStyle: 'marquee,panner',
       maxHeight: { xs: '480px', sm: '480px', md: '480px', lg: '480px', xl: '850px' },
       overflowY: 'auto',
@@ -504,6 +530,7 @@ const styles = {
          backgroundColor: Colors.primary,
 
       },
+
    },
    userBox: {
       backgroundColor: '#00000017',

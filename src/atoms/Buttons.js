@@ -46,22 +46,19 @@ export const Button = (props) => {
                cursor: !disabled && 'pointer'
             },
             ...(secondary && {
-               backgroundColor: 'transparent',
-               color: colorPalette.buttonColor,
+               backgroundColor: '#C9C9C9',
+               color: colorPalette.secondary,
                // border: `1px solid ${!theme ? '#fff': 'black'}`,
-               border: `1px solid ${colorPalette.buttonColor}`,
                boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
                "&:hover": {
-                  backgroundColor: colorPalette.buttonColor + '33',
+                  opacity: 0.8,
                   cursor: !disabled && 'pointer'
                }
             }),
             ...(tertiary && {
-               backgroundColor: Colors.background,
-               color: '#fff',
-               border: `1px solid #d1d9dd`,
+               backgroundColor: '#FFB91D',
                "&:hover": {
-                  backgroundColor: '#e0e5e7',
+                  opacity: .8,
                   cursor: !disabled && 'pointer'
                }
             }),

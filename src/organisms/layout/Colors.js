@@ -14,14 +14,14 @@ export const Colors = {
    darkPrimary: '#111827' + `88`,
    darkSecondary: '#111827',
    darkThird: '#1F2044',
-   darkButton: '#2E93EE',
+   darkButton: '#F9604B',
    darkText: '#FFFFFF',
    darkInput: '#1B1829',
 
    clearPrimary: '#F2F4F8',
    clearSecondary: '#FFFFFF',
    clearThird: '#1F2044',
-   clearButton: '#2E93EE',
+   clearButton: '#F9604B',
    clearText: '#1C2126',
    clearInput: '#F2F4F8',
 }

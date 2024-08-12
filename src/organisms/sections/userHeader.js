@@ -79,39 +79,20 @@ export const UserHeader = (props) => {
     return (
         <>
             <Box sx={{ ...styles.header, backgroundColor: colorPalette.secondary, gap: 2 }}>
-                <Box sx={{ gap: 2, display: 'flex', alignItems: 'center', marginLeft: 10 }}>
-                    <Box sx={{
-                        ...styles.menuIcon,
-                        backgroundImage: `url(${icons.home})`,
-                        width: 17,
-                        height: 17,
-                        filter: theme ? 'brightness(0) invert(0)' : 'brightness(0) invert(1)',
-                        transition: 'background-color 1s',
-                        "&:hover": {
-                            opacity: 0.8,
-                            cursor: 'pointer'
-                        }
-                    }} onClick={() => router.push('/')} />
-                    <Box sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 0.5,
-                        "&:hover": {
-                            opacity: 0.8,
-                            cursor: 'pointer'
-                        }
-                    }} onClick={() => handleGoBack()}>
-                        <Box sx={{
-                            ...styles.menuIcon,
-                            backgroundImage: `url(${icons.goback})`,
-                            filter: theme ? 'brightness(0) invert(0)' : 'brightness(0) invert(1)',
-                            transition: '.3s',
-                            aspectRatio: '1/1'
-                        }} />
-                        <Text small sx={{}}>Voltar</Text>
-                    </Box>
+                <Box sx={{ gap: 2, display: 'flex', alignItems: 'center', marginLeft: 15 }}>
                     <Box sx={{ width: 400, display: 'flex', marginLeft: 10 }}>
-                        <TextInput placeholder="Buscar pelo paciente" type="search" InputProps={{ style: { height: 35, fontSize: '13px', width: 400, borderRadius: 8 } }} />
+                        <TextInput placeholder="Buscar pelo paciente" type="search"
+                            InputProps={{
+                                style: {
+                                    height: 45,
+                                    fontSize: '13px',
+                                    width: 400,
+                                    borderRadius: 32,
+                                    borderColor: 'transparent', // Define a cor da borda como transparente
+                                    borderWidth: 1, // Ajusta a largura da borda se necessário
+                                    borderStyle: 'solid'
+                                }
+                            }} />
                     </Box>
                 </Box>
                 {/* <IconTheme flex /> */}
@@ -360,7 +341,7 @@ const styles = {
     header: {
         display: { xs: 'none', sm: 'none', md: 'flex', lg: 'flex' },
         width: '100%',
-        padding: `8px 32px 8px 32px`,
+        padding: `20px 32px 20px 32px`,
         alignItems: 'center',
         justifyContent: 'space-between',
         boxSizing: 'border-box',

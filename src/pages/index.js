@@ -314,7 +314,7 @@ function Home() {
             <Box sx={{ display: 'flex', flexDirection: 'column', width: { xs: '100%', xm: '100%', md: '100%', lg: '100%' }, transition: '0.5s', marginTop: 10, padding: '10px 50px' }}>
 
                <Box>
-                  <Box sx={{ display: 'flex', flexDirection: { xs: 'column', xm: 'row', md: 'row', lg: 'row' }, alignItems: 'center', gap: 2 }}>
+                  {/* <Box sx={{ display: 'flex', flexDirection: { xs: 'column', xm: 'row', md: 'row', lg: 'row' }, alignItems: 'center', gap: 2 }}>
                      <Text
                         bold
                         veryLarge
@@ -324,7 +324,7 @@ function Home() {
                            {user?.nome}!
                         </Text>
                      </Text>
-                  </Box>
+                  </Box> */}
 
 
                   <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', marginTop: 2 }}>

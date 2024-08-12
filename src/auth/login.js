@@ -413,12 +413,12 @@ export default function Login() {
                                     style={{
                                         width: '205px',
                                         padding: '10px 30px',
+                                        backgroundColor: '#FFB91D',
                                         marginBottom: 5,
                                         borderRadius: '100px',
-                                        border: `1px solid ${colorPalette.buttonColor}`,
                                         transition: 'background-color 1s',
                                         "&:hover": {
-                                            backgroundColor: colorPalette.buttonColor + '22',
+                                            opacity: .8,
                                             cursor: 'pointer'
                                         },
                                         display: 'flex',
@@ -433,7 +433,7 @@ export default function Login() {
                                         setShowRedefinitionPass(true)
                                     }}
                                 >
-                                    <Text small bold style={{ color: colorPalette.buttonColor }}>Redefinir</Text>
+                                    <Text small bold style={{ color: colorPalette.secondary }}>Redefinir</Text>
                                 </Button>
                             </form>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: .5, justifyContent: 'center', width: '100%' }}>
