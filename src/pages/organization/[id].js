@@ -1,9 +1,9 @@
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
-import { useMediaQuery, useTheme } from "@mui/material"
+import { TablePagination, useMediaQuery, useTheme } from "@mui/material"
 import { api } from "../../api/api"
 import { Box, ContentContainer, TextInput, Text, Button } from "../../atoms"
-import { RadioItem, SectionHeader, Sectioner } from "../../organisms"
+import { RadioItem, SectionHeader, Sectioner, Table_V1 } from "../../organisms"
 import { useAppContext } from "../../context/AppContext"
 import { formatCEP, formatCNPJ } from "../../helpers"
 import { checkUserPermissions } from "../../validators/checkPermissionUser"
@@ -13,6 +13,7 @@ import { CopyAll } from '@mui/icons-material';
 export default function EditCompany(props) {
     const { setLoading, alert, colorPalette, user, setShowConfirmationDialog, userPermissions, menuItemsList } = useAppContext()
     let userId = user?.id;
+    const isPartner = user?.perfil?.includes('parceiro')
     const router = useRouter()
     const { id } = router.query;
     const newCompany = id === 'new';
@@ -26,6 +27,10 @@ export default function EditCompany(props) {
     })
     const [isPermissionEdit, setIsPermissionEdit] = useState(false)
     const [linkRegisterUser, setLinkRegisterUser] = useState('')
+    const [employees, setEmployees] = useState([])
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [filterData, setFilterData] = useState('')
 
     const fetchPermissions = async () => {
         try {
@@ -55,6 +60,20 @@ export default function EditCompany(props) {
         setLoading(false)
     }
 
+    const getEmployees = async () => {
+        setLoading(true)
+        try {
+            const response = await api.get(`/users/employee/${id}`)
+            const { data = [] } = response;
+            setEmployees(data)
+        } catch (error) {
+            console.log(error)
+            return error
+        } finally {
+            setLoading(false)
+        }
+    }
+
     useEffect(() => {
         (async () => {
             if (newCompany) {
@@ -73,6 +92,7 @@ export default function EditCompany(props) {
         setLoading(true)
         try {
             await getCompany()
+            await getEmployees()
 
         } catch (error) {
             alert.error('Ocorreu um arro ao carregar A Empresa')
@@ -160,34 +180,6 @@ export default function EditCompany(props) {
         }
     }
 
-    const handleBlurCEP = (event) => {
-        const { value, name } = event.target;
-        findCEP(value, name);
-    };
-
-    async function findCEP(cep, name) {
-        setLoading(true)
-        try {
-            const response = await axios.get(`https://viacep.com.br/ws/${cep}/json/`)
-            const { data } = response;
-
-            let fields = {
-                rua: data.logradouro,
-                cidade: data.localidade,
-                uf: data.uf,
-                bairro: data.bairro
-            }
-            setCompanyData((prevValues) => ({
-                ...prevValues,
-                ...fields
-            }))
-        } catch (error) {
-        } finally {
-            setLoading(false)
-        }
-
-    }
-
     const generateKey = (length = 10) => {
         const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
         let result = '';
@@ -206,13 +198,13 @@ export default function EditCompany(props) {
 
     const copyToClipboard = () => {
         navigator.clipboard.writeText(linkRegisterUser)
-          .then(() => {
-            alert.info('Link copiado para a área de transferência!');
-          })
-          .catch(err => {
-            console.error('Erro ao copiar o link: ', err);
-          });
-      };
+            .then(() => {
+                alert.info('Link copiado para a área de transferência!');
+            })
+            .catch(err => {
+                console.error('Erro ao copiar o link: ', err);
+            });
+    };
 
     const groupStatus = [
         { label: 'ativo', value: 1 },
@@ -224,14 +216,32 @@ export default function EditCompany(props) {
         currency: 'BRL'
     });
 
+    const handleChangePage = (event, newPage) => {
+        setPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (event) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
+    };
+
+    const startIndex = page * rowsPerPage;
+    const endIndex = startIndex + rowsPerPage;
+
+    const column = [
+        { key: 'nome', avatar: true, label: 'Nome', avatarUrl: 'location' },
+        { key: 'email', label: 'E-mail' },
+        { key: 'telefone', label: 'Telefone' },
+    ];
+
 
     return (
         <>
             <SectionHeader
                 title={companyData?.razao_social || `Empresas`}
                 saveButton={isPermissionEdit}
-                saveButtonAction={newCompany ? handleCreateCompany : handleEditCompany}
-                deleteButton={!newCompany && isPermissionEdit}
+                saveButtonAction={(newCompany) ? handleCreateCompany : handleEditCompany}
+                deleteButton={!newCompany && isPermissionEdit && !isPartner}
                 deleteButtonAction={(event) => setShowConfirmationDialog({ active: true, event, acceptAction: handleDeleteCompany })}
             />
             <ContentContainer style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 1.8, padding: 5, }}>
@@ -246,7 +256,7 @@ export default function EditCompany(props) {
                     <TextInput disabled={!isPermissionEdit && true} placeholder='CNPJ' name='cnpj' onChange={handleChange} value={companyData?.cnpj || ''} label='CNPJ' sx={{ flex: 1, }} />
                     <Box sx={{ display: 'flex', gap: 1 }}>
                         <TextInput disabled={!isPermissionEdit && true} placeholder='Código de Acesso' name='cod_key' onChange={handleChange} value={companyData?.cod_key || ''} label='Código de Acesso' sx={{ flex: 1, }} />
-                        <Button text="Gerar chave" onClick={() => generateKey(12)} />
+                       <Button text="Gerar chave" onClick={() => generateKey(12)} />
                     </Box>
                 </Box>
                 <Box sx={{ display: 'flex', gap: 1 }}>
@@ -272,21 +282,64 @@ export default function EditCompany(props) {
 
             </ContentContainer>
 
-            <ContentContainer style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 1.8, padding: 5, }}>
-                <Text bold >Endereço</Text>
+            <Box sx={{ display: !newCompany ? 'flex' : 'none', flexDirection: 'column', justifyContent: 'space-between', gap: 1.8, width: '100%' }}>
+                <Box sx={{ display: 'flex', gap: 1, flex: 1, justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Text veryLarge bold>Colaboradores</Text>
+                    <Box sx={{ display: 'flex', justifyContent: 'start', gap: 2, alignItems: 'center', flexDirection: 'row' }}>
+                        <TextInput placeholder="Pesquisar por colaborador" name='filterData' type="search"
+                            onChange={(event) => setFilterData(event.target.value)} value={filterData}
+                            InputProps={{
+                                style: {
+                                    width: 400,
+                                    backgroundColor: colorPalette?.secondary,
+                                    borderRadius: 16,
+                                    borderColor: 'transparent', // Define a cor da borda como transparente
+                                    borderStyle: 'none'
+                                }
+                            }} />
 
-                <Box sx={styles.inputSection}>
-                    <TextInput disabled={!isPermissionEdit && true} placeholder='CEP' name='cep' onChange={handleChange} value={companyData?.cep || ''} label='CEP *' onBlur={handleBlurCEP} sx={{ flex: 1, }} />
-                    <TextInput disabled={!isPermissionEdit && true} placeholder='Endereço' name='rua' onChange={handleChange} value={companyData?.rua || ''} label='Endereço *' sx={{ flex: 1, }} />
-                    <TextInput disabled={!isPermissionEdit && true} placeholder='Nº' name='numero' onChange={handleChange} value={companyData?.numero || ''} label='Nº *' sx={{ flex: 1, }} />
+                        <Box sx={{
+                            display: 'flex', padding: '12px', borderRadius: 3, gap: 2, backgroundColor: colorPalette?.buttonColor,
+                            transition: '.3s', boxShadow: `rgba(149, 157, 165, 0.6) 0px 6px 24px`,
+                            "&:hover": {
+                                opacity: 0.8,
+                                cursor: 'pointer'
+                            }
+                        }} onClick={() => router.push(`/users/new?company=${id}`)}>
+                            <Box sx={{
+                                ...styles.menuIcon,
+                                width: 20,
+                                height: 20,
+                                backgroundImage: `url('/icons/add-friend.png')`,
+                                transition: '.3s',
+                            }} />
+                            <Text bold style={{ color: '#fff' }}>Novo Colaborador</Text>
+                        </Box>
+                    </Box>
                 </Box>
-                <Box sx={styles.inputSection}>
-                    <TextInput disabled={!isPermissionEdit && true} placeholder='Cidade' name='cidade' onChange={handleChange} value={companyData?.cidade || ''} label='Cidade *' sx={{ flex: 1, }} />
-                    <TextInput disabled={!isPermissionEdit && true} placeholder='UF' name='uf' onChange={handleChange} value={companyData?.uf || ''} label='UF *' sx={{ flex: 1, }} />
-                    <TextInput disabled={!isPermissionEdit && true} placeholder='Bairro' name='bairro' onChange={handleChange} value={companyData?.bairro || ''} label='Bairro *' sx={{ flex: 1, }} />
-                    <TextInput disabled={!isPermissionEdit && true} placeholder='Complemento' name='complemento' onChange={handleChange} value={companyData?.complemento || ''} label='Complemento' sx={{ flex: 1, }} />
-                </Box>
-            </ContentContainer>
+
+                {
+                    employees?.length > 0 ?
+                        <>
+                            <Table_V1 targetBlank={true} route="users" data={employees.slice(startIndex, endIndex)} columns={column} columnId={'id'} columnActive={false} />
+                            <TablePagination
+                                component="div"
+                                count={employees?.length}
+                                page={page}
+                                onPageChange={handleChangePage}
+                                rowsPerPage={rowsPerPage}
+                                onRowsPerPageChange={handleChangeRowsPerPage}
+                                style={{ color: colorPalette.textColor }} // Define a cor do texto
+                                backIconButtonProps={{ style: { color: colorPalette.textColor } }} // Define a cor do ícone de voltar
+                                nextIconButtonProps={{ style: { color: colorPalette.textColor } }} // Define a cor do ícone de avançar
+                            />
+                        </>
+                        :
+                        <Box sx={{ alignItems: 'center', justifyContent: 'center', display: 'flex', padding: '80px 40px 0px 0px' }}>
+                            <Text light>Não existem colaboradores vínculados á essa empresa.</Text>
+                        </Box>
+                }
+            </Box>
         </>
     )
 }

@@ -7,7 +7,7 @@ import { Box, ContentContainer, TextInput, Text, Button, PhoneInputField, FileIn
 import { CheckBoxComponent, CustomDropzone, RadioItem, SectionHeader, TableOfficeHours, Table_V1 } from "../../organisms"
 import { useAppContext } from "../../context/AppContext"
 import { icons } from "../../organisms/layout/Colors"
-import { createContract, createEnrollment, createUser, deleteFile, deleteUser, editContract, editeEnrollment, editeUser } from "../../validators/api-requests"
+import { createUser, deleteFile, deleteUser, editContract, editeEnrollment, editeUser } from "../../validators/api-requests"
 import { emailValidator, formatCEP, formatCPF, formatDate, formatRg, formatTimeStamp } from "../../helpers"
 import { SelectList } from "../../organisms/select/SelectList"
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -18,11 +18,11 @@ export default function EditUser() {
     const { setLoading, alert, colorPalette, user, matches, theme, setShowConfirmationDialog, menuItemsList, userPermissions } = useAppContext()
     const usuario_id = user.id;
     const router = useRouter()
-    const { id, menuScreen } = router.query;
+    const { id, menuScreen, company } = router.query;
     const menu = menuScreen ? menuScreen : `userData`;
     const newUser = id === 'new';
     const [fileCallback, setFileCallback] = useState()
-    const [selectedMenu, setSelectedMenu] = useState(menu)
+    const [companies, setCompanyList] = useState([])
     const [bgPhoto, setBgPhoto] = useState({})
     const [userData, setUserData] = useState({
         cpf: null,
@@ -51,10 +51,7 @@ export default function EditUser() {
         agencia_2: null,
         tipo_conta_2: null
     })
-    const [groupPermissions, setGroupPermissions] = useState([])
-    const [permissionPerfil, setPermissionPerfil] = useState()
-    const [permissionPerfilBefore, setPermissionPerfilBefore] = useState()
-    const [showContract, setShowContract] = useState(false)
+
     const themeApp = useTheme()
     const mobile = useMediaQuery(themeApp.breakpoints.down('sm'))
     const [showSections, setShowSections] = useState({
@@ -66,16 +63,7 @@ export default function EditUser() {
         photoProfile: false,
         cpf: false
     })
-    const isProfissional = user?.perfil?.includes('profissional')
     const [filesUser, setFilesUser] = useState([])
-    const [officeHours, setOfficeHours] = useState([
-        { dia_semana: '2ª Feira', ent1: null, sai1: null, ent2: null, sai2: null, ent3: null, sai3: null },
-        { dia_semana: '3ª Feira', ent1: null, sai1: null, ent2: null, sai2: null, ent3: null, sai3: null },
-        { dia_semana: '4ª Feira', ent1: null, sai1: null, ent2: null, sai2: null, ent3: null, sai3: null },
-        { dia_semana: '5ª Feira', ent1: null, sai1: null, ent2: null, sai2: null, ent3: null, sai3: null },
-        { dia_semana: '6ª Feira', ent1: null, sai1: null, ent2: null, sai2: null, ent3: null, sai3: null },
-        { dia_semana: 'Sábado', ent1: null, sai1: null, ent2: null, sai2: null, ent3: null, sai3: null },
-    ]);
     const [isPermissionEdit, setIsPermissionEdit] = useState(false)
     const isAdministrador = user?.perfil?.includes('administrador');
 
@@ -98,22 +86,27 @@ export default function EditUser() {
         try {
             const response = await api.get(`/user/${id}`)
             const { data } = response
-            setUserData(data.response)
+            setUserData(data)
         } catch (error) {
             console.log(error)
             return error
         }
     }
 
-
-    const getContract = async () => {
+    const getCompany = async () => {
+        setLoading(true)
         try {
-            const response = await api.get(`/contract/${id}`)
-            const { data } = response
-            setContract(data)
+            const response = await api.get('/companies')
+            const { data = [] } = response;
+            const companiesData = data.map((item) => ({
+                label: item.razao_social,
+                value: item.id_empresa
+            }))
+            setCompanyList(companiesData)
         } catch (error) {
             console.log(error)
-            return error
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -152,31 +145,6 @@ export default function EditUser() {
     }
 
 
-    const getContractStudent = async () => {
-        try {
-            const response = await api.get(`/student/enrollment/contracts/${id}`)
-            const { data } = response
-            if (data.length > 0) {
-                setContractStudent(data)
-            }
-        } catch (error) {
-            console.log(error)
-        }
-    }
-
-    const getOfficeHours = async () => {
-        try {
-            const response = await api.get(`/officeHours/${id}`)
-            const { data = [] } = response
-            if (data.length > 0) {
-                setOfficeHours(data)
-                return
-            }
-        } catch (error) {
-            console.log(error)
-            return error
-        }
-    }
 
     const getPermissionUser = async () => {
         try {
@@ -227,30 +195,13 @@ export default function EditUser() {
     }
 
 
-    async function autoEmail(email) {
-        try {
-            const name = userData?.nome?.split(' ');
-            const firstName = name[0];
-            const lastName = name.length > 1 ? name[name.length - 1] : '';
-            let firstEmail = `${firstName}.${lastName}@gmail.com.br`;
-
-            if (!lastName) {
-                firstEmail = `${firstName}01@gmail.com.br`;
-            }
-        } catch (error) {
-        }
-    }
-
     const handleItems = async () => {
         setLoading(true)
         try {
             await getUserData()
-            getContract()
-            getPhoto()
-            getFileUser()
-            getContractStudent()
-            getOfficeHours()
-            getPermissionUser()
+            await getPhoto()
+            await getFileUser()
+            await getCompany()
         } catch (error) {
             alert.error('Ocorreu um arro ao carregar Usuarios')
         } finally {
@@ -270,17 +221,6 @@ export default function EditUser() {
             [value.target.name]: value.target.value,
         }))
     }
-
-    const handleChangeContract = (value) => {
-        setContract((prevValues) => ({
-            ...prevValues,
-            [value.target.name]: value.target.value,
-        }))
-    }
-
-    const handleOfficeHours = (newData) => {
-        setOfficeHours(newData);
-    };
 
 
     const checkRequiredFields = () => {
@@ -309,27 +249,28 @@ export default function EditUser() {
         if (checkRequiredFields()) {
             setLoading(true)
             try {
-                const response = await createUser(userData, usuario_id)
-                const { data } = response
-                if (userData?.perfil?.includes('profissional')) {
-                    const contracthere = await createContract(data?.userId, contract)
+                if (company) {
+                    userData.empresa_id = company
+                    userData.perfil = 'paciente'
                 }
+
+                const response = await createUser({ userData, usuario_id })
+                const { data } = response
                 if (fileCallback) {
                     const file = await api.patch(`/file/edit/${fileCallback?.id_foto_perfil}/${data?.userId}`)
                 }
-                if (officeHours) { await api.post(`/officeHours/create/${data?.userId}`, { officeHours }) }
                 if (newUser && filesUser) {
                     const files = await api.patch(`/file/editFiles/${data?.userId}`, { filesUser });
                 }
-                if (permissionPerfil) {
-                    const permissionsToAdd = permissionPerfil.split(',').map(id => parseInt(id));
-                    if (permissionsToAdd.length > 0) {
-                        await api.post(`/permissionPerfil/create/${data?.userId}`, { permissionsToAdd })
-                    }
-                }
                 if (response?.status === 201) {
                     alert.success('Usuário cadastrado com sucesso.');
-                    if (data?.userId) router.push(`/users/list`)
+                    if (data?.userId) {
+                        if (company) {
+                            router.push(`/organization/${user.empresa_id}`)
+                        } else {
+                            router.push(`/users/list`)
+                        }
+                    }
                 }
             } catch (error) {
                 alert.error('Tivemos um problema ao cadastrar usuário.');
@@ -363,15 +304,6 @@ export default function EditUser() {
             try {
                 const response = await editeUser({ id, userData })
                 if (response.status === 422) return alert.error('CPF já cadastrado.')
-                if (contract) {
-                    const contr = await editContract({ id, contract })
-                }
-                if (!(officeHours.filter((item) => item?.id_hr_trabalho).length > 0)) {
-                    await api.post(`/officeHours/create/${id}`, { officeHours })
-                }
-                if (officeHours?.map((item) => item.id_hr_trabalho).length > 0) {
-                    await api.patch(`/officeHours/update`, { officeHours })
-                }
                 if (response?.status === 201) {
                     alert.success('Usuário atualizado com sucesso.');
                     handleItems()
@@ -389,34 +321,6 @@ export default function EditUser() {
 
     }
 
-    const handleAddPermission = async () => {
-        setLoading(true)
-        try {
-
-            const currentPermissions = permissionPerfil.split(',').map(id => parseInt(id));
-            const previousPermissions = permissionPerfilBefore.split(',').map(id => parseInt(id));
-
-            const permissionsToAdd = currentPermissions.filter(id => !previousPermissions.includes(id));
-            const permissionsToRemove = previousPermissions.filter(id => !currentPermissions.includes(id));
-
-            if (permissionsToAdd.length > 0) {
-                const responseData = await api.post(`/permissionPerfil/create/${id}`, { permissionsToAdd })
-            }
-
-            if (permissionsToRemove.length > 0) {
-                const permissionsToRemoveString = permissionsToRemove.join(','); // Converta o array em uma string
-                const responseData = await api.delete(`/permissionPerfil/remove/${id}?permissions=${permissionsToRemoveString}`);
-            }
-            alert.info('Permissões do usuário atualizadas.');
-        } catch (error) {
-            console.log(error)
-            alert.error('Tivemos um problema ao atualizar as permissões.');
-            return error;
-        } finally {
-            setLoading(false)
-        }
-    }
-
     const handleChangeFilesUser = (field, fileId, filePreview) => {
         setFilesUser((prevClassDays) => [
             ...prevClassDays,
@@ -428,24 +332,8 @@ export default function EditUser() {
         ]);
     };
 
-    const replicateToDaysWork = () => {
-        const firstWorkingHours = officeHours.find(day => day.dia_semana === '2ª Feira')
-        if (firstWorkingHours?.ent1 !== '') {
-            const updatedOfficeHours = officeHours.map(day => ({
-                ...day,
-                ent1: firstWorkingHours.ent1,
-                sai1: firstWorkingHours.sai1,
-                ent2: firstWorkingHours.ent2,
-                sai2: firstWorkingHours.sai2,
-                ent3: firstWorkingHours.ent3,
-                sai3: firstWorkingHours.sai3,
-            }))
-            setOfficeHours(updatedOfficeHours)
-        }
-    }
-
     const groupPerfil = [
-        { label: 'Profissional', value: 'profissional' },
+        { label: 'Parceiro', value: 'parceiro' },
         { label: 'Paciente', value: 'paciente' },
         { label: 'Administrador', value: 'administrador' },
     ]
@@ -456,38 +344,24 @@ export default function EditUser() {
     ]
 
     const groupAdmin = [
-        { label: 'sim', value: 1 },
-        { label: 'não', value: 0 },
+        { label: 'Sim', value: 1 },
+        { label: 'Não', value: 0 },
 
     ]
 
     const groupGender = [
         { label: 'Masculino', value: 'Masculino' },
-        { label: 'Feminino', value: 'Feminino' },
-        { label: 'Outro', value: 'Outro' },
-        { label: 'Prefiro não informar', value: 'Prefiro não informar' },
-    ]
-
-    const groupAccount = [
-        { label: 'Conta Corrente', value: 'Conta Corrente' },
-        { label: 'Conta salário', value: 'Conta salário' },
-        { label: 'Conta poupança', value: 'Conta poupança' }
-    ]
-
-
-    const groupBank = [
-        { label: 'Itaú', value: 'Itau' },
-        { label: 'Bradesco', value: 'Bradesco' },
+        { label: 'Feminino', value: 'Feminino' }
     ]
 
     return (
         <>
             <SectionHeader
                 perfil={userData?.perfil}
-                title={userData?.nome || `Novo ${userData?.perfil === 'profissional' && 'Profissional' || userData?.perfil === 'administrador' && 'Administrador' || userData?.perfil === 'paciente' && 'Paciente' || 'Usuário'}`}
+                title={userData?.nome || `Novo ${userData?.perfil === 'parceiro' && 'Parceiro' || userData?.perfil === 'administrador' && 'Administrador' || userData?.perfil === 'paciente' && 'Paciente' || 'Usuário'}`}
                 saveButton={isPermissionEdit}
                 saveButtonAction={newUser ? handleCreateUser : handleEditUser}
-                deleteButton={!newUser && userData?.perfil?.includes('administrador')}
+                deleteButton={!newUser && isAdministrador}
                 deleteButtonAction={(event) => setShowConfirmationDialog({
                     active: true,
                     event,
@@ -496,163 +370,122 @@ export default function EditUser() {
                     message: 'Tem certeza que deseja prosseguir com a exclusão do usuário? Todos os dados vinculados a esse usuário serão excluídos, sem opção de recuperação.',
                 })}
             />
+            <>
+                <ContentContainer style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 1.8, padding: 5, }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1, alignItems: 'center' }}>
 
-            <Box sx={{
-                display: 'flex'
-            }}>
-                <Box sx={{
-                    display: 'flex', padding: '8px 12px', backgroundColor: colorPalette?.secondary, gap: .5,
-                    borderRadius: '8px 8px 0px 0px', flexDirection: 'column', transition: '3s',
-                    boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
-                }}>
-                    <Box sx={{ display: 'flex', gap: 1 }}>
-                        <Box sx={{
-                            display: 'flex', padding: '15px 12px', transition: '.3s',
-                            // borderBottom: selectedMenu === 'userData' ? `3px solid ${colorPalette?.buttonColor}`
-                            //     : '.5px solid trasnparent',
-                            gap: 2,
-                            '&:hover': { opacity: 0.8, cursor: 'pointer' },
-                        }}
-                            onClick={() => {
-                                setSelectedMenu('userData')
-                            }}>
-                            <Text bold title style={{ color: selectedMenu === 'userData' && colorPalette?.buttonColor, transition: '.3s' }}>Meus Dados</Text>
-                        </Box>
-                        {isProfissional && <Box sx={{
-                            display: 'flex', transition: '.3s', padding: '15px 12px',
-                            // borderBottom: selectedMenu === 'paymentConfig' ? `3px solid ${colorPalette?.buttonColor}`
-                            //     : '.5px solid trasnparent',
-                            gap: 2,
-                            '&:hover': { opacity: 0.8, cursor: 'pointer' },
-                        }}
-                            onClick={() => {
-                                setSelectedMenu('paymentConfig')
-                            }}>
-                            <Text bold title style={{ color: selectedMenu === 'paymentConfig' && colorPalette?.buttonColor, transition: '.3s' }}>Preferências de Pagamento</Text>
-                        </Box>}
-                    </Box>
-
-                    <Box sx={{
-                        display: 'flex',
-                        justifyContent: 'flex-start',
-                        transition: 'transform 0.3s', // Adicionando a transição
-                        position: 'relative', // Adicionando position relative
-                    }}>
-                        <Box
-                            sx={{
-                                display: 'flex',
-                                height: '3px',
-                                width: selectedMenu === 'userData' ? '120px' : '240px',
-                                backgroundColor: colorPalette?.buttonColor,
-                                transform: selectedMenu === 'userData' ? 'translateX(0)' : 'translateX(70%)', // Ajuste a posição com base no selectedMenu
-                                transition: 'transform 0.3s', // Adicionando a transição aqui também
-                                position: 'absolute', // Alterando para posição absoluta
+                        <EditFile
+                            isPermissionEdit={isPermissionEdit}
+                            columnId="id_foto_perfil"
+                            open={showEditFile.photoProfile}
+                            newUser={newUser}
+                            onSet={(set) => {
+                                setShowEditFiles({ ...showEditFile, photoProfile: set })
+                            }}
+                            title='Foto de perfil'
+                            text='Para alterar sua foto de perfil, clique ou arraste no local desejado.'
+                            textDropzone='Arraste ou clique para selecionar a Foto que deseja'
+                            fileData={bgPhoto}
+                            usuarioId={id}
+                            campo='foto_perfil'
+                            tipo='foto'
+                            bgImage={bgPhoto?.location || fileCallback?.filePreview}
+                            callback={(file) => {
+                                if (file.status === 201 || file.status === 200) {
+                                    setFileCallback({
+                                        status: file.status,
+                                        id_foto_perfil: file.fileId,
+                                        filePreview: file.filePreview
+                                    })
+                                    if (!newUser) { handleItems() }
+                                }
                             }}
                         />
+
                     </Box>
-                </Box>
-            </Box >
-
-            {selectedMenu === 'userData' ?
-                <>
-                    <ContentContainer style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 1.8, padding: 5, }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1, alignItems: 'center' }}>
-                            <Box>
-                                <Text title bold style={{}}>Meu Perfil</Text>
-                            </Box>
-
-                            <EditFile
-                                isPermissionEdit={isPermissionEdit}
-                                columnId="id_foto_perfil"
-                                open={showEditFile.photoProfile}
-                                newUser={newUser}
-                                onSet={(set) => {
-                                    setShowEditFiles({ ...showEditFile, photoProfile: set })
-                                }}
-                                title='Foto de perfil'
-                                text='Para alterar sua foto de perfil, clique ou arraste no local desejado.'
-                                textDropzone='Arraste ou clique para selecionar a Foto que deseja'
-                                fileData={bgPhoto}
-                                usuarioId={id}
-                                campo='foto_perfil'
-                                tipo='foto'
-                                bgImage={bgPhoto?.location || fileCallback?.filePreview}
-                                callback={(file) => {
-                                    if (file.status === 201 || file.status === 200) {
-                                        setFileCallback({
-                                            status: file.status,
-                                            id_foto_perfil: file.fileId,
-                                            filePreview: file.filePreview
-                                        })
-                                        if (!newUser) { handleItems() }
-                                    }
-                                }}
-                            />
-
-                        </Box>
-                        <Box sx={{ ...styles.inputSection, whiteSpace: 'nowrap', alignItems: 'start', gap: 4 }}>
+                    <Box sx={{ ...styles.inputSection, whiteSpace: 'nowrap', alignItems: 'start', gap: 4 }}>
+                        <Box sx={{
+                            justifyContent: 'center', alignItems: 'center',
+                            width: 300,
+                            gap: 2
+                        }}>
+                            <Avatar src={bgPhoto?.location || fileCallback?.filePreview} sx={{
+                                height: 'auto',
+                                borderRadius: '16px',
+                                width: { xs: 250, sm: 300, md: 300, lg: 300 },
+                                aspectRatio: '1/1',
+                            }} variant="rounded" />
                             <Box sx={{
-                                justifyContent: 'center', alignItems: 'center',
-                                width: 300,
-                                gap: 2
-                            }}>
-                                <Avatar src={bgPhoto?.location || fileCallback?.filePreview} sx={{
-                                    height: 'auto',
-                                    borderRadius: '16px',
-                                    width: { xs: 250, sm: 300, md: 300, lg: 300 },
-                                    aspectRatio: '1/1',
-                                }} variant="rounded" />
+                                display: 'flex', gap: 1, justifyContent: 'space-between', alignItems: 'center', backgroundColor: colorPalette.inputColor,
+                                borderRadius: '12px',
+                                padding: '12px 0px 12px 12px',
+                                marginTop: 2, border: '1px solid lightgray',
+                                position: 'relative',
+                                '&:hover': { opacity: 0.8, cursor: 'pointer' },
+                            }} onClick={() => setShowEditFiles({ ...showEditFile, photoProfile: true })}>
+                                <Text bold small>Selecionar Foto...</Text>
                                 <Box sx={{
-                                    display: 'flex', gap: 1, justifyContent: 'space-between', alignItems: 'center', backgroundColor: colorPalette.inputColor,
-                                    borderRadius: '12px',
-                                    padding: '12px 0px 12px 12px',
-                                    marginTop: 2, border: '1px solid lightgray',
-                                    position: 'relative',
-                                    '&:hover': { opacity: 0.8, cursor: 'pointer' },
-                                }} onClick={() => setShowEditFiles({ ...showEditFile, photoProfile: true })}>
-                                    <Text bold small>Selecionar Foto...</Text>
+                                    display: 'flex', padding: '10px', zIndex: 99, backgroundColor: colorPalette.buttonColor, borderRadius: '0px 11px 11px 0px', border: `1px solid ${colorPalette.buttonColor}`,
+                                    position: 'absolute', right: 0, top: 0, bottom: 0
+                                }}>
                                     <Box sx={{
-                                        display: 'flex', padding: '10px', zIndex: 99, backgroundColor: colorPalette.buttonColor, borderRadius: '0px 11px 11px 0px', border: `1px solid ${colorPalette.buttonColor}`,
-                                        position: 'absolute', right: 0, top: 0, bottom: 0
-                                    }}>
-                                        <Box sx={{
-                                            ...styles.menuIcon,
-                                            backgroundImage: `url(/icons/upload.png)`,
-                                            transition: '.3s',
-                                        }} />
+                                        ...styles.menuIcon,
+                                        backgroundImage: `url(/icons/upload.png)`,
+                                        transition: '.3s',
+                                    }} />
+                                </Box>
+                            </Box>
+                        </Box>
+                        <Box sx={{ ...styles.inputSection, flexDirection: 'column', justifyContent: 'flex-start' }}>
+                            <Box sx={{ ...styles.inputSection }}>
+                                <TextInput placeholder='Nome Completo' name='nome' onChange={handleChange} value={userData?.nome || ''} label='Nome Completo: *' sx={{ flex: 1, }} />
+                                {!company && <SelectList
+                                    fullWidth
+                                    data={companies}
+                                    valueSelection={userData.empresa_id}
+                                    onSelect={(value) => setUserData({ ...userData, empresa_id: value })}
+                                    title="Empresa:"
+                                    filterOpition="value"
+                                    inputStyle={{ color: colorPalette.textColor, fontSize: '15px' }}
+                                    clean={false}
+                                />}
+                            </Box>
+                            <Box sx={{ ...styles.inputSection }}>
+                                <TextInput placeholder='E-mail' name='email' onChange={handleChange} value={userData?.email || ''} label='E-mail: *' sx={{ flex: 1, }} />
+                                <TextInput placeholder='Telefone' name='telefone' onChange={handleChange} value={userData?.telefone || ''} label='Telefone: *' sx={{ flex: 1, }} />
+                            </Box>
+                            <TextInput placeholder='Nascimento' name='nascimento' onChange={handleChange} type="date" value={(userData?.nascimento)?.split('T')[0] || ''} label='Nascimento *' sx={{ flex: 1, }} />
+                            <SelectList fullWidth data={groupGender} valueSelection={userData?.genero || ''} onSelect={(value) => setUserData({ ...userData, genero: value })}
+                                title="Gênero *" filterOpition="value" sx={{ color: colorPalette.textColor, flex: 1 }}
+                                inputStyle={{ color: colorPalette.textColor, fontSize: '15px', fontFamily: 'MetropolisBold' }}
+                            />
+                            <TextInput placeholder='CPF' name='cpf' onChange={handleChange} value={userData?.cpf || ''} label='CPF' sx={{ flex: 1, }} />
+
+                            <Box sx={{ ...styles.inputSection, whiteSpace: 'nowrap', alignItems: 'end', gap: 4 }}>
+                                <Box sx={{ ...styles.inputSection, flexDirection: 'column', }}>
+                                    <Box sx={{ ...styles.inputSection }}>
+                                        <TextInput placeholder='Login' name='login' onChange={handleChange} value={userData?.login || ''} label='Login *' sx={{ flex: 1, }} />
                                     </Box>
                                 </Box>
                             </Box>
-                            <Box sx={{ ...styles.inputSection, flexDirection: 'column', justifyContent: 'flex-start' }}>
-                                <Box sx={{ ...styles.inputSection }}>
-                                    <TextInput placeholder='Nome Completo' name='nome' onChange={handleChange} value={userData?.nome || ''} label='Nome Completo: *' onBlur={autoEmail} sx={{ flex: 1, }} />
-                                    <TextInput placeholder='Apelido' name='apelido' onChange={isPermissionEdit && handleChange} value={userData?.apelido || ''} label='Apelido:' sx={{ flex: 1, }} />
-                                </Box>
-                                <Box sx={{ ...styles.inputSection }}>
-                                    <TextInput placeholder='E-mail' name='email' onChange={handleChange} value={userData?.email || ''} label='E-mail: *' sx={{ flex: 1, }} />
-                                    <TextInput placeholder='Telefone' name='telefone' onChange={handleChange} value={userData?.telefone || ''} label='Telefone: *' sx={{ flex: 1, }} />
-                                    {/* <PhoneInputField
-                                
-                                label='Telefone *'
-                                name='telefone'
-                                onChange={(phone) => setUserData({ ...userData, telefone: phone })}
-                                value={userData?.telefone}
-                                sx={{ flex: 1, }}
-                            /> */}
-                                </Box>
-                                <TextInput placeholder='Nascimento' name='nascimento' onChange={handleChange} type="date" value={(userData?.nascimento)?.split('T')[0] || ''} label='Nascimento *' sx={{ flex: 1, }} />
-                                <SelectList fullWidth data={groupGender} valueSelection={userData?.genero || ''} onSelect={(value) => setUserData({ ...userData, genero: value })}
-                                    title="Gênero *" filterOpition="value" sx={{ color: colorPalette.textColor, flex: 1 }}
-                                    inputStyle={{ color: colorPalette.textColor, fontSize: '15px', fontFamily: 'MetropolisBold' }}
-                                />
-                                <TextInput placeholder='CPF' name='cpf' onChange={handleChange} value={userData?.cpf || ''} label='CPF' sx={{ flex: 1, }} />
+                            {!newUser && <Box sx={{ flex: 1, display: 'flex', justifyContent: 'space-around', gap: 1.8 }}>
+                                <TextInput placeholder='Nova senha' name='nova_senha' onChange={handleChange} value={userData?.nova_senha || ''} type="password" label='Nova senha' sx={{ flex: 1, }} />
+                                <TextInput placeholder='Confirmar senha' name='confirmar_senha' onChange={handleChange} value={userData?.confirmar_senha || ''} type="password" label='Confirmar senha' sx={{ flex: 1, }} />
+                            </Box>}
+                            <Box sx={{ ...styles.inputSection, justifyContent: 'flex-start', gap: 4 }}>
+                                <RadioItem valueRadio={userData?.admin_sistema} group={groupAdmin} title="Acesso ao Sistema *" horizontal={mobile ? false : true} onSelect={(value) => setUserData({ ...userData, admin_sistema: parseInt(value) })} />
+                                <RadioItem valueRadio={userData?.ativo} group={groupStatus} title="Status *" horizontal={mobile ? false : true} onSelect={(value) => setUserData({
+                                    ...userData,
+                                    ativo: parseInt(value)
+                                })} />
 
-                                {isAdministrador &&
+                                {(isAdministrador && !company) &&
                                     <> <Box sx={{ ...styles.inputSection, justifyContent: 'start', alignItems: 'center', gap: 25 }}>
+
                                         <CheckBoxComponent
                                             valueChecked={userData?.perfil}
                                             boxGroup={groupPerfil}
-                                            title="Perfil *"
+                                            title="Permissão *"
                                             horizontal={mobile ? false : true}
                                             onSelect={(value) => setUserData({
                                                 ...userData,
@@ -662,118 +495,13 @@ export default function EditUser() {
                                         />
 
                                     </Box>
-                                        <RadioItem valueRadio={userData?.ativo} group={groupStatus} title="Status *" horizontal={mobile ? false : true} onSelect={(value) => setUserData({
-                                            ...userData,
-                                            ativo: parseInt(value)
-                                        })} />
                                     </>
                                 }
                             </Box>
                         </Box>
-                    </ContentContainer>
-
-
-                    {
-                        isAdministrador && <ContentContainer style={{ ...styles.containerRegister, padding: showSections?.accessData ? '40px' : '25px' }}>
-                            <Box sx={{
-                                display: 'flex', alignItems: 'center', gap: 1, padding: showSections?.accessData ? '0px 0px 20px 0px' : '0px', "&:hover": {
-                                    opacity: 0.8,
-                                    cursor: 'pointer'
-                                },
-                                justifyContent: 'space-between'
-                            }} onClick={() => setShowSections({ ...showSections, accessData: !showSections?.accessData })}>
-                                <Text title bold >Dados de acesso</Text>
-                                <Box sx={{
-                                    ...styles.menuIcon,
-                                    backgroundImage: `url(${icons.gray_arrow_down})`,
-                                    transform: showSections?.accessData ? 'rotate(0deg)' : 'rotate(-90deg)',
-                                    transition: '.3s',
-                                }} />
-                            </Box>
-                            {showSections?.accessData &&
-                                <>
-                                    <Box sx={{ ...styles.inputSection, whiteSpace: 'nowrap', alignItems: 'end', gap: 4 }}>
-                                        <Box sx={{ ...styles.inputSection, flexDirection: 'column', }}>
-                                            <Box sx={{ ...styles.inputSection }}>
-                                                <TextInput placeholder='Login' name='login' onChange={handleChange} value={userData?.login || ''} label='Login *' sx={{ flex: 1, }} />
-                                            </Box>
-                                        </Box>
-                                    </Box>
-                                    {!newUser && <Box sx={{ flex: 1, display: 'flex', justifyContent: 'space-around', gap: 1.8 }}>
-                                        <TextInput placeholder='Nova senha' name='nova_senha' onChange={handleChange} value={userData?.nova_senha || ''} type="password" label='Nova senha' sx={{ flex: 1, }} />
-                                        <TextInput placeholder='Confirmar senha' name='confirmar_senha' onChange={handleChange} value={userData?.confirmar_senha || ''} type="password" label='Confirmar senha' sx={{ flex: 1, }} />
-                                    </Box>}
-                                    <RadioItem valueRadio={userData?.admin_sistema} group={groupAdmin} title="Acesso ao Sistema *" horizontal={mobile ? false : true} onSelect={(value) => setUserData({ ...userData, admin_sistema: parseInt(value) })} />
-
-                                </>}
-                        </ContentContainer>
-                    }
-
-                    {
-                        (userData?.perfil && userData?.perfil?.includes('profissional')) &&
-                        <>
-                            <ContentContainer style={{ ...styles.containerContract, padding: showContract ? '40px' : '25px' }}>
-                                <Box sx={{
-                                    display: 'flex', alignItems: 'center', padding: showContract ? '0px 0px 20px 0px' : '0px', gap: 1, "&:hover": {
-                                        opacity: 0.8,
-                                        cursor: 'pointer'
-                                    },
-                                    justifyContent: 'space-between'
-                                }} onClick={() => setShowContract(!showContract)}>
-                                    <Text title bold >Contrato de Atendimento</Text>
-                                    <Box sx={{
-                                        ...styles.menuIcon,
-                                        backgroundImage: `url(${icons.gray_arrow_down})`,
-                                        transform: showContract ? 'rotate(0deg)' : 'rotate(-90deg)',
-                                        transition: '.3s',
-                                        "&:hover": {
-                                            opacity: 0.8,
-                                            cursor: 'pointer'
-                                        }
-                                    }} />
-                                </Box>
-                                {showContract &&
-                                    <>
-                                        <Box sx={styles.inputSection}>
-                                            <TextInput placeholder='Profissão' name='funcao' onChange={handleChangeContract} value={contract?.funcao || ''} label='Profissão:' sx={{ flex: 1, }} />
-                                            <TextInput disabled={!isAdministrador && true} placeholder='Início da contratação' name='admissao' type="date" onChange={handleChangeContract} value={(contract?.admissao)?.split('T')[0] || ''} label='Início da contratação' sx={{ flex: 1, }} />
-                                            <TextInput disabled={!isAdministrador && true} placeholder='Encerramento' name='desligamento' type="date" onChange={handleChangeContract} value={contract?.desligamento?.split('T')[0] || ''} label='Encerramento da contratação' sx={{ flex: 1, }} onBlur={() => {
-                                                new Date(contract?.desligamento) > new Date(1001, 0, 1) &&
-                                                    setUserData({ ...userData, ativo: 0 })
-                                            }} />
-                                        </Box>
-                                        <Box sx={styles.inputSection}>
-                                            <SelectList fullWidth data={groupBank} valueSelection={contract?.banco_1} onSelect={(value) => setContract({ ...contract, banco_1: value })}
-                                                title="Banco" filterOpition="value" sx={{ color: colorPalette.textColor, flex: 1 }}
-                                                inputStyle={{ color: colorPalette.textColor, fontSize: '15px', fontFamily: 'MetropolisBold' }}
-                                            />
-                                            <TextInput placeholder='Conta' name='conta_1' onChange={handleChangeContract} value={contract?.conta_1 || ''} label='Conta' sx={{ flex: 1, }} />
-                                            <TextInput placeholder='Agência' name='agencia_1' onChange={handleChangeContract} value={contract?.agencia_1 || ''} label='Agência' sx={{ flex: 1, }} />
-                                            <SelectList fullWidth data={groupAccount} valueSelection={contract?.tipo_conta_1} onSelect={(value) => setContract({ ...contract, tipo_conta_1: value })}
-                                                title="Tipo de conta" filterOpition="value" sx={{ color: colorPalette.textColor, flex: 1 }}
-                                                inputStyle={{ color: colorPalette.textColor, fontSize: '15px', fontFamily: 'MetropolisBold' }}
-                                            />
-                                        </Box>
-                                        <Box sx={styles.inputSection}>
-                                            <TextInput placeholder='Banco 2' name='banco_2' onChange={handleChangeContract} value={contract?.banco_2 || ''} label='Banco 2' sx={{ flex: 1, }} />
-                                            <TextInput placeholder='Conta 2' name='conta_2' onChange={handleChangeContract} value={contract?.conta_2 || ''} label='Conta 2' sx={{ flex: 1, }} />
-                                            <TextInput placeholder='Agência 2' name='agencia_2' onChange={handleChangeContract} value={contract?.agencia_2 || ''} label='Agência 2' sx={{ flex: 1, }} />
-                                            <SelectList fullWidth data={groupAccount} valueSelection={contract?.tipo_conta_2} onSelect={(value) => setContract({ ...contract, tipo_conta_2: value })}
-                                                title="Tipo de conta 2" filterOpition="value" sx={{ color: colorPalette.textColor, flex: 1 }}
-                                                inputStyle={{ color: colorPalette.textColor, fontSize: '15px', fontFamily: 'MetropolisBold' }}
-                                            />
-                                        </Box>
-
-                                    </>
-                                }
-                            </ContentContainer>
-
-                        </>
-                    }
-                </>
-                :
-                <PaymentConfigScreen />
-            }
+                    </Box>
+                </ContentContainer>
+            </>
         </>
     )
 }
@@ -930,7 +658,7 @@ const PaymentConfigScreen = () => {
                     <Box>
                         <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', alignItems: 'start' }}>
 
-                            <Box sx={{display: 'flex', gap: 1, flexDirection: 'column'}}>
+                            <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column' }}>
                                 <Text large>Defina o valor de sua consulta:</Text>
                                 <TextInput
                                     placeholder='0,00'

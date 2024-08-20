@@ -35,17 +35,13 @@ function PerfilProfissional() {
     const getUserData = async () => {
         try {
             const response = await api.get(`/user/${profissionalId}`)
-            console.log(response)
-            console.log(profissionalId)
             const { data } = response
-            setUserData(data.response)
+            setUserData(data)
         } catch (error) {
             console.log(error)
             return error
         }
     }
-
-    console.log(userData)
 
 
     const getReserva = async () => {

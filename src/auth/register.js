@@ -105,9 +105,6 @@ export const Register = ({ type = `paciente`, setTypeSelected, typeSelected, set
                 userData.perfil = type;
                 const response = await api.post('/user/create', { userData })
                 const { data } = response
-                if (type?.includes('profissional')) {
-                    await createContract(data?.userId, contract)
-                }
                 if (response?.status === 201) {
                     alert.success('Parabéns! Seu cadastro foi realizado com sucesso!. Faça Login para começar a ultilizar a plataforma!');
                     if (data?.userId) router.push(`/`)
@@ -178,23 +175,21 @@ export const Register = ({ type = `paciente`, setTypeSelected, typeSelected, set
 
     const groupGender = [
         { label: 'Masculino', value: 'Masculino' },
-        { label: 'Feminino', value: 'Feminino' },
-        { label: 'Outro', value: 'Outro' },
-        { label: 'Prefiro não informar', value: 'Prefiro não informar' },
+        { label: 'Feminino', value: 'Feminino' }
     ]
 
     const steps = [
         {
             id: '01', step: 1, key: 'userData', title: 'Dados Cadastrais', description: 'Insira seu dados cadastrais.',
-            type: ['profissional', 'paciente']
+            type: ['parceiro', 'paciente']
         },
         {
             id: '02', step: 2, key: 'accessDara', title: 'Dados de Acesso', description: 'Insira suas credenciais.',
-            type: ['profissional', 'paciente']
+            type: ['parceiro', 'paciente']
         },
         {
             id: '03', step: 3, key: 'terapeutData', title: 'Preferências de Pagamento', description: 'Preferências e configurações.',
-            type: ['profissional']
+            type: ['parceiro']
         },
     ]
 
@@ -208,41 +203,25 @@ export const Register = ({ type = `paciente`, setTypeSelected, typeSelected, set
                 <link rel="icon" href="https://minhaclinicatrindade.s3.amazonaws.com/Afectu+-+PNG+-+Fundo+Tranparente-8%402x.png" />
             </Head>
             <Box sx={{
+                zIndex: 999,
                 display: 'flex',
                 justifyContent: 'flex-start',
                 alignItems: 'center',
                 transition: 'background-color 1s',
-                width: '100%', height: '100%'
+                width: '100%', height: '100%',
             }}>
                 <Box sx={{
                     display: 'flex', gap: 1, backgroundColor: colorPalette.third, width: '100%', height: '100%', position: 'relative',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    padding: '30px 50px'
-                }}>
-                    <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', maxWidth: 480, marginBottom: 20, padding: '20px' }}>
-                        <Text bold veryLarge style={{ color: '#fff' }}>Crie seu cadastro e aproveite o melhor da plataforma!</Text>
-                        <Text large light style={{ color: '#fff' }}>Bem vindo {type === 'profissional' ?
-                            'Profissional! É um prazer fazer parte dessa jornada com você, oferecendo todo o suporte e a melhor forma de atendimento para seu paciente e para você!'
-                            : 'Paciente! É um prazer fazer parte dessa jornada com você, e oferecer todo o suporte, facilitando seu uso da plataforma!'}</Text>
-                    </Box>
+                    padding: '30px 50px',
+                    flexDirection: { xs: 'column', xm: 'column', md: 'row', lg: 'row' }
 
-                    <Box sx={{
-                        ...styles.icon,
-                        position: 'absolute',
-                        bottom: 40,
-                        left: 80,
-                        backgroundImage: `url('/background/terapia-trg.png')`,
-                        // backgroundImage: `url('/icons/logo-clinica.png')`,
-                        backgroundSize: 'contain',
-                        backgroundPosition: 'center',
-                        backgroundSize: 'cover',
-                        backgroundRepeat: 'no-repeat',
-                        backgroundPosition: 'center center',
-                        width: { xs: 200, xm: 200, md: 200, lg: 300, xl: 450 },
-                        height: { xs: 200, xm: 200, md: 200, lg: 200, xl: 300 },
-                        display: 'flex',
-                    }} />
+                }}>
+                    <Box sx={{ display: { xs: 'none', xm: 'none', md: 'flex', lg: 'flex' }, gap: 2, flexDirection: 'column', maxWidth: 480, marginBottom: 20, padding: '20px' }}>
+                        <Text bold veryLarge style={{ color: '#fff' }}>Crie seu cadastro e aproveite o melhor da plataforma!</Text>
+                        <Text large light style={{ color: '#fff' }}>Bem vindo Paciente! É um prazer fazer parte dessa jornada com você, e oferecer todo o suporte, facilitando seu uso da plataforma!</Text>
+                    </Box>
 
                     <Box sx={{
                         display: 'flex',
@@ -256,11 +235,12 @@ export const Register = ({ type = `paciente`, setTypeSelected, typeSelected, set
                         backgroundColor: '#fff',
                         gap: 3,
                         marginTop: 10,
+                        zIndex: 9999
                     }}>
 
                         <Box sx={{ display: 'flex', flexDirection: 'row', gap: .8, alignItems: 'center', width: '100%', justifyContent: 'center' }}>
                             <Text bold indicator style={{ color: !theme ? '#fff' : Colors.backgroundPrimary, transition: 'background-color 1s', textAlign: 'center' }}>Bem vindo </Text>
-                            <Text bold indicator style={{ color: colorPalette?.buttonColor, transition: 'background-color 1s', textAlign: 'center' }}> {type === 'profissional' ? 'Terapeuta!' : 'Paciente!'}</Text>
+                            <Text bold indicator style={{ color: colorPalette?.buttonColor, transition: 'background-color 1s', textAlign: 'center' }}> {type === 'parceiro' ? 'Terapeuta!' : 'Paciente!'}</Text>
                         </Box>
 
                         {cod_key &&
@@ -342,7 +322,7 @@ export const Register = ({ type = `paciente`, setTypeSelected, typeSelected, set
                                 <Text sx={{}}>Voltar</Text>
                             </Box>
                         }
-                        <form style={{ display: 'flex', flexDirection: 'column', gap: 3, alignItems: 'center', width: smallWidthDevice ? '80%' : '100%', }}>
+                        <form style={{ display: 'flex', zIndex: 999, flexDirection: 'column', gap: 3, alignItems: 'center', width: smallWidthDevice ? '80%' : '100%', }}>
                             {stepSelected === 3 ?
                                 < PaymentConfigScreen />
                                 :
@@ -358,7 +338,6 @@ export const Register = ({ type = `paciente`, setTypeSelected, typeSelected, set
                                                     <Box sx={{ ...styles.inputSection }}>
                                                         <TextInput placeholder='Nome Completo' name='nome' onChange={handleChange} value={userData?.nome || ''} label='Nome Completo: *' sx={{ flex: 1, }} />
                                                     </Box>
-                                                    <TextInput placeholder='Apelido' name='apelido' onChange={handleChange} value={userData?.apelido || ''} label='Apelido:' sx={{ flex: 1, }} />
                                                     <TextInput placeholder='E-mail' name='email' onChange={handleChange} value={userData?.email || ''} label='E-mail: *' sx={{ flex: 1, }} />
                                                     <TextInput placeholder='Telefone' name='telefone' onChange={handleChange} value={userData?.telefone || ''} label='Telefone: *' sx={{ flex: 1, }} />
                                                     <Box sx={{ ...styles.inputSection }}>
@@ -374,7 +353,7 @@ export const Register = ({ type = `paciente`, setTypeSelected, typeSelected, set
 
                                             {stepSelected === 2 &&
                                                 <>
-                                                    {type === 'profissional' &&
+                                                    {type === 'parceiro' &&
                                                         <>
                                                             <Text bold>Mostre para seus pacientes sua especialização:</Text>
                                                             <TextInput placeholder='Terapeuta formado em ...' name='funcao' onChange={handleChangeContract} value={contract?.funcao || ''} label='Profissão/Especialidade:' sx={{ flex: 1, }} />
@@ -391,7 +370,7 @@ export const Register = ({ type = `paciente`, setTypeSelected, typeSelected, set
                                     </Box>
                                 </Box>}
                             <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column', marginTop: 5, alignItems: 'center' }}>
-                                {(type === 'profissional' && stepSelected !== 3) || (type === 'paciente' && stepSelected !== 2) ?
+                                {(type === 'parceiro' && stepSelected !== 3) || (type === 'paciente' && stepSelected !== 2) ?
                                     <Button
                                         style={{
                                             width: { xs: `80%`, xm: `80%`, md: '60%', lg: '60%' },
@@ -412,7 +391,7 @@ export const Register = ({ type = `paciente`, setTypeSelected, typeSelected, set
                                         }}
                                         text='Entrar'
                                         onClick={() => {
-                                            if (type === 'profissional') {
+                                            if (type === 'parceiro') {
                                                 setStepSelected(stepSelected + 1)
                                             } else {
                                                 setStepSelected(2)

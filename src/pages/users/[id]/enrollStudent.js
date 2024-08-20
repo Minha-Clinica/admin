@@ -146,15 +146,15 @@ export default function InterestEnroll() {
         setLoading(true)
         try {
             const userDetails = await api.get(`/user/${id}`)
-            const { response } = userDetails.data
-            setUserData(response)
+            const { data } = userDetails
+            setUserData(data)
 
-            const isOfLegalAge = await calculationAge(response?.nascimento)
+            const isOfLegalAge = await calculationAge(data?.nascimento)
             setUserIsOfLegalAge(isOfLegalAge)
             if (!isOfLegalAge) {
                 alert.info('Aluno menor de idade. Por favor, cadastrar responsável pagante para prosseguir com a matrícula.')
             }
-            return response
+            return data
         } catch (error) {
             console.log(error)
             return error

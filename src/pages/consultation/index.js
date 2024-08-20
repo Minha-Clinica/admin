@@ -38,7 +38,7 @@ export default function ListConsultions(props) {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const router = useRouter()
-    const [isPermissionEdit, setIsPermissionEdit] = useState(false)
+    const isPartner = user?.perfil?.includes('parceiro')
     const userFilterFunctions = {
         ativo: (item) => filtersField?.status === 'todos' || item.ativo === filtersField?.status,
         enrollmentSituation: (item) => filtersField?.enrollmentSituation === 'todos' || item?.total_matriculas_em_andamento === filtersField?.enrollmentSituation,
@@ -53,7 +53,7 @@ export default function ListConsultions(props) {
 
         let perfil;
 
-        if (user?.perfil?.includes('profissional')) {
+        if (user?.perfil?.includes('administrador')) {
             perfil = item?.paciente;
         }
 
@@ -98,28 +98,36 @@ export default function ListConsultions(props) {
     }, []);
 
     const getConsultion = async () => {
-        setLoading(true)
+        setLoading(true);
         try {
             let query;
-            if (user?.perfil?.includes('profissional')) {
-                query = `/consultation/profissional/${user?.id}`
-            }
-            if (user?.perfil?.includes('paciente')) {
-                query = `/consultation/pacient/${user?.id}`
+            if (user?.perfil?.includes('administrador')) {
+                query = `/consultation/profissional/${user?.id}`;
+            } else if (user?.perfil?.includes('paciente')) {
+                query = `/consultation/pacient/${user?.id}`;
+            } else if (isPartner) {
+                query = `/consultation/company/pacient/${user?.empresa_id}`;
+            } else {
+                throw new Error("Perfil de usuário não reconhecido");
             }
 
-            const response = await api.get(query)
+            const response = await api.get(query);
             const { data = [] } = response;
-            setConsultion(data)
+
+            if (Array.isArray(data) && data.length > 0) {
+                setConsultion(data);
+            } else {
+                setConsultion([]); // Certifique-se de definir um array vazio se os dados não forem um array ou estiverem vazios
+            }
         } catch (error) {
-            console.log(error)
-            return error
+            console.log(error);
+            return error;
         } finally {
-            setLoading(false)
+            setLoading(false);
         }
-    }
+    };
 
-
+    console.log('consultionList: ', consultionList)
 
 
     useEffect(() => {
@@ -239,18 +247,21 @@ export default function ListConsultions(props) {
                     </Box>
                 </Box>
             </Box>
-            <TableConsultion data={consultionList?.filter(filter)?.slice(startIndex, endIndex)} setConsultion={setConsultion}
-                callBack={() => {
-                    getConsultion()
-                    setLoadingPayment({ active: false, success: false, error: false, message: '' });
-                }}
-                setLoadingPayment={setLoadingPayment}
-                loadingPayment={loadingPayment}
-                filter={filter}
-                setPage={setPage}
-                setRowsPerPage={setRowsPerPage}
-                page={page}
-                rowsPerPage={rowsPerPage} />
+            {(consultionList?.length > 0 && consultionList) ?
+                <TableConsultion data={consultionList?.length > 0 ? consultionList?.slice(startIndex, endIndex) : []} setConsultion={setConsultion}
+                    callBack={() => {
+                        getConsultion()
+                        setLoadingPayment({ active: false, success: false, error: false, message: '' });
+                    }}
+                    setLoadingPayment={setLoadingPayment}
+                    loadingPayment={loadingPayment}
+                    filter={filter}
+                    setPage={setPage}
+                    setRowsPerPage={setRowsPerPage}
+                    page={page}
+                    rowsPerPage={rowsPerPage} />
+                :
+                <Text>Não exitem consultas agendadas.</Text>}
 
         </Box>
     )
@@ -268,6 +279,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
     const { setLoading, colorPalette, theme, user, alert } = useAppContext()
     const [dateSelected, setDateSelected] = useState({ day: '', hour: '', profissionalId: '', reserva_id: '', consultId: '' })
     const isProfissional = user?.perfil?.includes('profissional')
+    const isPartner = user?.perfil?.includes('parceiro')
     const [showAgendas, setShowAgendas] = useState({ active: false, profissionalId: null, profissionalData: {}, consultionDate: '' })
 
     const getProfissionalAgendas = async ({ profissionalId, dateConsult, consultId = null }) => {
@@ -489,7 +501,17 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
             { key: 'status', label: 'Status' },
             { key: 'actions', label: 'Ações' },
         ];
-    } else {
+    } else if (isPartner) {
+        columns = [
+            { key: 'data', label: 'Data' },
+            { key: 'paciente', label: 'Colaborador' },
+            { key: 'profissional', label: 'Terapeuta' },
+            { key: 'modalidade', label: 'Tipo' },
+            { key: 'status', label: 'Status' },
+            { key: 'actions', label: 'Ações' },
+        ];
+    }
+    else {
         columns = [
             { key: 'data', label: 'Data' },
             { key: isProfissional ? 'paciente' : 'profissional', label: isProfissional ? 'Paciente ' : 'Profissional' },
@@ -591,7 +613,26 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                                             <TableCell sx={{ padding: '8px 25px', justifyContent: 'flex-start' }}>
                                                 <Text>{formatTimeStamp(item?.data, true) || '-'}</Text>
                                             </TableCell>
-                                            <Tooltip title={isProfissional ? item?.paciente : item?.profissional}>
+                                            <Tooltip title={isPartner ? item?.paciente : isProfissional ? item?.paciente : item?.profissional}>
+                                                <TableCell sx={{
+                                                    padding: '15px 10px', textAlign: 'center',
+                                                }}>
+                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'flex-start' }}>
+                                                        <Avatar src={isPartner ? item?.url_foto_pac : item?.url_foto_prof || ''} sx={{
+                                                            height: { xs: '100%', sm: 30, md: 30, lg: 30 },
+                                                            width: { xs: '100%', sm: 30, md: 30, lg: 30 },
+                                                        }} variant="rounded"
+                                                        />
+                                                        <Text style={{
+                                                            textOverflow: 'ellipsis',
+                                                            whiteSpace: 'nowrap',
+                                                            overflow: 'hidden',
+                                                        }}>{isPartner ? item?.paciente : isProfissional ? item?.paciente : item?.profissional || '-'}</Text>
+                                                    </Box>
+                                                </TableCell>
+                                            </Tooltip>
+                                            {isPartner &&
+                                             <Tooltip title={item?.profissional}>
                                                 <TableCell sx={{
                                                     padding: '15px 10px', textAlign: 'center',
                                                 }}>
@@ -605,10 +646,10 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                                                             textOverflow: 'ellipsis',
                                                             whiteSpace: 'nowrap',
                                                             overflow: 'hidden',
-                                                        }}>{isProfissional ? item?.paciente : item?.profissional || '-'}</Text>
+                                                        }}>{item?.profissional || '-'}</Text>
                                                     </Box>
                                                 </TableCell>
-                                            </Tooltip>
+                                            </Tooltip>}
                                             <TableCell sx={{ padding: '15px 10px', justifyContent: 'flex-start' }}>
                                                 <Text>{item?.modalidade || '-'}</Text>
                                             </TableCell>

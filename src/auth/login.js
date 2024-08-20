@@ -192,235 +192,163 @@ export default function Login() {
                             <Text sx={{}}>Voltar</Text>
                         </Box>
                     }
-                    {showRegisterType ?
+                    <Box sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'flex-start',
+                        alignItems: 'center',
+                        width: '100%',
+                        padding: '10px 15px 30px 15px',
+                        gap: 3,
+                        marginTop: 5,
+                        position: 'relative'
+                    }}>
 
                         <Box sx={{
+                            ...styles.icon,
+                            backgroundImage: `url('/icons/afectu_icon_home.png')`,
+                            // backgroundImage: `url('/icons/logo-clinica.png')`,
+                            backgroundSize: 'contain',
+                            backgroundPosition: 'center',
+                            backgroundSize: 'cover',
+                            backgroundRepeat: 'no-repeat',
+                            backgroundPosition: 'center center',
+                            width: 150,
+                            height: 90,
+                            margin: '30px 0px',
                             display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'flex-start',
-                            alignItems: 'start',
-                            width: '100%',
-                            padding: '30px 30px',
-                            gap: 3,
-                            marginTop: 10,
-                            position: 'relative'
-                        }}>
-                            <Text bold indicator style={{ color: !theme ? '#fff' : Colors.backgroundPrimary, transition: 'background-color 1s', textAlign: 'center' }}>Para seguir com o cadastro,
-                                informe se você é:</Text>
-                            <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column', width: '100%', alignItems: 'center' }}>
 
-                                <Box sx={{
-                                    padding: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    marginTop: 2,
-                                    width: '100%',
-                                    transition: '.5s',
-                                    gap: 2,
-                                    backgroundColor: colorPalette.third,
-                                    borderRadius: 2,
-                                    "&:hover": {
-                                        opacity: 0.8,
-                                        cursor: 'pointer',
-                                        transform: 'scale(1.1, 1.1)'
-                                    }
-                                }} onClick={() => handleRegister('parceiro')}>
-                                    <Text bold style={{ color: colorPalette?.primary }}>PARCEIRO</Text>
+                        }} />
+
+                        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 3, width: '100%', }}>
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, width: '100%', padding: '10px 30px' }}>
+                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'start', width: '100%', }}>
+                                    <Text bold indicator style={{ color: !theme ? '#fff' : Colors.backgroundPrimary, transition: 'background-color 1s', textAlign: 'center' }}>Faça seu Login</Text>
                                 </Box>
-
-                                <Box sx={{
-                                    padding: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    marginTop: 2,
-                                    width: '100%',
-                                    transition: '.5s',
-                                    gap: 2,
-                                    backgroundColor: colorPalette.buttonColor,
-                                    borderRadius: 2,
-                                    "&:hover": {
-                                        opacity: 0.8,
-                                        cursor: 'pointer',
-                                        transform: 'scale(1.1, 1.1)'
-                                    }
-                                }} onClick={() => handleRegister('profissional')}>
-                                    <Text bold style={{ color: '#fff' }}>TERAPEUTA</Text>
-                                </Box>
-                                <Box sx={{
-                                    padding: '15px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    marginTop: 2,
-                                    width: '100%',
-                                    transition: '.5s',
-                                    gap: 2,
-                                    border: `1px solid ${colorPalette.buttonColor}`,
-                                    backgroundColor: 'transparent',
-                                    borderRadius: 2,
-                                    "&:hover": {
-                                        opacity: 0.8,
-                                        cursor: 'pointer',
-                                        transform: 'scale(1.1, 1.1)'
-                                    }
-                                }} onClick={() => handleRegister('paciente')}>
-                                    <Text bold style={{ color: colorPalette?.buttonColor }}>PACIENTE</Text>
-                                </Box>
-                            </Box>
-
-
-                        </Box>
-                        :
-                        <Box sx={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            justifyContent: 'flex-start',
-                            alignItems: 'center',
-                            width: '100%',
-                            padding: '10px 15px 30px 15px',
-                            gap: 3,
-                            marginTop: 5,
-                            position: 'relative'
-                        }}>
-
-                            <Box sx={{
-                                ...styles.icon,
-                                backgroundImage: `url('/icons/afectu_icon_home.png')`,
-                                // backgroundImage: `url('/icons/logo-clinica.png')`,
-                                backgroundSize: 'contain',
-                                backgroundPosition: 'center',
-                                backgroundSize: 'cover',
-                                backgroundRepeat: 'no-repeat',
-                                backgroundPosition: 'center center',
-                                width: 150,
-                                height: 90,
-                                margin: '30px 0px',
-                                display: 'flex',
-
-                            }} />
-
-                            <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 3, width: '100%', }}>
-                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, width: '100%', padding: '10px 30px' }}>
-                                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'start', width: '100%', }}>
-                                        <Text bold indicator style={{ color: !theme ? '#fff' : Colors.backgroundPrimary, transition: 'background-color 1s', textAlign: 'center' }}>Faça seu Login</Text>
-                                    </Box>
-                                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, width: '100%', alignItems: 'center' }}>
-                                        <Box sx={{
-                                            display: 'flex', flexDirection: 'column', gap: 2, width: '100%', justifyContent: 'center',
-                                        }}>
-                                            <TextInput
-                                                label='E-mail:'
-                                                placeholder='email@outlook.com.br'
-                                                value={userData?.email || ''}
-                                                onChange={handleChange}
-                                                name='email'
-                                                margin='none'
-                                                type="email"
-                                                InputProps={{
-                                                    style: {
-                                                        backgroundColor: !theme ? '#1B1829' : Colors.background,
-                                                        transition: 'background-color 1s',
-                                                        border: "none",
-                                                        color: !theme ? '#fff' : Colors.backgroundPrimary,
-                                                        outline: 'none',
-                                                        // // width: '280px',
-                                                    }
-                                                }}
-                                                InputLabelProps={{
-                                                    style: {
-                                                        color: !theme ? '#fff' : Colors.backgroundPrimary,
-                                                        transition: 'background-color 1s',
-                                                        // width: '280px',
-                                                    }
-                                                }}
-                                            />
-                                            <TextInput
-                                                placeholder='******'
-                                                label='Senha:'
-                                                colorLabel={'#fff'}
-                                                value={userData.senha || ''}
-                                                onChange={handleChange}
-                                                name='senha'
-                                                type="password"
-                                                margin='none'
-                                                InputProps={{
-                                                    style: {
-                                                        backgroundColor: !theme ? '#1B1829' : Colors.background,
-                                                        transition: 'background-color 1s',
-                                                        color: !theme ? '#ffffffbb' : Colors.backgroundPrimary,
-                                                        outline: 'none',
-                                                        // width: '280px',
-                                                    }
-                                                }}
-                                                InputLabelProps={{
-                                                    style: {
-                                                        color: !theme ? '#fff' : Colors.backgroundPrimary,
-                                                        transition: 'background-color 1s',
-                                                    }
-                                                }}
-                                            />
-                                        </Box>
-                                        <Button
-                                            style={{
-                                                width: '100%',
-                                                padding: '12px 80px',
-                                                marginBottom: 5,
-                                                borderRadius: '12px',
-                                                backgroundColor: colorPalette.buttonColor,
-                                                transition: 'background-color 1s',
-                                                "&:hover": {
-                                                    backgroundColor: colorPalette.buttonColor + 'dd',
-                                                    cursor: 'pointer'
-                                                },
-                                                display: 'flex',
-                                                justifyContent: 'center',
-                                                alignItems: 'center',
-                                                color: '#f0f0f0',
-                                                // padding: { xs: `6px 10px`, xm: `8px 16px`, md: `8px 16px`, lg: `8px 16px` },
-                                                borderRadius: '12px',
-                                            }}
-                                            text='Entrar'
-                                            onClick={handleLogin}
-                                            type="submit"
-                                        >
-                                            <Text small bold style={{ color: 'inherit' }}>Entrar</Text>
-                                        </Button>
-                                    </Box>
-                                </Box>
-                                <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center', padding: '0px 30px' }}>
-                                    <Text light small style={{ marginTop: 5 }}>Esqueceu sua senha?</Text>
+                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, width: '100%', alignItems: 'center' }}>
                                     <Box sx={{
-                                        display: 'flex', "&:hover": {
-                                            opacity: 0.8,
-                                            cursor: 'pointer'
-                                        }
-                                    }} onClick={() => setShowRedefinitionPass(true)}>
-                                        <Text style={{ color: colorPalette.buttonColor }}>Redefinir Senha.</Text>
+                                        display: 'flex', flexDirection: 'column', gap: 2, width: '100%', justifyContent: 'center',
+                                    }}>
+                                        <TextInput
+                                            label='E-mail:'
+                                            placeholder='email@outlook.com.br'
+                                            value={userData?.email || ''}
+                                            onChange={handleChange}
+                                            name='email'
+                                            margin='none'
+                                            type="email"
+                                            InputProps={{
+                                                style: {
+                                                    backgroundColor: !theme ? '#1B1829' : Colors.background,
+                                                    transition: 'background-color 1s',
+                                                    border: "none",
+                                                    color: !theme ? '#fff' : Colors.backgroundPrimary,
+                                                    outline: 'none',
+                                                    // // width: '280px',
+                                                }
+                                            }}
+                                            InputLabelProps={{
+                                                style: {
+                                                    color: !theme ? '#fff' : Colors.backgroundPrimary,
+                                                    transition: 'background-color 1s',
+                                                    // width: '280px',
+                                                }
+                                            }}
+                                        />
+                                        <TextInput
+                                            placeholder='******'
+                                            label='Senha:'
+                                            colorLabel={'#fff'}
+                                            value={userData.senha || ''}
+                                            onChange={handleChange}
+                                            name='senha'
+                                            type="password"
+                                            margin='none'
+                                            InputProps={{
+                                                style: {
+                                                    backgroundColor: !theme ? '#1B1829' : Colors.background,
+                                                    transition: 'background-color 1s',
+                                                    color: !theme ? '#ffffffbb' : Colors.backgroundPrimary,
+                                                    outline: 'none',
+                                                    // width: '280px',
+                                                }
+                                            }}
+                                            InputLabelProps={{
+                                                style: {
+                                                    color: !theme ? '#fff' : Colors.backgroundPrimary,
+                                                    transition: 'background-color 1s',
+                                                }
+                                            }}
+                                        />
                                     </Box>
+                                    <Button
+                                        style={{
+                                            width: '100%',
+                                            padding: '12px 80px',
+                                            marginBottom: 5,
+                                            borderRadius: '12px',
+                                            backgroundColor: colorPalette.buttonColor,
+                                            transition: 'background-color 1s',
+                                            "&:hover": {
+                                                backgroundColor: colorPalette.buttonColor + 'dd',
+                                                cursor: 'pointer'
+                                            },
+                                            display: 'flex',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            color: '#f0f0f0',
+                                            // padding: { xs: `6px 10px`, xm: `8px 16px`, md: `8px 16px`, lg: `8px 16px` },
+                                            borderRadius: '12px',
+                                        }}
+                                        text='Entrar'
+                                        onClick={handleLogin}
+                                        type="submit"
+                                    >
+                                        <Text small bold style={{ color: 'inherit' }}>Entrar</Text>
+                                    </Button>
                                 </Box>
-                            </form>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: .5, justifyContent: 'center', width: '100%', padding: '10px 30px' }}>
-                                <Button
-                                    style={{
-                                        width: '100%',
-                                        padding: '10px 30px',
-                                        backgroundColor: '#FFB91D',
-                                        marginBottom: 5,
-                                        borderRadius: '100px',
-                                        transition: 'background-color 1s',
-                                        "&:hover": {
-                                            opacity: .8,
-                                            cursor: 'pointer'
-                                        },
-                                        display: 'flex',
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                        color: '#f0f0f0',
-                                        // padding: { xs: `6px 10px`, xm: `8px 16px`, md: `8px 16px`, lg: `8px 16px` },
-                                        borderRadius: '12px',
-                                    }}
-                                    text='Entrar'
-                                    onClick={() => {
-                                        setShowRegisterType(true)
-                                    }}
-                                >
-                                    <Text small bold style={{ color: colorPalette.secondary }}>Criar Conta</Text>
-                                </Button>
                             </Box>
-                        </Box>}
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center', padding: '0px 30px' }}>
+                                <Text light small style={{ marginTop: 5 }}>Esqueceu sua senha?</Text>
+                                <Box sx={{
+                                    display: 'flex', "&:hover": {
+                                        opacity: 0.8,
+                                        cursor: 'pointer'
+                                    }
+                                }} onClick={() => setShowRedefinitionPass(true)}>
+                                    <Text style={{ color: colorPalette.buttonColor }}>Redefinir Senha.</Text>
+                                </Box>
+                            </Box>
+                        </form>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: .5, justifyContent: 'center', width: '100%', padding: '10px 30px' }}>
+                            <Button
+                                style={{
+                                    width: '100%',
+                                    padding: '10px 30px',
+                                    backgroundColor: '#FFB91D',
+                                    marginBottom: 5,
+                                    borderRadius: '100px',
+                                    transition: 'background-color 1s',
+                                    "&:hover": {
+                                        opacity: .8,
+                                        cursor: 'pointer'
+                                    },
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    color: '#f0f0f0',
+                                    // padding: { xs: `6px 10px`, xm: `8px 16px`, md: `8px 16px`, lg: `8px 16px` },
+                                    borderRadius: '12px',
+                                }}
+                                text='Entrar'
+                                onClick={() => {
+                                    handleRegister('paciente')
+                                }}
+                            >
+                                <Text small bold style={{ color: colorPalette.secondary }}>Criar Conta</Text>
+                            </Button>
+                        </Box>
+                    </Box>
 
                 </Box>
             </Box>

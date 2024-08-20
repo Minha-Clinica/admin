@@ -1,15 +1,13 @@
 import Head from 'next/head'
 import { Inter } from 'next/font/google'
-import { Box, Button, ContentContainer, Divider, Text, TextInput } from '../atoms'
-import { Carousel, Holidays } from '../organisms'
+import { Box, Button, ContentContainer, Divider, Text } from '../atoms'
+import { Holidays, SelectList } from '../organisms'
 import { useAppContext } from '../context/AppContext'
 import { icons } from '../organisms/layout/Colors'
 import { useEffect, useState } from 'react'
-import { menuItems } from '../permissions'
 import { useRouter } from 'next/router'
-import { getImageByScreen } from '../validators/api-requests'
 import { api } from '../api/api'
-import { Avatar, Backdrop, CircularProgress } from '@mui/material'
+import { Backdrop, CircularProgress } from '@mui/material'
 import moment from "moment";
 import "moment/locale/pt-br";
 import Calendar from "react-calendar"
@@ -22,102 +20,21 @@ import "react-big-calendar/lib/addons/dragAndDrop"; // Recurso de arrastar e sol
 import "react-big-calendar/lib/css/react-big-calendar.css"
 import Link from 'next/link'
 
-const inter = Inter({ subsets: ['latin'] })
-
-const backgroundHome = [
-   { name: 'slide-1', location: 'https://adm-melies.s3.amazonaws.com/slide-3.jpg' },
-   { name: 'slide-2', location: 'https://adm-melies.s3.amazonaws.com/slide-5.jpg' },
-]
-
-const equipeProf = [
-   {
-      id: '01', icon: '/icons/jean.jpeg', nome: 'Jean Santos', titulo: 'Pastor em São Paulo - SP',
-      text: 'Pastor em São Paulo, Marido de Lívia, Pai de Caio, Mari e Levi. Formado em xpto, etc etc.'
-   },
-   {
-      id: '02', icon: 'https://mf-planejados.s3.us-east-1.amazonaws.com/62b7737f31b966b061e340b5d150340d-perfil.jpg',
-      nome: 'Marcus Silva', titulo: 'Desenvolvedor',
-      text: 'Desenvolvedor do Sistema, marido de Dallila e pai de Vicente, rico de saude, só que não.'
-   },
-   {
-      id: '03', icon: '/icons/doutor_icon.jpeg', nome: 'Fulano Silva', titulo: 'Psicoterapeuta',
-      text: 'Fulano de Cicrano, formado em Psicologia em SP, etc...'
-   },
-]
-
-const birthDate = [
-   { id: '01', name: 'Marcus Silva', day: 1, function: 'Desenvolvedor' },
-   { id: '02', name: 'Felipe Bomfim', day: 13, function: 'Suporte' },
-   { id: '03', name: 'Fulano Silva', day: 15, function: 'Suporte' },
-   { id: '04', name: 'Renato Miranda', day: 5, function: 'Gerente Suporte' }
-]
-
-
-const subMenu = [
-   {
-      id: '01', icon: '/icons/calendar.png',
-      route: '/calendar',
-      title: 'Minha Agenda',
-      permissions: ['profissional', 'administrador'],
-      filter: true,
-      text: 'Vizualize suas agendas confirmadas ou crie sua lista de reservas.'
-   },
-   {
-      id: '02', icon: '/icons/discussion.png',
-      route: '/consultation',
-      title: 'Minhas Sessões',
-      permissions: ['profissional', 'paciente', 'administrador'],
-      filter: true,
-      text: 'Vizualize os prontuários de seus pacientes de consultas agendadas.'
-   },
-   // {
-   //    id: '04', icon: '/icons/search_input_icon.png',
-   //    route: '/searchProfissional',
-   //    title: 'Buscar Terapeura',
-   //    permissions: ['administrador'],
-   //    filter: true,
-   //    text: 'Buscar profissionais e marque sua consulta agora mesmo!'
-   // },
-   {
-      id: '05', icon: '/icons/message.png',
-      route: '',
-      title: 'Ajuda',
-      permissions: ['administrador', 'paciente'],
-      filter: true,
-      text: 'Está com alguma dificuldade com o Painel? Peça ajuda ao suporte.'
-   },
-   {
-      id: '06', icon: '/icons/gateway.png',
-      route: '',
-      title: 'Continuar a preencher minha Anamnêse',
-      permissions: ['paciente'],
-      filter: true,
-      text: 'Não esqueça de preencher seu formulário.'
-   },
-   //Primeira fase
-   // {
-   //    id: '06', icon: '/icons/subscription.png',
-   //    filter: true,
-   //    route: '/assignmentPlan',
-   //    permissions: ['profissional', 'administrador'],
-   //    title: 'Meus Planos',
-   //    text: 'Usufrua o melhor da plataforma contratando os melhores planos! E aproveite!'
-   // }
-]
 
 function Home() {
 
    const { user, colorPalette, theme, setLoading, alert, notificationUser } = useAppContext()
-   const [menu, setMenu] = useState(menuItems)
-   const [imagesList, setImagesList] = useState([])
    const [myEvents, setMyEvents] = useState([])
    const [consultionList, setConsultion] = useState([])
+   const [employees, setEmployees] = useState([])
    const isPacient = user?.perfil?.includes('paciente')
+   const isPartner = user?.perfil?.includes('parceiro')
    const router = useRouter();
-   const [dateSelected, setDateSelected] = useState({ day: '', hour: '', profissionalId: '', reserva_id: '' })
+   const [dateSelected, setDateSelected] = useState({ day: '', hour: '', profissionalId: '', reserva_id: '', userId: '' })
    const [calendarSessions, setCalendarSessions] = useState([])
    const [calendarHours, setCalendarHours] = useState([])
    const [loadingDate, setLoadingDate] = useState(false)
+   const [showEmployeeList, setShowEmployeeList] = useState(false)
    const [selectedEvent, setSelectedEvent] = useState(null);
    const [showEventForm, setShowEventForm] = useState(false);
    const [eventData, setEventData] = useState({
@@ -142,6 +59,73 @@ function Home() {
    moment.locale("pt-br");
    const localizer = momentLocalizer(moment);
 
+   const subMenu = [
+      {
+         id: '01', icon: '/icons/calendar-2.png',
+         route: '/calendar',
+         title: 'Minha Agenda',
+         permissions: ['administrador'],
+         filter: true,
+         text: 'Vizualize suas agendas confirmadas ou crie sua lista de reservas.'
+      },
+      {
+         id: '02', icon: '/icons/team.png',
+         route: `/organization/${user.empresa_id}`,
+         title: 'Minha Empresa',
+         permissions: ['parceiro',],
+         filter: true,
+         text: 'Visualizar os dados de sua empresa. Cadastre e veja os colaboradores vínculados a sua sua empresa.'
+      },
+      {
+         id: '02', icon: '/icons/technology.png',
+         route: '/consultation',
+         title: 'Sessões dos Colaboradores',
+         permissions: ['parceiro',],
+         filter: true,
+         text: 'Vizualize os detalhes das consultas agendadas para seus colaboradores.'
+      },
+      {
+         id: '02', icon: '/icons/technology.png',
+         route: '/consultation',
+         title: 'Minhas Sessões',
+         permissions: ['paciente', 'administrador'],
+         filter: true,
+         text: 'Visualize os prontuários de seus pacientes de consultas agendadas.'
+      },
+      {
+         id: '03', icon: '/icons/userdata.png',
+         route: `/users/${user?.id}`,
+         title: 'Meus Dados',
+         permissions: ['parceiro', 'paciente', 'administrador'],
+         filter: true,
+         text: 'Editar e atualizar seus dados.'
+      },
+      {
+         id: '05', icon: '/icons/message.png',
+         route: '',
+         title: 'Ajuda',
+         permissions: ['administrador', 'parceiro', 'paciente'],
+         filter: true,
+         text: 'Está com alguma dificuldade com o Painel? Peça ajuda ao suporte.'
+      },
+      {
+         id: '06', icon: '/icons/gateway.png',
+         route: `/anamnese/${user.id}`,
+         title: 'Continuar a preencher minha Anamnêse',
+         permissions: ['paciente'],
+         filter: true,
+         text: 'Não esqueça de preencher seu formulário.'
+      },
+      //Primeira fase
+      // {
+      //    id: '06', icon: '/icons/subscription.png',
+      //    filter: true,
+      //    route: '/assignmentPlan',
+      //    permissions: ['profissional', 'administrador'],
+      //    title: 'Meus Planos',
+      //    text: 'Usufrua o melhor da plataforma contratando os melhores planos! E aproveite!'
+      // }
+   ]
 
    const getConsultion = async () => {
       setLoading(true)
@@ -150,6 +134,26 @@ function Home() {
          const response = await api.get(query)
          const { data = [] } = response;
          setConsultion(data)
+      } catch (error) {
+         console.log(error)
+         return error
+      } finally {
+         setLoading(false)
+      }
+   }
+
+   const getEmployees = async () => {
+      setLoading(true)
+      try {
+         const response = await api.get(`/users/employee/${user.empresa_id}`)
+         const { data = [] } = response;
+         if (data?.length > 0) {
+            const employeeMap = data.map((item) => ({
+               label: item.nome,
+               value: item.id
+            }))
+            setEmployees(employeeMap)
+         }
       } catch (error) {
          console.log(error)
          return error
@@ -233,6 +237,7 @@ function Home() {
       handleEvents()
       getConsultion()
       getSessionsCalendar()
+      getEmployees()
    }, [])
 
    const nowMonth = new Date().toLocaleString('pt-BR', { month: 'long' });
@@ -283,9 +288,9 @@ function Home() {
       let date = moment(value).format("YYYY-MM-DD")
       try {
          if (dateSelected?.day === date) {
-            setDateSelected({ day: '', hour: '', profissionalId: '', reserva_id: '' })
+            setDateSelected({ day: '', hour: '', profissionalId: '', reserva_id: '', userId: '' })
          } else {
-            setDateSelected({ day: date, hour: '', profissionalId: id, reserva_id: '' })
+            setDateSelected({ day: date, hour: '', profissionalId: id, reserva_id: '', userId: '' })
          }
       } catch (error) {
          return error
@@ -312,15 +317,17 @@ function Home() {
          </Head>
          <Box sx={{ display: 'flex', gap: 1, flexDirection: { xs: 'column', xm: 'column', md: 'row', lg: 'row' } }}>
 
-            <Box sx={{ display: 'flex', flexDirection: 'column', width: { xs: '100%', xm: '100%', md: '100%', lg: '100%' },
-             transition: '0.5s', marginTop: { xs: 0, xm: 0, md: 10, lg: 10 }, padding: '10px 50px' }}>
+            <Box sx={{
+               display: 'flex', flexDirection: 'column', width: { xs: '100%', xm: '100%', md: '100%', lg: '100%' },
+               transition: '0.5s', marginTop: { xs: 0, xm: 0, md: 10, lg: 10 }, padding: '10px 50px'
+            }}>
 
-               {isPacient &&
+               {(isPacient || isPartner) &&
                   <>
                      <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', marginTop: 2 }}>
 
                         <Text light large>Minhas próximas Sessões.</Text>
-                        <Box sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', xm: 'column', md: 'row', lg: 'row' }}}>
+                        <Box sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', xm: 'column', md: 'row', lg: 'row' } }}>
 
                            {myEvents?.filter(item => item.disponivel === 1 && (new Date(item?.start) >= new Date()))?.length > 0 ?
                               <Box sx={{ display: 'flex', flexDirection: 'row', gap: .5, width: '100%', }}>
@@ -361,11 +368,13 @@ function Home() {
                         display: 'flex', gap: 2, padding: '10px',
                         marginTop: 5,
                         backgroundColor: colorPalette?.secondary,
+
                         boxShadow: `rgba(149, 157, 165, 0.6) 0px 6px 24px`,
                         borderRadius: 2
                      }}>
                         <Box sx={{
-                           display: 'flex', gap: 2, width: '100%'
+                           display: 'flex', gap: 2, width: '100%',
+                           flexDirection: { xs: 'column', xm: 'column', md: 'row', lg: 'row' }
                         }}>
                            <Box sx={{
                               display: 'flex', gap: 2,
@@ -381,7 +390,10 @@ function Home() {
                                     <Divider />
                                     {calendarSessions?.length > 0 ?
                                        <Box sx={{ display: 'flex', gap: 3, flexDirection: 'column' }}>
-                                          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'space-between' }}>
+                                          <Box sx={{
+                                             display: 'flex', gap: 2, justifyContent: 'space-between',
+                                             flexDirection: { xs: 'column', xm: 'column', md: 'row', lg: 'row' }
+                                          }}>
                                              <Box sx={{
                                                 display: 'flex', gap: 2, width: '100%', justifyContent: 'center', marginTop: 1,
                                                 alignItems: 'center'
@@ -437,7 +449,10 @@ function Home() {
                                                                      if (selected) {
                                                                         setDateSelected({ ...dateSelected, hour: '', reserva_id: '' })
                                                                      } else {
-                                                                        setDateSelected({ ...dateSelected, hour: hourFormatted, reserva_id: hour?.id_evento_calendario })
+                                                                        if (isPartner) {
+                                                                           setShowEmployeeList(true)
+                                                                        }
+                                                                        setDateSelected({ ...dateSelected, hour: hourFormatted, reserva_id: hour?.id_evento_calendario, userId: !isPartner && user.id })
                                                                      }
                                                                   }}>
                                                                      <Text large bold={selected ? true : false}>{hourFormatted}</Text>
@@ -467,18 +482,18 @@ function Home() {
                                        gap: 2,
                                        backgroundColor: colorPalette.buttonColor,
                                        borderRadius: 2,
-                                       opacity: (dateSelected?.reserva_id !== '' && dateSelected?.profissionalId === profissionalId) ? 1 : 0.5,
+                                       opacity: (dateSelected?.reserva_id !== '' && dateSelected?.profissionalId === profissionalId && dateSelected?.userId !== '') ? 1 : 0.5,
                                        "&:hover": {
-                                          opacity: (dateSelected?.reserva_id !== '' && dateSelected?.profissionalId === profissionalId) ? 1 : 0.5,
+                                          opacity: (dateSelected?.reserva_id !== '' && dateSelected?.profissionalId === profissionalId && dateSelected?.userId !== '') ? 1 : 0.5,
                                           cursor: 'pointer',
-                                          transform: (dateSelected?.reserva_id !== '' && dateSelected?.profissionalId === profissionalId) ? 'scale(1.1, 1.1)' : 'none'
+                                          transform: (dateSelected?.reserva_id !== '' && dateSelected?.profissionalId === profissionalId && dateSelected?.userId !== '') ? 'scale(1.1, 1.1)' : 'none'
                                        }
                                     }} onClick={() => {
-                                       if (dateSelected?.reserva_id !== '' && dateSelected?.profissionalId === profissionalId) {
+                                       if (dateSelected?.reserva_id !== '' && dateSelected?.profissionalId === profissionalId && dateSelected?.userId !== '') {
                                           if (dateSelected?.reserva_id === '') {
                                              alert.info('Selecione um horário antes de continuar.')
                                           } else {
-                                             router.push(`/searchProfissional/${dateSelected?.reserva_id}?professionalId=${dateSelected?.profissionalId}`)
+                                             router.push(`/searchProfissional/${dateSelected?.reserva_id}?professionalId=${dateSelected?.profissionalId}&userId=${dateSelected?.userId}`)
                                           }
                                        }
                                     }}>
@@ -487,6 +502,38 @@ function Home() {
                                  </Box>
                               </Box>
                            </Box>
+
+                           <Backdrop open={showEmployeeList}>
+                              <ContentContainer>
+                                 <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 4, alignItems: 'center' }}>
+                                    <Text bold large>Selecione o Colaborador</Text>
+                                    <Box sx={{
+                                       ...styles.menuIcon,
+                                       width: 15, height: 15,
+                                       backgroundImage: `url(${icons.gray_close})`,
+                                       transition: '.3s',
+                                       zIndex: 999999999,
+                                       "&:hover": {
+                                          opacity: 0.8,
+                                          cursor: 'pointer'
+                                       }
+                                    }} onClick={() => setShowEmployeeList(false)} />
+                                 </Box>
+                                 <Box>
+                                    <SelectList
+                                       fullWidth
+                                       data={employees}
+                                       valueSelection={dateSelected.userId}
+                                       onSelect={(value) => setDateSelected({ ...dateSelected, userId: value })}
+                                       title="Selecione um colaborador:"
+                                       filterOpition="value"
+                                       inputStyle={{ color: colorPalette.textColor, fontSize: '15px' }}
+                                       clean={false}
+                                    />
+                                 </Box>
+                                 <Button text="Confirmar" onClick={() => setShowEmployeeList(false)} />
+                              </ContentContainer>
+                           </Backdrop>
                            <Box sx={{ display: 'flex', marginLeft: 2, height: '100%', width: '1px', backgroundColor: 'lightgray' }} />
                            <Box sx={{ display: 'block', width: '100%' }}>
                               <Box sx={{
@@ -528,7 +575,7 @@ function Home() {
                                                       ...styles.menuIcon,
                                                       backgroundImage: `url(${item?.icon})`,
                                                       transition: '.3s',
-                                                      width: 30, height: 30,
+                                                      width: 45, height: 45,
                                                       "&:hover": {
                                                          opacity: 0.8,
                                                          cursor: 'pointer'
@@ -563,7 +610,7 @@ function Home() {
                      </Box>
                   </>}
 
-               <Box sx={{ display: isPacient ? 'none' : 'flex', gap: 2, marginTop: 5, flexDirection: 'column' }}>
+               <Box sx={{ display: (isPacient || isPartner) ? 'none' : 'flex', gap: 2, marginTop: 5, flexDirection: 'column' }}>
                   <Box sx={{
                      display: 'flex', gap: 2, padding: '10px 0px',
                      width: '100%',
@@ -572,9 +619,9 @@ function Home() {
                   }}>
                      <Box sx={{
                         display: 'flex', flexDirection: 'column', gap: 5, padding: '0px 20px 0px 0px',
-                        width:  { xs: '100%', xm: '100%', md: '40%', lg: '40%' }, alignItems: 'start'
+                        width: { xs: '100%', xm: '100%', md: '40%', lg: '40%' }, alignItems: 'start'
                      }}>
-                        <Text large bold>{isPacient ? 'Atendimento' : 'Próximas Sessões'}</Text>
+                        <Text large bold>{(isPacient || isPartner) ? 'Atendimento' : 'Próximas Sessões'}</Text>
                         <Box sx={{
                            display: 'flex', gap: 2, flexDirection: 'column',
                            width: '100%'

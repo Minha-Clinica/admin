@@ -218,6 +218,58 @@ export const AppProvider = ({ children }) => {
     }, [user]);
 
 
+    const menuItems = [
+        {
+            text: 'Usuários',
+            icon: '/icons/user_mult.png',
+            to: '/users/list',
+            permissions: ['administrador'],
+        },
+        {
+            text: 'Meus Dados',
+            icon: '/icons/settings.png',
+            to: `/users/${user?.id}`,
+            permissions: ['parceiro'],
+        },
+        {
+            text: 'Minha Empresa',
+            icon: '/icons/user_mult.png',
+            to: `/organization/${user?.empresa_id}`,
+            permissions: ['parceiro'],
+        },
+        {
+            text: 'Empresas',
+            icon: '/icons/settings.png',
+            to: '/organization/list',
+            permissions: ['administrador'],
+        },
+        {
+            text: 'Agenda',
+            icon: '/icons/agenda.png',
+            to: '/calendar',
+            permissions: ['administrador'],
+        },
+        {
+            text: 'Sessões',
+            icon: '/icons/email.png',
+            to: '/consultation',
+            permissions: ['parceiro', 'administrador', 'paciente'],
+        },
+        {
+            text: 'Meus Pacientes',
+            icon: '/icons/app.png',
+            to: '/patients',
+            permissions: ['administrador'],
+        },
+        {
+            text: 'Ajuda',
+            icon: '/icons/help.png',
+            to: '/tasks/list',
+            permissions: ['parceiro', 'administrador', 'paciente'],
+        },
+    ];
+
+
     return (
         <AppContext.Provider
             value={{
@@ -244,7 +296,8 @@ export const AppProvider = ({ children }) => {
                 latestVersion,
                 menuItemsList,
                 showVersion,
-                setShowVersion
+                setShowVersion,
+                menuItems
             }}
         >
             {children}

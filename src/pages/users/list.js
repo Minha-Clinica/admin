@@ -141,30 +141,10 @@ export default function ListUsers(props) {
         { key: 'id', label: 'ID' },
         { key: 'nome', avatar: true, label: 'Nome', avatarUrl: 'location', matricula: true },
         { key: 'email', label: 'E-mail' },
-        { key: 'perfil', label: 'Perfil' },
+        { key: 'perfil', label: 'Permissão' },
+        { key: 'razao_social', label: 'Empresa' },
     ];
 
-    const listAtivo = [
-        { label: 'Todos', value: 'todos' },
-        { label: 'Ativo', value: 1 },
-        { label: 'Inativo', value: 0 },
-    ]
-
-    const listEnrollStatus = [
-        { label: 'Todos', value: 'todos' },
-        // { label: 'Pendente de nota', value: 'Pendente de nota' },
-        // { label: 'Reprovado', value: 'Reprovado' },
-        // { label: 'Aprovado - Pendente de pré-matrícula', value: 'Aprovado - Pendente de pré-matrícula' },
-        // { label: 'Aprovado - Em análise', value: 'Aprovado - Em análise' },
-        { label: 'Matriculado', value: 1 },
-    ]
-
-    const listUser = [
-        { label: 'Todos', value: 'todos' },
-        { label: 'Aluno', value: 'aluno' },
-        { label: 'Funcionário', value: 'funcionario' },
-        { label: 'Interessado', value: 'interessado' },
-    ]
 
     return (
         <Box sx={{ display: 'flex', gap: 4, flexDirection: 'column', paddingTop: 4 }}>

@@ -8,7 +8,7 @@ import { SectionHeader, SelectList, Holidays, CheckBoxComponent } from "../../or
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css"; // Estilo para o recurso de arrastar e soltar (se estiver usando)
 import "react-big-calendar/lib/addons/dragAndDrop"; // Recurso de arrastar e soltar (se estiver usando)
 import { useAppContext } from "../../context/AppContext";
-import { Backdrop, Checkbox, Grid, Input } from "@mui/material";
+import { Backdrop, Checkbox, Grid, Input, Tooltip } from "@mui/material";
 import { icons } from "../../organisms/layout/Colors";
 import { api } from "../../api/api";
 import { useRouter } from "next/router";
@@ -301,6 +301,7 @@ export default function CalendarComponent(props) {
             const { data } = response
             if (data?.status === 201) {
                 alert.success('Rerervas criadas!')
+                setReservasAgenda([])
                 handleItems()
             }
         } catch (error) {
@@ -440,7 +441,7 @@ export default function CalendarComponent(props) {
     };
 
     const handleDayToggle = (day) => {
-        day.toLowerCase()
+        day = day.toLowerCase();
         if (selectedDays.includes(day)) {
             setSelectedDays(selectedDays.filter((selectedDay) => selectedDay !== day));
             setAvailability((prevAvailability) => {
@@ -452,48 +453,31 @@ export default function CalendarComponent(props) {
             setSelectedDays([...selectedDays, day]);
             setAvailability((prevAvailability) => ({
                 ...prevAvailability,
-                [day]: { startTime: "09:00", endTime: "17:00" }, // Define um horário padrão
+                [day]: [{ startTime: "09:00", endTime: "17:00" }], // Lista de intervalos
             }));
         }
     };
 
-    const handleAvailabilityChange = (day, field, value) => {
-        day.toLowerCase()
+
+    const handleAvailabilityChange = (day, index, field, value) => {
+        day = day.toLowerCase();
         setAvailability((prevAvailability) => ({
             ...prevAvailability,
-            [day]: {
-                ...prevAvailability[day],
-                [field]: value,
-            },
+            [day]: prevAvailability[day].map((period, i) =>
+                i === index ? { ...period, [field]: value } : period
+            ),
         }));
     };
-    // const handleAvailabilitySubmit = () => {
-    //     const availabilityData = {
-    //         days: selectedDays.map((day) => {
-    //             // Calcular a diferença de minutos entre o início e o término do dia
-    //             const startOfDay = moment(availability[day]?.startTime || "09:00", "HH:mm");
-    //             const endOfDay = moment(availability[day]?.endTime || "17:00", "HH:mm");
-    //             const diffMinutes = endOfDay.diff(startOfDay, "minutes");
 
-    //             // Calcular o número de slots disponíveis com base na duração
-    //             const numSlots = diffMinutes / duration;
 
-    //             // Criar os slots com base na duração
-    //             const slots = Array.from({ length: numSlots }, (_, index) => ({
-    //                 start: startOfDay.clone().add(index * duration, "minutes").format("HH:mm"),
-    //                 end: startOfDay.clone().add((index + 1) * duration, "minutes").format("HH:mm"),
-    //             }));
+    const handleAddPeriod = (day) => {
+        setAvailability((prevAvailability) => ({
+            ...prevAvailability,
+            [day]: [...prevAvailability[day], { startTime: "", endTime: "" }],
+        }));
+    };
 
-    //             return {
-    //                 day,
-    //                 slots,
-    //             };
-    //         }),
-    //     };
 
-    //     // Chame a função de callback para enviar os dados ao seu backend ou realizar a lógica necessária
-    //     console.log(availabilityData);
-    // };
 
     const handleAvailabilitySubmit = () => {
         const events = [];
@@ -505,82 +489,69 @@ export default function CalendarComponent(props) {
             dayOfWeek = dayOfWeek.toLowerCase();
 
             if (selectedDays.map(day => day.toLowerCase()).includes(dayOfWeek)) {
-                const startOfDay = moment(availability[dayOfWeek]?.startTime || "09:00", "HH:mm");
-                const endOfDay = moment(availability[dayOfWeek.toLowerCase()]?.endTime || "17:00", "HH:mm");
-                const diffMinutes = endOfDay.diff(startOfDay, "minutes");
+                availability[dayOfWeek].forEach(period => {
+                    const startOfDay = moment(period.startTime, "HH:mm");
+                    const endOfDay = moment(period.endTime, "HH:mm");
+                    const diffMinutes = endOfDay.diff(startOfDay, "minutes");
+                    const numSlots = diffMinutes / duration;
 
-                const numSlots = diffMinutes / duration;
+                    const slots = Array.from({ length: numSlots }, (_, index) => {
+                        const slotStart = startOfDay.clone().add(index * duration, "minutes");
+                        const slotEnd = slotStart.clone().add(duration, "minutes");
 
-                const slots = Array.from({ length: numSlots }, (_, index) => {
-                    const slotStart = startOfDay.clone().add(index * duration, "minutes");
-                    const slotEnd = slotStart.clone().add(duration, "minutes");
+                        if (slotEnd.isAfter(endOfDay)) {
+                            return {
+                                start: slotStart.format("HH:mm"),
+                                end: endOfDay.format("HH:mm"),
+                            };
+                        } else {
+                            return {
+                                start: slotStart.format("HH:mm"),
+                                end: slotEnd.format("HH:mm"),
+                            };
+                        }
+                    });
 
-                    // Verifica se o horário final é maior que o fim do dia; se for, ajusta para o fim do dia
-                    if (slotEnd.isAfter(endOfDay)) {
-                        return {
-                            start: slotStart.format("HH:mm"),
-                            end: endOfDay.format("HH:mm"),
+                    slots.forEach((slot) => {
+                        const event = {
+                            titulo: "Reserva de consulta",
+                            descricao: "Horário disponível para reserva.",
+                            local: "",
+                            color: "#808080",
+                            inicio: moment(`${moment().format("YYYY-MM")}-${dayOfMonth} ${slot.start}`, "YYYY-MM-DD HH:mm").toISOString(),
+                            fim: moment(`${moment().format("YYYY-MM")}-${dayOfMonth} ${slot.end}`, "YYYY-MM-DD HH:mm").toISOString(),
+                            usuario_agendado: '',
+                            email_agendado: '',
+                            nome_agendado: '',
+                            disponivel: 0,
+                            usuario_id: user?.id,
+                            nome_usuario_agendado: ''
                         };
-                    } else {
-                        return {
-                            start: slotStart.format("HH:mm"),
-                            end: slotEnd.format("HH:mm"),
-                        };
-                    }
-                });
 
-                slots.forEach((slot) => {
-                    const event = {
-                        titulo: "Reserva de consulta",
-                        descricao: "Horário disponível para reserva.",
-                        local: "",
-                        color: "#808080",
-                        inicio: moment(`${moment().format("YYYY-MM")}-${dayOfMonth} ${slot.start}`, "YYYY-MM-DD HH:mm").toISOString(),
-                        fim: moment(`${moment().format("YYYY-MM")}-${dayOfMonth} ${slot.end}`, "YYYY-MM-DD HH:mm").toISOString(),
-                        usuario_agendado: '',
-                        email_agendado: '',
-                        nome_agendado: '',
-                        disponivel: 0,
-                        usuario_id: user?.id,
-                        nome_usuario_agendado: ''
-                    };
-
-                    events.push(event);
+                        events.push(event);
+                    });
                 });
-            } else {
-                console.log(`Day ${dayOfWeek} is not selected`);
             }
         }
+
         setReservasAgenda(events);
 
         if (events.length > 0) {
-            alert.success('Lista de reservas criada.')
-            setShowAppointment(false)
-            setShowReservas(true)
-            setAvailability([])
-            setSelectedDays([])
+            alert.success('Lista de reservas criada.');
+            setShowAppointment(false);
+            setShowReservas(true);
+            setAvailability([]);
+            setSelectedDays([]);
         } else {
-            alert.error('Houve um erro ao tentar criar a lista de reservas')
+            alert.error('Houve um erro ao tentar criar a lista de reservas');
         }
     };
-
-
-
 
 
     const handleDurationChange = (value) => {
         setDuration(parseInt(value, 10));
     };
 
-    const groupMonths = [
-        { label: '1º Semestre', value: '1º Semestre' },
-        { label: '2º Semestre', value: '2º Semestre' },
-    ]
-
-    const groupPerfil = [
-        { label: 'Profissional', value: 'Profissional' },
-        { label: 'Paciente', value: 'Paciente' }
-    ]
 
     const groupHour = [
         { label: '1,5 hora', value: 90 },
@@ -609,6 +580,13 @@ export default function CalendarComponent(props) {
         const dataFormatada = `${dia} ${mes}.`;
 
         return dataFormatada
+    }
+
+    const formatNamesToUpperCase = (data) => {
+        if (typeof data === 'string') {
+            return data.charAt(0).toUpperCase() + data.slice(1)
+        }
+        return data
     }
 
 
@@ -948,8 +926,8 @@ export default function CalendarComponent(props) {
                 )
             }
 
-            <Backdrop open={showAppointment} sx={{ zIndex: 999 }}>
-                <ContentContainer style={{ maxWidth: { md: '800px', lg: '1980px' }, maxHeight: { md: '800px', lg: '700px', xl: '1280px' }, overflowY: matches && 'auto', width: 400 }}>
+            <Backdrop open={showAppointment} sx={{ zIndex: 999, paddingTop: 5 }}>
+                <ContentContainer style={{ maxWidth: { md: '800px', lg: '1980px' }, maxHeight: { md: '800px', lg: 550, xl: '1280px' }, overflowY: 'auto', width: 400 }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                         <Text bold large>Dísponibilidade de reserva</Text>
                         <Box sx={{
@@ -988,21 +966,46 @@ export default function CalendarComponent(props) {
                                         checked={selectedDays.includes(day)}
                                         onChange={() => handleDayToggle(day)}
                                     />
-                                    <Text>{day}</Text>
+                                    <Text>{formatNamesToUpperCase(day)}</Text>
                                     {selectedDays.includes(day) && (
-                                        <Box sx={{ display: "flex", flexDirection: "row", gap: 2 }}>
-                                            <Input
-                                                type="time"
-                                                label="Hora de início"
-                                                value={availability[day]?.startTime || "09:00"}
-                                                onChange={(e) => handleAvailabilityChange(day, "startTime", e.target.value)}
-                                            />
-                                            <Input
-                                                type="time"
-                                                label="Hora de término"
-                                                value={availability[day]?.endTime || "17:00"}
-                                                onChange={(e) => handleAvailabilityChange(day, "endTime", e.target.value)}
-                                            />
+                                        <Box sx={{ display: "flex", gap: 2, alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+
+                                            <Box sx={{ display: "flex", flexDirection: "column", gap: 2, width: '100%',  }}>
+                                                {availability[day].map((period, index) => (
+                                                    <Box key={index} sx={{ display: "flex", gap: 2, alignItems: 'center', backgroundColor: colorPalette.primary, padding: '5px 12px', width: '100%', alignItems: 'center', justifyContent: 'spcae-between' }}>
+                                                        <Input
+                                                            fullWidth
+                                                            type="time"
+                                                            label="Hora de início"
+                                                            value={period.startTime}
+                                                            onChange={(e) => handleAvailabilityChange(day, index, "startTime", e.target.value)}
+                                                        />
+                                                        <Text>-</Text>
+                                                        <Input
+                                                            fullWidth
+                                                            type="time"
+                                                            label="Hora de término"
+                                                            value={period.endTime}
+                                                            onChange={(e) => handleAvailabilityChange(day, index, "endTime", e.target.value)}
+                                                        />
+                                                    </Box>
+                                                ))}
+                                            </Box>
+                                            <Tooltip title="Adicionar outro período a este dia">
+                                                <div>
+                                                    <Box sx={{
+                                                        ...styles.menuIcon,
+                                                        backgroundImage: `url('/icons/add.png')`,
+                                                        transition: '.3s',
+                                                        "&:hover": {
+                                                            opacity: 0.8,
+                                                            cursor: 'pointer'
+                                                        }
+                                                    }} onClick={() => {
+                                                        handleAddPeriod(day)
+                                                    }} />
+                                                </div>
+                                            </Tooltip>
                                         </Box>
                                     )}
                                 </Grid>

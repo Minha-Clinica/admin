@@ -1,8 +1,5 @@
 import { Box } from '../atoms'
 import { AppProvider, useAppContext } from '../context/AppContext'
-import { ProtectRoute } from '../context/ProtectRoute'
-import { Colors, LeftMenu, UserHeader } from '../organisms'
-import { menuItems } from '../permissions'
 import '../styles/globals.css'
 import 'react-credit-cards/es/styles-compiled.css';
 import PagesRoute from './pagesRoute'

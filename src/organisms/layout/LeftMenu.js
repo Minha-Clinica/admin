@@ -10,11 +10,10 @@ import { IconTheme } from "../iconTheme/IconTheme"
 import { getImageByScreen } from "../../validators/api-requests"
 import { DialogUserEdit } from "../userEdit/dialogEditUser"
 import { api } from "../../api/api"
-import { menuItems } from "../../permissions"
 
 export const LeftMenu = ({ }) => {
 
-   const { logout, user, colorPalette, theme, userPermissions, latestVersion, showVersion, setShowVersion } = useAppContext();
+   const { menuItems, user, colorPalette, theme, userPermissions, latestVersion, showVersion, setShowVersion } = useAppContext();
    const name = user?.nome?.split(' ');
    const firstName = name[0];
    const lastName = name[name.length - 1];
@@ -180,7 +179,7 @@ export const LeftMenu = ({ }) => {
                                  <Box sx={{ display: 'flex', justifyContent: 'flex-start', gap: 1.5, position: 'relative', alignItems: 'center', position: 'relative' }}>
                                     <Box sx={{
                                        ...styles.icon, backgroundImage: `url(${group?.icon})`, width: group.text === 'Administrativo' ? 15 : 18,
-                                       height: 18, 
+                                       height: 18,
                                        transition: 'background-color 1s'
                                     }} />
                                     {<Text bold style={{ color: (pathname === group.to) ? colorPalette?.buttonColor : 'gray', transition: 'background-color 1s', }}>
@@ -208,7 +207,7 @@ export const LeftMenu = ({ }) => {
                               }} >
                                  <Box sx={{
                                     ...styles.icon, backgroundImage: `url(${group?.icon})`, width: group.text === 'Administrativo' ? 15 : 18, height: group.text === 'Administrativo' ? 24 : 18,
-                                     transition: 'background-color 1s'
+                                    transition: 'background-color 1s'
                                  }} />
                               </Box>
 

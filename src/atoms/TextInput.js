@@ -91,7 +91,7 @@ export const TextInput = (props) => {
                   shrink: true,
                   style: {
                      color: colorPalette.textColor,
-                     fontSize: { xs: '13px', xm: '13px', md: '13px', lg: '13px', xl: '14px' },
+                     fontSize: { xs: '9px', xm: '13px', md: '13px', lg: '13px', xl: '14px' },
                      fontFamily: 'MetropolisBold',
                      zIndex: 9
                   },
@@ -103,14 +103,14 @@ export const TextInput = (props) => {
                   sx: {
                      color: colorPalette.textColor,
                      fontSize: {
-                        xs: '16px',
+                        xs: '12px',
                         xm: '13px',
                         md: '13px',
                         lg: '13px',
                         xl: '14px'
                      },
                      fontFamily: 'MetropolisBold',
-                     zIndex: 99,
+                     zIndex: 9,
                      ...InputLabelProps?.style
                   }
                }

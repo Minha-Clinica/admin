@@ -15,8 +15,9 @@ export default function ReserveConsultation() {
     const { setLoading, alert, colorPalette, user, matches, theme, setShowConfirmationDialog, menuItemsList, userPermissions } = useAppContext()
     const usuario_id = user.id;
     const router = useRouter()
-    const { id, professionalId } = router.query;
+    const { id, professionalId, userId } = router.query;
     const [profissionalData, setProfissionalData] = useState({})
+    const [pacientData, setPacientData] = useState({})
     const [reservaData, setReserveData] = useState({})
     const [formattedDate, setFormattedDate] = useState()
     const [loadingReservation, setLoadingReservation] = useState(false)
@@ -32,7 +33,19 @@ export default function ReserveConsultation() {
         try {
             const response = await api.get(`/user/${professionalId}`)
             const { data } = response
-            setProfissionalData(data.response)
+            setProfissionalData(data)
+        } catch (error) {
+            console.log(error)
+            return error
+        }
+    }
+
+
+    const getPacientData = async () => {
+        try {
+            const response = await api.get(`/user/${userId}`)
+            const { data } = response
+            setPacientData(data)
         } catch (error) {
             console.log(error)
             return error
@@ -79,10 +92,10 @@ export default function ReserveConsultation() {
                     hora: formattedHour
                 },
                 pacientData: {
-                    photo: user?.getPhoto?.location,
-                    email: user?.email,
-                    nome: user?.nome,
-                    id: user?.id,
+                    photo: pacientData ? pacientData.location : user?.getPhoto?.location,
+                    email: pacientData ? pacientData.email : user?.email,
+                    nome: pacientData ? pacientData.nome : user?.nome,
+                    id: pacientData ? pacientData.id : user?.id,
                 }
             })
             const { status, data } = response
@@ -113,6 +126,7 @@ export default function ReserveConsultation() {
         try {
             await getProfissionalData()
             await getReserva()
+            await getPacientData()
         } catch (error) {
             alert.error('Ocorreu um arro ao carregar Usuarios')
         } finally {
@@ -179,12 +193,32 @@ export default function ReserveConsultation() {
                         <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', flex: 1, }}>
                             <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column', alignItems: 'start', padding: '10px 0px 0px 10px' }}>
                                 <Text veryLarge bold style={{ color: colorPalette.third }}>{profissionalData?.nome}</Text>
-                                <Text light large bold>Formado em Terapia - TRG </Text>
                                 <Text light large>São Paulo - SP </Text>
                             </Box>
                         </Box>
                     </Box>
                     <Divider />
+                    <Box sx={{
+                        display: 'flex', gap: 2, backgroundColor: colorPalette.secondary, padding: '15px', borderRadius: 2,
+                        flexDirection: 'row', alignItems: 'center',
+                    }}>
+                        <Box sx={{ padding: '0px 20px' }}>
+                            <Text title bold style={{ color: colorPalette.buttonColor }}>Paciente</Text>
+                        </Box>
+                        <Avatar src={pacientData?.location || ''} sx={{
+                            height: { xs: '100%', sm: 45, md: 45, lg: 45 },
+                            width: { xs: '100%', sm: 45, md: 45, lg: 45 },
+                        }} variant="rounded"
+                        />
+
+                        <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column', alignItems: 'start', padding: '10px 0px 0px 10px' }}>
+                            <Text light bold>{pacientData?.nome}</Text>
+                            <Text light>{pacientData?.email}</Text>
+                        </Box>
+                    </Box>
+                    <Divider />
+
+
                     <Box sx={{ padding: '0px 20px' }}>
                         <Text title bold style={{ color: colorPalette.buttonColor }}>Informações da Consulta</Text>
                     </Box>
