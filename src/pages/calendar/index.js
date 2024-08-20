@@ -4,7 +4,7 @@ import moment from "moment";
 import "moment/locale/pt-br";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { Box, Button, ContentContainer, Divider, Text, TextInput } from "../../atoms";
-import { SectionHeader, SelectList, Holidays, CheckBoxComponent } from "../../organisms";
+import { SectionHeader, SelectList, Holidays, CheckBoxComponent, RadioItem } from "../../organisms";
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css"; // Estilo para o recurso de arrastar e soltar (se estiver usando)
 import "react-big-calendar/lib/addons/dragAndDrop"; // Recurso de arrastar e soltar (se estiver usando)
 import { useAppContext } from "../../context/AppContext";
@@ -287,6 +287,7 @@ export default function CalendarComponent(props) {
                 handleItems()
             }
         } catch (error) {
+            console.log(error)
             return error
         } finally {
             setLoading(false)
@@ -349,6 +350,7 @@ export default function CalendarComponent(props) {
         try {
             setLoading(true)
             const response = await api.delete(`/event/delete/${eventData.id_evento_calendario}`)
+            console.log(eventData)
             const { status } = response
             if (status === 200) {
                 alert.success('Evento deletado.')
@@ -357,6 +359,7 @@ export default function CalendarComponent(props) {
             }
             alert.error('Ocorreu um erro ao deletar o evento')
         } catch (error) {
+            console.log(error)
             return error
         } finally {
             setLoading(false)
@@ -413,6 +416,7 @@ export default function CalendarComponent(props) {
         if (selectedEvent) {
             handleEditEvent(eventData);
         } else {
+            console.log('entrou aqui')
             handleCreateEvent(eventData);
         }
 
@@ -856,6 +860,21 @@ export default function CalendarComponent(props) {
                                     value={eventData.color}
                                     onChange={handleEventFormChange}
                                 />
+
+                                <RadioItem
+                                    valueRadio={eventData?.disponivel}
+                                    group={[
+                                        { label: 'Não', value: 1 },
+                                        { label: 'Sim', value: 0 },
+                                    ]}
+                                    title="Agenda Disponível *"
+                                    onSelect={(value) =>
+                                        setEventData({
+                                            ...eventData, disponivel: parseInt(value)
+                                        })
+                                    }
+                                />
+
                                 <TextInput disabled={!isPermissionEdit && true}
                                     name="email_agendado"
                                     value={eventData?.email_agendado || ''}
@@ -900,7 +919,7 @@ export default function CalendarComponent(props) {
                                         style={{ padding: '5px 6px 5px 6px', width: 100 }}
                                         onClick={(event) => handleEventFormSubmit(event)}
                                     />
-                                    {(selectedEvent && parseInt(eventData?.disponivel) === 0)
+                                    {(selectedEvent)
                                         &&
                                         < Button
                                             disabled={!isPermissionEdit && true}
@@ -970,7 +989,7 @@ export default function CalendarComponent(props) {
                                     {selectedDays.includes(day) && (
                                         <Box sx={{ display: "flex", gap: 2, alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
 
-                                            <Box sx={{ display: "flex", flexDirection: "column", gap: 2, width: '100%',  }}>
+                                            <Box sx={{ display: "flex", flexDirection: "column", gap: 2, width: '100%', }}>
                                                 {availability[day].map((period, index) => (
                                                     <Box key={index} sx={{ display: "flex", gap: 2, alignItems: 'center', backgroundColor: colorPalette.primary, padding: '5px 12px', width: '100%', alignItems: 'center', justifyContent: 'spcae-between' }}>
                                                         <Input

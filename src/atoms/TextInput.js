@@ -110,7 +110,7 @@ export const TextInput = (props) => {
                         xl: '14px'
                      },
                      fontFamily: 'MetropolisBold',
-                     zIndex: 9,
+                     zIndex: 99,
                      ...InputLabelProps?.style
                   }
                }
