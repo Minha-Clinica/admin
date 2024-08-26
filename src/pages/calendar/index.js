@@ -122,7 +122,7 @@ export default function CalendarComponent(props) {
         allDay: false
     });
     const router = useRouter()
-    const { setLoading, alert, colorPalette, matches, user, userPermissions, menuItemsList } = useAppContext()
+    const { setLoading, alert, colorPalette, matches, user, userPermissions, menuItemsList, mobile } = useAppContext()
     const [isPermissionEdit, setIsPermissionEdit] = useState(false)
     const [isAvailability, setIsAvailability] = useState(false);
     const [duration, setDuration] = useState(60);
@@ -602,15 +602,9 @@ export default function CalendarComponent(props) {
 
             <Box sx={{ display: 'flex', gap: 3, flexDirection: 'column' }}>
 
-                <Box sx={{ display: 'flex', gap: 3 }}>
-                    {/* <TextInput placeholder="Buscar pelo paciente" name='filterData' type="search" onChange={(event) => setFilterData(event.target.value)} value={filterData} sx={{ flex: 1 }}
-                    InputProps={{
-                        style: {
-                            backgroundColor: colorPalette.secondary
-                        }
-                    }} /> */}
+                <Box sx={{ display: 'flex', gap: 3 , flexDirection: { xs: 'column', xm: 'column', md: 'row', lg: 'row' }}}>
 
-                    <Box sx={{ display: 'flex', gap: .2 }}>
+                    <Box sx={{ display: 'flex', gap: .2}}>
                         <Box sx={{
                             display: 'flex', backgroundColor: colorPalette.buttonColor, padding: '10px 20px',
                             borderRadius: '8px 0px 0px 8px',
@@ -736,13 +730,13 @@ export default function CalendarComponent(props) {
                         boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
                         border: `.5px solid lightgray`,
                         padding: 10,
-                        height: 600,
-                        width: '80%'
+                        height: mobile ? 500 : 600,
+                        width: mobile ? '100%' : '80%'
                     }}
                 />
             </Box>
             <Box sx={{
-                display: 'flex', height: '100%', position: 'fixed', border: '1px solid lightgray',
+                display: { xs: 'none', xm: 'none', md: 'none', lg: 'flex' }, height: '100%', position: 'fixed', border: '1px solid lightgray',
                 backgroundColor: '#fff', right: 0, top: 51.5, flexDirection: 'column',
                 padding: '12px 12px', gap: 2, zIndex: 99999
             }}>

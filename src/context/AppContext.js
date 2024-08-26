@@ -1,4 +1,4 @@
-import { Backdrop, CircularProgress, useMediaQuery } from "@mui/material";
+import { Backdrop, CircularProgress, useMediaQuery, useTheme } from "@mui/material";
 import Cookies from "js-cookie";
 import { useRouter } from "next/router";
 import { createContext, useContext, useEffect, useReducer, useState } from "react";
@@ -50,6 +50,8 @@ export const AppProvider = ({ children }) => {
     const [showVersion, setShowVersion] = useState(false)
     const router = useRouter()
     const alert = new ShowAlert(setAlertData)
+    const themeApp = useTheme()
+    const mobile = useMediaQuery(themeApp.breakpoints.down('sm'))
     const calculateExpiration = (hours) => {
         const now = new Date();
         return now.getTime() + hours * 60 * 60 * 1000;
@@ -297,7 +299,8 @@ export const AppProvider = ({ children }) => {
                 menuItemsList,
                 showVersion,
                 setShowVersion,
-                menuItems
+                menuItems,
+                mobile
             }}
         >
             {children}

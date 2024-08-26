@@ -51,7 +51,7 @@ export default function AnamneseForms() {
                         return (
                             <Box key={index} sx={{
                                 display: 'flex', padding: '10px', borderRadius: 2, alignItems: 'center', justifyContent: 'center',
-                                width: 400, backgroundColor: colorPalette.buttonColor
+                                width: { xs: '100%', xm: '100%', md: `100%`, lg: 600 }, backgroundColor: colorPalette.buttonColor
                             }}>
                                 <Box>
                                     <Text title bold style={{ color: '#fff' }}>{item.title}</Text>
@@ -67,7 +67,7 @@ export default function AnamneseForms() {
             {page === 1 &&
                 <Box sx={{
                     display: 'flex', gap: 2, padding: '15px', backgroundColor: colorPalette.secondary, borderRadius: 2,
-                    boxShadow: `rgba(149, 157, 165, 0.6) 0px 6px 24px`, flexDirection: 'column', width: 600
+                    boxShadow: `rgba(149, 157, 165, 0.6) 0px 6px 24px`, flexDirection: 'column', width: { xs: '100%', xm: '100%', md: `100%`, lg: 600 }
                 }}>
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>E-mail *</Text>
@@ -275,7 +275,7 @@ export default function AnamneseForms() {
                 page === 2 &&
                 <Box sx={{
                     display: 'flex', gap: 2, padding: '15px', backgroundColor: colorPalette.secondary, borderRadius: 2,
-                    boxShadow: `rgba(149, 157, 165, 0.6) 0px 6px 24px`, flexDirection: 'column', width: 600
+                    boxShadow: `rgba(149, 157, 165, 0.6) 0px 6px 24px`, flexDirection: 'column', width: { xs: '100%', xm: '100%', md: `100%`, lg: 600 }
                 }}>
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>O que te trouxe aqui?</Text>
@@ -291,7 +291,7 @@ export default function AnamneseForms() {
             {page === 3 &&
                 <Box sx={{
                     display: 'flex', gap: 2, padding: '15px', backgroundColor: colorPalette.secondary, borderRadius: 2,
-                    boxShadow: `rgba(149, 157, 165, 0.6) 0px 6px 24px`, flexDirection: 'column', width: 600
+                    boxShadow: `rgba(149, 157, 165, 0.6) 0px 6px 24px`, flexDirection: 'column', width: { xs: '100%', xm: '100%', md: `100%`, lg: 600 }
                 }}>
                     {anamnese.estado_civil === 'Divorciado(a)' &&
                         <>
@@ -451,7 +451,7 @@ export default function AnamneseForms() {
                 page === 4 &&
                 <Box sx={{
                     display: 'flex', gap: 2, padding: '15px', backgroundColor: colorPalette.secondary, borderRadius: 2,
-                    boxShadow: `rgba(149, 157, 165, 0.6) 0px 6px 24px`, flexDirection: 'column', width: 600
+                    boxShadow: `rgba(149, 157, 165, 0.6) 0px 6px 24px`, flexDirection: 'column', width: { xs: '100%', xm: '100%', md: `100%`, lg: 600 }
                 }}>
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Pais?</Text>
@@ -552,7 +552,7 @@ export default function AnamneseForms() {
                 page === 5 &&
                 <Box sx={{
                     display: 'flex', gap: 2, padding: '15px', backgroundColor: colorPalette.secondary, borderRadius: 2,
-                    boxShadow: `rgba(149, 157, 165, 0.6) 0px 6px 24px`, flexDirection: 'column', width: 600
+                    boxShadow: `rgba(149, 157, 165, 0.6) 0px 6px 24px`, flexDirection: 'column', width: { xs: '100%', xm: '100%', md: `100%`, lg: 600 }
                 }}>
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Iniciou sua vida sexual com que idade?</Text>

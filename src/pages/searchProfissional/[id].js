@@ -185,8 +185,8 @@ export default function ReserveConsultation() {
                             display: 'flex',
                         }}>
                             <Avatar src={profissionalData?.location || ''} sx={{
-                                height: { xs: '100%', sm: 45, md: 45, lg: 120 },
-                                width: { xs: '100%', sm: 45, md: 45, lg: 120 },
+                                height: { xs: 80, sm: 45, md: 45, lg: 120 },
+                                width: { xs: 80, sm: 45, md: 45, lg: 120 },
                             }} variant="rounded"
                             />
                         </Box>
@@ -198,24 +198,32 @@ export default function ReserveConsultation() {
                         </Box>
                     </Box>
                     <Divider />
-                    <Box sx={{
-                        display: 'flex', gap: 2, backgroundColor: colorPalette.secondary, padding: '15px', borderRadius: 2,
-                        flexDirection: 'row', alignItems: 'center',
-                    }}>
-                        <Box sx={{ padding: '0px 20px' }}>
-                            <Text title bold style={{ color: colorPalette.buttonColor }}>Paciente</Text>
-                        </Box>
-                        <Avatar src={pacientData?.location || ''} sx={{
-                            height: { xs: '100%', sm: 45, md: 45, lg: 45 },
-                            width: { xs: '100%', sm: 45, md: 45, lg: 45 },
-                        }} variant="rounded"
-                        />
 
-                        <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column', alignItems: 'start', padding: '10px 0px 0px 10px' }}>
-                            <Text light bold>{pacientData?.nome}</Text>
-                            <Text light>{pacientData?.email}</Text>
+                    <Box sx={{ padding: '0px 20px' }}>
+                        <Text title bold style={{ color: colorPalette.buttonColor }}>Paciente</Text>
+                    </Box>
+                    <Box sx={{
+                        display: 'flex', gap: 4, backgroundColor: colorPalette.secondary, padding: '15px', borderRadius: 2,
+                        flexDirection: 'row'
+                    }}>
+                        <Box sx={{
+                            display: 'flex',
+                        }}>
+                            <Avatar src={pacientData?.location || ''} sx={{
+                                height: { xs: 80, sm: 45, md: 45, lg: 120 },
+                                width: { xs: 80, sm: 45, md: 45, lg: 120 },
+                            }} variant="rounded"
+                            />
+                        </Box>
+                        <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', flex: 1, }}>
+                            <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column', alignItems: 'start', padding: '10px 0px 0px 10px' }}>
+                                <Text veryLarge bold style={{ color: colorPalette.third }}>{pacientData?.nome}</Text>
+                                <Text light>{pacientData?.email}</Text>
+
+                            </Box>
                         </Box>
                     </Box>
+
                     <Divider />
 
 

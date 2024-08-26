@@ -197,7 +197,10 @@ export default function ListConsultions(props) {
 
     return (
         <Box sx={{ display: 'flex', gap: 4, flexDirection: 'column', paddingTop: 4 }}>
-            <Box sx={{ display: 'flex', gap: 1, flex: 1, justifyContent: 'space-between', alignItems: 'center' }}>
+            <Box sx={{
+                display: 'flex', gap: 1, flex: 1, justifyContent: 'space-between', alignItems: 'center',
+                flexDirection: { xs: 'column', sm: 'column', md: 'column', lg: 'row' }
+            }}>
                 <Text veryLarge bold>Sessões</Text>
                 <Box sx={{ display: 'flex', justifyContent: 'start', gap: 2, alignItems: 'center', flexDirection: 'row' }}>
                     <TextInput placeholder="Pesquisar por paciente" name='filterData' type="search"
@@ -213,7 +216,7 @@ export default function ListConsultions(props) {
                         }} />
 
                     <Box sx={{
-                        display: 'flex', padding: '12px', borderRadius: 3, backgroundColor: colorPalette?.secondary,
+                        display: { xs: 'none', sm: 'none', md: 'none', lg: 'flex' }, padding: '12px', borderRadius: 3, backgroundColor: colorPalette?.secondary,
                         boxShadow: `rgba(149, 157, 165, 0.6) 0px 6px 24px`,
                         transition: '.3s',
                         "&:hover": {
@@ -230,7 +233,7 @@ export default function ListConsultions(props) {
                     </Box>
 
                     <Box sx={{
-                        display: 'flex', padding: '12px', borderRadius: 3, backgroundColor: colorPalette?.secondary,
+                        display: { xs: 'none', sm: 'none', md: 'none', lg: 'flex' }, padding: '12px', borderRadius: 3, backgroundColor: colorPalette?.secondary,
                         transition: '.3s', boxShadow: `rgba(149, 157, 165, 0.6) 0px 6px 24px`,
                         "&:hover": {
                             opacity: 0.8,
@@ -276,7 +279,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
     setLoadingPayment,
     loadingPayment
 }) => {
-    const { setLoading, colorPalette, theme, user, alert } = useAppContext()
+    const { setLoading, colorPalette, mobile, user, alert } = useAppContext()
     const [dateSelected, setDateSelected] = useState({ day: '', hour: '', profissionalId: '', reserva_id: '', consultId: '' })
     const isProfissional = user?.perfil?.includes('profissional')
     const isPartner = user?.perfil?.includes('parceiro')
@@ -560,236 +563,239 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
 
     return (
         <>
-            <ContentContainer sx={{ display: 'flex', width: '100%', padding: 0, backgroundColor: colorPalette.primary, boxShadow: 'none', borderRadius: 2 }}>
+            {mobile ?
+                <CardConsultion data={data} isProfissional={isProfissional} isPartner={isPartner} handleRowClick={handleRowClick} handleUpdateStatus={handleUpdateStatus} />
+                :
+                <ContentContainer sx={{ display: 'flex', width: '100%', padding: 0, backgroundColor: colorPalette.primary, boxShadow: 'none', borderRadius: 2 }}>
+                    <TableContainer sx={{ borderRadius: '8px', overflow: 'auto', }}>
+                        <Table sx={{ borderCollapse: 'collapse', width: '100%', }}>
+                            <TableHead>
+                                <TableRow sx={{ borderBottom: `1px solid lightgray`, backgroundColor: colorPalette?.secondary }}>
+                                    {columns.map((column, index) => (
+                                        <TableCell key={index} sx={{ padding: '16px 20px', }}>
+                                            <Box sx={{
+                                                display: 'flex', gap: 1, alignItems: 'center', justifyContent: column.key !== "actions" ?
+                                                    'flex-start' : 'center'
+                                            }}>
+                                                <Text bold style={{ textAlign: 'center' }}>{column.label}</Text>
+                                                {column.key !== "actions" &&
+                                                    <Box sx={{
+                                                        ...styles.menuIcon,
+                                                        backgroundImage: `url(${icons.gray_arrow_down})`,
+                                                        transform: filters?.filterName === column.key ? filters?.filterOrder === 'asc' ? 'rotate(-0deg)' : 'rotate(-180deg)' : 'rotate(-0deg)',
+                                                        transition: '.3s',
+                                                        width: 17,
+                                                        height: 17,
 
-                <TableContainer sx={{ borderRadius: '8px', overflow: 'auto', }}>
-                    <Table sx={{ borderCollapse: 'collapse', width: '100%', }}>
-                        <TableHead>
-                            <TableRow sx={{ borderBottom: `1px solid lightgray`, backgroundColor: colorPalette?.secondary }}>
-                                {columns.map((column, index) => (
-                                    <TableCell key={index} sx={{ padding: '16px 20px', }}>
-                                        <Box sx={{
-                                            display: 'flex', gap: 1, alignItems: 'center', justifyContent: column.key !== "actions" ?
-                                                'flex-start' : 'center'
-                                        }}>
-                                            <Text bold style={{ textAlign: 'center' }}>{column.label}</Text>
-                                            {column.key !== "actions" &&
-                                                <Box sx={{
-                                                    ...styles.menuIcon,
-                                                    backgroundImage: `url(${icons.gray_arrow_down})`,
-                                                    transform: filters?.filterName === column.key ? filters?.filterOrder === 'asc' ? 'rotate(-0deg)' : 'rotate(-180deg)' : 'rotate(-0deg)',
-                                                    transition: '.3s',
-                                                    width: 17,
-                                                    height: 17,
-
-                                                    "&:hover": {
-                                                        opacity: 0.8,
-                                                        cursor: 'pointer'
-                                                    },
-                                                }}
-                                                    onClick={() => onPress({
-                                                        filterName: column.key,
-                                                        filterOrder: filters?.filterOrder === 'asc' ? 'desc' : 'asc'
-                                                    })} />}
-                                        </Box>
-                                    </TableCell>
-                                ))}
-                            </TableRow>
-                        </TableHead>
-                        <TableBody sx={{ flex: 1, padding: 5, backgroundColor: colorPalette.secondary }}>
-                            {
-                                data?.sort((a, b) => new Date(b.data) - new Date(a.data))?.map((item, index) => {
-                                    const pay = parseInt(item?.pago) === 1;
-                                    const currentDate = new Date()
-                                    const canUncheck = (item?.status !== 'Cancelada') && (new Date(item?.data) > currentDate);
-
-                                    return (
-                                        <TableRow key={`${item}-${index}`} sx={{
-                                            transition: '.3s',
-                                            "&:hover": {
-                                                backgroundColor: colorPalette.primary + '88',
-                                            },
-                                        }}>
-                                            <TableCell sx={{ padding: '8px 25px', justifyContent: 'flex-start' }}>
-                                                <Text>{formatTimeStamp(item?.data, true) || '-'}</Text>
-                                            </TableCell>
-                                            <Tooltip title={isPartner ? item?.paciente : isProfissional ? item?.paciente : item?.profissional}>
-                                                <TableCell sx={{
-                                                    padding: '15px 10px', textAlign: 'center',
-                                                }}>
-                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'flex-start' }}>
-                                                        <Avatar src={isPartner ? item?.url_foto_pac : item?.url_foto_prof || ''} sx={{
-                                                            height: { xs: '100%', sm: 30, md: 30, lg: 30 },
-                                                            width: { xs: '100%', sm: 30, md: 30, lg: 30 },
-                                                        }} variant="rounded"
-                                                        />
-                                                        <Text style={{
-                                                            textOverflow: 'ellipsis',
-                                                            whiteSpace: 'nowrap',
-                                                            overflow: 'hidden',
-                                                        }}>{isPartner ? item?.paciente : isProfissional ? item?.paciente : item?.profissional || '-'}</Text>
-                                                    </Box>
-                                                </TableCell>
-                                            </Tooltip>
-                                            {isPartner &&
-                                             <Tooltip title={item?.profissional}>
-                                                <TableCell sx={{
-                                                    padding: '15px 10px', textAlign: 'center',
-                                                }}>
-                                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'flex-start' }}>
-                                                        <Avatar src={item?.url_foto_prof || ''} sx={{
-                                                            height: { xs: '100%', sm: 30, md: 30, lg: 30 },
-                                                            width: { xs: '100%', sm: 30, md: 30, lg: 30 },
-                                                        }} variant="rounded"
-                                                        />
-                                                        <Text style={{
-                                                            textOverflow: 'ellipsis',
-                                                            whiteSpace: 'nowrap',
-                                                            overflow: 'hidden',
-                                                        }}>{item?.profissional || '-'}</Text>
-                                                    </Box>
-                                                </TableCell>
-                                            </Tooltip>}
-                                            <TableCell sx={{ padding: '15px 10px', justifyContent: 'flex-start' }}>
-                                                <Text>{item?.modalidade || '-'}</Text>
-                                            </TableCell>
-                                            <TableCell sx={{ padding: '15px 10px', justifyContent: 'flex-start' }}>
-                                                <Box
-                                                    sx={{
-                                                        display: 'flex',
-                                                        backgroundColor: colorPalette.primary,
-                                                        height: 30,
-                                                        gap: 2,
-                                                        alignItems: 'center',
-                                                        // width: 100,
-                                                        borderRadius: 2,
-                                                        justifyContent: 'flex-start'
+                                                        "&:hover": {
+                                                            opacity: 0.8,
+                                                            cursor: 'pointer'
+                                                        },
                                                     }}
-                                                >
-                                                    <Box sx={{ display: 'flex', backgroundColor: statusColor(item?.status), padding: '0px 5px', height: '100%', borderRadius: '8px 0px 0px 8px' }} />
-                                                    <Text small bold>{item?.status}</Text>
-                                                </Box>
-                                            </TableCell>
-                                            {isProfissional ?
-                                                <>
-                                                    <TableCell sx={{ padding: '15px 0px', textAlign: 'center' }}>
-                                                        <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
-                                                            <Button secondary text="prontuário" small
-                                                                onClick={() => handleRowClick(item?.id_consulta)}
+                                                        onClick={() => onPress({
+                                                            filterName: column.key,
+                                                            filterOrder: filters?.filterOrder === 'asc' ? 'desc' : 'asc'
+                                                        })} />}
+                                            </Box>
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
+                            </TableHead>
+                            <TableBody sx={{ flex: 1, padding: 5, backgroundColor: colorPalette.secondary }}>
+                                {
+                                    data?.sort((a, b) => new Date(b.data) - new Date(a.data))?.map((item, index) => {
+                                        const pay = parseInt(item?.pago) === 1;
+                                        const currentDate = new Date()
+                                        const canUncheck = (item?.status !== 'Cancelada') && (new Date(item?.data) > currentDate);
+
+                                        return (
+                                            <TableRow key={`${item}-${index}`} sx={{
+                                                transition: '.3s',
+                                                "&:hover": {
+                                                    backgroundColor: colorPalette.primary + '88',
+                                                },
+                                            }}>
+                                                <TableCell sx={{ padding: '8px 25px', justifyContent: 'flex-start' }}>
+                                                    <Text>{formatTimeStamp(item?.data, true) || '-'}</Text>
+                                                </TableCell>
+                                                <Tooltip title={isPartner ? item?.paciente : isProfissional ? item?.paciente : item?.profissional}>
+                                                    <TableCell sx={{
+                                                        padding: '15px 10px', textAlign: 'center',
+                                                    }}>
+                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'flex-start' }}>
+                                                            <Avatar src={isPartner ? item?.url_foto_pac : item?.url_foto_prof || ''} sx={{
+                                                                height: { xs: '100%', sm: 30, md: 30, lg: 30 },
+                                                                width: { xs: '100%', sm: 30, md: 30, lg: 30 },
+                                                            }} variant="rounded"
                                                             />
-                                                            <Box sx={{ display: 'flex', height: '30px', width: '2px', backgroundColor: colorPalette?.primary }} />
-                                                            <FormControlLabel small
-                                                                control={
-                                                                    <Switch checked={pay} name="pago" size="small" onChange={(e) => handleUpdateStatus(e, item?.id_consulta)} />
-                                                                }
-                                                                label="pago"
-                                                            />
+                                                            <Text style={{
+                                                                textOverflow: 'ellipsis',
+                                                                whiteSpace: 'nowrap',
+                                                                overflow: 'hidden',
+                                                            }}>{isPartner ? item?.paciente : isProfissional ? item?.paciente : item?.profissional || '-'}</Text>
                                                         </Box>
                                                     </TableCell>
-                                                </>
-                                                :
-                                                <>
-                                                    <TableCell sx={{ padding: '15px 0px', textAlign: 'center' }}>
-                                                        <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
-                                                            {/* <Button text="remarcar" small disabled={!canUncheck}
+                                                </Tooltip>
+                                                {isPartner &&
+                                                    <Tooltip title={item?.profissional}>
+                                                        <TableCell sx={{
+                                                            padding: '15px 10px', textAlign: 'center',
+                                                        }}>
+                                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'flex-start' }}>
+                                                                <Avatar src={item?.url_foto_prof || ''} sx={{
+                                                                    height: { xs: '100%', sm: 30, md: 30, lg: 30 },
+                                                                    width: { xs: '100%', sm: 30, md: 30, lg: 30 },
+                                                                }} variant="rounded"
+                                                                />
+                                                                <Text style={{
+                                                                    textOverflow: 'ellipsis',
+                                                                    whiteSpace: 'nowrap',
+                                                                    overflow: 'hidden',
+                                                                }}>{item?.profissional || '-'}</Text>
+                                                            </Box>
+                                                        </TableCell>
+                                                    </Tooltip>}
+                                                <TableCell sx={{ padding: '15px 10px', justifyContent: 'flex-start' }}>
+                                                    <Text>{item?.modalidade || '-'}</Text>
+                                                </TableCell>
+                                                <TableCell sx={{ padding: '15px 10px', justifyContent: 'flex-start' }}>
+                                                    <Box
+                                                        sx={{
+                                                            display: 'flex',
+                                                            backgroundColor: colorPalette.primary,
+                                                            height: 30,
+                                                            gap: 2,
+                                                            alignItems: 'center',
+                                                            // width: 100,
+                                                            borderRadius: 2,
+                                                            justifyContent: 'flex-start'
+                                                        }}
+                                                    >
+                                                        <Box sx={{ display: 'flex', backgroundColor: statusColor(item?.status), padding: '0px 5px', height: '100%', borderRadius: '8px 0px 0px 8px' }} />
+                                                        <Text small bold>{item?.status}</Text>
+                                                    </Box>
+                                                </TableCell>
+                                                {isProfissional ?
+                                                    <>
+                                                        <TableCell sx={{ padding: '15px 0px', textAlign: 'center' }}>
+                                                            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+                                                                <Button secondary text="prontuário" small
+                                                                    onClick={() => handleRowClick(item?.id_consulta)}
+                                                                />
+                                                                <Box sx={{ display: 'flex', height: '30px', width: '2px', backgroundColor: colorPalette?.primary }} />
+                                                                <FormControlLabel small
+                                                                    control={
+                                                                        <Switch checked={pay} name="pago" size="small" onChange={(e) => handleUpdateStatus(e, item?.id_consulta)} />
+                                                                    }
+                                                                    label="pago"
+                                                                />
+                                                            </Box>
+                                                        </TableCell>
+                                                    </>
+                                                    :
+                                                    <>
+                                                        <TableCell sx={{ padding: '15px 0px', textAlign: 'center' }}>
+                                                            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+                                                                {/* <Button text="remarcar" small disabled={!canUncheck}
                                                                 onClick={() => {
                                                                     getProfissionalAgendas(item?.profissional_id, item?.data)
                                                                     setDateSelected({ ...dateSelected, consultId: item?.id_consulta })
                                                                 }}
                                                             /> */}
 
-                                                            <Box sx={{
-                                                                display: 'flex', gap: 1, padding: '5px 12px', alignItems: 'center',
-                                                                justifyContent: 'center',
-                                                                transition: '.3s',
-                                                                opacity: !canUncheck && .6,
-                                                                backgroundColor: canUncheck && colorPalette?.buttonColor,
-                                                                border: !canUncheck && `1px solid ${colorPalette?.buttonColor}`, borderRadius: 2,
-                                                                "&:hover": {
-                                                                    opacity: canUncheck && 0.8,
-                                                                    cursor: canUncheck && 'pointer'
-                                                                }
-                                                            }}
-                                                                onClick={() => {
-                                                                    if (canUncheck) {
-                                                                        getProfissionalAgendas({ profissionalId: item?.profissional_id, dateConsult: item?.data, consultId: item?.id_consulta })
-                                                                        setDateSelected({ ...dateSelected, consultId: item?.id_consulta })
-                                                                    }
-                                                                }}>
                                                                 <Box sx={{
-                                                                    ...styles.menuIcon,
-                                                                    width: 14,
-                                                                    height: 14,
-                                                                    backgroundImage: `url('/icons/remarcar_icon.png')`,
+                                                                    display: 'flex', gap: 1, padding: '5px 12px', alignItems: 'center',
+                                                                    justifyContent: 'center',
                                                                     transition: '.3s',
-                                                                }} />
-                                                                <Text bold style={{ color: !canUncheck ? colorPalette?.buttonColor : '#fff' }}>Remarcar</Text>
-                                                            </Box>
+                                                                    opacity: !canUncheck && .6,
+                                                                    backgroundColor: canUncheck && colorPalette?.buttonColor,
+                                                                    border: !canUncheck && `1px solid ${colorPalette?.buttonColor}`, borderRadius: 2,
+                                                                    "&:hover": {
+                                                                        opacity: canUncheck && 0.8,
+                                                                        cursor: canUncheck && 'pointer'
+                                                                    }
+                                                                }}
+                                                                    onClick={() => {
+                                                                        if (canUncheck) {
+                                                                            getProfissionalAgendas({ profissionalId: item?.profissional_id, dateConsult: item?.data, consultId: item?.id_consulta })
+                                                                            setDateSelected({ ...dateSelected, consultId: item?.id_consulta })
+                                                                        }
+                                                                    }}>
+                                                                    <Box sx={{
+                                                                        ...styles.menuIcon,
+                                                                        width: 14,
+                                                                        height: 14,
+                                                                        backgroundImage: `url('/icons/remarcar_icon.png')`,
+                                                                        transition: '.3s',
+                                                                    }} />
+                                                                    <Text bold style={{ color: !canUncheck ? colorPalette?.buttonColor : '#fff' }}>Remarcar</Text>
+                                                                </Box>
 
-                                                            <Box sx={{ display: 'flex', height: '30px', width: '2px', backgroundColor: colorPalette?.primary }} />
-                                                            {/* <Button cancel secondary text="cancelar" small disabled={!canUncheck}
+                                                                <Box sx={{ display: 'flex', height: '30px', width: '2px', backgroundColor: colorPalette?.primary }} />
+                                                                {/* <Button cancel secondary text="cancelar" small disabled={!canUncheck}
                                                                 onClick={() => handleCancelAppointment({ consultId: item?.id_consulta })}
                                                             /> */}
-                                                            <Box sx={{
-                                                                display: 'flex', gap: 1, padding: '5px 12px', alignItems: 'center',
-                                                                justifyContent: 'center',
-                                                                transition: '.3s',
-                                                                opacity: !canUncheck && .6,
-                                                                backgroundColor: canUncheck && 'red',
-                                                                border: !canUncheck && '1px solid red', borderRadius: 2,
-                                                                "&:hover": {
-                                                                    opacity: canUncheck && 0.8,
-                                                                    cursor: canUncheck && 'pointer'
-                                                                }
-                                                            }} onClick={() => {
-                                                                if (canUncheck) {
-                                                                    if (!isWithin24Hours(item?.data)) {
-                                                                        handleCancelAppointment({ consultId: item?.id_consulta })
-                                                                    } else {
-                                                                        alert.info('Não é possível cancelar a consulta com menos de 24hrs de antecedência.')
-                                                                    }
-                                                                }
-                                                            }}>
                                                                 <Box sx={{
-                                                                    ...styles.menuIcon,
-                                                                    width: 14,
-                                                                    height: 14,
-                                                                    backgroundImage: `url('/icons/cancelar_icon.png')`,
+                                                                    display: 'flex', gap: 1, padding: '5px 12px', alignItems: 'center',
+                                                                    justifyContent: 'center',
                                                                     transition: '.3s',
-                                                                }} />
-                                                                <Text bold style={{ color: !canUncheck ? 'red' : '#fff' }}>Cancelar</Text>
+                                                                    opacity: !canUncheck && .6,
+                                                                    backgroundColor: canUncheck && 'red',
+                                                                    border: !canUncheck && '1px solid red', borderRadius: 2,
+                                                                    "&:hover": {
+                                                                        opacity: canUncheck && 0.8,
+                                                                        cursor: canUncheck && 'pointer'
+                                                                    }
+                                                                }} onClick={() => {
+                                                                    if (canUncheck) {
+                                                                        if (!isWithin24Hours(item?.data)) {
+                                                                            handleCancelAppointment({ consultId: item?.id_consulta })
+                                                                        } else {
+                                                                            alert.info('Não é possível cancelar a consulta com menos de 24hrs de antecedência.')
+                                                                        }
+                                                                    }
+                                                                }}>
+                                                                    <Box sx={{
+                                                                        ...styles.menuIcon,
+                                                                        width: 14,
+                                                                        height: 14,
+                                                                        backgroundImage: `url('/icons/cancelar_icon.png')`,
+                                                                        transition: '.3s',
+                                                                    }} />
+                                                                    <Text bold style={{ color: !canUncheck ? 'red' : '#fff' }}>Cancelar</Text>
+                                                                </Box>
                                                             </Box>
-                                                        </Box>
-                                                    </TableCell>
-                                                </>
-                                            }
-                                        </TableRow>
-                                    );
-                                })
+                                                        </TableCell>
+                                                    </>
+                                                }
+                                            </TableRow>
+                                        );
+                                    })
 
-                            }
-                        </TableBody>
+                                }
+                            </TableBody>
 
-                    </Table>
-                    <Box sx={{
-                        width: '100%', display: 'flex', gap: 2, backgroundColor: colorPalette?.secondary,
-                        padding: '5px 12px', justifyContent: 'space-between'
-                    }}>
-                        <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
-                            <Text light>Mostrando</Text>
-                            <Text bold light>{data?.filter(filter)?.length || '0'}</Text>
-                            <Text light>de</Text>
-                            <Text bold light>{data?.length || 0}</Text>
-                            <Text light>consultas</Text>
+                        </Table>
+                        <Box sx={{
+                            width: '100%', display: 'flex', gap: 2, backgroundColor: colorPalette?.secondary,
+                            padding: '5px 12px', justifyContent: 'space-between'
+                        }}>
+                            <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+                                <Text light>Mostrando</Text>
+                                <Text bold light>{data?.filter(filter)?.length || '0'}</Text>
+                                <Text light>de</Text>
+                                <Text bold light>{data?.length || 0}</Text>
+                                <Text light>consultas</Text>
+                            </Box>
+                            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', padding: '15px 12px', width: '100%', justifyContent: 'space-between' }}>
+                                <PaginationTable data={data?.filter(filter)}
+                                    page={page} setPage={setPage} rowsPerPage={rowsPerPage} setRowsPerPage={setRowsPerPage}
+                                />
+                            </Box>
                         </Box>
-                        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', padding: '15px 12px', width: '100%', justifyContent: 'space-between' }}>
-                            <PaginationTable data={data?.filter(filter)}
-                                page={page} setPage={setPage} rowsPerPage={rowsPerPage} setRowsPerPage={setRowsPerPage}
-                            />
-                        </Box>
-                    </Box>
-                </TableContainer>
-            </ContentContainer >
+                    </TableContainer>
+                </ContentContainer >
+            }
 
             <Backdrop open={loadingPayment?.active} sx={{ zIndex: 99999999999999 }}>
                 <ContentContainer>
@@ -1011,6 +1017,199 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
             </Backdrop>
 
         </>
+    )
+}
+
+const CardConsultion = ({ data, isProfissional, isPartner, handleRowClick, handleUpdateStatus }) => {
+    const { colorPalette } = useAppContext()
+
+    const statusColor = (data) => ((data === 'Agendado' && 'yellow') ||
+        (data === 'Cancelada' && 'red') ||
+        (data === 'Atendida' && 'green') ||
+        (data === 'Remarcada' && 'blue'))
+
+    return (
+        <Box sx={{ width: '100%' }}>
+            <Box sx={{
+                gap: 2, display: 'flex', padding: 5,
+                flexDirection: 'column', width: '100%'
+            }}>
+                {
+                    data?.sort((a, b) => new Date(b.data) - new Date(a.data))?.map((item, index) => {
+                        const pay = parseInt(item?.pago) === 1;
+                        const currentDate = new Date()
+                        const canUncheck = (item?.status !== 'Cancelada') && (new Date(item?.data) > currentDate);
+
+                        return (
+                            <Box key={`${item}-${index}`} sx={{
+                                transition: '.3s',
+                                backgroundColor: colorPalette.secondary, padding: '15px', borderRadius: 2
+                            }}>
+                                <Box sx={{ padding: '8px 25px', justifyContent: 'flex-start' }}>
+                                    <Text bold>Data: </Text>
+                                    <Text>{formatTimeStamp(item?.data, true) || '-'}</Text>
+                                </Box>
+                                <Tooltip title={isPartner ? item?.paciente : isProfissional ? item?.paciente : item?.profissional}>
+                                    <Box sx={{
+                                        padding: '15px 10px', textAlign: 'center', justifyContent: 'flex-start', display: 'flex',
+                                        alignItems: 'start', gap: 2
+                                    }}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'flex-start' }}>
+                                            <Avatar src={isPartner ? item?.url_foto_pac : item?.url_foto_prof || ''} sx={{
+                                                height: { xs: 60, sm: 30, md: 30, lg: 30 },
+                                                width: { xs: 60, sm: 30, md: 30, lg: 30 },
+                                            }} variant="rounded"
+                                            />
+                                            <Box sx={{
+                                                display: 'flex', alignItems: 'start', gap: 1, justifyContent: 'flex-start',
+                                                flexDirection: 'column',
+                                            }}>
+                                                {isProfissional ? <Text bold>Paciente: </Text> : <Text bold>Profissional: </Text>}
+
+                                                <Text style={{
+                                                    textOverflow: 'ellipsis',
+                                                    whiteSpace: 'nowrap',
+                                                    overflow: 'hidden',
+                                                }}>{isPartner ? item?.paciente : isProfissional ? item?.paciente : item?.profissional || '-'}</Text>
+                                            </Box>
+                                        </Box>
+                                    </Box>
+                                </Tooltip>
+                                {isPartner &&
+                                    <Tooltip title={item?.profissional}>
+                                        <Box sx={{
+                                            padding: '15px 10px', textAlign: 'center',
+                                        }}>
+                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'flex-start' }}>
+                                                <Avatar src={item?.url_foto_prof || ''} sx={{
+                                                    height: { xs: 60, sm: 30, md: 30, lg: 30 },
+                                                    width: { xs: 60, sm: 30, md: 30, lg: 30 },
+                                                }} variant="rounded"
+                                                />
+                                                <Text style={{
+                                                    textOverflow: 'ellipsis',
+                                                    whiteSpace: 'nowrap',
+                                                    overflow: 'hidden',
+                                                }}>{item?.profissional || '-'}</Text>
+                                            </Box>
+                                        </Box>
+                                    </Tooltip>}
+                                <Box sx={{ padding: '15px 10px', justifyContent: 'flex-start' }}>
+                                    <Text bold>Encontro: </Text>
+                                    <Text>{item?.modalidade || '-'}</Text>
+                                </Box>
+                                <Box sx={{ padding: '15px 10px', justifyContent: 'flex-start' }}>
+                                    <Text bold>Status: </Text>
+                                    <Box
+                                        sx={{
+                                            display: 'flex',
+                                            backgroundColor: colorPalette.primary,
+                                            height: 30,
+                                            gap: 2,
+                                            alignItems: 'center',
+                                            // width: 100,
+                                            borderRadius: 2,
+                                            justifyContent: 'flex-start'
+                                        }}
+                                    >
+                                        <Box sx={{ display: 'flex', backgroundColor: statusColor(item?.status), padding: '0px 5px', height: '100%', borderRadius: '8px 0px 0px 8px' }} />
+                                        <Text small bold>{item?.status}</Text>
+                                    </Box>
+                                </Box>
+                                {isProfissional ?
+                                    <>
+                                        <Box sx={{ padding: '15px 0px', textAlign: 'center' }}>
+                                            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+                                                <Button secondary text="prontuário" small
+                                                    onClick={() => handleRowClick(item?.id_consulta)}
+                                                />
+                                                <Box sx={{ display: 'flex', height: '30px', width: '2px', backgroundColor: colorPalette?.primary }} />
+                                                <FormControlLabel small
+                                                    control={
+                                                        <Switch checked={pay} name="pago" size="small" onChange={(e) => handleUpdateStatus(e, item?.id_consulta)} />
+                                                    }
+                                                    label="pago"
+                                                />
+                                            </Box>
+                                        </Box>
+                                    </>
+                                    :
+                                    <>
+                                        <Box sx={{ padding: '15px 0px', textAlign: 'center' }}>
+                                            <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+
+                                                <Box sx={{
+                                                    display: 'flex', gap: 1, padding: '5px 12px', alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    transition: '.3s',
+                                                    opacity: !canUncheck && .6,
+                                                    backgroundColor: canUncheck && colorPalette?.buttonColor,
+                                                    border: !canUncheck && `1px solid ${colorPalette?.buttonColor}`, borderRadius: 2,
+                                                    "&:hover": {
+                                                        opacity: canUncheck && 0.8,
+                                                        cursor: canUncheck && 'pointer'
+                                                    }
+                                                }}
+                                                    onClick={() => {
+                                                        if (canUncheck) {
+                                                            getProfissionalAgendas({ profissionalId: item?.profissional_id, dateConsult: item?.data, consultId: item?.id_consulta })
+                                                            setDateSelected({ ...dateSelected, consultId: item?.id_consulta })
+                                                        }
+                                                    }}>
+                                                    <Box sx={{
+                                                        ...styles.menuIcon,
+                                                        width: 14,
+                                                        height: 14,
+                                                        backgroundImage: `url('/icons/remarcar_icon.png')`,
+                                                        transition: '.3s',
+                                                    }} />
+                                                    <Text bold style={{ color: !canUncheck ? colorPalette?.buttonColor : '#fff' }}>Remarcar</Text>
+                                                </Box>
+
+                                                <Box sx={{ display: 'flex', height: '30px', width: '2px', backgroundColor: colorPalette?.primary }} />
+                                                {/* <Button cancel secondary text="cancelar" small disabled={!canUncheck}
+                                                    onClick={() => handleCancelAppointment({ consultId: item?.id_consulta })}
+                                                /> */}
+                                                <Box sx={{
+                                                    display: 'flex', gap: 1, padding: '5px 12px', alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    transition: '.3s',
+                                                    opacity: !canUncheck && .6,
+                                                    backgroundColor: canUncheck && 'red',
+                                                    border: !canUncheck && '1px solid red', borderRadius: 2,
+                                                    "&:hover": {
+                                                        opacity: canUncheck && 0.8,
+                                                        cursor: canUncheck && 'pointer'
+                                                    }
+                                                }} onClick={() => {
+                                                    if (canUncheck) {
+                                                        if (!isWithin24Hours(item?.data)) {
+                                                            handleCancelAppointment({ consultId: item?.id_consulta })
+                                                        } else {
+                                                            alert.info('Não é possível cancelar a consulta com menos de 24hrs de antecedência.')
+                                                        }
+                                                    }
+                                                }}>
+                                                    <Box sx={{
+                                                        ...styles.menuIcon,
+                                                        width: 14,
+                                                        height: 14,
+                                                        backgroundImage: `url('/icons/cancelar_icon.png')`,
+                                                        transition: '.3s',
+                                                    }} />
+                                                    <Text bold style={{ color: !canUncheck ? 'red' : '#fff' }}>Cancelar</Text>
+                                                </Box>
+                                            </Box>
+                                        </Box>
+                                    </>
+                                }
+                            </Box>
+                        );
+                    })
+
+                }
+            </Box>
+        </Box>
     )
 }
 

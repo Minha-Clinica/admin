@@ -393,9 +393,9 @@ export default function Login() {
                         </Box>
                         <Divider padding={0} />
                         <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 3, alignItems: 'center', width: smallWidthDevice ? '80%' : '100%', }}>
-                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, alignItems: 'center', width: smallWidthDevice ? '80%' : '100%', }}>
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, alignItems: 'center', width: smallWidthDevice ? '100%' : '100%', }}>
                                 <Box sx={{
-                                    display: 'flex', flexDirection: 'column', gap: 2, width: { xs: `80%`, xm: `80%`, md: '62.5%', lg: '90%' }, justifyContent: 'center',
+                                    display: 'flex', flexDirection: 'column', gap: 2, width: { xs: `100%`, xm: `100%`, md: '100%', lg: '90%' }, justifyContent: 'center',
                                     // alignItems: 'center',
                                 }}>
                                     <TextInput
