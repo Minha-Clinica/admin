@@ -28,10 +28,10 @@ export const Text = (props) => {
       sx={{
          color: colorPalette.textColor,
          transition: 'background-color 1s',
-         fontFamily: "'Metropolis Regular', Helvetica, Arial, Lucida, sans-serif, 'Metropolis Bold'",
+         fontFamily: "'NerisLight', Helvetica, Arial, Lucida, sans-serif, 'Neris'",
          fontSize: { xs: `13px`, xm: `13px`, md: `13px`, lg: `13px`, xl: '13px' },
-         ...(light && { fontFamily: 'MetropolisLight', }),
-         ...(bold && { fontFamily: 'MetropolisBold' }),
+         ...(light && { fontFamily: 'Neris', }),
+         ...(bold && { fontFamily: 'NerisBold' }),
          ...(xsmall && { fontSize: { xs: `10px`, sm: `10px`, md: `10px`, lg: `10px`, xl: '10px' } }),
          ...(small && { fontSize: { xs: `11px`, sm: `11px`, md: `10px`, lg: `11px`, xl: `11px` } }),
          ...(large && { fontSize: { xs: `15px`, sm: `15px`, md: `15px`, lg: `15px`, xl: `17px` } }),

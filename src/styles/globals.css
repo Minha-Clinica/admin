@@ -98,6 +98,27 @@ input::placeholder {
 }
 
 @font-face {
+   font-family: 'Neris';
+   src: url('../../assets/fonts/neris.thin.otf') format('opentype'); /* Atualize o caminho se necessário */
+   font-weight: 400;
+   font-style: normal;
+}
+
+@font-face {
+   font-family: 'NerisBold';
+   src: url('../../assets/fonts/neris.black.otf') format('opentype');
+   font-style: normal;
+}
+
+
+@font-face {
+   font-family: 'NerisLight';
+   src: url('../../assets/fonts/neris.light.otf') format('opentype');
+   font-weight: 200;
+   font-style: normal;
+}
+
+@font-face {
    font-family: 'MetropolisRegular';
    src: url('../../assets/fonts/metropolis.regular.otf');
    font-weight: 200;
