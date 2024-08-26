@@ -124,7 +124,7 @@ export default function CalendarComponent(props) {
     const router = useRouter()
     const { setLoading, alert, colorPalette, matches, user, userPermissions, menuItemsList, mobile } = useAppContext()
     const [isPermissionEdit, setIsPermissionEdit] = useState(false)
-    const [isAvailability, setIsAvailability] = useState(false);
+    const [users, setUsers] = useState(false)
     const [duration, setDuration] = useState(60);
 
     const fetchPermissions = async () => {
@@ -162,59 +162,9 @@ export default function CalendarComponent(props) {
         }
 
         await handleEvents()
+        await getEmployees()
         setLoading(false);
     }
-
-    const defaultYear = [
-        {
-            start: new Date(year, 0, 1), // January 2023
-            end: new Date(year, 0, 31),
-        },
-        {
-            start: new Date(year, 1, 1), // February 2023
-            end: new Date(year, 1, 31),
-        },
-        {
-            start: new Date(year, 2, 1), // March 2023
-            end: new Date(year, 2, 30),
-        },
-        {
-            start: new Date(year, 3, 1), // April 2023
-            end: new Date(year, 3, 31),
-        },
-        {
-            start: new Date(year, 4, 1), // Main 2023
-            end: new Date(year, 4, 30),
-        },
-        {
-            start: new Date(year, 5, 1), // Jun 2023
-            end: new Date(year, 5, 31),
-        },
-        {
-            start: new Date(year, 6, 1), // July 2023
-            end: new Date(year, 6, 31),
-        },
-        {
-            start: new Date(year, 7, 1), // August 2023
-            end: new Date(year, 7, 31),
-        },
-        {
-            start: new Date(year, 8, 1), // September 2023
-            end: new Date(year, 8, 30),
-        },
-        {
-            start: new Date(year, 9, 1), // October 2023
-            end: new Date(year, 9, 31),
-        },
-        {
-            start: new Date(year, 10, 1), // November 2023
-            end: new Date(year, 10, 30),
-        },
-        {
-            start: new Date(year, 11, 1), // December 2023
-            end: new Date(year, 11, 31),
-        },
-    ];
 
     const handleEvents = async () => {
         try {
@@ -293,6 +243,27 @@ export default function CalendarComponent(props) {
             setLoading(false)
         }
     };
+
+    const getEmployees = async () => {
+        setLoading(true)
+        try {
+            const response = await api.get(`/users`)
+            const { data = [] } = response;
+            if (data?.length > 0) {
+                const employeeMap = data.map((item) => ({
+                    label: item.nome,
+                    value: item.id,
+                    email: item.email
+                }))
+                setUsers(employeeMap)
+            }
+        } catch (error) {
+            console.log(error)
+            return error
+        } finally {
+            setLoading(false)
+        }
+    }
 
 
     const handleCreateReservas = async () => {
@@ -602,9 +573,9 @@ export default function CalendarComponent(props) {
 
             <Box sx={{ display: 'flex', gap: 3, flexDirection: 'column' }}>
 
-                <Box sx={{ display: 'flex', gap: 3 , flexDirection: { xs: 'column', xm: 'column', md: 'row', lg: 'row' }}}>
+                <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', xm: 'column', md: 'row', lg: 'row' } }}>
 
-                    <Box sx={{ display: 'flex', gap: .2}}>
+                    <Box sx={{ display: 'flex', gap: .2 }}>
                         <Box sx={{
                             display: 'flex', backgroundColor: colorPalette.buttonColor, padding: '10px 20px',
                             borderRadius: '8px 0px 0px 8px',
@@ -883,12 +854,30 @@ export default function CalendarComponent(props) {
                                     onChange={handleEventFormChange}
                                     sx={{ flex: 1 }}
                                 />
-                                <TextInput disabled={!isPermissionEdit && true}
+                                {/* <TextInput disabled={!isPermissionEdit && true}
                                     name="nome_usuario_agendado"
                                     value={eventData?.nome_usuario_agendado || ''}
                                     label='Paciente:'
                                     onChange={handleEventFormChange}
                                     sx={{ flex: 1 }}
+                                /> */}
+
+                                <SelectList
+                                    fullWidth
+                                    autoComplete
+                                    data={users}
+                                    valueSelection={eventData.usuario_agendado}
+                                    onSelect={(value) => {
+                                        setEventData({
+                                            ...eventData, usuario_agendado: value,
+                                            email_agendado: users.filter(u => u.value === value).map(i => i.email)[0],
+                                            nome_agendado: users.filter(u => u.value === value).map(i => i.label)[0],
+                                        })
+                                    }}
+                                    title="Selecione um paciente:"
+                                    filterOpition="value"
+                                    inputStyle={{ color: colorPalette.textColor, fontSize: '15px' }}
+                                    clean={false}
                                 />
                                 <Divider />
 
