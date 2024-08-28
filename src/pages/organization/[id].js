@@ -256,7 +256,7 @@ export default function EditCompany(props) {
                     <TextInput disabled={!isPermissionEdit && true} placeholder='CNPJ' name='cnpj' onChange={handleChange} value={companyData?.cnpj || ''} label='CNPJ' sx={{ flex: 1, }} />
                     <Box sx={{ display: 'flex', gap: 1 }}>
                         <TextInput disabled={!isPermissionEdit && true} placeholder='Código de Acesso' name='cod_key' onChange={handleChange} value={companyData?.cod_key || ''} label='Código de Acesso' sx={{ flex: 1, }} />
-                       <Button text="Gerar chave" onClick={() => generateKey(12)} />
+                        <Button text="Gerar chave" onClick={() => generateKey(12)} />
                     </Box>
                 </Box>
                 <Box sx={{ display: 'flex', gap: 1 }}>
@@ -283,14 +283,14 @@ export default function EditCompany(props) {
             </ContentContainer>
 
             <Box sx={{ display: !newCompany ? 'flex' : 'none', flexDirection: 'column', justifyContent: 'space-between', gap: 1.8, width: '100%' }}>
-                <Box sx={{ display: 'flex', gap: 1, flex: 1, justifyContent: 'space-between', alignItems: 'center' }}>
+                <Box sx={{ display: 'flex', gap: 1, flex: 1, justifyContent: 'space-between', alignItems: 'center', flexDirection: { xs: 'column', sm: 'column', md: 'row', lg: 'row' } }}>
                     <Text veryLarge bold>Colaboradores</Text>
-                    <Box sx={{ display: 'flex', justifyContent: 'start', gap: 2, alignItems: 'center', flexDirection: 'row' }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'start', gap: 2, alignItems: 'center', flexDirection: { xs: 'column', sm: 'column', md: 'row', lg: 'row' }}}>
                         <TextInput placeholder="Pesquisar por colaborador" name='filterData' type="search"
                             onChange={(event) => setFilterData(event.target.value)} value={filterData}
                             InputProps={{
                                 style: {
-                                    width: 400,
+                                    width: mobile ? 'auto' : 400,
                                     backgroundColor: colorPalette?.secondary,
                                     borderRadius: 16,
                                     borderColor: 'transparent', // Define a cor da borda como transparente

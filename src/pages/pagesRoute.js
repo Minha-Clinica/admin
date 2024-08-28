@@ -31,7 +31,7 @@ const PagesRoute = ({ Component, pageProps }) => {
                     <UserHeader />
                     <Box sx={{
                         ...styles.contentContainer, backgroundColor: colorPalette.primary, transition: 'background-color 1s',
-                        padding: removePadding ? '0px' : { xs: `30px 30px 85px 30px`, xm: `25px`, md: `120px 65px`, lg: `120px 65px` }
+                        padding: removePadding ? '0px' : { xs: `30px 5px 85px 5px`, xm: `25px`, md: `120px 65px`, lg: `120px 65px` }
                     }}>
                         <Elements stripe={stripePromise}>
                             <Component {...pageProps} />

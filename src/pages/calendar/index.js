@@ -87,19 +87,14 @@ const listEvents = [
     },
 ]
 
-export default function CalendarComponent(props) {
+export default function CalendarComponent() {
     const [events, setEvents] = useState([]);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [showEventForm, setShowEventForm] = useState(false);
     const [showAppointment, setShowAppointment] = useState(false);
     const [showReservas, setShowReservas] = useState(false);
-    const [semester, setSemester] = useState()
-    const [semesterSelect, setSemesterSelect] = useState()
-    const [year, setYear] = useState(2024)
-    const [yearSelect, setYearSelect] = useState(2024)
     const [reservasAgenda, setReservasAgenda] = useState([])
     const [defaultEvents, setDefaultEvents] = useState([])
-    const [filterData, setFilterData] = useState('');
     const [selectedDays, setSelectedDays] = useState([]);
     const [availability, setAvailability] = useState({});
     const [filterReservas, setFilterReservas] = useState(false)
@@ -124,22 +119,20 @@ export default function CalendarComponent(props) {
     const router = useRouter()
     const { setLoading, alert, colorPalette, matches, user, userPermissions, menuItemsList, mobile } = useAppContext()
     const [isPermissionEdit, setIsPermissionEdit] = useState(false)
+    const isAdminstrator = user.perfil.includes('adminstrador')
+    const isProfissional = user.perfil.includes('profissional')
     const [users, setUsers] = useState(false)
     const [duration, setDuration] = useState(60);
-
-    const fetchPermissions = async () => {
-        try {
-            const actions = await checkUserPermissions(router, userPermissions, menuItemsList)
-            setIsPermissionEdit(actions)
-        } catch (error) {
-            console.log(error)
-            return error
-        }
-    }
 
     const filter = (item) => {
         return filterReservas ? (parseInt(item.disponivel) === 1) : (item);
     };
+
+    const fetchPermissions = () => {
+        if(isAdminstrator || isProfissional){
+            setIsPermissionEdit(true)
+        }
+    }
 
     useEffect(() => {
         handleItems()
@@ -148,19 +141,6 @@ export default function CalendarComponent(props) {
 
     const handleItems = async () => {
         setLoading(true);
-        const dataAtual = new Date();
-        const anoAtual = dataAtual.getFullYear();
-        const mesAtual = dataAtual.getMonth();
-        setYear(anoAtual)
-        setYearSelect(anoAtual)
-        if (mesAtual > 5) {
-            setSemester('2º Semestre')
-            setSemesterSelect('2º Semestre')
-        } else {
-            setSemester('1º Semestre')
-            setSemesterSelect('1º Semestre')
-        }
-
         await handleEvents()
         await getEmployees()
         setLoading(false);
@@ -794,7 +774,8 @@ export default function CalendarComponent(props) {
                             </Box>
                             <Divider />
                             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto', maxHeight: 600, paddingTop: 3 }}>
-                                <TextInput disabled={!isPermissionEdit && true}
+                                <TextInput
+                                    disabled={!isPermissionEdit && true}
                                     name="title"
                                     value={eventData?.title || ''}
                                     label='Título'

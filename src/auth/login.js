@@ -11,7 +11,7 @@ import Link from "next/link"
 import { api } from "../api/api"
 import { Backdrop } from "@mui/material"
 import { useRouter } from "next/router"
-import { Register } from "./register"
+import { Register } from "../pages/register"
 
 export default function Login() {
 
@@ -19,36 +19,11 @@ export default function Login() {
     const [userData, setUserData] = useState([])
     const router = useRouter()
     const [themeName, setThemeName] = useState('')
-    const [imagesList, setImagesList] = useState([])
-    const [showMenu, setShowMenu] = useState(false)
-    const [typeSelected, setTypeSelected] = useState({ value: '', active: false })
     const [showRedefinitionPass, setShowRedefinitionPass] = useState(false)
     const [newPass, setNewPass] = useState(false)
     const [windowWidth, setWindowWidth] = useState(0)
     const [showRegisterType, setShowRegisterType] = useState(false)
     const smallWidthDevice = windowWidth < 1000
-    const notebookWidth = windowWidth > 1100 && windowWidth < 1500
-    const windowWidthScreen = window.innerWidth;
-    const windowHeigthScreen = window.innerHeight;
-
-    // const handleImages = async () => {
-    //     try {
-    //         const response = await getImageByScreen('Login')
-    //         if (response.status === 200) {
-    //             setImagesList(response.data)
-    //         }
-    //     } catch (error) {
-    //         return error
-    //     }
-    // }
-
-    // useEffect(() => {
-    //     handleImages()
-    // }, [])
-
-    const handleRegister = (value) => {
-        setTypeSelected({ value, active: true })
-    }
 
     useEffect(() => {
         const themeAltern = theme ? setThemeName('dark') : setThemeName('clear')
@@ -321,32 +296,31 @@ export default function Login() {
                             </Box>
                         </form>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: .5, justifyContent: 'center', width: '100%', padding: '10px 30px' }}>
-                            <Button
-                                style={{
-                                    width: '100%',
-                                    padding: '10px 30px',
-                                    backgroundColor: '#FFB91D',
-                                    marginBottom: 5,
-                                    borderRadius: '100px',
-                                    transition: 'background-color 1s',
-                                    "&:hover": {
-                                        opacity: .8,
-                                        cursor: 'pointer'
-                                    },
-                                    display: 'flex',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    color: '#f0f0f0',
-                                    // padding: { xs: `6px 10px`, xm: `8px 16px`, md: `8px 16px`, lg: `8px 16px` },
-                                    borderRadius: '12px',
-                                }}
-                                text='Entrar'
-                                onClick={() => {
-                                    handleRegister('paciente')
-                                }}
-                            >
-                                <Text small bold style={{ color: colorPalette.secondary }}>Criar Conta</Text>
-                            </Button>
+                            <Link href={'/register'} style={{width: '100%', display: 'flex'}}>
+                                <Button
+                                    style={{
+                                        width: '100%',
+                                        padding: '10px 30px',
+                                        backgroundColor: '#FFB91D',
+                                        marginBottom: 5,
+                                        borderRadius: '100px',
+                                        transition: 'background-color 1s',
+                                        "&:hover": {
+                                            opacity: .8,
+                                            cursor: 'pointer'
+                                        },
+                                        display: 'flex',
+                                        justifyContent: 'center',
+                                        alignItems: 'center',
+                                        color: '#f0f0f0',
+                                        // padding: { xs: `6px 10px`, xm: `8px 16px`, md: `8px 16px`, lg: `8px 16px` },
+                                        borderRadius: '12px',
+                                    }}
+                                    text='Entrar'
+                                >
+                                    <Text small bold style={{ color: colorPalette.secondary }}>Criar Conta</Text>
+                                </Button>
+                            </Link>
                         </Box>
                     </Box>
 
@@ -513,13 +487,6 @@ export default function Login() {
                     </ContentContainer>
                 </Box>
             </Backdrop>
-
-            {typeSelected?.active &&
-                <Register
-                    type={typeSelected?.value}
-                    setTypeSelected={setTypeSelected}
-                    typeSelected={typeSelected}
-                    setShowRegisterType={setShowRegisterType} />}
         </>
     )
 }

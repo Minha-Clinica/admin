@@ -7,7 +7,7 @@ import { useAppContext } from "../../context/AppContext"
 import { SelectList } from "../../organisms/select/SelectList"
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
-import { Backdrop, CircularProgress, FormControlLabel, Switch, TablePagination } from "@mui/material"
+import { Backdrop, CircularProgress, FormControlLabel, Switch, TablePagination, useMediaQuery, useTheme } from "@mui/material"
 import { checkUserPermissions } from "../../validators/checkPermissionUser"
 import { Paper, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Tooltip, Avatar } from "@mui/material";
 import { api } from "../../api/api"
@@ -38,6 +38,8 @@ export default function ListConsultions(props) {
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const router = useRouter()
+    const themeApp = useTheme()
+    const mobile = useMediaQuery(themeApp.breakpoints.down('sm'))
     const isPartner = user?.perfil?.includes('parceiro')
     const userFilterFunctions = {
         ativo: (item) => filtersField?.status === 'todos' || item.ativo === filtersField?.status,
@@ -196,7 +198,7 @@ export default function ListConsultions(props) {
     ]
 
     return (
-        <Box sx={{ display: 'flex', gap: 4, flexDirection: 'column', paddingTop: 4 }}>
+        <Box sx={{ display: 'flex', gap: 4, flexDirection: 'column', paddingTop: 4, }}>
             <Box sx={{
                 display: 'flex', gap: 1, flex: 1, justifyContent: 'space-between', alignItems: 'center',
                 flexDirection: { xs: 'column', sm: 'column', md: 'column', lg: 'row' }
@@ -207,7 +209,7 @@ export default function ListConsultions(props) {
                         onChange={(event) => setFilterData(event.target.value)} value={filterData}
                         InputProps={{
                             style: {
-                                width: 400,
+                                width: mobile ? 'auto': 400,
                                 backgroundColor: colorPalette?.secondary,
                                 borderRadius: 16,
                                 borderColor: 'transparent', // Define a cor da borda como transparente

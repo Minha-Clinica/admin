@@ -29,8 +29,6 @@ const styles = {
       flexDirection: 'column',
       flex: 1,
       gap: `35px`,
-      // backgroundColor: Colors.background,
-      // padding: { xs: `30px`, xm: `25px`, md: `120px 50px`, lg: `120px 50px` },
       paddingBottom: `60px`,
       overflowY: 'hidden',
       marginTop: { xs: `60px`, xm: `0px`, md: `0px`, lg: `0px` }

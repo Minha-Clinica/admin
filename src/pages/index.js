@@ -319,7 +319,8 @@ function Home() {
 
             <Box sx={{
                display: 'flex', flexDirection: 'column', width: { xs: '100%', xm: '100%', md: '100%', lg: '100%' },
-               transition: '0.5s', marginTop: { xs: 0, xm: 0, md: 10, lg: 10 }, padding: '10px 50px'
+               transition: '0.5s', marginTop: { xs: 0, xm: 0, md: 10, lg: 10 },
+               padding: { xs:'10px 20px', xm:'10px 20px', md: '10px 50px', lg: '10px 50px' }
             }}>
 
                {(isPacient || isPartner) &&

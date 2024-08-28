@@ -1,23 +1,23 @@
 import { useEffect, useState } from "react"
-import { useAppContext } from "../context/AppContext"
-import { emailValidator, formatCPF, formatPhone } from "../helpers"
-import { Colors, IconTheme, SelectList } from "../organisms"
-import { Box, ContentContainer, TextInput, Text, Divider } from "../atoms"
+import { useAppContext } from "../../context/AppContext"
+import { emailValidator, formatCPF, formatPhone } from "../../helpers"
+import { Colors, IconTheme, SelectList } from "../../organisms"
+import { Box, ContentContainer, TextInput, Text, Divider } from "../../atoms"
 import Button from '@mui/material/Button';
 import Head from "next/head"
-import { createContract, createUser, getImageByScreen } from "../validators/api-requests"
-import { icons } from "../organisms/layout/Colors"
+import { createContract, createUser, getImageByScreen } from "../../validators/api-requests"
+import { icons } from "../../organisms/layout/Colors"
 import Link from "next/link"
-import { api } from "../api/api"
+import { api } from "../../api/api"
 import { Backdrop, FormControlLabel, Switch } from "@mui/material"
 import { useRouter } from "next/router"
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
-export const Register = ({ type = `paciente`, setTypeSelected, typeSelected, setShowRegisterType, companyCode }) => {
+export default function Register() {
 
-    const { login, alert, theme, colorPalette, setLoading, setShowConfirmationDialog } = useAppContext()
+    const { alert, theme, colorPalette, setLoading } = useAppContext()
+    const type = 'paciente'
     const router = useRouter()
-    const cod_key = companyCode
     const [userData, setUserData] = useState({
         cpf: null,
         genero: '',
@@ -27,7 +27,7 @@ export const Register = ({ type = `paciente`, setTypeSelected, typeSelected, set
         login: null,
         nascimento: null,
         foto_perfil_id: null,
-        nome_social: null, perfil: type || null
+        nome_social: null, perfil: 'paciente'
     })
     const [contract, setContract] = useState({
         funcao: null,
@@ -46,13 +46,10 @@ export const Register = ({ type = `paciente`, setTypeSelected, typeSelected, set
         tipo_conta_2: null
     })
     const [themeName, setThemeName] = useState('')
-    const [company, setCompany] = useState({})
     const [showPreferences, setShowPreferences] = useState(false)
     const [windowWidth, setWindowWidth] = useState(0)
     const [stepSelected, setStepSelected] = useState(1)
     const smallWidthDevice = windowWidth < 1000
-
-    console.log(cod_key)
 
     useEffect(() => {
         const themeAltern = theme ? setThemeName('dark') : setThemeName('clear')
@@ -102,7 +99,7 @@ export const Register = ({ type = `paciente`, setTypeSelected, typeSelected, set
         if (checkRequiredFields()) {
             setLoading(true)
             try {
-                userData.perfil = type;
+                userData.perfil = 'paciente';
                 const response = await api.post('/user/create', { userData })
                 const { data } = response
                 if (response?.status === 201) {
@@ -122,19 +119,6 @@ export const Register = ({ type = `paciente`, setTypeSelected, typeSelected, set
                 setLoading(false)
             }
             return setLoading(false)
-        }
-    }
-
-    const handleCompany = async () => {
-        if (cod_key) {
-            try {
-                const response = await api.get(`/company/key/${cod_key}`)
-                if (response?.data) {
-                    setCompany(response?.data)
-                }
-            } catch (error) {
-                console.log(error)
-            }
         }
     }
 
@@ -166,10 +150,9 @@ export const Register = ({ type = `paciente`, setTypeSelected, typeSelected, set
 
 
     useEffect(() => {
-        handleCompany()
         setWindowWidth(window.innerWidth)
         window.addEventListener('resize', () => setWindowWidth(window.innerWidth))
-        document.title = `Admin Meliés`
+        document.title = `Cadastre-se - Afectu`
         return () => window.removeEventListener('resize', () => { });
     }, [])
 
@@ -203,7 +186,6 @@ export const Register = ({ type = `paciente`, setTypeSelected, typeSelected, set
                 <link rel="icon" href="https://minhaclinicatrindade.s3.amazonaws.com/Afectu+-+PNG+-+Fundo+Tranparente-8%402x.png" />
             </Head>
             <Box sx={{
-                zIndex: 999,
                 display: 'flex',
                 justifyContent: 'flex-start',
                 alignItems: 'center',
@@ -214,7 +196,7 @@ export const Register = ({ type = `paciente`, setTypeSelected, typeSelected, set
                     display: 'flex', gap: 1, backgroundColor: colorPalette.third, width: '100%', height: '100%', position: 'relative',
                     justifyContent: 'center',
                     alignItems: 'center',
-                    padding: '30px 50px',
+                    padding: { xs: '20px 30px', xm: '20px 30px', md: '20px 30px', lg: '30px 50px' },
                     flexDirection: { xs: 'column', xm: 'column', md: 'row', lg: 'row' }
 
                 }}>
@@ -228,31 +210,19 @@ export const Register = ({ type = `paciente`, setTypeSelected, typeSelected, set
                         flexDirection: 'column',
                         justifyContent: showPreferences ? 'flex-start' : 'center',
                         borderRadius: 2,
-                        width: 700,
+                        width: { xs: '100%', xm: '100%', md: '100%', lg: 700 },
                         minHeight: 800,
                         alignItems: 'center',
                         padding: '30px 15px',
                         backgroundColor: '#fff',
                         gap: 3,
                         marginTop: 10,
-                        zIndex: 9999
                     }}>
 
                         <Box sx={{ display: 'flex', flexDirection: 'row', gap: .8, alignItems: 'center', width: '100%', justifyContent: 'center' }}>
                             <Text bold indicator style={{ color: !theme ? '#fff' : Colors.backgroundPrimary, transition: 'background-color 1s', textAlign: 'center' }}>Bem vindo </Text>
-                            <Text bold indicator style={{ color: colorPalette?.buttonColor, transition: 'background-color 1s', textAlign: 'center' }}> {type === 'parceiro' ? 'Terapeuta!' : 'Paciente!'}</Text>
+                            <Text bold indicator style={{ color: colorPalette?.buttonColor, transition: 'background-color 1s', textAlign: 'center' }}> Paciente!</Text>
                         </Box>
-
-                        {cod_key &&
-                            <Box sx={{ display: 'flex', flexDirection: 'row', gap: .8, alignItems: 'center', width: '100%', justifyContent: 'center' }}>
-                                <Text bold style={{ color: !theme ? '#fff' : Colors.backgroundPrimary, transition: 'background-color 1s', textAlign: 'center' }}>
-                                    Você está se cadastrando pela empresa
-                                </Text>
-                                <Text bold large style={{ color: colorPalette?.buttonColor, transition: 'background-color 1s', textAlign: 'center' }}>
-                                    {company?.razao_social}
-                                </Text>
-                            </Box>
-                        }
 
                         <Box sx={{ display: 'flex' }}>
                             {steps?.map((item, index) => {
@@ -322,14 +292,14 @@ export const Register = ({ type = `paciente`, setTypeSelected, typeSelected, set
                                 <Text sx={{}}>Voltar</Text>
                             </Box>
                         }
-                        <form style={{ display: 'flex', zIndex: 999, flexDirection: 'column', gap: 3, alignItems: 'center', width: smallWidthDevice ? '80%' : '100%', }}>
+                        <form style={{ display: 'flex', flexDirection: 'column', gap: 3, alignItems: 'center', width: '100%', }}>
                             {stepSelected === 3 ?
                                 < PaymentConfigScreen />
                                 :
-                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, alignItems: 'center', width: smallWidthDevice ? '80%' : '100%', }}>
+                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, alignItems: 'center', width: '100%', }}>
 
                                     <Box sx={{
-                                        display: 'flex', flexDirection: 'column', gap: 2, width: { xs: `80%`, xm: `80%`, md: '62.5%', lg: '80%' }, justifyContent: 'center',
+                                        display: 'flex', flexDirection: 'column', gap: 2, width: { xs: `90%`, xm: `100%`, md: '100%', lg: '80%' }, justifyContent: 'center',
                                     }}>
                                         <Box sx={{ ...styles.inputSection, flexDirection: 'column', justifyContent: 'flex-start' }}>
 
@@ -342,9 +312,23 @@ export const Register = ({ type = `paciente`, setTypeSelected, typeSelected, set
                                                     <TextInput placeholder='Telefone' name='telefone' onChange={handleChange} value={userData?.telefone || ''} label='Telefone: *' sx={{ flex: 1, }} />
                                                     <Box sx={{ ...styles.inputSection }}>
                                                         <TextInput placeholder='Nascimento' name='nascimento' onChange={handleChange} type="date" value={(userData?.nascimento)?.split('T')[0] || ''} label='Nascimento *' sx={{ flex: 1, }} />
-                                                        <SelectList fullWidth data={groupGender} valueSelection={userData?.genero || ''} onSelect={(value) => setUserData({ ...userData, genero: value })}
+                                                        {/* <SelectList fullWidth data={groupGender} valueSelection={userData?.genero || ''} onSelect={(value) => setUserData({ ...userData, genero: value })}
                                                             title="Gênero *" filterOpition="value" sx={{ color: colorPalette.textColor, flex: 1 }}
                                                             inputStyle={{ color: colorPalette.textColor, fontSize: '15px', fontFamily: 'MetropolisBold' }}
+                                                        /> */}
+                                                        <SelectList
+                                                            fullWidth
+                                                            data={groupGender}
+                                                            valueSelection={userData?.genero}
+                                                            onSelect={(value) =>
+                                                                setUserData({
+                                                                    ...userData, genero: value,
+                                                                })
+                                                            }
+                                                            title="Sexo:"
+                                                            filterOpition="value"
+                                                            inputStyle={{ color: colorPalette.textColor, fontSize: '15px', fontFamily: 'MetropolisBold' }}
+                                                            clean={false}
                                                         />
                                                     </Box>
                                                     <TextInput placeholder='CPF' name='cpf' onChange={handleChange} value={userData?.cpf || ''} label='CPF' sx={{ flex: 1, }} />
@@ -424,33 +408,31 @@ export const Register = ({ type = `paciente`, setTypeSelected, typeSelected, set
                                         <Text small bold style={{ color: 'inherit' }}>CADASTRAR</Text>
                                     </Button>}
                                 <Text light small style={{ marginTop: 5 }}>Deseja voltar para tela de login?</Text>
-                                <Button
-                                    style={{
-                                        width: '205px',
-                                        padding: '10px 30px',
-                                        marginBottom: 5,
-                                        borderRadius: '100px',
-                                        border: `1px solid ${colorPalette.buttonColor}`,
-                                        transition: 'background-color 1s',
-                                        "&:hover": {
-                                            backgroundColor: colorPalette.buttonColor + '22',
-                                            cursor: 'pointer'
-                                        },
-                                        display: 'flex',
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                        color: '#f0f0f0',
-                                        // padding: { xs: `6px 10px`, xm: `8px 16px`, md: `8px 16px`, lg: `8px 16px` },
-                                        borderRadius: '12px',
-                                    }}
-                                    text='Entrar'
-                                    onClick={() => {
-                                        setTypeSelected({ value: '', active: false })
-                                        setShowRegisterType(false)
-                                    }}
-                                >
-                                    <Text small bold style={{ color: colorPalette.buttonColor }}>FAZER LOGIN</Text>
-                                </Button>
+                                <Link href={'/'}>
+                                    <Button
+                                        style={{
+                                            width: '205px',
+                                            padding: '10px 30px',
+                                            marginBottom: 5,
+                                            borderRadius: '100px',
+                                            border: `1px solid ${colorPalette.buttonColor}`,
+                                            transition: 'background-color 1s',
+                                            "&:hover": {
+                                                backgroundColor: colorPalette.buttonColor + '22',
+                                                cursor: 'pointer'
+                                            },
+                                            display: 'flex',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            color: '#f0f0f0',
+                                            // padding: { xs: `6px 10px`, xm: `8px 16px`, md: `8px 16px`, lg: `8px 16px` },
+                                            borderRadius: '12px',
+                                        }}
+                                        text='Entrar'
+                                    >
+                                        <Text small bold style={{ color: colorPalette.buttonColor }}>FAZER LOGIN</Text>
+                                    </Button>
+                                </Link>
                             </Box>
 
                         </form>
