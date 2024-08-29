@@ -221,8 +221,8 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { },
     const { setLoading, colorPalette, theme, user } = useAppContext()
 
     const columns = [
-        { key: 'ultima_consulta', label: 'Ultima Consulta' },
-        { key: 'proxima_consulta', label: 'Proxima Consulta' },
+        { key: 'ultima_consulta', label: 'Ultima Sessão' },
+        { key: 'proxima_consulta', label: 'Proxima Sessão' },
         { key: 'paciente', label: 'Paciente ' },
         { key: 'modalidade', label: 'Atendimento' },
         { key: 'actions', label: 'Ações' },
@@ -357,7 +357,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { },
                         <Text bold light>{data?.filter(filter)?.length || '0'}</Text>
                         <Text light>de</Text>
                         <Text bold light>{data?.length || 0}</Text>
-                        <Text light>consultas</Text>
+                        <Text light>sessões</Text>
                     </Box>
                     <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', padding: '15px 12px', width: '100%', justifyContent: 'space-between' }}>
                         <PaginationTable data={data?.filter(filter)}

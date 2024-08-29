@@ -145,7 +145,7 @@ export default function ListProfissionals(props) {
                         <Text bold style={{ color: '#d6d6d6' }} light>{profissionalList?.filter(filter)?.length || '0'}</Text>
                         <Text style={{ color: '#d6d6d6' }} light>de</Text>
                         <Text bold style={{ color: '#d6d6d6' }} light>{profissionalList?.length || 0}</Text>
-                        <Text style={{ color: '#d6d6d6' }} light>consultas</Text>
+                        <Text style={{ color: '#d6d6d6' }} light>sessões</Text>
                     </Box>
                 </Box>
                 <Box sx={{ display: 'flex', flex: 1, justifyContent: 'space-between', alignItems: 'center' }}>

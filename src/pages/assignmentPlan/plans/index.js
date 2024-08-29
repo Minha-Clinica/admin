@@ -73,7 +73,7 @@ export default function ListProfissionals(props) {
                 { include: 'Gestão de pagamentos dentro da plataforma', access: false },
                 { include: 'Ofertar diversas formas de pagamento para o paciente', access: false },
                 { include: 'Prontuário do paciente', access: false },
-                { include: 'Controle do acompanhamento do paciente por consulta', access: false },
+                { include: 'Controle do acompanhamento do paciente por sessão', access: false },
             ]
         },
         {
@@ -81,11 +81,11 @@ export default function ListProfissionals(props) {
             idPlan: 'price_1OkPihKKgBAGSCieN0lXjEky',
             listPlans: [
                 { include: 'Acesso total a plataforma', access: true },
-                { include: 'Gestão de Agendas das consultas', access: true },
+                { include: 'Gestão de Agendas das sessões', access: true },
                 { include: 'Gestão de pagamentos dentro da plataforma', access: true },
                 { include: 'Ofertar diversas formas de pagamento para o paciente', access: true },
                 { include: 'Prontuário do paciente', access: true },
-                { include: 'Controle do acompanhamento do paciente por consulta', access: true },
+                { include: 'Controle do acompanhamento do paciente por sessão', access: true },
             ]
         }
     ]

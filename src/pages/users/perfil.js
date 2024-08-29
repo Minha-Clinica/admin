@@ -23,7 +23,6 @@ function PerfilProfissional() {
     const [reservaData, setReserveData] = useState({})
     const [formattedDate, setFormattedDate] = useState()
     const [loadingReservation, setLoadingReservation] = useState(false)
-    const [formPayment, setFormPayment] = useState()
     const [formattedHour, setFormattedHour] = useState()
     const [priceConsultation, setPriceConsultation] = useState(200)
     const [agendaList, setAgendaList] = useState([])
@@ -85,15 +84,15 @@ function PerfilProfissional() {
             })
             const { status, data } = response
             if (status === 201 && data?.consultation) {
-                alert.success('Consulta criada e agendada com o profissional.')
+                alert.success('Sessão criada e agendada com o profissional.')
                 router.push('/consultation')
             } else {
-                alert.error('Ocorreu um erro ao reservar data e criar a consulta.')
+                alert.error('Ocorreu um erro ao reservar data e criar a sessão.')
             }
 
         } catch (error) {
             console.log(error)
-            alert.error('Ocorreu um erro ao reservar data e criar a consulta.')
+            alert.error('Ocorreu um erro ao reservar data e criar a sessão.')
             return error
         } finally {
             setLoadingReservation(false)
@@ -132,7 +131,7 @@ function PerfilProfissional() {
         {
             id: '02', icon: '/icons/creditCard_icon.png', title: 'Cartão de Crédito', key: 'creditCard',
             to: `/assignmentPlan/subscriptions`,
-            description: 'Sem dinheiro agora? Sem problemas! Pague pelo cartão de crédito, e não deixe a consulta para depois!'
+            description: 'Sem dinheiro agora? Sem problemas! Pague pelo cartão de crédito, e não deixe a sessão para depois!'
         }
     ]
 
@@ -371,7 +370,7 @@ function PerfilProfissional() {
                         Meu compromisso é oferecer um ambiente acolhedor e seguro para que você possa explorar suas emoções, compreender suas dificuldades e encontrar caminhos para uma vida mais equilibrada e gratificante. Com dedicação e experiência na TRG, estou aqui para apoiá-lo/a em sua jornada de autodescoberta e transformação pessoal.
                     </Text>
                     <Text large>
-                        Se você está enfrentando desafios emocionais ou psicossomáticos e deseja uma abordagem terapêutica eficaz e transformadora, entre em contato para agendar uma consulta. Juntos, podemos trabalhar na superação dos obstáculos que estão impedindo seu bem-estar e sua qualidade de vida.
+                        Se você está enfrentando desafios emocionais ou psicossomáticos e deseja uma abordagem terapêutica eficaz e transformadora, entre em contato para agendar uma sessão. Juntos, podemos trabalhar na superação dos obstáculos que estão impedindo seu bem-estar e sua qualidade de vida.
                     </Text>
                     <Text large>
                         Agradeço pela confiança em meu trabalho e espero poder ajudá-lo/a a alcançar uma vida mais plena e feliz.

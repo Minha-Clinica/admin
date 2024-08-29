@@ -266,7 +266,7 @@ export default function ListConsultions(props) {
                     page={page}
                     rowsPerPage={rowsPerPage} />
                 :
-                <Text>Não exitem consultas agendadas.</Text>}
+                <Text>Não exitem sessões agendadas.</Text>}
 
         </Box>
     )
@@ -379,7 +379,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
     };
 
     const handleCancelAppointment = async ({ consultId = null }) => {
-        setLoadingPayment({ active: true, success: false, error: false, message: 'Cancelando Consulta...' });
+        setLoadingPayment({ active: true, success: false, error: false, message: 'Cancelando Sessão...' });
 
         try {
             const response = await api.patch(`/consultation/update/cancel/agenda/${consultId}`);
@@ -388,16 +388,16 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                 setTimeout(() => {
                     setLoadingPayment({
                         active: true, success: true, error: false,
-                        message: `Consulta cancelada com sucesso.`
+                        message: `Sessão cancelada com sucesso.`
                     });
                     setTimeout(async () => {
                         setLoadingPayment({
                             active: false, success: true, error: false,
-                            message: `Consulta cancelada com sucesso.`
+                            message: `Sessão cancelada com sucesso.`
                         });
                         await callBack();
                     }, 2000);
-                    alert.success('Consulta cancelada.');
+                    alert.success('Sessão cancelada.');
                 }, 2000);
             } else {
                 setTimeout(() => {
@@ -411,7 +411,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                             message: `Ocorreu um erro ao cancelar. Tente novamente mais tarde.`
                         });
                     }, 3500);
-                    alert.error(`Ocorreu um erro ao cancelar consulta.`);
+                    alert.error(`Ocorreu um erro ao cancelar sessões.`);
                 }, 3500);
             }
         } catch (error) {
@@ -426,7 +426,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
 
 
     const handleRescheduleppointment = async () => {
-        setLoadingPayment({ active: true, success: false, error: false, message: 'Reagendando Consulta...' });
+        setLoadingPayment({ active: true, success: false, error: false, message: 'Reagendando Sessões...' });
 
         try {
             const response = await api.patch(`/consultation/agenda/reagenda/${dateSelected?.consultId}`, {
@@ -443,17 +443,17 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                     setLoadingPayment({
                         active: true, success: true, error: false,
                         icon: '/icons/remarcar_icon.png',
-                        message: `Consulta remarcada com sucesso.`
+                        message: `Sessão remarcada com sucesso.`
                     });
                     setTimeout(async () => {
                         setLoadingPayment({
                             active: false, success: true, error: false,
                             icon: '/icons/remarcar_icon.png',
-                            message: `Consulta remarcada com sucesso.`
+                            message: `Sessão remarcada com sucesso.`
                         });
                         await callBack();
                     }, 2000);
-                    alert.success('Consulta remarcada.');
+                    alert.success('Sessão remarcada.');
                 }, 2000);
                 setDateSelected({ day: '', hour: '', profissionalId: '', reserva_id: '', consultId: '' })
                 setShowAgendas({ active: false, profissionalId: null, profissionalData: {}, consultionDate: '' })
@@ -461,15 +461,15 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                 setTimeout(() => {
                     setLoadingPayment({
                         active: true, success: false, error: true,
-                        message: `Ocorreu um erro ao remarcar consulta. Tente novamente mais tarde.`
+                        message: `Ocorreu um erro ao remarcar sessão. Tente novamente mais tarde.`
                     });
                     setTimeout(async () => {
                         setLoadingPayment({
                             active: false, success: false, error: true,
-                            message: `Ocorreu um erro ao remarcar consulta. Tente novamente mais tarde.`
+                            message: `Ocorreu um erro ao remarcar sessão. Tente novamente mais tarde.`
                         });
                     }, 3500);
-                    alert.error(`Ocorreu um erro ao remarcar consulta consulta.`);
+                    alert.error(`Ocorreu um erro ao remarcar sessão sessão.`);
                 }, 3500);
             }
         } catch (error) {
@@ -753,7 +753,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                                                                         if (!isWithin24Hours(item?.data)) {
                                                                             handleCancelAppointment({ consultId: item?.id_consulta })
                                                                         } else {
-                                                                            alert.info('Não é possível cancelar a consulta com menos de 24hrs de antecedência.')
+                                                                            alert.info('Não é possível cancelar a sessão com menos de 24hrs de antecedência.')
                                                                         }
                                                                     }
                                                                 }}>
@@ -787,7 +787,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                                 <Text bold light>{data?.filter(filter)?.length || '0'}</Text>
                                 <Text light>de</Text>
                                 <Text bold light>{data?.length || 0}</Text>
-                                <Text light>consultas</Text>
+                                <Text light>sessões</Text>
                             </Box>
                             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', padding: '15px 12px', width: '100%', justifyContent: 'space-between' }}>
                                 <PaginationTable data={data?.filter(filter)}
@@ -1188,7 +1188,7 @@ const CardConsultion = ({ data, isProfissional, isPartner, handleRowClick, handl
                                                         if (!isWithin24Hours(item?.data)) {
                                                             handleCancelAppointment({ consultId: item?.id_consulta })
                                                         } else {
-                                                            alert.info('Não é possível cancelar a consulta com menos de 24hrs de antecedência.')
+                                                            alert.info('Não é possível cancelar a sessão com menos de 24hrs de antecedência.')
                                                         }
                                                     }
                                                 }}>

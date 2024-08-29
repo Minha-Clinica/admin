@@ -82,7 +82,7 @@ function Home() {
          title: 'Sessões dos Colaboradores',
          permissions: ['parceiro',],
          filter: true,
-         text: 'Vizualize os detalhes das consultas agendadas para seus colaboradores.'
+         text: 'Vizualize os detalhes das sessões agendadas para seus colaboradores.'
       },
       {
          id: '02', icon: '/icons/technology.png',
@@ -90,7 +90,7 @@ function Home() {
          title: 'Minhas Sessões',
          permissions: ['paciente', 'administrador'],
          filter: true,
-         text: 'Visualize os prontuários de seus pacientes de consultas agendadas.'
+         text: 'Visualize os prontuários de seus pacientes de sessões agendadas.'
       },
       {
          id: '03', icon: '/icons/userdata.png',

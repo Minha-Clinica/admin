@@ -646,7 +646,7 @@ const PaymentConfigScreen = () => {
                     },
                     justifyContent: 'space-between'
                 }} onClick={() => setShowSection({ ...showSection, consultValues: !showSection?.consultValues })}>
-                    <Text title bold>Valor da Consulta</Text>
+                    <Text title bold>Valor da Sessão</Text>
                     <Box sx={{
                         ...styles.menuIcon,
                         backgroundImage: `url(${icons.gray_arrow_down})`,
@@ -659,7 +659,7 @@ const PaymentConfigScreen = () => {
                         <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', alignItems: 'start' }}>
 
                             <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column' }}>
-                                <Text large>Defina o valor de sua consulta:</Text>
+                                <Text large>Defina o valor de sua sessão:</Text>
                                 <TextInput
                                     placeholder='0,00'
                                     name='valor_terapeuta'
@@ -671,9 +671,9 @@ const PaymentConfigScreen = () => {
                             </Box>
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column', alignItems: 'start' }}>
-                                <Text light>Ao definir o valor que será cobrado em suas consultas, geramos automáticamente a taxa cobrada pela plataforma. Fique tranquilo,
+                                <Text light>Ao definir o valor que será cobrado em suas sessões, geramos automáticamente a taxa cobrada pela plataforma. Fique tranquilo,
                                     o valor da taxa é "repassado" para o paciente, sem afetar seu lucro líquido.</Text>
-                                <Text light>Os valores podem ser alterado depois, e é possível criar "Cupons" de desconto, caso queira dar algum desconto sobre o valor da consulta para algum paciente.</Text>
+                                <Text light>Os valores podem ser alterado depois, e é possível criar "Cupons" de desconto, caso queira dar algum desconto sobre o valor da sessão para algum paciente.</Text>
                                 <Text bold large style={{ color: colorPalette?.buttonColor, marginTop: '5px' }}>O valor que irá ser disponibilizado para pagamento do paciente, está abaixo (Já incluso na taxa)!</Text>
                             </Box>
                             <Box sx={{ display: 'flex', gap: 1, flexDirection: 'row', alignItems: 'center' }}>

@@ -98,11 +98,15 @@ export default function CalendarComponent() {
     const [selectedDays, setSelectedDays] = useState([]);
     const [availability, setAvailability] = useState({});
     const [filterReservas, setFilterReservas] = useState(false)
+    const [filtersReservas, setFiltersReservas] = useState({
+        startDate: '',
+        endDate: ''
+    })
     const [eventData, setEventData] = useState({
         title: "",
         description: "",
         location: "",
-        color: "#007BFF",
+        color: "#808080",
         start: '',
         end: '',
         title: '',
@@ -129,7 +133,7 @@ export default function CalendarComponent() {
     };
 
     const fetchPermissions = () => {
-        if(isAdminstrator || isProfissional){
+        if (isAdminstrator || isProfissional) {
             setIsPermissionEdit(true)
         }
     }
@@ -376,7 +380,7 @@ export default function CalendarComponent() {
             title: "",
             description: "",
             location: "",
-            color: "#007BFF",
+            color: "#808080",
             start: '',
             end: '',
             title: '',
@@ -436,12 +440,25 @@ export default function CalendarComponent() {
 
     const handleAvailabilitySubmit = () => {
         const events = [];
-        const currentDayOfMonth = moment().date();
-        const lastDayOfMonth = moment().endOf("month").date();
+
+        const startDate = filtersReservas.startDate ? moment(filtersReservas.startDate) : moment().startOf("day");
+        const endDate = filtersReservas.endDate ? moment(filtersReservas.endDate) : moment().endOf("month");
+        const currentDayOfMonth = startDate.date();
+        const lastDayOfMonth = endDate.date();
+
+        console.log(filtersReservas.startDate)
+        console.log(filtersReservas.endDate)
+
+        console.log(currentDayOfMonth)
+        console.log(lastDayOfMonth)
+
+        // const startDate = filtersReservas.startDate ? moment(filtersReservas.startDate) : moment().startOf("day");
+        // const endDate = filtersReservas.endDate ? moment(filtersReservas.endDate) : moment().endOf("month");
 
         for (let dayOfMonth = currentDayOfMonth; dayOfMonth <= lastDayOfMonth; dayOfMonth++) {
-            let dayOfWeek = moment(`${moment().format("YYYY-MM")}-${dayOfMonth}`, "YYYY-MM-DD").format("ddd", { locale: "pt" });
+            let dayOfWeek = moment(`${startDate.format("YYYY-MM")}-${dayOfMonth}`, "YYYY-MM-DD").format("ddd", { locale: "pt" });
             dayOfWeek = dayOfWeek.toLowerCase();
+
 
             if (selectedDays.map(day => day.toLowerCase()).includes(dayOfWeek)) {
                 availability[dayOfWeek].forEach(period => {
@@ -469,7 +486,7 @@ export default function CalendarComponent() {
 
                     slots.forEach((slot) => {
                         const event = {
-                            titulo: "Reserva de consulta",
+                            titulo: "Reserva de sessão",
                             descricao: "Horário disponível para reserva.",
                             local: "",
                             color: "#808080",
@@ -622,7 +639,7 @@ export default function CalendarComponent() {
                                 cursor: 'pointer'
                             }
                         }} />
-                        <Text bold style={{ color: filterReservas ? '#fff' : colorPalette?.textColor }}>Vizualizar consultas agendas</Text>
+                        <Text bold style={{ color: filterReservas ? '#fff' : colorPalette?.textColor }}>Visualizar sessões agendas</Text>
                     </Box>
 
                     <Box sx={{ display: 'flex', gap: 2, }}>
@@ -727,8 +744,8 @@ export default function CalendarComponent() {
             </Box>
             {
                 showEventForm && (
-                    <Backdrop open={showEventForm} sx={{ zIndex: 999 }}>
-                        <ContentContainer style={{ maxWidth: { md: '1200px', lg: 900, xl: 1500 }, maxHeight: { md: '180px', lg: '600px', xl: '1200px' }, overflowY: 'auto', width: 400 }}>
+                    <Backdrop open={showEventForm} sx={{ zIndex: 999, paddingTop: 5 }}>
+                        <ContentContainer style={{ width: { xs: '90%', md: 400, lg: 500, xl: 500 }, maxHeight: { xs: '90%', md: 900, lg: '900px', xl: '1200px' }, overflowY: 'auto', }}>
                             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                                 <Text bold large>{selectedEvent ? eventData?.title : "Adicionar evento"}</Text>
                                 <Box sx={{
@@ -746,7 +763,7 @@ export default function CalendarComponent() {
                                         title: "",
                                         description: "",
                                         location: "",
-                                        color: "#007BFF",
+                                        color: "#808080",
                                         start: '',
                                         end: '',
                                         title: '',
@@ -789,16 +806,6 @@ export default function CalendarComponent() {
                                     label='Descrição do evento'
                                     onChange={handleEventFormChange}
                                     sx={{ flex: 1 }}
-                                    multiline
-                                    maxRows={8}
-                                    rows={4}
-                                />
-                                <TextInput disabled={!isPermissionEdit && true}
-                                    name="location"
-                                    value={eventData.location || ''}
-                                    label='Localização do evento'
-                                    onChange={handleEventFormChange}
-                                    sx={{ flex: 1 }}
                                 />
                                 <TextInput disabled={!isPermissionEdit && true}
                                     type="color"
@@ -809,6 +816,7 @@ export default function CalendarComponent() {
 
                                 <RadioItem
                                     valueRadio={eventData?.disponivel}
+                                    horizontal={true}
                                     group={[
                                         { label: 'Não', value: 1 },
                                         { label: 'Sim', value: 0 },
@@ -898,7 +906,7 @@ export default function CalendarComponent() {
                                                     title: "",
                                                     description: "",
                                                     location: "",
-                                                    color: "#007BFF",
+                                                    color: "#808080",
                                                 });
                                             }}
                                         />}
@@ -909,8 +917,8 @@ export default function CalendarComponent() {
                 )
             }
 
-            <Backdrop open={showAppointment} sx={{ zIndex: 999, paddingTop: 5 }}>
-                <ContentContainer style={{ maxWidth: { md: '800px', lg: '1980px' }, maxHeight: { md: '800px', lg: 550, xl: '1280px' }, overflowY: 'auto', width: 400 }}>
+            <Backdrop open={showAppointment} sx={{ zIndex: 999, paddingTop: 10 }}>
+                <ContentContainer style={{ maxWidth: { md: '800px', lg: '1980px' }, maxHeight: { xs: '95%', md: '800px', lg: '600px', xl: '900px' }, overflowY: 'auto', width: 500 }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                         <Text bold large>Dísponibilidade de reserva</Text>
                         <Box sx={{
@@ -928,13 +936,14 @@ export default function CalendarComponent() {
                     </Box>
                     <Divider />
                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 2 }}>
+
+                        <Text bold>Período:</Text>
+                        <Box sx={{ display: 'flex', gap: 1 }}>
+                            <TextInput label="De:" name='startDate' onChange={(e) => setFiltersReservas({ ...filtersReservas, startDate: e.target.value })} type="date" value={(filtersReservas?.startDate)?.split('T')[0] || ''} sx={{ flex: 1, }} />
+                            <TextInput label="Até:" name='endDate' onChange={(e) => setFiltersReservas({ ...filtersReservas, endDate: e.target.value })} type="date" value={(filtersReservas?.endDate)?.split('T')[0] || ''} sx={{ flex: 1, }} />
+                        </Box>
+
                         <Text bold>Duração da Reserva (minutos):</Text>
-                        {/* <Input
-                            type="number"
-                            value={duration}
-                            onChange={handleDurationChange}
-                            sx={{ width: "80px" }}
-                        /> */}
                         <SelectList fullWidth data={groupHour} valueSelection={duration || ''} onSelect={(value) => handleDurationChange(value)}
                             filterOpition="value" sx={{ color: colorPalette.textColor, flex: 1 }}
                             inputStyle={{ color: colorPalette.textColor, fontSize: '15px', fontFamily: 'MetropolisBold' }}
