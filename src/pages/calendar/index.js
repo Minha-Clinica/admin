@@ -527,6 +527,7 @@ export default function CalendarComponent() {
 
     const groupHour = [
         { label: '1,5 hora', value: 90 },
+        { label: '70 Minutos', value: 70 },
         { label: 'Uma hora', value: 60 },
         { label: '45 Minutos', value: 45 },
         { label: 'Meia hora', value: 30 },
