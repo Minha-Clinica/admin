@@ -78,7 +78,7 @@ export default function EditUser() {
     }
 
     useEffect(() => {
-        listPermissions()
+        getCompany()
         fetchPermissions()
     }, [])
 
@@ -86,6 +86,7 @@ export default function EditUser() {
         try {
             const response = await api.get(`/user/${id}`)
             const { data } = response
+
             setUserData(data)
         } catch (error) {
             console.log(error)
@@ -98,10 +99,18 @@ export default function EditUser() {
         try {
             const response = await api.get('/companies')
             const { data = [] } = response;
-            const companiesData = data.map((item) => ({
+            let companiesData = data.map((item) => ({
                 label: item.razao_social,
                 value: item.id_empresa
             }))
+
+            if (company) {
+                userData.empresa_id = company
+                if (!isAdministrador) {
+                    companiesData = companiesData?.filter(item => item.value === company)
+                }
+            }
+
             setCompanyList(companiesData)
         } catch (error) {
             console.log(error)
@@ -164,6 +173,7 @@ export default function EditUser() {
 
 
     useEffect(() => {
+
         (async () => {
             if (newUser) {
                 return
@@ -179,29 +189,12 @@ export default function EditUser() {
     }, [fileCallback])
 
 
-    async function listPermissions() {
-
-        try {
-            const response = await api.get(`/permissions`)
-            const { data } = response
-            const groupPermissions = data.map(permission => ({
-                label: permission.permissao,
-                value: permission?.id_grupo_perm.toString()
-            }));
-
-            setGroupPermissions(groupPermissions);
-        } catch (error) {
-        }
-    }
-
-
     const handleItems = async () => {
         setLoading(true)
         try {
             await getUserData()
             await getPhoto()
             await getFileUser()
-            await getCompany()
         } catch (error) {
             alert.error('Ocorreu um arro ao carregar Usuarios')
         } finally {
@@ -439,7 +432,7 @@ export default function EditUser() {
                         <Box sx={{ ...styles.inputSection, flexDirection: 'column', justifyContent: 'flex-start' }}>
                             <Box sx={{ ...styles.inputSection }}>
                                 <TextInput placeholder='Nome Completo' name='nome' onChange={handleChange} value={userData?.nome || ''} label='Nome Completo: *' sx={{ flex: 1, }} />
-                                {!company && <SelectList
+                                {isAdministrador && <SelectList
                                     fullWidth
                                     data={companies}
                                     valueSelection={userData.empresa_id}

@@ -1,5 +1,4 @@
 import Head from 'next/head'
-import { Inter } from 'next/font/google'
 import { Box, Button, ContentContainer, Divider, Text } from '../atoms'
 import { Holidays, SelectList } from '../organisms'
 import { useAppContext } from '../context/AppContext'
@@ -298,13 +297,6 @@ function Home() {
          setLoadingDate(false)
       }
    }
-
-   console.log(dateSelected)
-
-   const statusColor = (data) => ((data === 'Agendado' && 'yellow') ||
-      (data === 'Cancelada' && 'red') ||
-      (data === 'Atendida' && 'green') ||
-      (data === 'Remarcada' && 'blue'))
 
    return (
       <>

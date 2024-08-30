@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 import { createContext, useContext, useEffect, useReducer, useState } from "react";
 import { Box, Button, ContentContainer, Divider, Text } from "../atoms";
 import { getDialogPosition } from "../helpers";
-import { Alert, Colors } from "../organisms";
+import { Alert, CheckBoxComponent, Colors } from "../organisms";
 import { api } from "../api/api";
 import { LoadingIcon } from "../organisms/loading/Loading";
 import { versions } from "../config/config";
@@ -47,7 +47,7 @@ export const AppProvider = ({ children }) => {
         title: '',
         message: ''
     })
-    const [showVersion, setShowVersion] = useState(false)
+    const [showTerm, setShowTerm] = useState(false)
     const router = useRouter()
     const alert = new ShowAlert(setAlertData)
     const themeApp = useTheme()
@@ -71,6 +71,9 @@ export const AppProvider = ({ children }) => {
                     const response = await api.post('/user/loginToken')
                     const { data } = response;
                     const { userData, getPhoto, notificationsData } = data;
+                    if (userData?.termUse) {
+                        setShowTerm(true)
+                    }
                     if (userData) {
                         setUser({ ...userData, getPhoto })
                         setUserPermissions(userData?.permissoes)
@@ -100,6 +103,11 @@ export const AppProvider = ({ children }) => {
             if (userData.token) {
                 const { data } = response;
                 const { userData, getPhoto, notificationsData } = data;
+
+                if (userData?.termUse) {
+                    setShowTerm(true)
+                }
+
                 localStorage.setItem('token', userData?.token);
                 api.defaults.headers.Authorization = `Bearer ${userData?.token}`
                 setUser({ ...userData, getPhoto });
@@ -297,8 +305,6 @@ export const AppProvider = ({ children }) => {
                 latestVersionNumber,
                 latestVersion,
                 menuItemsList,
-                showVersion,
-                setShowVersion,
                 menuItems,
                 mobile
             }}
@@ -319,87 +325,72 @@ export const AppProvider = ({ children }) => {
                 colorPalette={colorPalette}
                 theme={theme}
             />
-            <UpdateVersion
+            <UpdateTerm
                 user={user}
-                showVersion={showVersion}
-                setShowVersion={setShowVersion}
-                latestVersion={latestVersion}
-                colorPalette={colorPalette}
-                theme={theme}
-                setUser={setUser} />
+                showTerm={showTerm}
+                setShowTerm={setShowTerm}
+                setUser={setUser}
+                alert={alert}
+            />
         </AppContext.Provider>
     )
 }
 
-export const UpdateVersion = ({ user, showVersion, setShowVersion, latestVersion, colorPalette, setUser, theme }) => {
+export const UpdateTerm = ({ user, showTerm, setUser, setShowTerm, alert }) => {
 
-    const handleAttMsgVersion = async () => {
+    const [accepted, setAccepted] = useState()
+    const [loader, setLoader] = useState(false)
+    const handleAcceptedTerm = async () => {
+        setLoader(true)
         try {
-            const response = await api.patch(`/user/notificationVersion/false/${user?.id}`)
+            const response = await api.patch(`/term-of-use/update/${user?.id}`)
+            const { success } = response.data
+            if (success) {
+                setUser({ ...user, termUse: {} })
+                setShowTerm(false)
+                alert.succes('Termos atualizados.')
+            }
         } catch (error) {
             console.log(error)
             return error
+        } finally {
+            setLoader(false)
         }
     }
 
     return (
-        <Backdrop open={showVersion || user?.at_versao > 0} sx={{ zIndex: 999 }}>
+        <Backdrop open={showTerm} sx={{ zIndex: 999 }}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 400 }}>
                 <ContentContainer>
                     <Box sx={{ flex: 1, display: 'flex', justifyContent: 'space-between' }}>
-                        <Text large bold>Atualização de Versão</Text>
-                        <Box sx={{
-                            ...styles.menuIcon,
-                            backgroundImage: `url(${icons.gray_close})`,
-                            transition: '.3s',
-                            zIndex: 999999999,
-                            "&:hover": {
-                                opacity: 0.8,
-                                cursor: 'pointer'
-                            }
-                        }} onClick={() => {
-                            setShowVersion(false)
-                            if (user?.at_versao > 0) {
-                                handleAttMsgVersion()
-                                setUser({ ...user, at_versao: 0 })
-                            }
-                        }} />
+                        <Text large bold>Termo de Privacidade para Sessões Terapêuticas da Afectu</Text>
                     </Box>
                     <Divider distance={0} />
-                    <Box sx={{ display: 'flex', gap: 3, flexDirection: 'column', marginTop: 2 }}>
-                        <Text bold>Versão em produção - {latestVersion?.version} ({latestVersion?.build})</Text>
-                        <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column' }}>
-                            <Text bold>Alterações realizadas</Text>
-                            <Text>{latestVersion?.msg}</Text>
+                    {loader ?
+                        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%' }}>
+                            <CircularProgress />
                         </Box>
-                        <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column' }}>
-                            <Text bold>Algumas mudanças:</Text>
-
-                            {latestVersion?.listChanges?.map((item, index) => {
-                                return (
-                                    <Box key={index} sx={{
-                                        display: 'flex', gap: 1, color: 'rgb(75 85 99)', "&:hover": {
-                                            opacity: 0.8,
-                                            transform: 'scale(1.1)',
-                                            transition: '.5s',
-                                            color: colorPalette.buttonColor,
-                                            fontWeight: 'bold'
-                                        },
-                                        marginTop: 1
-                                    }}>
-                                        <Box sx={{
-                                            ...styles.menuIcon,
-                                            aspectRatio: '1/1',
-                                            backgroundImage: `url('/icons/topic_icon.png')`,
-                                            filter: theme ? 'brightness(0) invert(0)' : 'brightness(0) invert(1)',
-                                            transition: '.3s',
-                                        }} />
-                                        <Text small bold style={{ color: 'inherit', fontWeight: 'inherit' }}>{item?.change}</Text>
-                                    </Box>
-                                )
-                            })}
-                        </Box>
-                    </Box>
+                        :
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            <Box sx={{ display: 'flex', gap: 2, marginTop: 2, alignItems: 'center' }}>
+                                <input
+                                    type="checkbox"
+                                    id="subscribeNews"
+                                    name="subscribe"
+                                    value={accepted}
+                                    onChange={(e) => setAccepted(e.target.checked)} />
+                                <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column' }}>
+                                    <Text light>Li e estou de acordo com a
+                                        <a
+                                            href="https://minhaclinicatrindade.s3.amazonaws.com/PF+-+Termo+de+Privacidade+para+Sesso%CC%83es+Terape%CC%82uticas+da+Afectu.pdf"
+                                            target="_blank"
+                                            style={{ color: '#1976d2', fontWeight: 'bold', paddingLeft: 5 }}>
+                                            Política de Privacidade
+                                        </a></Text>
+                                </Box>
+                            </Box>
+                            <Button text="Confirmar" disabled={!accepted} onClick={() => handleAcceptedTerm()} />
+                        </Box>}
                 </ContentContainer>
             </Box>
 
