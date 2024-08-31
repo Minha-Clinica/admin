@@ -9,7 +9,7 @@ import { getImageByScreen } from "../validators/api-requests"
 import { icons } from "../organisms/layout/Colors"
 import Link from "next/link"
 import { api } from "../api/api"
-import { Backdrop } from "@mui/material"
+import { Backdrop, CircularProgress } from "@mui/material"
 import { useRouter } from "next/router"
 import { Register } from "../pages/register"
 
@@ -23,6 +23,7 @@ export default function Login() {
     const [newPass, setNewPass] = useState(false)
     const [windowWidth, setWindowWidth] = useState(0)
     const [showRegisterType, setShowRegisterType] = useState(false)
+    const [loader, setLoader] = useState(false)
     const smallWidthDevice = windowWidth < 1000
 
     useEffect(() => {
@@ -84,6 +85,7 @@ export default function Login() {
     const resetPassword = async () => {
         const { email } = userData
         if (checkedReset(email)) {
+            setLoader(true)
             try {
                 const { email } = userData
                 const response = await api.patch(`/users/reset/password`, { email })
@@ -102,6 +104,8 @@ export default function Login() {
                 alert.error("Houve um erro ao resetar senha.")
                 console.log(error)
                 return error
+            } finally {
+                setLoader(false)
             }
         }
 
@@ -296,7 +300,7 @@ export default function Login() {
                             </Box>
                         </form>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: .5, justifyContent: 'center', width: '100%', padding: '10px 30px' }}>
-                            <Link href={'/register'} style={{width: '100%', display: 'flex'}}>
+                            <Link href={'/register'} style={{ width: '100%', display: 'flex' }}>
                                 <Button
                                     style={{
                                         width: '100%',
@@ -332,13 +336,12 @@ export default function Login() {
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
 
                     <ContentContainer sx={{ maxWidth: 400 }}>
-                        <Box sx={{ flex: 1, display: 'flex', justifyContent: 'space-between' }}>
+                        <Box sx={{ flex: 1, display: 'flex', justifyContent: 'space-between', gap: 2, alignItems: 'center' }}>
                             <Text large bold>Redefinição de Senha</Text>
                             <Box sx={{
                                 ...styles.menuIcon,
                                 backgroundImage: `url(${icons.gray_close})`,
                                 transition: '.3s',
-                                zIndex: 999999999,
                                 "&:hover": {
                                     opacity: 0.8,
                                     cursor: 'pointer'
@@ -348,142 +351,150 @@ export default function Login() {
                                 setShowRedefinitionPass(false)
                             }} />
                         </Box>
-                        <Box sx={{ flex: 1, display: `flex`, justifyContent: 'center', padding: '20px' }}>
+                        <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column' }}>
+                            <Box sx={{ flex: 1, display: `flex`, justifyContent: 'center', padding: '20px' }}>
 
-                            <Box sx={{
-                                backgroundSize: 'cover',
-                                display: 'flex',
-                                backgroundRepeat: 'no-repeat',
-                                backgroundPosition: 'center center',
-                                backgroundSize: 'cover',
-                                width: '140px',
-                                height: '100px',
-                                // backgroundColor: 'pink'
-                                backgroundImage: `url('/icons/afectu_icon_home.png')`,
-                            }} />
-                        </Box>
-                        <Box>
-                            <Text>Informe seu e-mail e enviaremos uma nova senha por e-mail. Assim que receber, insira no campo abaixo a nova senha e faça Login.</Text>
-                        </Box>
-                        <Divider padding={0} />
-                        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 3, alignItems: 'center', width: smallWidthDevice ? '80%' : '100%', }}>
-                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, alignItems: 'center', width: smallWidthDevice ? '100%' : '100%', }}>
                                 <Box sx={{
-                                    display: 'flex', flexDirection: 'column', gap: 2, width: { xs: `100%`, xm: `100%`, md: '100%', lg: '90%' }, justifyContent: 'center',
-                                    // alignItems: 'center',
-                                }}>
-                                    <TextInput
-                                        label='e-mail'
-                                        placeholder='email@outlook.com.br'
-                                        value={userData?.email || ''}
-                                        onChange={handleChange}
-                                        name='email'
-                                        margin='none'
-                                        type="email"
-                                        InputProps={{
-                                            style: {
-                                                backgroundColor: !theme ? '#1B1829' : Colors.background,
-                                                transition: 'background-color 1s',
-                                                border: "none",
-                                                color: !theme ? '#fff' : Colors.backgroundPrimary,
-                                                outline: 'none',
-                                                // // width: '280px',
-                                            }
-                                        }}
-                                        InputLabelProps={{
-                                            style: {
-                                                color: !theme ? '#fff' : Colors.backgroundPrimary,
-                                                transition: 'background-color 1s',
-                                                // width: '280px',
-                                            }
-                                        }}
-                                    />
-                                    {newPass && <TextInput
-                                        placeholder='******'
-                                        label='senha'
-                                        colorLabel={'#fff'}
-                                        value={userData.senha || ''}
-                                        onChange={handleChange}
-                                        name='senha'
-                                        type="password"
-                                        margin='none'
-                                        InputProps={{
-                                            style: {
-                                                backgroundColor: !theme ? '#1B1829' : Colors.background,
-                                                transition: 'background-color 1s',
-                                                color: !theme ? '#ffffffbb' : Colors.backgroundPrimary,
-                                                outline: 'none',
-                                                // width: '280px',
-                                            }
-                                        }}
-                                        InputLabelProps={{
-                                            style: {
-                                                color: !theme ? '#fff' : Colors.backgroundPrimary,
-                                                transition: 'background-color 1s',
-                                            }
-                                        }}
-                                    />}
-                                </Box>
-                                {newPass && <Button
-                                    style={{
-                                        width: '90%',
-                                        padding: '12px 80px',
-                                        marginBottom: 5,
-                                        borderRadius: '12px',
-                                        backgroundColor: colorPalette.buttonColor,
-                                        transition: 'background-color 1s',
-                                        "&:hover": {
-                                            backgroundColor: colorPalette.buttonColor + 'dd',
-                                            cursor: 'pointer'
-                                        },
-                                        display: 'flex',
-                                        justifyContent: 'center',
-                                        alignItems: 'center',
-                                        color: '#f0f0f0',
-                                        // padding: { xs: `6px 10px`, xm: `8px 16px`, md: `8px 16px`, lg: `8px 16px` },
-                                    }}
-                                    text='Entrar'
-                                    onClick={handleLogin}
-                                    type="submit"
-                                >
-                                    <Text small bold style={{ color: 'inherit' }}>Entrar</Text>
-                                </Button>}
-                            </Box>
-                            {!newPass && <Button
-                                style={{
-                                    width: '90%',
-                                    padding: '10px 30px',
-                                    marginBottom: 5,
-                                    marginTop: 15,
-                                    borderRadius: '12px',
-                                    border: `1px solid ${colorPalette.buttonColor}`,
-                                    transition: 'background-color 1s',
-                                    "&:hover": {
-                                        backgroundColor: colorPalette.buttonColor + '22',
-                                        cursor: 'pointer'
-                                    },
+                                    backgroundSize: 'cover',
                                     display: 'flex',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    color: '#f0f0f0',
-                                    // padding: { xs: `6px 10px`, xm: `8px 16px`, md: `8px 16px`, lg: `8px 16px` },
-                                }}
-                                onClick={(event) => {
-                                    if (checkedReset(userData?.email)) {
-                                        setShowConfirmationDialog({
-                                            active: true,
-                                            event,
-                                            acceptAction: resetPassword,
-                                            title: 'Resetar Senha',
-                                            message: 'Uma nova senha será enviada para seu e-mail.',
-                                        })
+                                    backgroundRepeat: 'no-repeat',
+                                    backgroundPosition: 'center center',
+                                    backgroundSize: 'cover',
+                                    width: '140px',
+                                    height: '100px',
+                                    // backgroundColor: 'pink'
+                                    backgroundImage: `url('/icons/afectu_icon_home.png')`,
+                                }} />
+                            </Box>
+                            <Box>
+                                <Text>Informe seu e-mail e enviaremos uma nova senha por e-mail. Assim que receber, insira no campo abaixo a nova senha e faça Login.</Text>
+                            </Box>
+                            <Divider padding={0} />
+                            {loader ?
+                                <Box sx={{ display: 'flex', width: '100%', height: '100%', justifyContent: 'center', alignItems: 'center' }}>
+                                    <CircularProgress />
+                                </Box>
+                                :
+                                <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 3, alignItems: 'center', width: smallWidthDevice ? '80%' : '100%', }}>
+                                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, alignItems: 'center', width: smallWidthDevice ? '100%' : '100%', }}>
+                                        <Box sx={{
+                                            display: 'flex', flexDirection: 'column', gap: 2, width: { xs: `100%`, xm: `100%`, md: '100%', lg: '90%' }, justifyContent: 'center',
+                                            // alignItems: 'center',
+                                        }}>
+                                            <TextInput
+                                                label='e-mail'
+                                                placeholder='email@outlook.com.br'
+                                                value={userData?.email || ''}
+                                                onChange={handleChange}
+                                                name='email'
+                                                margin='none'
+                                                type="email"
+                                                InputProps={{
+                                                    style: {
+                                                        backgroundColor: !theme ? '#1B1829' : Colors.background,
+                                                        transition: 'background-color 1s',
+                                                        border: "none",
+                                                        color: !theme ? '#fff' : Colors.backgroundPrimary,
+                                                        outline: 'none',
+                                                        // // width: '280px',
+                                                    }
+                                                }}
+                                                InputLabelProps={{
+                                                    style: {
+                                                        color: !theme ? '#fff' : Colors.backgroundPrimary,
+                                                        transition: 'background-color 1s',
+                                                        // width: '280px',
+                                                    }
+                                                }}
+                                            />
+                                            {newPass && <TextInput
+                                                placeholder='******'
+                                                label='senha'
+                                                colorLabel={'#fff'}
+                                                value={userData.senha || ''}
+                                                onChange={handleChange}
+                                                name='senha'
+                                                type="password"
+                                                margin='none'
+                                                InputProps={{
+                                                    style: {
+                                                        backgroundColor: !theme ? '#1B1829' : Colors.background,
+                                                        transition: 'background-color 1s',
+                                                        color: !theme ? '#ffffffbb' : Colors.backgroundPrimary,
+                                                        outline: 'none',
+                                                        // width: '280px',
+                                                    }
+                                                }}
+                                                InputLabelProps={{
+                                                    style: {
+                                                        color: !theme ? '#fff' : Colors.backgroundPrimary,
+                                                        transition: 'background-color 1s',
+                                                    }
+                                                }}
+                                            />}
+                                        </Box>
+                                        {newPass && <Button
+                                            style={{
+                                                width: '90%',
+                                                padding: '12px 80px',
+                                                marginBottom: 5,
+                                                borderRadius: '12px',
+                                                backgroundColor: colorPalette.buttonColor,
+                                                transition: 'background-color 1s',
+                                                "&:hover": {
+                                                    backgroundColor: colorPalette.buttonColor + 'dd',
+                                                    cursor: 'pointer'
+                                                },
+                                                display: 'flex',
+                                                justifyContent: 'center',
+                                                alignItems: 'center',
+                                                color: '#f0f0f0',
+                                                // padding: { xs: `6px 10px`, xm: `8px 16px`, md: `8px 16px`, lg: `8px 16px` },
+                                            }}
+                                            text='Entrar'
+                                            onClick={handleLogin}
+                                            type="submit"
+                                        >
+                                            <Text small bold style={{ color: 'inherit' }}>Entrar</Text>
+                                        </Button>}
+                                    </Box>
+                                    {!newPass && <Button
+                                        style={{
+                                            width: '90%',
+                                            padding: '10px 30px',
+                                            marginBottom: 5,
+                                            marginTop: 15,
+                                            borderRadius: '12px',
+                                            border: `1px solid ${colorPalette.buttonColor}`,
+                                            transition: 'background-color 1s',
+                                            "&:hover": {
+                                                backgroundColor: colorPalette.buttonColor + '22',
+                                                cursor: 'pointer'
+                                            },
+                                            display: 'flex',
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                            color: '#f0f0f0',
+                                            // padding: { xs: `6px 10px`, xm: `8px 16px`, md: `8px 16px`, lg: `8px 16px` },
+                                        }}
+                                        onClick={(event) => {
+                                            if (checkedReset(userData?.email)) {
+                                                setShowConfirmationDialog({
+                                                    active: true,
+                                                    event,
+                                                    acceptAction: resetPassword,
+                                                    title: 'Resetar Senha',
+                                                    message: 'Uma nova senha será enviada para seu e-mail.',
+                                                })
+                                            }
+                                        }}
+                                    >
+                                        <Text small bold style={{ color: colorPalette.buttonColor }}>Enviar nova senha</Text>
+                                    </Button>
                                     }
-                                }}
-                            >
-                                <Text small bold style={{ color: colorPalette.buttonColor }}>Enviar nova senha</Text>
-                            </Button>
-                            }
-                        </form>
+                                </form>}
+                        </Box>
+
                     </ContentContainer>
                 </Box>
             </Backdrop>
