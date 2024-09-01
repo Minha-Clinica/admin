@@ -236,10 +236,16 @@ export const AppProvider = ({ children }) => {
             permissions: ['administrador'],
         },
         {
+            text: 'Dashboard',
+            icon: '/icons/dashboard_icon.png',
+            to: '/users/list',
+            permissions: ['administrador'],
+        },
+        {
             text: 'Meus Dados',
             icon: '/icons/settings.png',
             to: `/users/${user?.id}`,
-            permissions: ['parceiro'],
+            permissions: ['parceiro, paciente, adminstrador'],
         },
         {
             text: 'Minha Empresa',

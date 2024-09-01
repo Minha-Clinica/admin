@@ -1297,10 +1297,545 @@ export default function AnamneseForms() {
             }
             {
                 page === 8 &&
-                <Box>
-                    <TextInput />
-                    <TextInput />
-                    <TextInput />
+                <Box sx={{
+                    display: 'flex', gap: 2, padding: '15px', backgroundColor: colorPalette.secondary, borderRadius: 2,
+                    boxShadow: `rgba(149, 157, 165, 0.6) 0px 6px 24px`, flexDirection: 'column', width: { xs: '100%', xm: '100%', md: `100%`, lg: 600 }
+                }}>
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Você foi criado pelos pais?</Text>
+                        <RadioItem
+                            valueRadio={anamnese?.criado_pais}
+                            group={[
+                                { label: 'Sim', value: 'Sim' },
+                                { label: 'Não', value: 'Não' },
+                            ]}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                criado_pais: value,
+                            })} />
+                    </Box>
+                    <Divider />
+
+                    <Text bold>Como é sua relação com seus pais?</Text>
+
+                    <Divider />
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Pai</Text>
+                        <TextInput
+                            name='relacao_mae'
+                            onChange={handleChange}
+                            value={anamnese?.relacao_mae || ''}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+
+                    <Divider />
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Mãe</Text>
+                        <TextInput
+                            name='relacao_pai'
+                            onChange={handleChange}
+                            value={anamnese?.relacao_pai || ''}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+
+                    <Divider />
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Seus pais foram agressivos com você?</Text>
+                        <RadioItem
+                            valueRadio={anamnese?.pais_agressivos}
+                            group={[
+                                { label: 'Sim', value: 'Sim' },
+                                { label: 'Não', value: 'Não' },
+                            ]}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                pais_agressivos: value,
+                            })} />
+                    </Box>
+                    <Divider />
+
+                    {anamnese.pais_agressivos === 'Sim' && <>
+                        <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                            <Text light>Como?</Text>
+                            <RadioItem
+                                valueRadio={anamnese?._como_pais_agressivos}
+                                group={[
+                                    { label: 'Sim', value: 'Sim' },
+                                    { label: 'Não', value: 'Não' },
+                                ]}
+                                onSelect={(value) => setAnamnese({
+                                    ...anamnese,
+                                    _como_pais_agressivos: value,
+                                })} />
+                        </Box>
+                        <Divider />
+                    </>}
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Qual deles era o mais bravo?</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.qual_pais_mais_bravo}
+                            boxGroup={[
+                                { label: 'Pai', value: 'Pai' },
+                                { label: 'Mãe', value: 'Mãe' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                qual_pais_mais_bravo: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Como? (responda com base na pergunta anterior)</Text>
+                        <TextInput
+                            name='como_pais_mais_bravo'
+                            onChange={handleChange}
+                            value={anamnese?.como_pais_mais_bravo || ''}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Usavam bebidas ou drogas?</Text>
+                        <RadioItem
+                            valueRadio={anamnese?.pais_usavam_beb_drog}
+                            group={[
+                                { label: 'Sim', value: 'Sim' },
+                                { label: 'Não', value: 'Não' },
+                            ]}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                pais_usavam_beb_drog: value,
+                            })} />
+                    </Box>
+                    <Divider />
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Algum comentário? (responda com base na pergunta anterior)</Text>
+                        <TextInput
+                            name='pais_usavam_beb_drog_coment'
+                            onChange={handleChange}
+                            value={anamnese?.pais_usavam_beb_drog_coment || ''}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Como você descreveria o relacionamento entre seus pais?</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.descr_relac_pais}
+                            boxGroup={[
+                                { label: 'Excelente', value: 'Excelente' },
+                                { label: 'Muito Bom', value: 'Muito Bom' },
+                                { label: 'Bom', value: 'Bom' },
+                                { label: 'Regular', value: 'Regular' },
+                                { label: 'Péssimo', value: 'Péssimo' },
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                descr_relac_pais: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Por quê? (responda com base na pergunta anterior)</Text>
+                        <TextInput
+                            name='justific_relac_pais'
+                            onChange={handleChange}
+                            value={anamnese?.justific_relac_pais || ''}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Quais os aspectos deste relacionamento que se assemelham, ou se repetem em sua vida hoje?</Text>
+                        <TextInput
+                            name='aspect_rel_pais_repetem'
+                            onChange={handleChange}
+                            value={anamnese?.aspect_rel_pais_repetem || ''}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Quais as características deste relacionamento, que você se mantém determinado(a) a não repetir?</Text>
+                        <TextInput
+                            name='caracteris_rel_pais_repetem'
+                            onChange={handleChange}
+                            value={anamnese?.caracteris_rel_pais_repetem || ''}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Por quê? (responda com base na pergunta anterior)</Text>
+                        <TextInput
+                            name='just_caracteris_rel_pais_repetem'
+                            onChange={handleChange}
+                            value={anamnese?.just_caracteris_rel_pais_repetem || ''}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Quanto ao relacionamento de seus pais, responda: Qual a crença que você adquiriu em relação a relacionamentos?</Text>
+                        <TextInput
+                            name='crenca_adq_rel_pais_repetem'
+                            onChange={handleChange}
+                            value={anamnese?.crenca_adq_rel_pais_repetem || ''}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Na infância, era obrigado(a) a fazer alguma coisa que lhe desagradava?</Text>
+                        <RadioItem
+                            valueRadio={anamnese?.algo_desegradavel_inf}
+                            group={[
+                                { label: 'Sim', value: 'Sim' },
+                                { label: 'Não', value: 'Não' },
+                            ]}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                algo_desegradavel_inf: value,
+                            })} />
+                    </Box>
+                    <Divider />
+
+                    {anamnese?.algo_desegradavel_inf === 'Sim' &&
+                        <>
+                            <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                                <Text light>Quais? (responda com base na pergunta anterior)</Text>
+                                <TextInput
+                                    name='oq_fazia_algo_desegradavel_inf'
+                                    onChange={handleChange}
+                                    value={anamnese?.fazia_algo_desegradavel_inf || ''}
+                                    sx={{ flex: 1, }}
+                                />
+                            </Box>
+                            <Divider />
+                        </>
+                    }
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Lembra-se, de alguma coisa que o magoou muito na Infância?</Text>
+                        <RadioItem
+                            valueRadio={anamnese?.magoa_na_infancia}
+                            group={[
+                                { label: 'Sim', value: 'Sim' },
+                                { label: 'Não', value: 'Não' },
+                            ]}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                magoa_na_infancia: value,
+                            })} />
+                    </Box>
+                    <Divider />
+
+                    {anamnese?.magoa_na_infancia === 'Sim' &&
+                        <>
+                            <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                                <Text light>Quais? (responda com base na pergunta anterior)</Text>
+                                <TextInput
+                                    name='oq_magoou_infancia'
+                                    onChange={handleChange}
+                                    value={anamnese?.oq_magoou_infancia || ''}
+                                    sx={{ flex: 1, }}
+                                />
+                            </Box>
+                            <Divider />
+                        </>
+                    }
+
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Teve perdas familiares ou de amigos na Infância?</Text>
+                        <RadioItem
+                            valueRadio={anamnese?.perdas_famil_infancia}
+                            group={[
+                                { label: 'Sim', value: 'Sim' },
+                                { label: 'Não', value: 'Não' },
+                            ]}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                perdas_famil_infancia: value,
+                            })} />
+                    </Box>
+                    <Divider />
+
+                    {anamnese?.perdas_famil_infancia === 'Sim' &&
+                        <>
+                            <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                                <Text light>Quais? (responda com base na pergunta anterior)</Text>
+                                <TextInput
+                                    name='quais_perdas_famil_infancia'
+                                    onChange={handleChange}
+                                    value={anamnese?.quais_perdas_famil_infancia || ''}
+                                    sx={{ flex: 1, }}
+                                />
+                            </Box>
+                            <Divider />
+                        </>
+                    }
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>O que te faz sentir tristeza ao relembrar do passado?</Text>
+                        <TextInput
+                            name='tristeza_passado'
+                            onChange={handleChange}
+                            value={anamnese?.tristeza_passado || ''}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Quando criança tinha medo de quê?</Text>
+                        <TextInput
+                            name='do_q_tinha_medo_infancia'
+                            onChange={handleChange}
+                            value={anamnese?.do_q_tinha_medo_infancia || ''}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Dormia com a luz acesa ou apagada?</Text>
+                        <TextInput
+                            name='dormia_com_a_luz'
+                            onChange={handleChange}
+                            value={anamnese?.dormia_com_a_luz || ''}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Como foi sua adolescência?</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.adolecencia}
+                            boxGroup={[
+                                { label: 'Excelente', value: 'Excelente' },
+                                { label: 'Muito Bom', value: 'Muito Bom' },
+                                { label: 'Bom', value: 'Bom' },
+                                { label: 'Regular', value: 'Regular' },
+                                { label: 'Péssimo', value: 'Péssimo' },
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                adolecencia: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Com qual de seus pais você tinha mais dificuldade de relacionamento?</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.qual_pais_dificul_relac}
+                            boxGroup={[
+                                { label: 'Pai', value: 'Pai' },
+                                { label: 'Mãe', value: 'Mãe' },
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                qual_pais_dificul_relac: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Qual a filosofia de sua família em relação ao sucesso profissional?</Text>
+                        <TextInput
+                            name='filos_familia_sucess_profissional'
+                            onChange={handleChange}
+                            value={anamnese?.filos_familia_sucess_profissional || ''}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Qual a filosofia de sua família em relação ao dinheiro?</Text>
+                        <TextInput
+                            name='filos_familia_relac_dinheiro'
+                            onChange={handleChange}
+                            value={anamnese?.filos_familia_relac_dinheiro || ''}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Qual a filosofia de sua família em relação ao amor?</Text>
+                        <TextInput
+                            name='filos_familia_relac_amor'
+                            onChange={handleChange}
+                            value={anamnese?.filos_familia_relac_amor || ''}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Qual a filosofia de sua família em relação ao sexo?</Text>
+                        <TextInput
+                            name='filos_familia_relac_sex'
+                            onChange={handleChange}
+                            value={anamnese?.filos_familia_relac_sex || ''}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>O que era para você, ser um bom(boa) menino(a)? Descreva.</Text>
+                        <TextInput
+                            name='descr_bom_menino'
+                            onChange={handleChange}
+                            value={anamnese?.descr_bom_menino || ''}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Como você deveria agir, ou ser para ser amado(a)?</Text>
+                        <TextInput
+                            name='como_agir_p_ser_amado'
+                            onChange={handleChange}
+                            value={anamnese?.como_agir_p_ser_amado || ''}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Possui irmãos?</Text>
+                        <RadioItem
+                            valueRadio={anamnese?.tem_irmaos}
+                            group={[
+                                { label: 'Sim', value: 'Sim' },
+                                { label: 'Não', value: 'Não' },
+                            ]}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                tem_irmaos: value,
+                            })} />
+                    </Box>
+                    <Divider />
+
+                    {anamnese?.tem_irmaos === 'Sim' &&
+                        <>
+                            <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                                <Text light>Quantos? (responda com base na pergunta anterior)</Text>
+                                <TextInput
+                                    name='qnt_irmaos'
+                                    onChange={handleChange}
+                                    value={anamnese?.qnt_irmaos || ''}
+                                    sx={{ flex: 1, }}
+                                />
+                            </Box>
+                            <Divider />
+
+                            <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                                <Text light>Como é sua relação com eles?</Text>
+                                <TextInput
+                                    name='relac_c_irmaos'
+                                    onChange={handleChange}
+                                    value={anamnese?.relac_c_irmaos || ''}
+                                    sx={{ flex: 1, }}
+                                />
+                            </Box>
+                            <Divider />
+                        </>}
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Você foi uma criança introvertida ou extrovertida?</Text>
+                        <TextInput
+                            name='introvertido_ou_extrovertido'
+                            onChange={handleChange}
+                            value={anamnese?.introvertido_ou_extrovertido || ''}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Havia dificuldades de relacionamentos com os colegas do colégio? Se sim, cite-os</Text>
+                        <TextInput
+                            name='dificul_rel_colegas'
+                            onChange={handleChange}
+                            value={anamnese?.dificul_rel_colegas || ''}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Quais eram seus maiores medos na infância?</Text>
+                        <TextInput
+                            name='maiores_medos_infanc'
+                            onChange={handleChange}
+                            value={anamnese?.maiores_medos_infanc || ''}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Relate algum fato marcante em sua infância</Text>
+                        <TextInput
+                            name='relato_fato_marcante_infanc'
+                            onChange={handleChange}
+                            value={anamnese?.relato_fato_marcante_infanc || ''}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
                 </Box>
             }
             {
