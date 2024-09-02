@@ -164,7 +164,7 @@ function Home() {
    const handleEvents = async () => {
       try {
          setLoading(true)
-         const perfil = user?.perfil?.includes('profissional') ? 'profissional' : 'paciente'
+         const perfil = (user?.perfil?.includes('profissional') || user?.perfil?.includes('administrador')) ? 'profissional' : 'paciente'
          const response = await api.get(`/event/${perfil}/agenda/${user?.id}`) 
          const { data } = response
          if (data) {
