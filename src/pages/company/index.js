@@ -35,6 +35,7 @@ export default function RegisterFromCompany({ companyCode }) {
     const [showPreferences, setShowPreferences] = useState(false)
     const [windowWidth, setWindowWidth] = useState(0)
     const [stepSelected, setStepSelected] = useState(1)
+    
     const smallWidthDevice = windowWidth < 1000
 
     useEffect(() => {
@@ -423,6 +424,8 @@ export default function RegisterFromCompany({ companyCode }) {
                             </Box>
                         </Box>
                     </Box>
+
+                    <ConsultionsTable />
                 </>
             }
         </>

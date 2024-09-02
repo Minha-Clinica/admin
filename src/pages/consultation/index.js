@@ -203,7 +203,7 @@ export default function ListConsultions(props) {
                 display: 'flex', gap: 1, flex: 1, justifyContent: 'space-between', alignItems: 'center',
                 flexDirection: { xs: 'column', sm: 'column', md: 'column', lg: 'row' }
             }}>
-                <Text veryLarge bold>Sessões</Text>
+                <Text veryLarge bold>Sessões ({consultionList?.length})</Text>
                 <Box sx={{ display: 'flex', justifyContent: 'start', gap: 2, alignItems: 'center', flexDirection: 'row' }}>
                     <TextInput placeholder="Pesquisar por paciente" name='filterData' type="search"
                         onChange={(event) => setFilterData(event.target.value)} value={filterData}
