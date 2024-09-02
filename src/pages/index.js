@@ -164,9 +164,8 @@ function Home() {
    const handleEvents = async () => {
       try {
          setLoading(true)
-         console.log(user?.perfil)
          const perfil = user?.perfil?.includes('profissional') ? 'profissional' : 'paciente'
-         const response = await api.get(`/event/${perfil}/agenda/${user?.id}`)
+         const response = await api.get(`/event/${perfil}/agenda/${user?.id}`) 
          const { data } = response
          if (data) {
             const eventsMap = data?.map((event) => ({
