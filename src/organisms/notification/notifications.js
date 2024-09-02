@@ -116,7 +116,18 @@ export const Notifications = ({ showNotification = false, setShowNotification })
             <div ref={containerRef}>
                 {showNotification &&
 
-                    <ContentContainer style={{ position: 'absolute', zIndex: 99999, right: 30, top: 45, width: 415, maxHeight: 600, overflowY: 'auto', padding: 2, display: 'flex', flexDirection: 'column' }}>
+                    <ContentContainer style={{
+                        position: 'absolute',
+                        zIndex: 99999,
+                        right: { xs: -70, sm: 0, md: 0, lg: 30 },
+                        top: 45,
+                        width: { xs: 380, sm: '100%', md: '100%', lg: 415 },
+                        maxHeight: 600,
+                        overflowY: 'auto',
+                        padding: 2,
+                        display: 'flex',
+                        flexDirection: 'column'
+                    }}>
 
                         <Box>
                             <Text bold>Notificações</Text>
@@ -220,15 +231,15 @@ export const Notifications = ({ showNotification = false, setShowNotification })
                                                 left: -5
                                             }} />}
                                         <Box sx={{ display: 'flex', gap: 1.75, }}>
-                                            <Avatar src={item?.imagem || item?.location|| ''} sx={{
-                                                height: { xs: '100%', sm: 45, md: 45, lg: 60 },
-                                                width: { xs: '100%', sm: 45, md: 45, lg: 60 },
+                                            <Avatar src={item?.imagem || item?.location || ''} sx={{
+                                                height: { xs: '20px', sm: 45, md: 45, lg: 60 },
+                                                width: { xs: '20px', sm: 45, md: 45, lg: 60 },
                                             }} variant="rounded"
                                             />
                                             <Box sx={{ display: 'flex', gap: 0.5, flexDirection: 'column', flex: 1 }}>
                                                 <Text small bold>{item?.titulo}</Text>
                                                 <Text small>{item?.menssagem}</Text>
-                                               {item?.id_path && <Text bold small>id: {item?.id_path}</Text>}
+                                                {item?.id_path && <Text bold small>id: {item?.id_path}</Text>}
                                                 <Box sx={{ display: 'flex', gap: 1 }}>
                                                     <Text style={{ color: '#606060', marginTop: 2 }} xsmall>{formatTimeAgo(item?.dt_criacao, true)}</Text>
                                                     {vizualized ?

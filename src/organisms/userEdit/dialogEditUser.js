@@ -190,23 +190,6 @@ export const DialogUserEdit = (props) => {
                </Box>
                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   <TextInput
-                     placeholder='Nome social'
-                     label='Nome social'
-                     onChange={handleChange}
-                     name='nome_social'
-                     value={userData?.nome_social || ''}
-                     margin='none'
-                     fullWidth
-                     sx={{ flex: 1 }}
-                  />
-                  <PhoneInputField
-                     // label='Telefone *'
-                     name='telefone'
-                     onChange={(phone) => setUserData({ ...userData, telefone: phone })}
-                     value={userData?.telefone}
-                     sx={{ flex: 1, }}
-                  />
-                  <TextInput
                      label='Senha Atual *'
                      placeholder='Senha Atual *'
                      onChange={handleChange}
