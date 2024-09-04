@@ -21,7 +21,7 @@ import 'react-calendar/dist/Calendar.css';
 
 export default function ListConsultions(props) {
     const [consultionList, setConsultion] = useState([])
-    const [filterData, setFilterData] = useState('')
+    const [filterData, setFilterData] = useState(null)
     const [perfil, setPerfil] = useState('todos')
     const { setLoading, colorPalette, menuItemsList, userPermissions, user } = useAppContext()
     const [loadingPayment, setLoadingPayment] = useState(false)
@@ -41,36 +41,33 @@ export default function ListConsultions(props) {
     const themeApp = useTheme()
     const mobile = useMediaQuery(themeApp.breakpoints.down('sm'))
     const isPartner = user?.perfil?.includes('parceiro')
-    const userFilterFunctions = {
-        ativo: (item) => filtersField?.status === 'todos' || item.ativo === filtersField?.status,
-        enrollmentSituation: (item) => filtersField?.enrollmentSituation === 'todos' || item?.total_matriculas_em_andamento === filtersField?.enrollmentSituation,
-        perfilUser: (item) => filtersField?.userPerfil === 'todos' || item?.perfil?.includes(filtersField?.userPerfil),
-    };
-
+    const isAdministrator = user?.perfil?.includes('administrador')
+    const isPacient = user?.perfil?.includes('paciente')
 
     const filter = (item) => {
         const normalizeString = (str) => {
             return str?.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
         };
 
-        let perfil;
+        let perfil = null
 
-        if (user?.perfil?.includes('administrador')) {
+        if (isAdministrator || isPartner) {
             perfil = item?.paciente;
         }
 
-        if (user?.perfil?.includes('paciente')) {
+        if (isPacient) {
             perfil = item?.profissional;
         }
 
         const normalizedFilterData = normalizeString(filterData);
+        const normalizedPerfil = normalizeString(perfil);
 
-        return (
-            // Object.values(userFilterFunctions).every(userFilterFunction => userFilterFunction(item)) &&
-            (
-                normalizeString(perfil)?.toLowerCase().includes(normalizedFilterData?.toLowerCase())
-            )
-        );
+        if (!filterData || filterData.trim() === '') {
+            return true
+        }
+
+        // Caso contrário, aplique o filtro normalmente
+        return normalizedPerfil?.toLowerCase().includes(normalizedFilterData?.toLowerCase());
     };
 
 
@@ -104,7 +101,7 @@ export default function ListConsultions(props) {
         try {
             let query;
             if (user?.perfil?.includes('administrador')) {
-                query = `/consultation/profissional/${user?.id}`;
+                query = `/consultation/profissional/${125}`;
             } else if (user?.perfil?.includes('paciente')) {
                 query = `/consultation/pacient/${user?.id}`;
             } else if (isPartner) {
@@ -203,7 +200,7 @@ export default function ListConsultions(props) {
                 display: 'flex', gap: 1, flex: 1, justifyContent: 'space-between', alignItems: 'center',
                 flexDirection: { xs: 'column', sm: 'column', md: 'column', lg: 'row' }
             }}>
-                <Text veryLarge bold>Sessões ({consultionList?.length})</Text>
+                <Text veryLarge bold>Sessões ({consultionList?.filter(filter)?.length})</Text>
                 <Box sx={{ display: 'flex', justifyContent: 'start', gap: 2, alignItems: 'center', flexDirection: 'row' }}>
                     <TextInput placeholder="Pesquisar por paciente" name='filterData' type="search"
                         onChange={(event) => setFilterData(event.target.value)} value={filterData}
@@ -253,18 +250,46 @@ export default function ListConsultions(props) {
                 </Box>
             </Box>
             {(consultionList?.length > 0 && consultionList) ?
-                <TableConsultion data={consultionList?.length > 0 ? consultionList?.slice(startIndex, endIndex) : []} setConsultion={setConsultion}
-                    callBack={() => {
-                        getConsultion()
-                        setLoadingPayment({ active: false, success: false, error: false, message: '' });
-                    }}
-                    setLoadingPayment={setLoadingPayment}
-                    loadingPayment={loadingPayment}
-                    filter={filter}
-                    setPage={setPage}
-                    setRowsPerPage={setRowsPerPage}
-                    page={page}
-                    rowsPerPage={rowsPerPage} />
+                <>
+                    <TableConsultion data={consultionList?.filter(filter).slice(startIndex, endIndex)} setConsultion={setConsultion}
+                        callBack={() => {
+                            getConsultion()
+                            setLoadingPayment({ active: false, success: false, error: false, message: '' });
+                        }}
+                        setLoadingPayment={setLoadingPayment}
+                        loadingPayment={loadingPayment}
+                        filter={filter}
+                        setPage={setPage}
+                        setRowsPerPage={setRowsPerPage}
+                        page={page}
+                        rowsPerPage={rowsPerPage} />
+
+                    <Box sx={{
+                        width: '100%', display: 'flex', gap: 2, backgroundColor: colorPalette?.secondary,
+                        padding: '5px 12px', justifyContent: 'space-between'
+                    }}>
+                        <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
+                            <Text light>Mostrando</Text>
+                            <Text bold light>{consultionList?.filter(filter)?.length || '0'}</Text>
+                            <Text light>de</Text>
+                            <Text bold light>{consultionList?.filter(filter)?.length || 0}</Text>
+                            <Text light>sessões</Text>
+                        </Box>
+                        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', padding: '15px 12px' }}>
+                            <TablePagination
+                                component="div"
+                                count={consultionList?.filter(filter)?.length}
+                                page={page}
+                                onPageChange={handleChangePage}
+                                rowsPerPage={rowsPerPage}
+                                onRowsPerPageChange={handleChangeRowsPerPage}
+                                style={{ color: colorPalette.textColor }} // Define a cor do texto
+                                backIconButtonProps={{ style: { color: colorPalette.textColor } }} // Define a cor do ícone de voltar
+                                nextIconButtonProps={{ style: { color: colorPalette.textColor } }} // Define a cor do ícone de avançar
+                            />
+                        </Box>
+                    </Box>
+                </>
                 :
                 <Text>Não exitem sessões agendadas.</Text>}
 
@@ -839,23 +864,6 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                             </TableBody>
 
                         </Table>
-                        <Box sx={{
-                            width: '100%', display: 'flex', gap: 2, backgroundColor: colorPalette?.secondary,
-                            padding: '5px 12px', justifyContent: 'space-between'
-                        }}>
-                            <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
-                                <Text light>Mostrando</Text>
-                                <Text bold light>{data?.filter(filter)?.length || '0'}</Text>
-                                <Text light>de</Text>
-                                <Text bold light>{data?.length || 0}</Text>
-                                <Text light>sessões</Text>
-                            </Box>
-                            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', padding: '15px 12px', width: '100%', justifyContent: 'space-between' }}>
-                                <PaginationTable data={data?.filter(filter)}
-                                    page={page} setPage={setPage} rowsPerPage={rowsPerPage} setRowsPerPage={setRowsPerPage}
-                                />
-                            </Box>
-                        </Box>
                     </TableContainer>
                 </ContentContainer >
             }
