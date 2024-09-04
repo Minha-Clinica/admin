@@ -424,8 +424,6 @@ export default function RegisterFromCompany({ companyCode }) {
                             </Box>
                         </Box>
                     </Box>
-
-                    <ConsultionsTable />
                 </>
             }
         </>
