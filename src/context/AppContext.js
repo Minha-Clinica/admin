@@ -40,7 +40,7 @@ export const AppProvider = ({ children }) => {
         textColor: ''
     })
     const [theme, setTheme] = useState(true)
-    const [showConfirmationDialog, setShowConfirmationDialog] = useReducer(reducer, { active: false, position: { left: 0, top: 0 }, acceptAction: () => { } })
+    const [showConfirmationDialog, setShowConfirmationDialog] = useReducer(reducer, { active: false, position: { left: 0, top: 0 }, acceptAction: () => { }, propsData: null })
     const [alertData, setAlertData] = useState({
         active: false,
         type: '',
@@ -328,6 +328,7 @@ export const AppProvider = ({ children }) => {
                 title={showConfirmationDialog.title}
                 message={showConfirmationDialog.message}
                 acceptAction={showConfirmationDialog.acceptAction}
+                propsData={showConfirmationDialog.propsData}
                 closeDialog={() => setShowConfirmationDialog({ active: false })}
                 colorPalette={colorPalette}
                 theme={theme}
@@ -414,7 +415,8 @@ export const ConfirmationModal = (props) => {
         acceptAction,
         closeDialog,
         colorPalette,
-        theme
+        theme,
+        propsData
     } = props;
 
     const [position, setPosition] = useState({});
@@ -466,7 +468,11 @@ export const ConfirmationModal = (props) => {
                 <Box sx={{ display: 'flex', gap: 1, width: '100%', justifyContent: 'center' }}>
                     <Button small='true' text='Prosseguir' style={{ height: 30, width: '100%' }} onClick={() => {
                         closeDialog();
-                        acceptAction();
+                        if (propsData) {
+                            acceptAction(propsData);
+                        } else {
+                            acceptAction();
+                        }
                     }} />
                     <Button small='true' secondary='true' style={{ height: 30, width: '100%' }} text='Cancelar' onClick={closeDialog} />
                 </Box>

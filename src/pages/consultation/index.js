@@ -209,7 +209,7 @@ export default function ListConsultions(props) {
                         onChange={(event) => setFilterData(event.target.value)} value={filterData}
                         InputProps={{
                             style: {
-                                width: mobile ? 'auto': 400,
+                                width: mobile ? 'auto' : 400,
                                 backgroundColor: colorPalette?.secondary,
                                 borderRadius: 16,
                                 borderColor: 'transparent', // Define a cor da borda como transparente
@@ -281,7 +281,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
     setLoadingPayment,
     loadingPayment
 }) => {
-    const { setLoading, colorPalette, mobile, user, alert } = useAppContext()
+    const { setLoading, colorPalette, mobile, user, alert, setShowConfirmationDialog } = useAppContext()
     const [dateSelected, setDateSelected] = useState({ day: '', hour: '', profissionalId: '', reserva_id: '', consultId: '' })
     const isProfissional = user?.perfil?.includes('profissional')
     const isPartner = user?.perfil?.includes('parceiro')
@@ -425,6 +425,55 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
     };
 
 
+    const handleDelete = async (consultId) => {
+        setLoadingPayment({ active: true, success: false, error: false, message: 'Excluíndo Sessão...' });
+
+        try {
+            console.log(consultId)
+            const response = await api.delete(`/consultation/delete/${consultId}`);
+
+            if (response.status === 200) {
+                setTimeout(() => {
+                    setLoadingPayment({
+                        active: true, success: true, error: false,
+                        message: `Sessão excluída com sucesso.`
+                    });
+                    setTimeout(async () => {
+                        setLoadingPayment({
+                            active: false, success: true, error: false,
+                            message: `Sessão excluída com sucesso.`
+                        });
+                        await callBack();
+                    }, 2000);
+                    alert.success('Sessão excluída.');
+                }, 2000);
+            } else {
+                setTimeout(() => {
+                    setLoadingPayment({
+                        active: true, success: false, error: true,
+                        message: `Ocorreu um erro ao excluir. Tente novamente mais tarde.`
+                    });
+                    setTimeout(async () => {
+                        setLoadingPayment({
+                            active: false, success: false, error: true,
+                            message: `Ocorreu um erro ao excluir. Tente novamente mais tarde.`
+                        });
+                    }, 3500);
+                    alert.error(`Ocorreu um erro ao excluir sessão.`);
+                }, 3500);
+            }
+        } catch (error) {
+            console.log(error);
+            return error;
+        } finally {
+            setTimeout(() => {
+                setLoadingPayment({ active: false, success: false, error: false, message: '' });
+            })
+        }
+    };
+
+
+
     const handleRescheduleppointment = async () => {
         setLoadingPayment({ active: true, success: false, error: false, message: 'Reagendando Sessões...' });
 
@@ -551,6 +600,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
         const horaFormatada = horaMoment.format("HH:mm");
         return horaFormatada
     }
+
 
     const getAvailableDays = (agendas) => {
         const uniqueDates = new Set(); // Usando um Set para armazenar as datas únicas
@@ -690,6 +740,17 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                                                                         <Switch checked={pay} name="pago" size="small" onChange={(e) => handleUpdateStatus(e, item?.id_consulta)} />
                                                                     }
                                                                     label="pago"
+                                                                />
+
+                                                                <Button delete text="Deletar" small
+                                                                    onClick={(event) => setShowConfirmationDialog({
+                                                                        active: true,
+                                                                        event,
+                                                                        acceptAction: handleDelete,
+                                                                        propsData: item?.id_consulta,
+                                                                        title: 'Excluir Sessão',
+                                                                        message: 'Tem certeza que deseja excluir a Sessão selecionada?'
+                                                                    })}
                                                                 />
                                                             </Box>
                                                         </TableCell>
