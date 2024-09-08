@@ -239,7 +239,7 @@ export const AppProvider = ({ children }) => {
         {
             text: 'Dashboard',
             icon: '/icons/dashboard_icon.png',
-            to: '/users/list',
+            to: '/dashboard',
             permissions: ['administrador'],
         },
         {
