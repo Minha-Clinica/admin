@@ -12,6 +12,8 @@ export default function Dashboard() {
     const [consultionsDetails, setConsultionsDetails] = useState({
         total: 0
     })
+    const [companiesDetails, setCompaniesDetails] = useState([])
+    const [sessionsDetailsStatus, setSessionsDetailsStatus] = useState({})
     const { colorPalette, user, setLoading } = useAppContext()
 
 
@@ -19,10 +21,12 @@ export default function Dashboard() {
         setLoading(true);
         try {
             const response = await api.get(`/consultation/profissional/next-sessions/${125}`);
-            const { data, consultionDetails } = response?.data;
-            console.log(response?.data)
+            const { data, consultionDetails, sessionsCompany, detailsStatusSessions } = response?.data;
 
             setConsultionsDetails(consultionDetails)
+            setCompaniesDetails(sessionsCompany)
+            setSessionsDetailsStatus(detailsStatusSessions)
+
             if (Array.isArray(data) && data.length > 0) {
                 const sortData = data?.sort((a, b) => new Date(b.data) - new Date(a.data))
                 setConsultion(sortData);
@@ -165,10 +169,17 @@ export default function Dashboard() {
                     <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column' }}>
                         <Box sx={{ display: 'flex', gap: 2 }}>
                             <Text bold>Concluídas</Text>
-                            <Text bold>20</Text>
+                            <Text bold>{sessionsDetailsStatus?.concluidas || 0}</Text>
                         </Box>
                         <Box sx={{ width: '100%', backgroundColor: colorPalette.primary, height: 8, width: '100%', borderRadius: 2 }}>
-                            <Box sx={{ display: 'flex', height: '100%', backgroundColor: 'green', width: '80%' }}></Box>
+                            <Box sx={{
+                                display: 'flex', height: '100%', backgroundColor: 'green',
+                                width: `${Math.min(
+                                    (sessionsDetailsStatus?.concluidas / (consultionsDetails?.totalSessions || 1)) * 100,
+                                    100
+                                )}%`,
+                                transition: 'width 0.5s ease-in-out',
+                            }}></Box>
                         </Box>
                     </Box>
                     <Divider />
@@ -176,31 +187,52 @@ export default function Dashboard() {
                     <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column' }}>
                         <Box sx={{ display: 'flex', gap: 2 }}>
                             <Text>Agendadas</Text>
-                            <Text>15</Text>
+                            <Text>{sessionsDetailsStatus?.agendadas || 0}</Text>
                         </Box>
                         <Box sx={{ width: '100%', backgroundColor: colorPalette.primary, height: 8, width: '100%', borderRadius: 2 }}>
-                            <Box sx={{ display: 'flex', height: '100%', backgroundColor: 'orange', width: '40%' }}></Box>
+                            <Box sx={{
+                                display: 'flex', height: '100%', backgroundColor: 'orange',
+                                width: `${Math.min(
+                                    (sessionsDetailsStatus?.agendadas / (consultionsDetails?.totalSessions || 1)) * 100,
+                                    100
+                                )}%`,
+                                transition: 'width 0.5s ease-in-out',
+                            }}></Box>
                         </Box>
                     </Box>
                     <Divider />
                     <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column' }}>
                         <Box sx={{ display: 'flex', gap: 2 }}>
                             <Text>Remarcadas</Text>
-                            <Text>6</Text>
+                            <Text>{sessionsDetailsStatus?.remarcadas || 0}</Text>
                         </Box>
                         <Box sx={{ width: '100%', backgroundColor: colorPalette.primary, height: 8, width: '100%', borderRadius: 2 }}>
-                            <Box sx={{ display: 'flex', height: '100%', backgroundColor: 'blue', width: '15%' }}></Box>
+                            <Box sx={{
+                                display: 'flex', height: '100%', backgroundColor: 'blue',
+                                width: `${Math.min(
+                                    (sessionsDetailsStatus?.remarcadas / (consultionsDetails?.totalSessions || 1)) * 100,
+                                    100
+                                )}%`,
+                                transition: 'width 0.5s ease-in-out',
+                            }}></Box>
                         </Box>
                     </Box>
                     <Divider />
 
                     <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column' }}>
                         <Box sx={{ display: 'flex', gap: 2 }}>
-                            <Text>Concluídas</Text>
-                            <Text>3</Text>
+                            <Text>Canceladas</Text>
+                            <Text>{sessionsDetailsStatus?.canceladas || 0}</Text>
                         </Box>
                         <Box sx={{ width: '100%', backgroundColor: colorPalette.primary, height: 8, width: '100%', borderRadius: 2 }}>
-                            <Box sx={{ display: 'flex', height: '100%', backgroundColor: 'red', width: '5%' }}></Box>
+                            <Box sx={{
+                                display: 'flex', height: '100%', backgroundColor: 'red',
+                                width: `${Math.min(
+                                    (sessionsDetailsStatus?.canceladas / (consultionsDetails?.totalSessions || 1)) * 100,
+                                    100
+                                )}%`,
+                                transition: 'width 0.5s ease-in-out',
+                            }}></Box>
                         </Box>
                     </Box>
                 </ContentContainer>
@@ -313,31 +345,36 @@ export default function Dashboard() {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                <TableRow>
-                                    <TableCell><Text light>Grupo UNUS</Text></TableCell>
-                                    <TableCell>
-                                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                                            <Box sx={{
-                                                ...styles.menuIcon,
-                                                width: 12,
-                                                height: 12,
-                                                backgroundImage: `url('/icons/consults.png')`,
-                                            }} />
-                                            <Text light>35</Text>
-                                        </Box>
-                                    </TableCell>
-                                    <TableCell>
-                                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                                            <Box sx={{
-                                                ...styles.menuIcon,
-                                                width: 12,
-                                                height: 12,
-                                                backgroundImage: `url('/icons/pacients.png')`,
-                                            }} />
-                                            <Text light>5</Text>
-                                        </Box>
-                                    </TableCell>
-                                </TableRow>
+                                {companiesDetails?.map((item, index) => {
+                                    return (
+                                        <TableRow key={index}>
+
+                                            <TableCell><Text light>{item?.empresa || 'Sessão Particular'}</Text></TableCell>
+                                            <TableCell>
+                                                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                                                    <Box sx={{
+                                                        ...styles.menuIcon,
+                                                        width: 12,
+                                                        height: 12,
+                                                        backgroundImage: `url('/icons/consults.png')`,
+                                                    }} />
+                                                    <Text light>{item?.consultas || 0}</Text>
+                                                </Box>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                                                    <Box sx={{
+                                                        ...styles.menuIcon,
+                                                        width: 12,
+                                                        height: 12,
+                                                        backgroundImage: `url('/icons/pacients.png')`,
+                                                    }} />
+                                                    <Text light>{item?.totalPacientes || 0}</Text>
+                                                </Box>
+                                            </TableCell>
+                                        </TableRow>
+                                    )
+                                })}
                             </TableBody>
                         </Table>
                     </TableContainer>
