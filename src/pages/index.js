@@ -165,7 +165,7 @@ function Home() {
       try {
          setLoading(true)
          const perfil = (user?.perfil?.includes('profissional') || user?.perfil?.includes('administrador')) ? 'profissional' : 'paciente'
-         const response = await api.get(`/event/${perfil}/agenda/${user?.id}`) 
+         const response = await api.get(`/event/${perfil}/agenda/${user?.id}`)
          const { data } = response
          if (data) {
             const eventsMap = data?.map((event) => ({
@@ -297,6 +297,30 @@ function Home() {
       }
    }
 
+   const handleReservationSession = async () => {
+
+      if (dateSelected?.reserva_id !== '' && dateSelected?.profissionalId === profissionalId && dateSelected?.userId !== '') {
+         if (dateSelected?.reserva_id === '') {
+            alert.info('Selecione um horário antes de continuar.')
+            return
+         }
+
+         try {
+            const verifyMaxSessions = await api.get(`/consultation/patients/verify-qnt-curr-month/${dateSelected?.userId || user?.id}`)
+            const { qntSessions } = verifyMaxSessions.data
+
+            if (user?.n_max_sessoes && user?.n_max_sessoes > 0 && qntSessions >= user?.n_max_sessoes) {
+               alert.info('Você já possúi já ultrapassou o limite de sessões por mês. Consulta o RH de sua empresa, ou entre em contato com o Suporte.')
+            } else {
+               router.push(`/searchProfissional/${dateSelected?.reserva_id}?professionalId=${dateSelected?.profissionalId}&userId=${dateSelected?.userId}`)
+            }
+         } catch (error) {
+            console.log(error)
+            alert.error('Ocorreu um erro ao agendar a sessão. Tente novamente mais tarde.')
+         }
+      }
+   }
+
    return (
       <>
          <Head>
@@ -311,7 +335,7 @@ function Home() {
             <Box sx={{
                display: 'flex', flexDirection: 'column', width: { xs: '100%', xm: '100%', md: '100%', lg: '100%' },
                transition: '0.5s', marginTop: { xs: 0, xm: 0, md: 10, lg: 10 },
-               padding: { xs:'10px 20px', xm:'10px 20px', md: '10px 50px', lg: '10px 50px' }
+               padding: { xs: '10px 20px', xm: '10px 20px', md: '10px 50px', lg: '10px 50px' }
             }}>
 
                {(isPacient || isPartner) &&
@@ -480,15 +504,7 @@ function Home() {
                                           cursor: 'pointer',
                                           transform: (dateSelected?.reserva_id !== '' && dateSelected?.profissionalId === profissionalId && dateSelected?.userId !== '') ? 'scale(1.1, 1.1)' : 'none'
                                        }
-                                    }} onClick={() => {
-                                       if (dateSelected?.reserva_id !== '' && dateSelected?.profissionalId === profissionalId && dateSelected?.userId !== '') {
-                                          if (dateSelected?.reserva_id === '') {
-                                             alert.info('Selecione um horário antes de continuar.')
-                                          } else {
-                                             router.push(`/searchProfissional/${dateSelected?.reserva_id}?professionalId=${dateSelected?.profissionalId}&userId=${dateSelected?.userId}`)
-                                          }
-                                       }
-                                    }}>
+                                    }} onClick={() => handleReservationSession()}>
                                        <Text bold style={{ color: '#fff' }}>Agendar</Text>
                                     </Box>
                                  </Box>

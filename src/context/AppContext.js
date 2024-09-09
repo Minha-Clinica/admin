@@ -71,8 +71,7 @@ export const AppProvider = ({ children }) => {
                     const response = await api.post('/user/loginToken')
                     const { data } = response;
                     const { userData, getPhoto, notificationsData } = data;
-                    console.log(userData)
-                    if (userData?.termUse) {
+                    if (userData?.termUse && Object.keys(userData.termUse).length > 0) {
                         setShowTerm(true)
                     }
                     if (userData) {
@@ -105,7 +104,7 @@ export const AppProvider = ({ children }) => {
                 const { data } = response;
                 const { userData, getPhoto, notificationsData } = data;
 
-                if (userData?.termUse) {
+                if (userData?.termUse && Object.keys(userData.termUse).length > 0) {
                     setShowTerm(true)
                 }
 

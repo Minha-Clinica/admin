@@ -66,6 +66,7 @@ export default function EditUser() {
     const [filesUser, setFilesUser] = useState([])
     const [isPermissionEdit, setIsPermissionEdit] = useState(false)
     const isAdministrador = user?.perfil?.includes('administrador');
+    const isPartner = user?.perfil?.includes(`parceiro`)
 
     const fetchPermissions = async () => {
         try {
@@ -441,6 +442,15 @@ export default function EditUser() {
                                     filterOpition="value"
                                     inputStyle={{ color: colorPalette.textColor, fontSize: '15px' }}
                                     clean={false}
+                                />}
+                                {(isAdministrador || isPartner) && <TextInput
+                                    placeholder='Escolha o número máximo de sesões permitidas por mês:'
+                                    name='n_max_sessoes'
+                                    type="number"
+                                    onChange={handleChange}
+                                    value={userData?.n_max_sessoes || ''}
+                                    label='Nº Máx Sessões/mês: *'
+                                    sx={{ flex: 1, }}
                                 />}
                             </Box>
                             <Box sx={{ ...styles.inputSection }}>
