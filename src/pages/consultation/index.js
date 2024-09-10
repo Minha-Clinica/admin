@@ -22,19 +22,23 @@ import 'react-calendar/dist/Calendar.css';
 export default function ListConsultions(props) {
     const [consultionList, setConsultion] = useState([])
     const [filterData, setFilterData] = useState(null)
-    const [perfil, setPerfil] = useState('todos')
+    const [showFilters, setShowFilters] = useState(false)
     const { setLoading, colorPalette, menuItemsList, userPermissions, user } = useAppContext()
     const [loadingPayment, setLoadingPayment] = useState(false)
     const [firstRender, setFirstRender] = useState(true)
+    const [loadingData, setLoadingData] = useState(true)
     const [filters, setFilters] = useState({
         filterName: 'nome',
         filterOrder: 'asc'
     })
     const [filtersField, setFiltersField] = useState({
-        enrollmentSituation: 'todos',
-        status: 'todos',
-        userPerfil: 'todos',
+        startDate: '',
+        endDate: '',
+        status_pagamento: '',
+        status: '',
+        paciente_id: '',
     })
+    const [users, setUsers] = useState([])
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const router = useRouter()
@@ -82,11 +86,36 @@ export default function ListConsultions(props) {
         }
     }
 
+    const getEmployees = async () => {
+        setLoading(true)
+        try {
+            const response = await api.get(`/users`)
+            const { data = [] } = response;
+            if (data?.length > 0) {
+                const employeeMap = data.map((item) => ({
+                    label: item.nome,
+                    value: item.id,
+                    email: item.email
+                })).sort((a, b) => a.label.localeCompare(b.label))
+                setUsers(employeeMap)
+            }
+        } catch (error) {
+            console.log(error)
+            return error
+        } finally {
+            setLoading(false)
+        }
+    }
+
     const pathname = router.pathname === '/' ? null : router.asPath.split('/')[2]
 
+
+
     useEffect(() => {
+        setLoading(true)
         getConsultion();
         fetchPermissions()
+        getEmployees()
         if (window.localStorage.getItem('list-consultion-filters')) {
             const admLocalStorage = JSON.parse(window.localStorage.getItem('list-consultion-filters') || null);
             setFilters({
@@ -94,10 +123,12 @@ export default function ListConsultions(props) {
                 filterOrder: admLocalStorage?.filterOrder
             })
         }
+        setLoading(false)
+
     }, []);
 
-    const getConsultion = async () => {
-        setLoading(true);
+    const getConsultion = async (filtersData) => {
+        setLoadingData(true);
         try {
             let query;
             if (user?.perfil?.includes('administrador')) {
@@ -110,9 +141,20 @@ export default function ListConsultions(props) {
                 throw new Error("Perfil de usuário não reconhecido");
             }
 
-            const response = await api.get(query);
+            const response = await api.get(query, {
+                params: {
+                    date: {
+                        startDate: filtersData ? filtersData.startDate : filtersField.startDate,
+                        endDate: filtersData ? filtersData.endDate : filtersField.endDate
+                    },
+                    status_pagamento: filtersData ? filtersData.status_pagamento : filtersField.status_pagamento,
+                    status: filtersData ? filtersData.status : filtersField.status,
+                    paciente_id: filtersData ? filtersData.paciente_id : filtersField.paciente_id
+                }
+            });
             const { data = [] } = response;
 
+            console.log(data)
             if (Array.isArray(data) && data.length > 0) {
                 setConsultion(data);
             } else {
@@ -122,11 +164,10 @@ export default function ListConsultions(props) {
             console.log(error);
             return error;
         } finally {
-            setLoading(false);
+            setLoadingData(false);
         }
     };
 
-    console.log('consultionList: ', consultionList)
 
 
     useEffect(() => {
@@ -165,35 +206,6 @@ export default function ListConsultions(props) {
     const startIndex = page * rowsPerPage;
     const endIndex = startIndex + rowsPerPage;
 
-    const column = [
-        { key: 'id', label: 'ID' },
-        { key: 'nome', avatar: true, label: 'Nome', avatarUrl: 'location', matricula: true },
-        { key: 'email', label: 'E-mail' },
-        { key: 'perfil', label: 'Perfil' },
-    ];
-
-    const listAtivo = [
-        { label: 'Todos', value: 'todos' },
-        { label: 'Ativo', value: 1 },
-        { label: 'Inativo', value: 0 },
-    ]
-
-    const listEnrollStatus = [
-        { label: 'Todos', value: 'todos' },
-        // { label: 'Pendente de nota', value: 'Pendente de nota' },
-        // { label: 'Reprovado', value: 'Reprovado' },
-        // { label: 'Aprovado - Pendente de pré-matrícula', value: 'Aprovado - Pendente de pré-matrícula' },
-        // { label: 'Aprovado - Em análise', value: 'Aprovado - Em análise' },
-        { label: 'Matriculado', value: 1 },
-    ]
-
-    const listUser = [
-        { label: 'Todos', value: 'todos' },
-        { label: 'Aluno', value: 'aluno' },
-        { label: 'Funcionário', value: 'funcionario' },
-        { label: 'Interessado', value: 'interessado' },
-    ]
-
     return (
         <Box sx={{ display: 'flex', gap: 4, flexDirection: 'column', paddingTop: 4, }}>
             <Box sx={{
@@ -222,7 +234,7 @@ export default function ListConsultions(props) {
                             opacity: 0.8,
                             cursor: 'pointer'
                         }
-                    }}>
+                    }} onClick={() => setShowFilters(!showFilters)}>
                         <Box sx={{
                             ...styles.menuIcon,
                             width: 20,
@@ -230,28 +242,117 @@ export default function ListConsultions(props) {
                             backgroundImage: `url('/icons/row.png')`,
                         }} />
                     </Box>
+                </Box>
+            </Box>
 
+            <Backdrop open={showFilters} sx={{ display: 'flex', justifyContent: 'flex-end', zIndex: 999 }}>
+                <Box sx={{ position: 'relative', display: 'flex', gap: 2, width: '400px', marginTop: 20, height: '100%', flexDirection: 'column', padding: '20px 25px', backgroundColor: colorPalette.secondary }}>
                     <Box sx={{
-                        display: { xs: 'none', sm: 'none', md: 'none', lg: 'flex' }, padding: '12px', borderRadius: 3, backgroundColor: colorPalette?.secondary,
-                        transition: '.3s', boxShadow: `rgba(149, 157, 165, 0.6) 0px 6px 24px`,
-                        "&:hover": {
-                            opacity: 0.8,
-                            cursor: 'pointer'
-                        }
+                        display: 'flex', flexDirection: 'row', gap: 2, alignItems: 'center', width: '100%', justifyContent: 'space-between',
+                        paddingTop: 2
                     }}>
+                        <Text bold={true} large={true}>Filtros</Text>
                         <Box sx={{
                             ...styles.menuIcon,
-                            width: 20,
-                            height: 20,
-                            backgroundImage: `url('/icons/menu-3.png')`,
+                            width: 17,
+                            height: 17,
+                            aspectRatio: '1/1',
+                            backgroundImage: `url(${icons.gray_close})`,
                             transition: '.3s',
+                            "&:hover": {
+                                opacity: 0.8,
+                                cursor: 'pointer'
+                            }
+                        }} onClick={() => setShowFilters(false)} />
+                    </Box>
+
+                    <Box sx={{ display: 'flex', gap: 3, flexDirection: 'column', marginTop: 5 }}>
+                        <Box sx={{ display: 'flex', gap: 1 }}>
+                            <TextInput label="De:" name='startDate' onChange={(e) => setFiltersField({ ...filtersField, startDate: e.target.value })} type="date" value={(filtersField?.startDate)?.split('T')[0] || ''} sx={{ flex: 1, }} />
+                            <TextInput label="Até:" name='endDate' onChange={(e) => setFiltersField({ ...filtersField, endDate: e.target.value })} type="date" value={(filtersField?.endDate)?.split('T')[0] || ''} sx={{ flex: 1, }} />
+                        </Box>
+
+                        <SelectList
+                            data={[
+                                { label: 'Agendado', value: 'Agendado' },
+                                { label: 'Concluído', value: 'Concluído' },
+                                { label: 'Remarcado', value: 'Remarcado' },
+                                { label: 'Cancelado', value: 'Cancelado' }
+                            ]}
+                            valueSelection={filtersField?.status}
+                            onSelect={(value) => setFiltersField({ ...filtersField, status: value })}
+                            title="Status: "
+                            filterOpition="value"
+                            inputStyle={{ color: colorPalette.textColor, fontSize: '15px' }}
+                        />
+
+                        {isAdministrator && <SelectList
+                            data={[
+                                { label: 'Pago', value: 'Pago' },
+                                { label: 'Não Pago', value: 'Não Pago' }
+                            ]}
+                            valueSelection={filtersField?.status_pagamento}
+                            onSelect={(value) => setFiltersField({ ...filtersField, status_pagamento: value })}
+                            title="Status de Pagamento: "
+                            filterOpition="value"
+                            inputStyle={{ color: colorPalette.textColor, fontSize: '15px' }}
+                        />}
+
+
+                        {(isAdministrator || isPartner) && <SelectList
+                            fullWidth
+                            autoComplete
+                            data={users}
+                            valueSelection={filtersField.paciente_id}
+                            onSelect={(value) => {
+                                setFiltersField({
+                                    ...filtersField, paciente_id: value,
+                                })
+                            }}
+                            title="Selecione um paciente:"
+                            filterOpition="value"
+                            inputStyle={{ color: colorPalette.textColor, fontSize: '15px' }}
+                        />}
+
+                    </Box>
+
+                    <Divider />
+                    <Box sx={{ display: 'flex', width: '350px', borderTop: `1px solid ${colorPalette.primary}`, position: 'fixed', bottom: 0, padding: '15px', gap: 2, justifyContent: 'space-between' }}>
+                        <Button secondary text="Limpar" style={{ width: `100%` }} onClick={() => {
+                            setFiltersField({
+                                startDate: '',
+                                endDate: '',
+                                status_pagamento: '',
+                                status: '',
+                                paciente_id: '',
+                            })
+                            getConsultion({
+                                startDate: '',
+                                endDate: '',
+                                status_pagamento: '',
+                                status: '',
+                                paciente_id: '',
+                            })
+                            setShowFilters(false)
+                        }} />
+                        <Button text="Filtrar" style={{ width: `100%` }} onClick={() => {
+                            getConsultion()
+                            setShowFilters(false)
                         }} />
                     </Box>
                 </Box>
-            </Box>
+            </Backdrop>
+
+
+            {loadingData &&
+                <Box sx={styles.loadingContainer}>
+                    <CircularProgress />
+                </Box>}
+
             {(consultionList?.length > 0 && consultionList) ?
-                <>
-                    <TableConsultion data={consultionList?.filter(filter).slice(startIndex, endIndex)} setConsultion={setConsultion}
+
+                <Box sx={{ opacity: loadingData ? 0.6 : 1 }}>
+                    <TableConsultion data={sortConsultion()?.filter(filter).slice(startIndex, endIndex)} setConsultion={setConsultion}
                         callBack={() => {
                             getConsultion()
                             setLoadingPayment({ active: false, success: false, error: false, message: '' });
@@ -262,7 +363,8 @@ export default function ListConsultions(props) {
                         setPage={setPage}
                         setRowsPerPage={setRowsPerPage}
                         page={page}
-                        rowsPerPage={rowsPerPage} />
+                        rowsPerPage={rowsPerPage} 
+                        filters={filters} onPress={(value) => setFilters(value)}/>
 
                     <Box sx={{
                         width: '100%', display: 'flex', gap: 2, backgroundColor: colorPalette?.secondary,
@@ -278,7 +380,7 @@ export default function ListConsultions(props) {
                         <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', padding: '15px 12px' }}>
                             <TablePagination
                                 component="div"
-                                count={consultionList?.filter(filter)?.length}
+                                count={sortConsultion()?.filter(filter)?.length}
                                 page={page}
                                 onPageChange={handleChangePage}
                                 rowsPerPage={rowsPerPage}
@@ -289,7 +391,7 @@ export default function ListConsultions(props) {
                             />
                         </Box>
                     </Box>
-                </>
+                </Box>
                 :
                 <Text>Não exitem sessões agendadas.</Text>}
 
@@ -310,6 +412,8 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
     const [dateSelected, setDateSelected] = useState({ day: '', hour: '', profissionalId: '', reserva_id: '', consultId: '' })
     const isProfissional = user?.perfil?.includes('profissional')
     const isPartner = user?.perfil?.includes('parceiro')
+    const isAdministrator = user?.perfil?.includes('adminstrador')
+
     const [showAgendas, setShowAgendas] = useState({ active: false, profissionalId: null, profissionalData: {}, consultionDate: '' })
 
     const getProfissionalAgendas = async ({ profissionalId, dateConsult, consultId = null }) => {
@@ -611,7 +715,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
 
     const statusColor = (data) => ((data === 'Agendado' && 'yellow') ||
         (data === 'Cancelada' && 'red') ||
-        (data === 'Atendida' && 'green') ||
+        (data === 'Concluído' && 'green') ||
         (data === 'Remarcada' && 'blue'))
 
 
@@ -700,7 +804,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                                                         padding: '15px 10px', textAlign: 'center',
                                                     }}>
                                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'flex-start' }}>
-                                                            <Avatar src={isPartner ? item?.url_foto_pac : item?.url_foto_prof || ''} sx={{
+                                                            <Avatar src={(isPartner || isAdministrator || isProfissional) ? item?.url_foto_pac : item?.url_foto_prof || ''} sx={{
                                                                 height: { xs: '100%', sm: 30, md: 30, lg: 30 },
                                                                 width: { xs: '100%', sm: 30, md: 30, lg: 30 },
                                                             }} variant="rounded"
@@ -762,7 +866,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                                                                 <Box sx={{ display: 'flex', height: '30px', width: '2px', backgroundColor: colorPalette?.primary }} />
                                                                 <FormControlLabel small
                                                                     control={
-                                                                        <Switch checked={pay} name="pago" size="small" onChange={(e) => handleUpdateStatus(e, item?.id_consulta)} />
+                                                                        <Switch checked={pay} name="pago" sx={{ zIndex: 9 }} size="small" onChange={(e) => handleUpdateStatus(e, item?.id_consulta)} />
                                                                     }
                                                                     label="pago"
                                                                 />
@@ -1189,15 +1293,15 @@ const CardConsultion = ({ data, isProfissional, isPartner, handleRowClick, handl
                                 </Box>
                                 {isProfissional ?
                                     <>
-                                        <Box sx={{ padding: '15px 0px', textAlign: 'center' }}>
+                                        <Box sx={{ padding: '15px 0px', textAlign: 'center', zIndex: 99 }}>
                                             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
                                                 <Button secondary text="prontuário" small
                                                     onClick={() => handleRowClick(item?.id_consulta)}
                                                 />
                                                 <Box sx={{ display: 'flex', height: '30px', width: '2px', backgroundColor: colorPalette?.primary }} />
-                                                <FormControlLabel small
+                                                <FormControlLabel small sx={{ zIndex: 99 }}
                                                     control={
-                                                        <Switch checked={pay} name="pago" size="small" onChange={(e) => handleUpdateStatus(e, item?.id_consulta)} />
+                                                        <Switch checked={pay} name="pago" sx={{ zIndex: 99 }} size="small" onChange={(e) => handleUpdateStatus(e, item?.id_consulta)} />
                                                     }
                                                     label="pago"
                                                 />
@@ -1299,4 +1403,16 @@ const styles = {
         width: 15,
         height: 15,
     },
+    loadingContainer: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        heigth: '100%',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        bottom: 0,
+        right: 0
+    }
 }
