@@ -862,6 +862,8 @@ export default function CalendarComponent() {
                                             ...eventData, usuario_agendado: value,
                                             email_agendado: users.filter(u => u.value === value).map(i => i.email)[0],
                                             nome_agendado: users.filter(u => u.value === value).map(i => i.label)[0],
+                                            disponivel: 1,
+                                            color: '#2E93EE'
                                         })
                                     }}
                                     title="Selecione um paciente:"
