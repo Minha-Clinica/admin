@@ -2813,7 +2813,7 @@ const Pagination = ({ setPage, page, pages }) => {
                     }
                 }}
                     onClick={() => setPage(item.page)}>
-                    <Text style={{ color: 'inherit' }}>{item.page}</Text>
+                    <Text small style={{ color: 'inherit' }}>{item.page}</Text>
                 </Box>
             ))}
         </Box>
@@ -2847,8 +2847,8 @@ const styles = {
         backgroundSize: 'cover',
         backgroundRepeat: 'no-repeat',
         backgroundPosition: 'center',
-        width: 20,
-        height: 20,
+        width: 16,
+        height: 16,
         display: 'flex',
         borderRadius: 2,
     },
