@@ -1,48 +1,64 @@
 import { useRouter } from "next/router";
-import { Box, Button, Divider, Text, TextInput } from "../../atoms";
+import {
+    Box, Button, Divider, Text, TextInput
+} from "../../atoms";
 import { useEffect, useState } from "react";
 import { useAppContext } from "../../context/AppContext";
 import { formatCPF } from "../../helpers";
 import { CheckBoxComponent, RadioItem } from "../../organisms";
 import { api } from "../../api/api";
+import { CircularProgress } from "@mui/material";
 
 export default function AnamneseForms() {
     const [page, setPage] = useState(1);
-    const [anamnese, setAnamnese] = useState({
-
-    })
-    const { colorPalette, user } = useAppContext()
+    const [loadingData, setLoadingData] = useState(false);
+    const [currentTable, setCurrentTable] = useState('anamnese_dados_pessoais');
+    const [anamnese, setAnamnese] = useState({})
+    const { colorPalette, user, alert } = useAppContext()
     const router = useRouter()
     const { id } = router.query;
 
     const pages = [
-        { page: 1, title: 'Dados Pessoais' },
-        { page: 2, title: 'Queixa Principal' },
-        { page: 3, title: 'Fase 01 - Vida Pessoal' },
-        { page: 4, title: 'Você sente frustração em relação a:' },
-        { page: 5, title: 'Vida Sexual' },
-        { page: 6, title: 'Fase 01 - Mental' },
-        { page: 7, title: 'Fase 02 - Mental' },
-        { page: 8, title: 'Fase 03 – Infância' },
-        { page: 9, title: 'Fase 04 – Emocional' },
+        { page: 1, title: 'Dados Pessoais', dataTable: 'anamnese_dados_pessoais' },
+        { page: 2, title: 'Queixa Principal', dataTable: 'anamnese_queixa_principal' },
+        { page: 3, title: 'Fase 01 - Vida Pessoal', dataTable: 'anamnese_vida_pessoal' },
+        { page: 4, title: 'Você sente frustração em relação a:', dataTable: 'anamnese_frustracao_relacionamentos' },
+        { page: 5, title: 'Vida Sexual', dataTable: 'anamnese_vida_sexual_anamnese' },
+        { page: 6, title: 'Fase 01 - Mental', dataTable: 'anamnese_fase_01_mental' },
+        { page: 7, title: 'Fase 02 - Mental', dataTable: 'anamnese_fase_02_mental' },
+        { page: 8, title: 'Fase 03 – Infância', dataTable: 'anamnese_fase_03_infancia' },
+        { page: 9, title: 'Fase 04 – Emocional', dataTable: 'anamnese_fase_04_emocional' },
     ]
 
     useEffect(() => {
-
-
-        if (!anamnese?.nome) {
-
-            setAnamnese({
-                ...anamnese,
-                email: user?.email,
-                nome: user?.nome,
-                nascimento: user?.nascimento,
-                cpf: user?.cpf,
-                celular: user?.telefone,
-                genero: user?.genero
-            })
-        }
+        handleGetAnamnese()
     }, [])
+
+    const handleGetAnamnese = async () => {
+        try {
+            setLoadingData(true)
+            const response = await api.get(`/anamnese/paciente/${id}`)
+            console.log(response)
+            if (response?.data) {
+                setAnamnese(response?.data)
+            } else {
+                setAnamnese({
+                    ...anamnese,
+                    email: user?.email,
+                    nome: user?.nome,
+                    nascimento: user?.nascimento,
+                    cpf: user?.cpf,
+                    celular: user?.telefone,
+                    genero: user?.genero
+                })
+            }
+
+        } catch (error) {
+            console.log(error)
+        } finally {
+            setLoadingData(false)
+        }
+    }
 
     const handleChange = (event) => {
 
@@ -58,25 +74,57 @@ export default function AnamneseForms() {
         }))
     }
 
-    const onBlurSaveForms = async (event) => {
+    const handleSendAnamnese = async () => {
         try {
-            const field = event.target.name
-            const value = event.target.value
-
-            if (field && value) {
-                await api.patch(`/user/anamnese/update/automatic/${id}`, { field, value })
-            }
+            setLoadingData(true)
+            alert.success('Anamnese enviada!')
+            router.push('/')
         } catch (error) {
             console.log(error)
+        } finally {
+            setLoadingData(false)
         }
     }
 
+    const handleBlur = async (event) => {
+        const { name, value } = event.target;
+        const table = currentTable; // Nome da tabela
+
+        try {
+            console.log('name: ', name)
+            console.log('value: ', value)
+            console.log('table: ', table)
+            await api.patch(`/anamnese/paciente/update/${anamnese?.id}`, { table, field: name, value });
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const handleBlurSelecAndRadio = async (name, value) => {
+        const table = currentTable; // Nome da tabela
+
+        try {
+            console.log('name: ', name)
+            console.log('value: ', value)
+            console.log('table: ', table)
+            await api.patch(`/anamnese/paciente/update/${anamnese?.id}`, { table, field: name, value });
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
 
     return (
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center', width: '100%' }}>
+        <Box sx={{ opacity: loadingData ? .6 : 1, display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center', width: '100%' }}>
             <Box>
                 <Text bold title>TERAPIA - Formulário de Anamnese</Text>
             </Box>
+
+            {loadingData &&
+                <Box sx={styles.loadingContainer}>
+                    <CircularProgress />
+                    <Text>Carregando anamnese...</Text>
+                </Box>}
 
             <Box>
                 {pages.map((item, index) => {
@@ -105,6 +153,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>E-mail *</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             placeholder='fulano@gmail.com'
                             name='email'
                             onChange={handleChange}
@@ -115,6 +164,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Nome Completo</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             placeholder='Nome Completo'
                             name='nome'
                             onChange={handleChange}
@@ -129,6 +179,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>CPF</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             placeholder='CPF'
                             name='cpf'
                             onChange={handleChange}
@@ -143,6 +194,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Data de Nascimento *</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             type="date"
                             name='nascimento'
                             onChange={handleChange}
@@ -163,10 +215,13 @@ export default function AnamneseForms() {
                                 { label: 'Viúvo(a)', value: 'Viúvo(a)' },
                                 { label: 'Divorciado(a)', value: 'Divorciado(a)' },
                             ]}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                estado_civil: value,
-                            })}
+                            onSelect={(value) => {
+                                setAnamnese({
+                                    ...anamnese,
+                                    estado_civil: value,
+                                })
+                                handleBlurSelecAndRadio('estado_civil', value)
+                            }}
                         />
                     </Box>
                     <Divider />
@@ -191,6 +246,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Endereço *</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='endereco'
                             onChange={handleChange}
                             value={anamnese?.endereco || ''}
@@ -203,6 +259,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>CEP *</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='cep'
                             onChange={handleChange}
                             value={anamnese?.cep || ''}
@@ -215,6 +272,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Bairro</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='bairro'
                             onChange={handleChange}
                             value={anamnese?.bairro || ''}
@@ -227,6 +285,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Cidade</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='cidade'
                             onChange={handleChange}
                             value={anamnese?.cidade || ''}
@@ -239,6 +298,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>UF *</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='uf'
                             onChange={handleChange}
                             value={anamnese?.uf || ''}
@@ -251,6 +311,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Celular *</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='celular'
                             onChange={handleChange}
                             value={anamnese?.celular || ''}
@@ -263,6 +324,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Nacionalidade *</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='nacionalidade'
                             onChange={handleChange}
                             value={anamnese?.nacionalidade || ''}
@@ -275,6 +337,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Profissão</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='profissao'
                             onChange={handleChange}
                             value={anamnese?.profissao || ''}
@@ -287,6 +350,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Cargo</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='religão'
                             onChange={handleChange}
                             value={anamnese?.religão || ''}
@@ -331,6 +395,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>O que te trouxe aqui?</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='queixa_principal'
                             onChange={handleChange}
                             value={anamnese?.queixa_principal || ''}
@@ -352,6 +417,7 @@ export default function AnamneseForms() {
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Por qual motivo é divorciado(a), e como se sente??</Text>
                                 <TextInput
+                                    onBlur={handleBlur}
                                     name='motivo_divorcio'
                                     onChange={handleChange}
                                     value={anamnese?.motivo_divorcio || ''}
@@ -365,6 +431,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Número de Filhos:</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             type="number"
                             name='numero_filhos'
                             onChange={handleChange}
@@ -379,6 +446,7 @@ export default function AnamneseForms() {
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Como é o seu relacionamento com seus filhos?</Text>
                                 <TextInput
+                                    onBlur={handleBlur}
                                     name='relacionamento_c_filho'
                                     onChange={handleChange}
                                     value={anamnese?.relacionamento_c_filho || ''}
@@ -393,6 +461,7 @@ export default function AnamneseForms() {
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light> Como você se sente em seu relacionamento com sua(eu) parceira(o)?</Text>
                                 <TextInput
+                                    onBlur={handleBlur}
                                     name='relacionamento_parceiro'
                                     onChange={handleChange}
                                     value={anamnese?.relacionamento_parceiro || ''}
@@ -405,6 +474,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Como você se sente em sua casa, dentro do contexto familiar?</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='sentimento_em_casa'
                             onChange={handleChange}
                             value={anamnese?.sentimento_em_casa || ''}
@@ -416,6 +486,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Como você se sente no seu trabalho?</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='sentimento_trabalho'
                             onChange={handleChange}
                             value={anamnese?.sentimento_trabalho || ''}
@@ -443,6 +514,7 @@ export default function AnamneseForms() {
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Por quê? (comente com base na resposta anterior)</Text>
                                 <TextInput
+                                    onBlur={handleBlur}
                                     name='just_contx_familiar'
                                     onChange={handleChange}
                                     value={anamnese?.just_contx_familiar || ''}
@@ -473,6 +545,7 @@ export default function AnamneseForms() {
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Por quê? (comente com base na resposta anterior)</Text>
                                 <TextInput
+                                    onBlur={handleBlur}
                                     name='just_contx_familiar'
                                     onChange={handleChange}
                                     value={anamnese?.just_contx_familiar || ''}
@@ -503,6 +576,7 @@ export default function AnamneseForms() {
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Por quê? (comente com base na resposta anterior)</Text>
                                 <TextInput
+                                    onBlur={handleBlur}
                                     name='just_contx_religioso'
                                     onChange={handleChange}
                                     value={anamnese?.just_contx_religioso || ''}
@@ -522,6 +596,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Pais?</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='frustracao_pais'
                             onChange={handleChange}
                             value={anamnese?.frustracao_pais || ''}
@@ -533,6 +608,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Irmãos?</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='frustracao_irmaos'
                             onChange={handleChange}
                             value={anamnese?.frustracao_irmaos || ''}
@@ -546,6 +622,7 @@ export default function AnamneseForms() {
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Filhos?</Text>
                                 <TextInput
+                                    onBlur={handleBlur}
                                     name='frustracao_filhos'
                                     onChange={handleChange}
                                     value={anamnese?.frustracao_filhos || ''}
@@ -559,6 +636,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Profissão?</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='frustracao_profissao'
                             onChange={handleChange}
                             value={anamnese?.frustracao_profissao || ''}
@@ -570,6 +648,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Colégio?</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='frustracao_colegio'
                             onChange={handleChange}
                             value={anamnese?.frustracao_colegio || ''}
@@ -582,6 +661,7 @@ export default function AnamneseForms() {
                         <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                             <Text light>Cônjuge?</Text>
                             <TextInput
+                                onBlur={handleBlur}
                                 name='frustracao_conguje'
                                 onChange={handleChange}
                                 value={anamnese?.frustracao_conguje || ''}
@@ -594,6 +674,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Vida Sexual?</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='frustracao_vida_sex'
                             onChange={handleChange}
                             value={anamnese?.frustracao_vida_sex || ''}
@@ -605,6 +686,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Por quê? (comente com base nas respostas anteriores)</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='frustracao_justificativa'
                             onChange={handleChange}
                             value={anamnese?.frustracao_justificativa || ''}
@@ -622,6 +704,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Iniciou sua vida sexual com que idade?</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='inicio_vida_sex'
                             onChange={handleChange}
                             value={anamnese?.inicio_vida_sex || ''}
@@ -650,6 +733,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Tem tido algum problema em relação ao sexo?</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='tem_probl_rela_sex'
                             onChange={handleChange}
                             value={anamnese?.tem_probl_rela_sex || ''}
@@ -715,6 +799,7 @@ export default function AnamneseForms() {
                         <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                             <Text light>Qual? (responda com base na pergunta anterior)</Text>
                             <TextInput
+                                onBlur={handleBlur}
                                 name='qual_trauma'
                                 onChange={handleChange}
                                 value={anamnese?.qual_trauma || ''}
@@ -743,6 +828,7 @@ export default function AnamneseForms() {
                         <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                             <Text light>Qual? (responda com base na pergunta anterior)</Text>
                             <TextInput
+                                onBlur={handleBlur}
                                 name='qual_trauma'
                                 onChange={handleChange}
                                 value={anamnese?.qual_trauma || ''}
@@ -771,6 +857,7 @@ export default function AnamneseForms() {
                         <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                             <Text light>De quê? (responda com base na pergunta anterior)</Text>
                             <TextInput
+                                onBlur={handleBlur}
                                 name='qual_medo'
                                 onChange={handleChange}
                                 value={anamnese?.qual_medo || ''}
@@ -799,6 +886,7 @@ export default function AnamneseForms() {
                         <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                             <Text light>Quais? (responda com base na pergunta anterior)</Text>
                             <TextInput
+                                onBlur={handleBlur}
                                 name='qual_medo'
                                 onChange={handleChange}
                                 value={anamnese?.qual_medo || ''}
@@ -827,6 +915,7 @@ export default function AnamneseForms() {
                         <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                             <Text light>Com que frequência? (responda com base na pergunta anterior)</Text>
                             <TextInput
+                                onBlur={handleBlur}
                                 name='freq_dor_cabeca'
                                 onChange={handleChange}
                                 value={anamnese?.freq_dor_cabeca || ''}
@@ -856,6 +945,7 @@ export default function AnamneseForms() {
                         <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                             <Text light>Com que frequência? (responda com base na pergunta anterior)</Text>
                             <TextInput
+                                onBlur={handleBlur}
                                 name='freq_insonia'
                                 onChange={handleChange}
                                 value={anamnese?.freq_insonia || ''}
@@ -885,6 +975,7 @@ export default function AnamneseForms() {
                         <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                             <Text light>Quais? (responda com base na pergunta anterior)</Text>
                             <TextInput
+                                onBlur={handleBlur}
                                 name='quais_ideias_suicidas'
                                 onChange={handleChange}
                                 value={anamnese?.quais_ideias_suicidas || ''}
@@ -914,6 +1005,7 @@ export default function AnamneseForms() {
                         <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                             <Text light>Com que frequência? (responda com base na pergunta anterior)</Text>
                             <TextInput
+                                onBlur={handleBlur}
                                 name='freq_bebidas_alcoolicas'
                                 onChange={handleChange}
                                 value={anamnese?.freq_bebidas_alcoolicas || ''}
@@ -962,6 +1054,7 @@ export default function AnamneseForms() {
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Quantas semanas? (responda com base na pergunta anterior)</Text>
                                 <TextInput
+                                    onBlur={handleBlur}
                                     name='semanas_gravidez'
                                     onChange={handleChange}
                                     value={anamnese?.semanas_gravidez || ''}
@@ -1008,6 +1101,7 @@ export default function AnamneseForms() {
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Qual? (responda com base na pergunta anterior)</Text>
                                 <TextInput
+                                    onBlur={handleBlur}
                                     name='qual_medicacao'
                                     onChange={handleChange}
                                     value={anamnese?.qual_medicacao || ''}
@@ -1040,6 +1134,7 @@ export default function AnamneseForms() {
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Foi diagnosticado(a)?</Text>
                                 <TextInput
+                                    onBlur={handleBlur}
                                     name='diag_psiq_psicolog'
                                     onChange={handleChange}
                                     value={anamnese?.diag_psiq_psicolog || ''}
@@ -1053,6 +1148,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Qual a quantidade de amigos que você tem?</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='qnt_amigos'
                             onChange={handleChange}
                             value={anamnese?.qnt_amigos || ''}
@@ -1064,6 +1160,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Qual seu passatempo preferido?</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='qual_passatempo'
                             onChange={handleChange}
                             value={anamnese?.qual_passatempo || ''}
@@ -1075,6 +1172,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Qual a principal a crença que as pessoas possuem em relação a você que mais se repete?</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='crenca_rel_a_voce'
                             onChange={handleChange}
                             value={anamnese?.crenca_rel_a_voce || ''}
@@ -1103,6 +1201,7 @@ export default function AnamneseForms() {
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Por quê?</Text>
                                 <TextInput
+                                    onBlur={handleBlur}
                                     name='pq_consid_feliz'
                                     onChange={handleChange}
                                     value={anamnese?.pq_consid_feliz || ''}
@@ -1116,6 +1215,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Se você pudesse mudar alguma coisa em você, no seu modo de ser, ou agir, ou no seu comportamento atual, o que mudaria?</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='oq_mudaria_em_vc'
                             onChange={handleChange}
                             value={anamnese?.oq_mudaria_em_vc || ''}
@@ -1128,6 +1228,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Defina o que é a vida em apenas uma frase.</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='oq_a_vida_e'
                             onChange={handleChange}
                             value={anamnese?.oq_a_vida_e || ''}
@@ -1163,6 +1264,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Quais exatamente? (responda com base na pergunta anterior)</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='quais_pensamentos'
                             onChange={handleChange}
                             value={anamnese?.quais_pensamentos || ''}
@@ -1191,6 +1293,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Quais exatamente? (responda com base na pergunta anterior)</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='quais_pensamentos_aparencia'
                             onChange={handleChange}
                             value={anamnese?.quais_pensamentos_aparencia || ''}
@@ -1218,6 +1321,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Quais exatamente? (responda com base na pergunta anterior)</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='quais_pensamentos_profiss'
                             onChange={handleChange}
                             value={anamnese?.quais_pensamentos_profiss || ''}
@@ -1245,6 +1349,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Quais exatamente? (responda com base na pergunta anterior)</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='quais_pensamentos_vida_sex'
                             onChange={handleChange}
                             value={anamnese?.quais_pensamentos_vida_sex || ''}
@@ -1272,6 +1377,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Quais exatamente? (responda com base na pergunta anterior)</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='quais_pensamentos_passado'
                             onChange={handleChange}
                             value={anamnese?.quais_pensamentos_passado || ''}
@@ -1299,6 +1405,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Quais exatamente? (responda com base na pergunta anterior)</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='quais_pensamentos_futuro'
                             onChange={handleChange}
                             value={anamnese?.quais_pensamentos_futuro || ''}
@@ -1310,6 +1417,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Qual sua visão sobre você</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='visao_sobre_voce'
                             onChange={handleChange}
                             value={anamnese?.visao_sobre_voce || ''}
@@ -1347,6 +1455,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Pai</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='relacao_mae'
                             onChange={handleChange}
                             value={anamnese?.relacao_mae || ''}
@@ -1359,6 +1468,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Mãe</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='relacao_pai'
                             onChange={handleChange}
                             value={anamnese?.relacao_pai || ''}
@@ -1421,6 +1531,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Como? (responda com base na pergunta anterior)</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='como_pais_mais_bravo'
                             onChange={handleChange}
                             value={anamnese?.como_pais_mais_bravo || ''}
@@ -1447,6 +1558,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Algum comentário? (responda com base na pergunta anterior)</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='pais_usavam_beb_drog_coment'
                             onChange={handleChange}
                             value={anamnese?.pais_usavam_beb_drog_coment || ''}
@@ -1479,6 +1591,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Por quê? (responda com base na pergunta anterior)</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='justific_relac_pais'
                             onChange={handleChange}
                             value={anamnese?.justific_relac_pais || ''}
@@ -1490,6 +1603,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Quais os aspectos deste relacionamento que se assemelham, ou se repetem em sua vida hoje?</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='aspect_rel_pais_repetem'
                             onChange={handleChange}
                             value={anamnese?.aspect_rel_pais_repetem || ''}
@@ -1502,6 +1616,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Quais as características deste relacionamento, que você se mantém determinado(a) a não repetir?</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='caracteris_rel_pais_repetem'
                             onChange={handleChange}
                             value={anamnese?.caracteris_rel_pais_repetem || ''}
@@ -1513,6 +1628,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Por quê? (responda com base na pergunta anterior)</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='just_caracteris_rel_pais_repetem'
                             onChange={handleChange}
                             value={anamnese?.just_caracteris_rel_pais_repetem || ''}
@@ -1524,6 +1640,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Quanto ao relacionamento de seus pais, responda: Qual a crença que você adquiriu em relação a relacionamentos?</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='crenca_adq_rel_pais_repetem'
                             onChange={handleChange}
                             value={anamnese?.crenca_adq_rel_pais_repetem || ''}
@@ -1554,6 +1671,7 @@ export default function AnamneseForms() {
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Quais? (responda com base na pergunta anterior)</Text>
                                 <TextInput
+                                    onBlur={handleBlur}
                                     name='oq_fazia_algo_desegradavel_inf'
                                     onChange={handleChange}
                                     value={anamnese?.fazia_algo_desegradavel_inf || ''}
@@ -1585,6 +1703,7 @@ export default function AnamneseForms() {
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Quais? (responda com base na pergunta anterior)</Text>
                                 <TextInput
+                                    onBlur={handleBlur}
                                     name='oq_magoou_infancia'
                                     onChange={handleChange}
                                     value={anamnese?.oq_magoou_infancia || ''}
@@ -1617,6 +1736,7 @@ export default function AnamneseForms() {
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Quais? (responda com base na pergunta anterior)</Text>
                                 <TextInput
+                                    onBlur={handleBlur}
                                     name='quais_perdas_famil_infancia'
                                     onChange={handleChange}
                                     value={anamnese?.quais_perdas_famil_infancia || ''}
@@ -1630,6 +1750,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>O que te faz sentir tristeza ao relembrar do passado?</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='tristeza_passado'
                             onChange={handleChange}
                             value={anamnese?.tristeza_passado || ''}
@@ -1641,6 +1762,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Quando criança tinha medo de quê?</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='do_q_tinha_medo_infancia'
                             onChange={handleChange}
                             value={anamnese?.do_q_tinha_medo_infancia || ''}
@@ -1652,6 +1774,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Dormia com a luz acesa ou apagada?</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='dormia_com_a_luz'
                             onChange={handleChange}
                             value={anamnese?.dormia_com_a_luz || ''}
@@ -1706,6 +1829,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Qual a filosofia de sua família em relação ao sucesso profissional?</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='filos_familia_sucess_profissional'
                             onChange={handleChange}
                             value={anamnese?.filos_familia_sucess_profissional || ''}
@@ -1717,6 +1841,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Qual a filosofia de sua família em relação ao dinheiro?</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='filos_familia_relac_dinheiro'
                             onChange={handleChange}
                             value={anamnese?.filos_familia_relac_dinheiro || ''}
@@ -1728,6 +1853,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Qual a filosofia de sua família em relação ao amor?</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='filos_familia_relac_amor'
                             onChange={handleChange}
                             value={anamnese?.filos_familia_relac_amor || ''}
@@ -1739,6 +1865,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Qual a filosofia de sua família em relação ao sexo?</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='filos_familia_relac_sex'
                             onChange={handleChange}
                             value={anamnese?.filos_familia_relac_sex || ''}
@@ -1751,6 +1878,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>O que era para você, ser um bom(boa) menino(a)? Descreva.</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='descr_bom_menino'
                             onChange={handleChange}
                             value={anamnese?.descr_bom_menino || ''}
@@ -1763,6 +1891,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Como você deveria agir, ou ser para ser amado(a)?</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='como_agir_p_ser_amado'
                             onChange={handleChange}
                             value={anamnese?.como_agir_p_ser_amado || ''}
@@ -1792,6 +1921,7 @@ export default function AnamneseForms() {
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Quantos? (responda com base na pergunta anterior)</Text>
                                 <TextInput
+                                    onBlur={handleBlur}
                                     name='qnt_irmaos'
                                     onChange={handleChange}
                                     value={anamnese?.qnt_irmaos || ''}
@@ -1803,6 +1933,7 @@ export default function AnamneseForms() {
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Como é sua relação com eles?</Text>
                                 <TextInput
+                                    onBlur={handleBlur}
                                     name='relac_c_irmaos'
                                     onChange={handleChange}
                                     value={anamnese?.relac_c_irmaos || ''}
@@ -1815,6 +1946,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Você foi uma criança introvertida ou extrovertida?</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='introvertido_ou_extrovertido'
                             onChange={handleChange}
                             value={anamnese?.introvertido_ou_extrovertido || ''}
@@ -1827,6 +1959,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Havia dificuldades de relacionamentos com os colegas do colégio? Se sim, cite-os</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='dificul_rel_colegas'
                             onChange={handleChange}
                             value={anamnese?.dificul_rel_colegas || ''}
@@ -1839,6 +1972,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Quais eram seus maiores medos na infância?</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='maiores_medos_infanc'
                             onChange={handleChange}
                             value={anamnese?.maiores_medos_infanc || ''}
@@ -1851,6 +1985,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Relate algum fato marcante em sua infância</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='relato_fato_marcante_infanc'
                             onChange={handleChange}
                             value={anamnese?.relato_fato_marcante_infanc || ''}
@@ -1871,6 +2006,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Quais são seus maiores medos hoje?</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='maiores_medos_hoje'
                             onChange={handleChange}
                             value={anamnese?.maiores_medos_hoje || ''}
@@ -1882,6 +2018,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>O que você pensa a seu respeito?</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='pensamento_ao_seu_respeito'
                             onChange={handleChange}
                             value={anamnese?.pensamento_ao_seu_respeito || ''}
@@ -1894,6 +2031,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Como foi o seu primeiro relacionamento amoroso?</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='primeiro_rel_amoroso'
                             onChange={handleChange}
                             value={anamnese?.primeiro_rel_amoroso || ''}
@@ -1923,6 +2061,7 @@ export default function AnamneseForms() {
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Qual o ganho secundário? O que "ganhava" com isso? (responda com base na pergunta anterior)</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='ganho_secund_c_papel'
                             onChange={handleChange}
                             value={anamnese?.ganho_secund_c_papel || ''}
@@ -1936,6 +2075,7 @@ export default function AnamneseForms() {
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Em quais situações você desempenha o papel de vítima?</Text>
                                 <TextInput
+                                    onBlur={handleBlur}
                                     name='primeiro_rel_amoroso'
                                     onChange={handleChange}
                                     value={anamnese?.primeiro_rel_amoroso || ''}
@@ -1951,6 +2091,7 @@ export default function AnamneseForms() {
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Em quais situações você desempenha o papel de responsável?</Text>
                                 <TextInput
+                                    onBlur={handleBlur}
                                     name='primeiro_rel_amoroso'
                                     onChange={handleChange}
                                     value={anamnese?.primeiro_rel_amoroso || ''}
@@ -2003,6 +2144,7 @@ export default function AnamneseForms() {
                         <Text light>OU</Text>
                         <Text light>Quem é o culpado por seus problemas pessoais?</Text>
                         <TextInput
+                            onBlur={handleBlur}
                             name='quem_e_culpado_punido'
                             onChange={handleChange}
                             value={anamnese?.quem_e_culpado_punido || ''}
@@ -2035,6 +2177,7 @@ export default function AnamneseForms() {
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>De que maneira? (responda com base na pergunta anterior)</Text>
                                 <TextInput
+                                    onBlur={handleBlur}
                                     name='pressionado_de_q_forma'
                                     onChange={handleChange}
                                     value={anamnese?.pressionado_de_q_forma || ''}
@@ -2087,6 +2230,7 @@ export default function AnamneseForms() {
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Por quê? (responda com base na pergunta anterior)</Text>
                                 <TextInput
+                                    onBlur={handleBlur}
                                     name='porq_sente_inferior'
                                     onChange={handleChange}
                                     value={anamnese?.porq_sente_inferior || ''}
@@ -2160,6 +2304,7 @@ export default function AnamneseForms() {
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>O que exatamente? (responda com base na pergunta anterior)</Text>
                                 <TextInput
+                                    onBlur={handleBlur}
                                     name='oq_sente_culpado'
                                     onChange={handleChange}
                                     value={anamnese?.oq_sente_culpado || ''}
@@ -2769,18 +2914,18 @@ export default function AnamneseForms() {
                     <Divider />
 
                     <Box sx={{ display: 'flex', width: '100%', justifyContent: 'flex-end' }}>
-                        <Button text="Enviar" style={{ width: 120 }} />
+                        <Button text="Enviar" style={{ width: 120 }} onClick={() => handleSendAnamnese()} />
                     </Box>
 
                 </Box>
             }
 
-            <Pagination setPage={setPage} page={page} pages={pages} />
+            <Pagination setPage={setPage} page={page} pages={pages} setCurrentTable={setCurrentTable} />
         </Box>
     )
 }
 
-const Pagination = ({ setPage, page, pages }) => {
+const Pagination = ({ setPage, page, pages, setCurrentTable }) => {
 
     const { colorPalette } = useAppContext()
 
@@ -2791,7 +2936,10 @@ const Pagination = ({ setPage, page, pages }) => {
             opacity: page === 1 ? .4 : 1
         }} onClick={() => {
             if (page !== 1) {
-                setPage(page - 1)
+                let currPage = page - 1
+                let currTable = pages.filter(pg => pg.page === currPage).map(pg => pg.table)[0]
+                setPage(currPage)
+                setCurrentTable(currTable)
             }
         }}>
             <Box sx={{
@@ -2812,7 +2960,10 @@ const Pagination = ({ setPage, page, pages }) => {
                         cursor: 'pointer'
                     }
                 }}
-                    onClick={() => setPage(item.page)}>
+                    onClick={() => {
+                        setPage(item.page)
+                        setCurrentTable(item.table)
+                    }}>
                     <Text small style={{ color: 'inherit' }}>{item.page}</Text>
                 </Box>
             ))}
@@ -2822,7 +2973,10 @@ const Pagination = ({ setPage, page, pages }) => {
             opacity: page >= (pages.length) ? .4 : 1
         }} onClick={() => {
             if (page <= (pages.length - 1)) {
-                setPage(page + 1)
+                let currPage = page + 1
+                let currTable = pages.filter(pg => pg.page === currPage).map(pg => pg.table)[0]
+                setPage(currPage)
+                setCurrentTable(currTable)
             }
         }}>
             <Box sx={{
@@ -2862,5 +3016,19 @@ const styles = {
             opacity: .8,
             cursor: 'pointer'
         }
+    },
+    loadingContainer: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'column',
+        gap: 2,
+        width: '100%',
+        heigth: '100%',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        bottom: 0,
+        right: 0
     }
 }
