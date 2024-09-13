@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
-import { Box, Divider, Text, TextInput } from "../../atoms";
-import { useState } from "react";
+import { Box, Button, Divider, Text, TextInput } from "../../atoms";
+import { useEffect, useState } from "react";
 import { useAppContext } from "../../context/AppContext";
 import { formatCPF } from "../../helpers";
 import { CheckBoxComponent, RadioItem } from "../../organisms";
@@ -8,8 +8,10 @@ import { api } from "../../api/api";
 
 export default function AnamneseForms() {
     const [page, setPage] = useState(1);
-    const [anamnese, setAnamnese] = useState({})
-    const { colorPalette } = useAppContext()
+    const [anamnese, setAnamnese] = useState({
+
+    })
+    const { colorPalette, user } = useAppContext()
     const router = useRouter()
     const { id } = router.query;
 
@@ -24,6 +26,23 @@ export default function AnamneseForms() {
         { page: 8, title: 'Fase 03 – Infância' },
         { page: 9, title: 'Fase 04 – Emocional' },
     ]
+
+    useEffect(() => {
+
+
+        if (!anamnese?.nome) {
+
+            setAnamnese({
+                ...anamnese,
+                email: user?.email,
+                nome: user?.nome,
+                nascimento: user?.nascimento,
+                cpf: user?.cpf,
+                celular: user?.telefone,
+                genero: user?.genero
+            })
+        }
+    }, [])
 
     const handleChange = (event) => {
 
@@ -290,10 +309,14 @@ export default function AnamneseForms() {
                                 { label: 'Doutorado', value: 'Doutorado' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                escolaridade: value,
-                            })}
+                            onSelect={(value) => {
+                                if (value) {
+                                    setAnamnese({
+                                        ...anamnese,
+                                        escolaridade: value,
+                                    })
+                                }
+                            }}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -1840,10 +1863,915 @@ export default function AnamneseForms() {
             }
             {
                 page === 9 &&
-                <Box>
-                    <TextInput />
-                    <TextInput />
-                    <TextInput />
+                <Box sx={{
+                    display: 'flex', gap: 2, padding: '15px', backgroundColor: colorPalette.secondary, borderRadius: 2,
+                    boxShadow: `rgba(149, 157, 165, 0.6) 0px 6px 24px`, flexDirection: 'column', width: { xs: '100%', xm: '100%', md: `100%`, lg: 600 }
+                }}>
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Quais são seus maiores medos hoje?</Text>
+                        <TextInput
+                            name='maiores_medos_hoje'
+                            onChange={handleChange}
+                            value={anamnese?.maiores_medos_hoje || ''}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>O que você pensa a seu respeito?</Text>
+                        <TextInput
+                            name='pensamento_ao_seu_respeito'
+                            onChange={handleChange}
+                            value={anamnese?.pensamento_ao_seu_respeito || ''}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Como foi o seu primeiro relacionamento amoroso?</Text>
+                        <TextInput
+                            name='primeiro_rel_amoroso'
+                            onChange={handleChange}
+                            value={anamnese?.primeiro_rel_amoroso || ''}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Se você avaliasse sua atuação na vida, qual papel que mais caberia a você hoje?</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.qual_seu_papel_hj}
+                            boxGroup={[
+                                { label: 'Vítima', value: 'Vítima' },
+                                { label: 'Responsável', value: 'Responsável' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                qual_seu_papel_hj: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Qual o ganho secundário? O que "ganhava" com isso? (responda com base na pergunta anterior)</Text>
+                        <TextInput
+                            name='ganho_secund_c_papel'
+                            onChange={handleChange}
+                            value={anamnese?.ganho_secund_c_papel || ''}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+                    {anamnese?.qual_seu_papel_hj === 'Vítima' &&
+                        <>
+                            <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                                <Text light>Em quais situações você desempenha o papel de vítima?</Text>
+                                <TextInput
+                                    name='primeiro_rel_amoroso'
+                                    onChange={handleChange}
+                                    value={anamnese?.primeiro_rel_amoroso || ''}
+                                    sx={{ flex: 1, }}
+                                />
+                            </Box>
+                            <Divider />
+                        </>
+                    }
+
+                    {anamnese?.qual_seu_papel_hj === 'Responsável' &&
+                        <>
+                            <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                                <Text light>Em quais situações você desempenha o papel de responsável?</Text>
+                                <TextInput
+                                    name='primeiro_rel_amoroso'
+                                    onChange={handleChange}
+                                    value={anamnese?.primeiro_rel_amoroso || ''}
+                                    sx={{ flex: 1, }}
+                                />
+                            </Box>
+                            <Divider />
+                        </>
+                    }
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Você se considera:</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.se_considera}
+                            boxGroup={[
+                                { label: 'Vitorioso(a)', value: 'Vitorioso(a)' },
+                                { label: 'Derrotado(a)', value: 'Derrotado(a)' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                se_considera: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Nos relacionamentos e na vida, você prefere ser:</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.prefere_no_rel_da_vida}
+                            boxGroup={[
+                                { label: 'Dominante', value: 'Dominante' },
+                                { label: 'Submisso', value: 'Submisso' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                prefere_no_rel_da_vida: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Quem deve ser punido por problemas que ocorrem com você?</Text>
+                        <Text light>OU</Text>
+                        <Text light>Quem é o culpado por seus problemas pessoais?</Text>
+                        <TextInput
+                            name='quem_e_culpado_punido'
+                            onChange={handleChange}
+                            value={anamnese?.quem_e_culpado_punido || ''}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Sente-se de alguma forma pressionado(a) na atualidade?</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.sente_pressionado}
+                            boxGroup={[
+                                { label: 'Sim', value: 'Sim' },
+                                { label: 'Não', value: 'Não' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                sente_pressionado: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+                    {anamnese?.sente_pressionado === 'Sim' &&
+                        <>
+                            <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                                <Text light>De que maneira? (responda com base na pergunta anterior)</Text>
+                                <TextInput
+                                    name='pressionado_de_q_forma'
+                                    onChange={handleChange}
+                                    value={anamnese?.pressionado_de_q_forma || ''}
+                                    sx={{ flex: 1, }}
+                                />
+                            </Box>
+                            <Divider />
+                        </>
+                    }
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Você se acha uma pessoa controladora?</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.controladora}
+                            boxGroup={[
+                                { label: 'Sim', value: 'Sim' },
+                                { label: 'Não', value: 'Não' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                controladora: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Sente-se de alguma forma inferior aos outros?</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.sente_inferior_a_outros}
+                            boxGroup={[
+                                { label: 'Sim', value: 'Sim' },
+                                { label: 'Não', value: 'Não' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                sente_inferior_a_outros: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+                    {anamnese?.sente_inferior_a_outros === 'Sim' &&
+                        <>
+                            <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                                <Text light>Por quê? (responda com base na pergunta anterior)</Text>
+                                <TextInput
+                                    name='porq_sente_inferior'
+                                    onChange={handleChange}
+                                    value={anamnese?.porq_sente_inferior || ''}
+                                    sx={{ flex: 1, }}
+                                />
+                            </Box>
+                            <Divider />
+                        </>
+                    }
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Dúvida de sua própria capacidade?</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.duvida_propria_capac}
+                            boxGroup={[
+                                { label: 'Sim', value: 'Sim' },
+                                { label: 'Não', value: 'Não' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                duvida_propria_capac: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Você é audacioso(a), corre atrás de suas metas, ou é autoprotetor(a), preferindo se poupar dos eventuais riscos?</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.audacioso_ou_autoprotetor}
+                            boxGroup={[
+                                { label: 'Audacioso(a)', value: 'Audacioso(a)' },
+                                { label: 'Autoprotetor(a)', value: 'Autoprotetor(a)' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                audacioso_ou_autoprotetor: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Existe algo que o(a) faz sentir-se culpado(a)?</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.algo_q_sente_culpado}
+                            boxGroup={[
+                                { label: 'Sim', value: 'Sim' },
+                                { label: 'Não', value: 'Não' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                algo_q_sente_culpado: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+
+                    {anamnese?.algo_q_sente_culpado === 'Sim' &&
+                        <>
+                            <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                                <Text light>O que exatamente? (responda com base na pergunta anterior)</Text>
+                                <TextInput
+                                    name='oq_sente_culpado'
+                                    onChange={handleChange}
+                                    value={anamnese?.oq_sente_culpado || ''}
+                                    sx={{ flex: 1, }}
+                                />
+                            </Box>
+                            <Divider />
+                        </>
+                    }
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text bold>Quais os sentimentos mais comuns em você hoje?</Text>
+                    </Box>
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Raiva</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.sentimento_raiva}
+                            boxGroup={[
+                                { label: 'Muita Intensidade', value: 'Muita Intensidade' },
+                                { label: 'Média Intensidade', value: 'Média Intensidade' },
+                                { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                sentimento_raiva: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Medo de algo concreto</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.sentimento_medo_concreto}
+                            boxGroup={[
+                                { label: 'Muita Intensidade', value: 'Muita Intensidade' },
+                                { label: 'Média Intensidade', value: 'Média Intensidade' },
+                                { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                sentimento_medo_concreto: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Medos vagos</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.sentimento_medos_vagos}
+                            boxGroup={[
+                                { label: 'Muita Intensidade', value: 'Muita Intensidade' },
+                                { label: 'Média Intensidade', value: 'Média Intensidade' },
+                                { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                sentimento_medos_vagos: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Culpa</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.sentimento_culpa}
+                            boxGroup={[
+                                { label: 'Muita Intensidade', value: 'Muita Intensidade' },
+                                { label: 'Média Intensidade', value: 'Média Intensidade' },
+                                { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                sentimento_culpa: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Revolta</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.sentimento_revolta}
+                            boxGroup={[
+                                { label: 'Muita Intensidade', value: 'Muita Intensidade' },
+                                { label: 'Média Intensidade', value: 'Média Intensidade' },
+                                { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                sentimento_revolta: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Medo de perder o controle</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.sentimento_perder_controle}
+                            boxGroup={[
+                                { label: 'Muita Intensidade', value: 'Muita Intensidade' },
+                                { label: 'Média Intensidade', value: 'Média Intensidade' },
+                                { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                sentimento_perder_controle: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Tristeza</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.sentimento_tristeza}
+                            boxGroup={[
+                                { label: 'Muita Intensidade', value: 'Muita Intensidade' },
+                                { label: 'Média Intensidade', value: 'Média Intensidade' },
+                                { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                sentimento_tristeza: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Mágoa</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.sentimento_magoa}
+                            boxGroup={[
+                                { label: 'Muita Intensidade', value: 'Muita Intensidade' },
+                                { label: 'Média Intensidade', value: 'Média Intensidade' },
+                                { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                sentimento_magoa: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Orgulho</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.sentimento_orgulho}
+                            boxGroup={[
+                                { label: 'Muita Intensidade', value: 'Muita Intensidade' },
+                                { label: 'Média Intensidade', value: 'Média Intensidade' },
+                                { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                sentimento_orgulho: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Ódio</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.sentimento_odio}
+                            boxGroup={[
+                                { label: 'Muita Intensidade', value: 'Muita Intensidade' },
+                                { label: 'Média Intensidade', value: 'Média Intensidade' },
+                                { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                sentimento_odio: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Egoísmo</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.sentimento_egoismo}
+                            boxGroup={[
+                                { label: 'Muita Intensidade', value: 'Muita Intensidade' },
+                                { label: 'Média Intensidade', value: 'Média Intensidade' },
+                                { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                sentimento_egoismo: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Ansiedade</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.sentimento_ansiedade}
+                            boxGroup={[
+                                { label: 'Muita Intensidade', value: 'Muita Intensidade' },
+                                { label: 'Média Intensidade', value: 'Média Intensidade' },
+                                { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                sentimento_ansiedade: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Intolerância</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.sentimento_intolerancia}
+                            boxGroup={[
+                                { label: 'Muita Intensidade', value: 'Muita Intensidade' },
+                                { label: 'Média Intensidade', value: 'Média Intensidade' },
+                                { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                sentimento_intolerancia: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Subsmissao</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.sentimento_submissao}
+                            boxGroup={[
+                                { label: 'Muita Intensidade', value: 'Muita Intensidade' },
+                                { label: 'Média Intensidade', value: 'Média Intensidade' },
+                                { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                sentimento_submissao: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Indecisão</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.sentimento_indecisao}
+                            boxGroup={[
+                                { label: 'Muita Intensidade', value: 'Muita Intensidade' },
+                                { label: 'Média Intensidade', value: 'Média Intensidade' },
+                                { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                sentimento_indecisao: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Desespero</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.sentimento_desespero}
+                            boxGroup={[
+                                { label: 'Muita Intensidade', value: 'Muita Intensidade' },
+                                { label: 'Média Intensidade', value: 'Média Intensidade' },
+                                { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                sentimento_desespero: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Desnânimo</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.sentimento_desanimo}
+                            boxGroup={[
+                                { label: 'Muita Intensidade', value: 'Muita Intensidade' },
+                                { label: 'Média Intensidade', value: 'Média Intensidade' },
+                                { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                sentimento_desanimo: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Covardia</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.sentimento_covardia}
+                            boxGroup={[
+                                { label: 'Muita Intensidade', value: 'Muita Intensidade' },
+                                { label: 'Média Intensidade', value: 'Média Intensidade' },
+                                { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                sentimento_covardia: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Egocentrismo</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.sentimento_egocentrismo}
+                            boxGroup={[
+                                { label: 'Muita Intensidade', value: 'Muita Intensidade' },
+                                { label: 'Média Intensidade', value: 'Média Intensidade' },
+                                { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                sentimento_egocentrismo: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Cíume</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.sentimento_ciume}
+                            boxGroup={[
+                                { label: 'Muita Intensidade', value: 'Muita Intensidade' },
+                                { label: 'Média Intensidade', value: 'Média Intensidade' },
+                                { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                sentimento_ciume: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Frustração</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.sentimento_frustracao}
+                            boxGroup={[
+                                { label: 'Muita Intensidade', value: 'Muita Intensidade' },
+                                { label: 'Média Intensidade', value: 'Média Intensidade' },
+                                { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                sentimento_frustracao: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Nostalgia</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.sentimento_nostalgia}
+                            boxGroup={[
+                                { label: 'Muita Intensidade', value: 'Muita Intensidade' },
+                                { label: 'Média Intensidade', value: 'Média Intensidade' },
+                                { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                sentimento_nostalgia: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Cansaço</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.sentimento_cansaco}
+                            boxGroup={[
+                                { label: 'Muita Intensidade', value: 'Muita Intensidade' },
+                                { label: 'Média Intensidade', value: 'Média Intensidade' },
+                                { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                sentimento_cansaco: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Impaciência</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.sentimento_impaciencia}
+                            boxGroup={[
+                                { label: 'Muita Intensidade', value: 'Muita Intensidade' },
+                                { label: 'Média Intensidade', value: 'Média Intensidade' },
+                                { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                sentimento_impaciencia: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Angústia</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.sentimento_angustia}
+                            boxGroup={[
+                                { label: 'Muita Intensidade', value: 'Muita Intensidade' },
+                                { label: 'Média Intensidade', value: 'Média Intensidade' },
+                                { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                sentimento_angustia: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Timidez</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.sentimento_timidez}
+                            boxGroup={[
+                                { label: 'Muita Intensidade', value: 'Muita Intensidade' },
+                                { label: 'Média Intensidade', value: 'Média Intensidade' },
+                                { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                sentimento_timidez: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Apatia</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.sentimento_apatia}
+                            boxGroup={[
+                                { label: 'Muita Intensidade', value: 'Muita Intensidade' },
+                                { label: 'Média Intensidade', value: 'Média Intensidade' },
+                                { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                sentimento_apatia: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Ressentimento</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.sentimento_ressentimento}
+                            boxGroup={[
+                                { label: 'Muita Intensidade', value: 'Muita Intensidade' },
+                                { label: 'Média Intensidade', value: 'Média Intensidade' },
+                                { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                sentimento_ressentimento: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Solidão</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.sentimento_solidao}
+                            boxGroup={[
+                                { label: 'Muita Intensidade', value: 'Muita Intensidade' },
+                                { label: 'Média Intensidade', value: 'Média Intensidade' },
+                                { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                sentimento_solidao: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+
+                    <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
+                        <Text light>Autoritarismo</Text>
+                        <CheckBoxComponent
+                            valueChecked={anamnese?.sentimento_autoritarismo}
+                            boxGroup={[
+                                { label: 'Muita Intensidade', value: 'Muita Intensidade' },
+                                { label: 'Média Intensidade', value: 'Média Intensidade' },
+                                { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
+                            ]}
+                            horizontal={false}
+                            onSelect={(value) => setAnamnese({
+                                ...anamnese,
+                                sentimento_autoritarismo: value,
+                            })}
+                            sx={{ flex: 1, }}
+                        />
+                    </Box>
+                    <Divider />
+
+                    <Box sx={{ display: 'flex', width: '100%', justifyContent: 'flex-end' }}>
+                        <Button text="Enviar" style={{ width: 120 }} />
+                    </Box>
+
                 </Box>
             }
 

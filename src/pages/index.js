@@ -107,14 +107,15 @@ function Home() {
          filter: true,
          text: 'Está com alguma dificuldade com o Painel? Peça ajuda ao suporte.'
       },
-      // {
-      //    id: '06', icon: '/icons/gateway.png',
-      //    route: `/anamnese/${user.id}`,
-      //    title: 'Continuar a preencher minha Anamnêse',
-      //    permissions: ['paciente'],
-      //    filter: true,
-      //    text: 'Não esqueça de preencher seu formulário.'
-      // },
+      {
+         id: '06', icon: '/icons/gateway.png',
+         route: `/anamnese/${user.id}`,
+         title: 'Continuar a preencher minha Anamnêse',
+         // permissions: ['paciente'],
+         permissions: ['administrador'],
+         filter: true,
+         text: 'Não esqueça de preencher seu formulário.'
+      },
       //Primeira fase
       // {
       //    id: '06', icon: '/icons/subscription.png',
