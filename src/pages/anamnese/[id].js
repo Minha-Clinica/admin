@@ -7,7 +7,7 @@ import { useAppContext } from "../../context/AppContext";
 import { formatCPF } from "../../helpers";
 import { CheckBoxComponent, RadioItem } from "../../organisms";
 import { api } from "../../api/api";
-import { CircularProgress } from "@mui/material";
+import { CircularProgress, keyframes } from "@mui/material";
 
 export default function AnamneseForms() {
     const [page, setPage] = useState(1);
@@ -19,16 +19,17 @@ export default function AnamneseForms() {
     const { id } = router.query;
 
     const pages = [
-        { page: 1, title: 'Dados Pessoais', dataTable: 'anamnese_dados_pessoais' },
-        { page: 2, title: 'Queixa Principal', dataTable: 'anamnese_queixa_principal' },
-        { page: 3, title: 'Fase 01 - Vida Pessoal', dataTable: 'anamnese_vida_pessoal' },
-        { page: 4, title: 'Você sente frustração em relação a:', dataTable: 'anamnese_frustracao_relacionamentos' },
-        { page: 5, title: 'Vida Sexual', dataTable: 'anamnese_vida_sexual_anamnese' },
-        { page: 6, title: 'Fase 01 - Mental', dataTable: 'anamnese_fase_01_mental' },
-        { page: 7, title: 'Fase 02 - Mental', dataTable: 'anamnese_fase_02_mental' },
-        { page: 8, title: 'Fase 03 – Infância', dataTable: 'anamnese_fase_03_infancia' },
-        { page: 9, title: 'Fase 04 – Emocional', dataTable: 'anamnese_fase_04_emocional' },
+        { page: 1, title: 'Dados Pessoais', table: 'anamnese_dados_pessoais' },
+        { page: 2, title: 'Queixa Principal', table: 'anamnese_queixa_principal' },
+        { page: 3, title: 'Fase 01 - Vida Pessoal', table: 'anamnese_vida_pessoal' },
+        { page: 4, title: 'Você sente frustração em relação a:', table: 'anamnese_frustracao_relacionamentos' },
+        { page: 5, title: 'Vida Sexual', table: 'anamnese_vida_sexual_anamnese' },
+        { page: 6, title: 'Fase 01 - Mental', table: 'anamnese_fase_01_mental' },
+        { page: 7, title: 'Fase 02 - Mental', table: 'anamnese_fase_02_mental' },
+        { page: 8, title: 'Fase 03 – Infância', table: 'anamnese_fase_03_infancia' },
+        { page: 9, title: 'Fase 04 – Emocional', table: 'anamnese_fase_04_emocional' },
     ]
+
 
     useEffect(() => {
         handleGetAnamnese()
@@ -38,7 +39,6 @@ export default function AnamneseForms() {
         try {
             setLoadingData(true)
             const response = await api.get(`/anamnese/paciente/${id}`)
-            console.log(response)
             if (response?.data) {
                 setAnamnese(response?.data)
             } else {
@@ -51,6 +51,18 @@ export default function AnamneseForms() {
                     celular: user?.telefone,
                     genero: user?.genero
                 })
+
+                let keys = [
+                    { name: 'email', value: user?.email },
+                    { name: 'nome', value: user?.nome },
+                    { name: 'nascimento', value: user?.nascimento },
+                    { name: 'cpf', value: user?.cpf },
+                    { name: 'celular', value: user?.celular },
+                    { name: 'genero', value: user?.genero }
+                ]
+                for (let keyData of keys) {
+                    handleBlurSelecAndRadio(keyData.name, keyData.value)
+                }
             }
 
         } catch (error) {
@@ -89,27 +101,29 @@ export default function AnamneseForms() {
     const handleBlur = async (event) => {
         const { name, value } = event.target;
         const table = currentTable; // Nome da tabela
-
-        try {
-            console.log('name: ', name)
-            console.log('value: ', value)
-            console.log('table: ', table)
-            await api.patch(`/anamnese/paciente/update/${anamnese?.id}`, { table, field: name, value });
-        } catch (error) {
-            console.log(error);
+        if (table) {
+            try {
+                await api.patch(`/anamnese/paciente/update/${anamnese?.id}`, { table, field: name, value });
+            } catch (error) {
+                console.log(error);
+            }
         }
     };
 
     const handleBlurSelecAndRadio = async (name, value) => {
-        const table = currentTable; // Nome da tabela
 
-        try {
-            console.log('name: ', name)
-            console.log('value: ', value)
-            console.log('table: ', table)
-            await api.patch(`/anamnese/paciente/update/${anamnese?.id}`, { table, field: name, value });
-        } catch (error) {
-            console.log(error);
+        setAnamnese((prevValues) => ({
+            ...prevValues,
+            [name]: value,
+        }))
+
+        const table = currentTable; // Nome da tabela
+        if (table) {
+            try {
+                await api.patch(`/anamnese/paciente/update/${anamnese?.id}`, { table, field: name, value });
+            } catch (error) {
+                console.log(error);
+            }
         }
     };
 
@@ -216,10 +230,6 @@ export default function AnamneseForms() {
                                 { label: 'Divorciado(a)', value: 'Divorciado(a)' },
                             ]}
                             onSelect={(value) => {
-                                setAnamnese({
-                                    ...anamnese,
-                                    estado_civil: value,
-                                })
                                 handleBlurSelecAndRadio('estado_civil', value)
                             }}
                         />
@@ -234,10 +244,9 @@ export default function AnamneseForms() {
                                 { label: 'Masculino', value: 'Masculino' },
                                 { label: 'Feminino', value: 'Feminino' }
                             ]}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                genero: value,
-                            })}
+                            onSelect={(value) => {
+                                handleBlurSelecAndRadio('genero', value)
+                            }}
                         />
                     </Box>
                     <Divider />
@@ -373,14 +382,7 @@ export default function AnamneseForms() {
                                 { label: 'Doutorado', value: 'Doutorado' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => {
-                                if (value) {
-                                    setAnamnese({
-                                        ...anamnese,
-                                        escolaridade: value,
-                                    })
-                                }
-                            }}
+                            onSelect={(value) => handleBlurSelecAndRadio('escolaridade', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -503,10 +505,7 @@ export default function AnamneseForms() {
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' }
                             ]}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                pertence_contx_familiar: value,
-                            })} />
+                            onSelect={(value) => handleBlurSelecAndRadio('pertence_contx_familiar', value)} />
                     </Box>
 
                     {anamnese?.pertence_contx_familiar !== '' &&
@@ -533,10 +532,7 @@ export default function AnamneseForms() {
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' }
                             ]}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                pertence_contx_social: value,
-                            })} />
+                            onSelect={(value) => handleBlurSelecAndRadio('pertence_contx_social', value)} />
                     </Box>
                     <Divider />
 
@@ -564,10 +560,7 @@ export default function AnamneseForms() {
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' }
                             ]}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                sent_contx_religioso: value,
-                            })} />
+                            onSelect={(value) => handleBlurSelecAndRadio('sent_contx_religioso', value)} />
                     </Box>
                     <Divider />
 
@@ -723,10 +716,7 @@ export default function AnamneseForms() {
                                 { label: 'Boa', value: 'Boa' },
                                 { label: 'Satisfátoria', value: 'Satisfátoria' }
                             ]}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                primaira_rel_sex: value,
-                            })} />
+                            onSelect={(value) => handleBlurSelecAndRadio('primaira_rel_sex', value)} />
                     </Box>
                     <Divider />
 
@@ -750,10 +740,7 @@ export default function AnamneseForms() {
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' }
                             ]}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                realizado_rela_sex: value,
-                            })} />
+                            onSelect={(value) => handleBlurSelecAndRadio('realizado_rela_sex', value)} />
                     </Box>
                     <Divider />
 
@@ -766,11 +753,7 @@ export default function AnamneseForms() {
                                 { label: 'Importante', value: 'Importante' },
                                 { label: 'Muito importante', value: 'Muito importante' }
                             ]}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                sexo_e_algo: value,
-                            })}
-                        />
+                            onSelect={(value) => handleBlurSelecAndRadio('sexo_e_algo', value)} />
                     </Box>
                     <Divider />
                 </Box>}
@@ -788,10 +771,7 @@ export default function AnamneseForms() {
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' }
                             ]}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                trauma: value,
-                            })} />
+                            onSelect={(value) => handleBlurSelecAndRadio('trauma', value)} />
                     </Box>
                     <Divider />
 
@@ -817,10 +797,7 @@ export default function AnamneseForms() {
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' }
                             ]}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                fobia: value,
-                            })} />
+                            onSelect={(value) => handleBlurSelecAndRadio('fobia', value)} />
                     </Box>
                     <Divider />
 
@@ -846,10 +823,7 @@ export default function AnamneseForms() {
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' }
                             ]}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                medo: value,
-                            })} />
+                            onSelect={(value) => handleBlurSelecAndRadio('medo', value)} />
                     </Box>
                     <Divider />
 
@@ -875,10 +849,7 @@ export default function AnamneseForms() {
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' }
                             ]}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                drogas: value,
-                            })} />
+                            onSelect={(value) => handleBlurSelecAndRadio('drogas', value)} />
                     </Box>
                     <Divider />
 
@@ -904,10 +875,7 @@ export default function AnamneseForms() {
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' }
                             ]}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                dor_cabeca: value,
-                            })} />
+                            onSelect={(value) => handleBlurSelecAndRadio('dor_cabeca', value)} />
                     </Box>
                     <Divider />
 
@@ -934,10 +902,7 @@ export default function AnamneseForms() {
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' }
                             ]}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                insonia: value,
-                            })} />
+                            onSelect={(value) => handleBlurSelecAndRadio('insonia', value)} />
                     </Box>
                     <Divider />
 
@@ -964,10 +929,7 @@ export default function AnamneseForms() {
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' }
                             ]}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                ideias_suicidas: value,
-                            })} />
+                            onSelect={(value) => handleBlurSelecAndRadio('ideias_suicidas', value)} />
                     </Box>
                     <Divider />
 
@@ -994,10 +956,7 @@ export default function AnamneseForms() {
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' }
                             ]}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                bebidas_alcoolicas: value,
-                            })} />
+                            onSelect={(value) => handleBlurSelecAndRadio('bebidas_alcoolicas', value)} />
                     </Box>
                     <Divider />
 
@@ -1024,10 +983,7 @@ export default function AnamneseForms() {
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' }
                             ]}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                fumante: value,
-                            })} />
+                            onSelect={(value) => handleBlurSelecAndRadio('fumante', value)} />
                     </Box>
                     <Divider />
                     {anamnese.genero === 'Feminino' &&
@@ -1040,10 +996,7 @@ export default function AnamneseForms() {
                                         { label: 'Sim', value: 'Sim' },
                                         { label: 'Não', value: 'Não' }
                                     ]}
-                                    onSelect={(value) => setAnamnese({
-                                        ...anamnese,
-                                        gravida: value,
-                                    })} />
+                                    onSelect={(value) => handleBlurSelecAndRadio('gravida', value)} />
                             </Box>
                             <Divider />
                         </>
@@ -1074,10 +1027,7 @@ export default function AnamneseForms() {
                                 { label: 'Médio', value: 'Médio' },
                                 { label: 'Baixo', value: 'Baixo' },
                             ]}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                nvl_estress: value,
-                            })} />
+                            onSelect={(value) => handleBlurSelecAndRadio('nvl_estress', value)} />
                     </Box>
                     <Divider />
 
@@ -1089,10 +1039,7 @@ export default function AnamneseForms() {
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' }
                             ]}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                tomando_medicacao: value,
-                            })} />
+                            onSelect={(value) => handleBlurSelecAndRadio('tomando_medicacao', value)} />
                     </Box>
                     <Divider />
 
@@ -1122,10 +1069,7 @@ export default function AnamneseForms() {
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' }
                             ]}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                consult_psicologo_psiq: value,
-                            })} />
+                            onSelect={(value) => handleBlurSelecAndRadio('consult_psicologo_psiq', value)} />
                     </Box>
                     <Divider />
 
@@ -1189,10 +1133,7 @@ export default function AnamneseForms() {
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' }
                             ]}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                considera_feliz: value,
-                            })} />
+                            onSelect={(value) => handleBlurSelecAndRadio('considera_feliz', value)} />
                     </Box>
                     <Divider />
 
@@ -1254,10 +1195,7 @@ export default function AnamneseForms() {
                                 { label: 'Negativos', value: 'Negativos' },
                                 { label: 'Ambos', value: 'Ambos' },
                             ]}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                tipo_pensamento: value,
-                            })} />
+                            onSelect={(value) => handleBlurSelecAndRadio('tipo_pensamento', value)} />
                     </Box>
                     <Divider />
 
@@ -1283,10 +1221,7 @@ export default function AnamneseForms() {
                                 { label: 'Negativos', value: 'Negativos' },
                                 { label: 'Ambos', value: 'Ambos' },
                             ]}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                pensamento_aparencia: value,
-                            })} />
+                            onSelect={(value) => handleBlurSelecAndRadio('pensamento_aparencia', value)} />
                     </Box>
                     <Divider />
 
@@ -1311,10 +1246,7 @@ export default function AnamneseForms() {
                                 { label: 'Negativos', value: 'Negativos' },
                                 { label: 'Ambos', value: 'Ambos' },
                             ]}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                pensamento_compet_profis: value,
-                            })} />
+                            onSelect={(value) => handleBlurSelecAndRadio('pensamento_compet_profis', value)} />
                     </Box>
                     <Divider />
 
@@ -1339,10 +1271,7 @@ export default function AnamneseForms() {
                                 { label: 'Negativos', value: 'Negativos' },
                                 { label: 'Ambos', value: 'Ambos' },
                             ]}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                pensamento_vida_sex: value,
-                            })} />
+                            onSelect={(value) => handleBlurSelecAndRadio('pensamento_vida_sex', value)} />
                     </Box>
                     <Divider />
 
@@ -1367,10 +1296,7 @@ export default function AnamneseForms() {
                                 { label: 'Negativos', value: 'Negativos' },
                                 { label: 'Ambos', value: 'Ambos' },
                             ]}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                pensamento_passado: value,
-                            })} />
+                            onSelect={(value) => handleBlurSelecAndRadio('pensamento_passado', value)} />
                     </Box>
                     <Divider />
 
@@ -1395,10 +1321,7 @@ export default function AnamneseForms() {
                                 { label: 'Negativos', value: 'Negativos' },
                                 { label: 'Ambos', value: 'Ambos' },
                             ]}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                pensamento_futuro: value,
-                            })} />
+                            onSelect={(value) => handleBlurSelecAndRadio('pensamento_futuro', value)} />
                     </Box>
                     <Divider />
 
@@ -1441,10 +1364,7 @@ export default function AnamneseForms() {
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' },
                             ]}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                criado_pais: value,
-                            })} />
+                            onSelect={(value) => handleBlurSelecAndRadio('criado_pais', value)} />
                     </Box>
                     <Divider />
 
@@ -1486,10 +1406,7 @@ export default function AnamneseForms() {
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' },
                             ]}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                pais_agressivos: value,
-                            })} />
+                            onSelect={(value) => handleBlurSelecAndRadio('pais_agressivos', value)} />
                     </Box>
                     <Divider />
 
@@ -1502,10 +1419,7 @@ export default function AnamneseForms() {
                                     { label: 'Sim', value: 'Sim' },
                                     { label: 'Não', value: 'Não' },
                                 ]}
-                                onSelect={(value) => setAnamnese({
-                                    ...anamnese,
-                                    _como_pais_agressivos: value,
-                                })} />
+                                onSelect={(value) => handleBlurSelecAndRadio('_como_pais_agressivos', value)} />
                         </Box>
                         <Divider />
                     </>}
@@ -1519,12 +1433,7 @@ export default function AnamneseForms() {
                                 { label: 'Mãe', value: 'Mãe' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                qual_pais_mais_bravo: value,
-                            })}
-                            sx={{ flex: 1, }}
-                        />
+                            onSelect={(value) => handleBlurSelecAndRadio('qual_pais_mais_bravo', value)} />
                     </Box>
                     <Divider />
 
@@ -1548,10 +1457,7 @@ export default function AnamneseForms() {
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' },
                             ]}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                pais_usavam_beb_drog: value,
-                            })} />
+                            onSelect={(value) => handleBlurSelecAndRadio('pais_usavam_beb_drog', value)} />
                     </Box>
                     <Divider />
 
@@ -1579,12 +1485,7 @@ export default function AnamneseForms() {
                                 { label: 'Péssimo', value: 'Péssimo' },
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                descr_relac_pais: value,
-                            })}
-                            sx={{ flex: 1, }}
-                        />
+                            onSelect={(value) => handleBlurSelecAndRadio('descr_relac_pais', value)} />
                     </Box>
                     <Divider />
 
@@ -1659,10 +1560,7 @@ export default function AnamneseForms() {
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' },
                             ]}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                algo_desegradavel_inf: value,
-                            })} />
+                            onSelect={(value) => handleBlurSelecAndRadio('algo_desegradavel_inf', value)} />
                     </Box>
                     <Divider />
 
@@ -1691,10 +1589,7 @@ export default function AnamneseForms() {
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' },
                             ]}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                magoa_na_infancia: value,
-                            })} />
+                            onSelect={(value) => handleBlurSelecAndRadio('magoa_na_infancia', value)} />
                     </Box>
                     <Divider />
 
@@ -1724,10 +1619,7 @@ export default function AnamneseForms() {
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' },
                             ]}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                perdas_famil_infancia: value,
-                            })} />
+                            onSelect={(value) => handleBlurSelecAndRadio('perdas_famil_infancia', value)} />
                     </Box>
                     <Divider />
 
@@ -1796,12 +1688,7 @@ export default function AnamneseForms() {
                                 { label: 'Péssimo', value: 'Péssimo' },
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                adolecencia: value,
-                            })}
-                            sx={{ flex: 1, }}
-                        />
+                            onSelect={(value) => handleBlurSelecAndRadio('adolecencia', value)} />
                     </Box>
                     <Divider />
 
@@ -1816,12 +1703,7 @@ export default function AnamneseForms() {
                                 { label: 'Mãe', value: 'Mãe' },
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                qual_pais_dificul_relac: value,
-                            })}
-                            sx={{ flex: 1, }}
-                        />
+                            onSelect={(value) => handleBlurSelecAndRadio('qual_pais_dificul_relac', value)} />
                     </Box>
                     <Divider />
 
@@ -1909,10 +1791,7 @@ export default function AnamneseForms() {
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' },
                             ]}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                tem_irmaos: value,
-                            })} />
+                            onSelect={(value) => handleBlurSelecAndRadio('tem_irmaos', value)} />
                     </Box>
                     <Divider />
 
@@ -2049,12 +1928,7 @@ export default function AnamneseForms() {
                                 { label: 'Responsável', value: 'Responsável' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                qual_seu_papel_hj: value,
-                            })}
-                            sx={{ flex: 1, }}
-                        />
+                            onSelect={(value) => handleBlurSelecAndRadio('qual_seu_papel_hj', value)} />
                     </Box>
                     <Divider />
 
@@ -2112,10 +1986,7 @@ export default function AnamneseForms() {
                                 { label: 'Derrotado(a)', value: 'Derrotado(a)' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                se_considera: value,
-                            })}
+                            onSelect={(value) => handleBlurSelecAndRadio('se_considera', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2130,10 +2001,7 @@ export default function AnamneseForms() {
                                 { label: 'Submisso', value: 'Submisso' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                prefere_no_rel_da_vida: value,
-                            })}
+                            onSelect={(value) => handleBlurSelecAndRadio('prefere_no_rel_da_vida', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2163,10 +2031,7 @@ export default function AnamneseForms() {
                                 { label: 'Não', value: 'Não' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                sente_pressionado: value,
-                            })}
+                            onSelect={(value) => handleBlurSelecAndRadio('sente_pressionado', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2198,10 +2063,7 @@ export default function AnamneseForms() {
                                 { label: 'Não', value: 'Não' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                controladora: value,
-                            })}
+                            onSelect={(value) => handleBlurSelecAndRadio('controladora', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2216,10 +2078,7 @@ export default function AnamneseForms() {
                                 { label: 'Não', value: 'Não' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                sente_inferior_a_outros: value,
-                            })}
+                            onSelect={(value) => handleBlurSelecAndRadio('sente_inferior_a_outros', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2251,10 +2110,7 @@ export default function AnamneseForms() {
                                 { label: 'Não', value: 'Não' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                duvida_propria_capac: value,
-                            })}
+                            onSelect={(value) => handleBlurSelecAndRadio('duvida_propria_capac', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2270,10 +2126,7 @@ export default function AnamneseForms() {
                                 { label: 'Autoprotetor(a)', value: 'Autoprotetor(a)' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                audacioso_ou_autoprotetor: value,
-                            })}
+                            onSelect={(value) => handleBlurSelecAndRadio('audacioso_ou_autoprotetor', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2289,10 +2142,7 @@ export default function AnamneseForms() {
                                 { label: 'Não', value: 'Não' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                algo_q_sente_culpado: value,
-                            })}
+                            onSelect={(value) => handleBlurSelecAndRadio('algo_q_sente_culpado', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2330,10 +2180,7 @@ export default function AnamneseForms() {
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                sentimento_raiva: value,
-                            })}
+                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_raiva', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2349,10 +2196,7 @@ export default function AnamneseForms() {
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                sentimento_medo_concreto: value,
-                            })}
+                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_medo_concreto', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2369,10 +2213,7 @@ export default function AnamneseForms() {
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                sentimento_medos_vagos: value,
-                            })}
+                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_medos_vagos', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2389,10 +2230,7 @@ export default function AnamneseForms() {
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                sentimento_culpa: value,
-                            })}
+                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_culpa', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2409,10 +2247,7 @@ export default function AnamneseForms() {
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                sentimento_revolta: value,
-                            })}
+                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_revolta', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2429,10 +2264,7 @@ export default function AnamneseForms() {
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                sentimento_perder_controle: value,
-                            })}
+                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_perder_controle', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2449,10 +2281,7 @@ export default function AnamneseForms() {
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                sentimento_tristeza: value,
-                            })}
+                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_tristeza', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2469,10 +2298,7 @@ export default function AnamneseForms() {
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                sentimento_magoa: value,
-                            })}
+                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_magoa', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2489,10 +2315,7 @@ export default function AnamneseForms() {
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                sentimento_orgulho: value,
-                            })}
+                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_orgulho', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2508,10 +2331,7 @@ export default function AnamneseForms() {
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                sentimento_odio: value,
-                            })}
+                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_odio', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2527,10 +2347,7 @@ export default function AnamneseForms() {
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                sentimento_egoismo: value,
-                            })}
+                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_egoismo', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2547,10 +2364,7 @@ export default function AnamneseForms() {
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                sentimento_ansiedade: value,
-                            })}
+                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_ansiedade', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2567,10 +2381,7 @@ export default function AnamneseForms() {
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                sentimento_intolerancia: value,
-                            })}
+                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_intolerancia', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2588,10 +2399,7 @@ export default function AnamneseForms() {
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                sentimento_submissao: value,
-                            })}
+                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_submissao', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2608,10 +2416,7 @@ export default function AnamneseForms() {
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                sentimento_indecisao: value,
-                            })}
+                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_indecisao', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2628,10 +2433,7 @@ export default function AnamneseForms() {
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                sentimento_desespero: value,
-                            })}
+                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_desespero', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2648,10 +2450,7 @@ export default function AnamneseForms() {
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                sentimento_desanimo: value,
-                            })}
+                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_desanimo', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2668,10 +2467,7 @@ export default function AnamneseForms() {
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                sentimento_covardia: value,
-                            })}
+                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_covardia', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2688,10 +2484,7 @@ export default function AnamneseForms() {
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                sentimento_egocentrismo: value,
-                            })}
+                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_egocentrismo', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2708,10 +2501,7 @@ export default function AnamneseForms() {
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                sentimento_ciume: value,
-                            })}
+                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_ciume', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2728,10 +2518,7 @@ export default function AnamneseForms() {
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                sentimento_frustracao: value,
-                            })}
+                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_frustracao', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2748,10 +2535,7 @@ export default function AnamneseForms() {
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                sentimento_nostalgia: value,
-                            })}
+                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_nostalgia', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2767,10 +2551,7 @@ export default function AnamneseForms() {
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                sentimento_cansaco: value,
-                            })}
+                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_cansaco', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2786,10 +2567,7 @@ export default function AnamneseForms() {
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                sentimento_impaciencia: value,
-                            })}
+                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_impaciencia', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2805,10 +2583,7 @@ export default function AnamneseForms() {
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                sentimento_angustia: value,
-                            })}
+                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_angustia', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2824,10 +2599,7 @@ export default function AnamneseForms() {
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                sentimento_timidez: value,
-                            })}
+                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_timidez', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2844,10 +2616,7 @@ export default function AnamneseForms() {
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                sentimento_apatia: value,
-                            })}
+                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_apatia', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2864,10 +2633,7 @@ export default function AnamneseForms() {
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                sentimento_ressentimento: value,
-                            })}
+                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_ressentimento', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2884,10 +2650,7 @@ export default function AnamneseForms() {
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                sentimento_solidao: value,
-                            })}
+                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_solidao', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2904,10 +2667,7 @@ export default function AnamneseForms() {
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => setAnamnese({
-                                ...anamnese,
-                                sentimento_autoritarismo: value,
-                            })}
+                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_autoritarismo', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2938,6 +2698,8 @@ const Pagination = ({ setPage, page, pages, setCurrentTable }) => {
             if (page !== 1) {
                 let currPage = page - 1
                 let currTable = pages.filter(pg => pg.page === currPage).map(pg => pg.table)[0]
+                console.log(currTable)
+                console.log(currPage)
                 setPage(currPage)
                 setCurrentTable(currTable)
             }
@@ -2963,6 +2725,7 @@ const Pagination = ({ setPage, page, pages, setCurrentTable }) => {
                     onClick={() => {
                         setPage(item.page)
                         setCurrentTable(item.table)
+                        console.log(item.table)
                     }}>
                     <Text small style={{ color: 'inherit' }}>{item.page}</Text>
                 </Box>

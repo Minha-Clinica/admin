@@ -84,6 +84,14 @@ function Home() {
          text: 'Vizualize os detalhes das sessões agendadas para seus colaboradores.'
       },
       {
+         id: '06', icon: '/icons/medical.png',
+         route: `/anamnese/${user.id}`,
+         title: 'Continuar a preencher minha Anamnêse',
+         permissions: ['paciente'],
+         filter: true,
+         text: 'Não esqueça de preencher seu formulário.'
+      },
+      {
          id: '02', icon: '/icons/technology.png',
          route: '/consultation',
          title: 'Minhas Sessões',
@@ -107,14 +115,6 @@ function Home() {
          filter: true,
          text: 'Está com alguma dificuldade com o Painel? Peça ajuda ao suporte.'
       },
-      // {
-      //    id: '06', icon: '/icons/gateway.png',
-      //    route: `/anamnese/${user.id}`,
-      //    title: 'Continuar a preencher minha Anamnêse',
-      //    permissions: ['paciente'],
-      //    filter: true,
-      //    text: 'Não esqueça de preencher seu formulário.'
-      // },
       //Primeira fase
       // {
       //    id: '06', icon: '/icons/subscription.png',
@@ -583,6 +583,7 @@ function Home() {
                                                       ...styles.menuIcon,
                                                       backgroundImage: `url(${item?.icon})`,
                                                       transition: '.3s',
+                                                      aspectRatio: '1/1',
                                                       width: 45, height: 45,
                                                       "&:hover": {
                                                          opacity: 0.8,
