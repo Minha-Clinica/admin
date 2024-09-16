@@ -368,7 +368,7 @@ export default function ListConsultions(props) {
 
                     <Box sx={{
                         width: '100%', display: 'flex', gap: 2, backgroundColor: colorPalette?.secondary,
-                        padding: '5px 12px', justifyContent: 'space-between'
+                        padding: '5px 12px', justifyContent: 'space-between', flexDirection:  { xs: 'column', sm: 'column', md: 'row', lg: 'row' }
                     }}>
                         <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
                             <Text light>Mostrando</Text>
@@ -745,7 +745,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
     return (
         <>
             {mobile ?
-                <CardConsultion data={data} isProfissional={isProfissional} isPartner={isPartner} handleRowClick={handleRowClick} handleUpdateStatus={handleUpdateStatus} />
+                <CardConsultion isAdministrator={isAdministrator} data={data} isProfissional={isProfissional} isPartner={isPartner} handleRowClick={handleRowClick} handleUpdateStatus={handleUpdateStatus} />
                 :
                 <ContentContainer sx={{ display: 'flex', width: '100%', padding: 0, backgroundColor: colorPalette.primary, boxShadow: 'none', borderRadius: 2 }}>
                     <TableContainer sx={{ borderRadius: '8px', overflow: 'auto', }}>
@@ -1195,12 +1195,12 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
     )
 }
 
-const CardConsultion = ({ data, isProfissional, isPartner, handleRowClick, handleUpdateStatus }) => {
+const CardConsultion = ({ data, isProfissional, isPartner, handleRowClick, handleUpdateStatus, isAdministrator }) => {
     const { colorPalette } = useAppContext()
 
     const statusColor = (data) => ((data === 'Agendado' && 'yellow') ||
         (data === 'Cancelada' && 'red') ||
-        (data === 'Atendida' && 'green') ||
+        (data === 'Concluído' && 'green') ||
         (data === 'Remarcada' && 'blue'))
 
     return (
@@ -1230,7 +1230,7 @@ const CardConsultion = ({ data, isProfissional, isPartner, handleRowClick, handl
                                         alignItems: 'start', gap: 2
                                     }}>
                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'flex-start' }}>
-                                            <Avatar src={isPartner ? item?.url_foto_pac : item?.url_foto_prof || ''} sx={{
+                                        <Avatar src={(isPartner || isAdministrator || isProfissional) ? item?.url_foto_pac : item?.url_foto_prof || ''} sx={{
                                                 height: { xs: 60, sm: 30, md: 30, lg: 30 },
                                                 width: { xs: 60, sm: 30, md: 30, lg: 30 },
                                             }} variant="rounded"
@@ -1256,7 +1256,7 @@ const CardConsultion = ({ data, isProfissional, isPartner, handleRowClick, handl
                                             padding: '15px 10px', textAlign: 'center',
                                         }}>
                                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'flex-start' }}>
-                                                <Avatar src={item?.url_foto_prof || ''} sx={{
+                                            <Avatar src={item?.url_foto_prof || ''} sx={{
                                                     height: { xs: 60, sm: 30, md: 30, lg: 30 },
                                                     width: { xs: 60, sm: 30, md: 30, lg: 30 },
                                                 }} variant="rounded"
