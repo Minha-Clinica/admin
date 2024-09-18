@@ -9,6 +9,7 @@ import { Paper, TableContainer, Table, TableHead, TableRow, TableCell, TableBody
 import { api } from "../../api/api"
 import { icons } from "../../organisms/layout/Colors"
 import { formatTimeStamp } from "../../helpers"
+import Link from "next/link"
 
 export default function ListPatients(props) {
     const [patientsList, setPatients] = useState([])
@@ -71,7 +72,7 @@ export default function ListPatients(props) {
     const getPatients = async () => {
         setLoading(true)
         try {
-            const response = await api.get(`/consultation/patients/profissional/${user?.id}`)
+            const response = await api.get(`/consultation/patients/profissional/125`)
             const { data = [] } = response;
             setPatients(data)
         } catch (error) {
@@ -152,7 +153,7 @@ export default function ListPatients(props) {
     return (
         <Box sx={{ display: 'flex', gap: 4, flexDirection: 'column', paddingTop: 4 }}>
             <Box sx={{ display: 'flex', gap: 1, flex: 1, justifyContent: 'space-between', alignItems: 'center' }}>
-                <Text veryLarge bold>Meus Pacientes</Text>
+                <Text veryLarge bold>Meus Pacientes ({patientsList?.filter(filter)?.length})</Text>
                 <Box sx={{ display: 'flex', justifyContent: 'start', gap: 2, alignItems: 'center', flexDirection: 'row' }}>
                     <TextInput placeholder="Pesquisar por paciente" name='filterData' type="search"
                         onChange={(event) => setFilterData(event.target.value)} value={filterData}
@@ -201,12 +202,26 @@ export default function ListPatients(props) {
                     </Box>
                 </Box>
             </Box>
-            <TableConsultion data={patientsList?.filter(filter)?.slice(startIndex, endIndex)}
-                filter={filter}
-                setPage={setPage}
-                setRowsPerPage={setRowsPerPage}
-                page={page}
-                rowsPerPage={rowsPerPage} />
+            <Box sx={{ display: 'flex', flexDirection: 'column', backgroundColor: colorPalette.secondary }}>
+                <TableConsultion data={patientsList?.filter(filter)?.slice(startIndex, endIndex)}
+                    filter={filter}
+                    setPage={setPage}
+                    setRowsPerPage={setRowsPerPage}
+                    page={page}
+                    rowsPerPage={rowsPerPage} />
+
+                <TablePagination
+                    component="div"
+                    count={patientsList?.filter(filter)?.length}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    rowsPerPage={rowsPerPage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                    style={{ color: colorPalette.textColor }} // Define a cor do texto
+                    backIconButtonProps={{ style: { color: colorPalette.textColor } }} // Define a cor do ícone de voltar
+                    nextIconButtonProps={{ style: { color: colorPalette.textColor } }} // Define a cor do ícone de avançar
+                />
+            </Box>
 
         </Box>
     )
@@ -338,7 +353,9 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { },
                                         </TableCell>
                                         <TableCell sx={{ padding: '15px 10px', textAlign: 'center' }}>
                                             <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
+                                                <Link href={`/users/${item?.paciente_id}`} target="_blank">
                                                 <Button secondary text="prontuário" small />
+                                                </Link>
                                             </Box>
                                         </TableCell>
                                     </TableRow>
@@ -348,23 +365,6 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { },
                         }
                     </TableBody>
                 </Table>
-                <Box sx={{
-                    width: '100%', display: 'flex', gap: 2, backgroundColor: colorPalette?.secondary,
-                    padding: '5px 12px', justifyContent: 'space-between'
-                }}>
-                    <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
-                        <Text light>Mostrando</Text>
-                        <Text bold light>{data?.filter(filter)?.length || '0'}</Text>
-                        <Text light>de</Text>
-                        <Text bold light>{data?.length || 0}</Text>
-                        <Text light>sessões</Text>
-                    </Box>
-                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', padding: '15px 12px', width: '100%', justifyContent: 'space-between' }}>
-                        <PaginationTable data={data?.filter(filter)}
-                            page={page} setPage={setPage} rowsPerPage={rowsPerPage} setRowsPerPage={setRowsPerPage}
-                        />
-                    </Box>
-                </Box>
             </TableContainer>
         </ContentContainer >
     )

@@ -149,7 +149,7 @@ export default function ListUsers(props) {
     return (
         <Box sx={{ display: 'flex', gap: 4, flexDirection: 'column', paddingTop: 4 }}>
             <Box sx={{ display: 'flex', gap: 1, flex: 1, justifyContent: 'space-between', alignItems: 'center' }}>
-                <Text veryLarge bold>Clientes</Text>
+                <Text veryLarge bold>Clientes ({usersList?.length})</Text>
                 <Box sx={{ display: 'flex', justifyContent: 'start', gap: 2, alignItems: 'center', flexDirection: 'row' }}>
                     <TextInput placeholder="Pesquisar por cliente" name='filterData' type="search"
                         onChange={(event) => setFilterData(event.target.value)} value={filterData}

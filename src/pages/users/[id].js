@@ -13,6 +13,7 @@ import { SelectList } from "../../organisms/select/SelectList"
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import Link from "next/link"
 import { checkUserPermissions } from "../../validators/checkPermissionUser"
+import AnamneseUser from "./Components/anamnese"
 
 export default function EditUser() {
     const { setLoading, alert, colorPalette, user, matches, theme, setShowConfirmationDialog, menuItemsList, userPermissions } = useAppContext()
@@ -65,6 +66,7 @@ export default function EditUser() {
     })
     const [filesUser, setFilesUser] = useState([])
     const [isPermissionEdit, setIsPermissionEdit] = useState(false)
+    const [menuSelected, setMenuSelected] = useState('userdata')
     const isAdministrador = user?.perfil?.includes('administrador');
     const isPartner = user?.perfil?.includes(`parceiro`)
 
@@ -348,14 +350,29 @@ export default function EditUser() {
         { label: 'Feminino', value: 'Feminino' }
     ]
 
+    const showMenu = [
+        {
+            label: 'Dados do Usuário', value: 'userdata', showPerfil: ['administrador', 'paciente', 'parceiro'],
+            icon: 'personal-data.png'
+        },
+        {
+            label: 'Anamnese', value: 'anamnese', showPerfil: ['paciente'],
+            icon: 'patient.png'
+        },
+        {
+            label: 'Sessões', value: 'consultion', showPerfil: ['paciente'],
+            icon: 'chat.png'
+        },
+    ]
+
     return (
         <>
             <SectionHeader
                 perfil={userData?.perfil}
                 title={userData?.nome || `Novo ${userData?.perfil === 'parceiro' && 'Parceiro' || userData?.perfil === 'administrador' && 'Administrador' || userData?.perfil === 'paciente' && 'Paciente' || 'Usuário'}`}
-                saveButton={isPermissionEdit}
+                saveButton={isPermissionEdit && menuSelected === 'userdata'}
                 saveButtonAction={newUser ? handleCreateUser : handleEditUser}
-                deleteButton={!newUser && isAdministrador}
+                deleteButton={!newUser && isAdministrador && menuSelected === 'userdata'}
                 deleteButtonAction={(event) => setShowConfirmationDialog({
                     active: true,
                     event,
@@ -364,7 +381,35 @@ export default function EditUser() {
                     message: 'Tem certeza que deseja prosseguir com a exclusão do usuário? Todos os dados vinculados a esse usuário serão excluídos, sem opção de recuperação.',
                 })}
             />
-            <>
+
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', width: '100%' }}>
+                {showMenu?.map((item, index) => {
+                    const isSelected = menuSelected === item.value
+                    const isPerfil = item?.showPerfil?.some(role => userData?.perfil?.includes(role))
+                    if (userData?.perfil && isPerfil) {
+
+                        return (
+                            <Box key={index} sx={{
+                                display: 'flex', padding: '15px 20px', backgroundColor: colorPalette.secondary,
+                                gap: 2, alignItems: 'center', '&:hover': {
+                                    opacity: .7, cursor: 'pointer'
+                                }
+                            }} onClick={() => setMenuSelected(item.value)}>
+                                <Box sx={{
+                                    ...styles.menuIcon,
+                                    width: 18,
+                                    height: 18,
+                                    backgroundImage: `url('/icons/${item.icon}')`,
+                                }} />
+                                <Text large={isSelected} bold={isSelected} light={!isSelected} style={{ color: isSelected ? colorPalette.buttonColor : colorPalette.textColor }}>{item.label}</Text>
+                            </Box>
+                        )
+                    } else {
+                        return <></>
+                    }
+                })}
+            </Box>
+            {menuSelected === 'userdata' && <>
                 <ContentContainer style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 1.8, padding: 5, }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1, alignItems: 'center' }}>
 
@@ -504,7 +549,15 @@ export default function EditUser() {
                         </Box>
                     </Box>
                 </ContentContainer>
-            </>
+            </>}
+
+            {menuSelected === 'anamnese' &&
+                <>
+                    <ContentContainer>
+                        <AnamneseUser id={userData?.id} />
+                    </ContentContainer>
+                </>
+            }
         </>
     )
 }
