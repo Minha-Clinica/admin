@@ -1050,7 +1050,7 @@ const styles = {
       backgroundSize: "cover",
       backgroundRepeat: "no-repeat",
       backgroundPosition: "center",
-      width: 350,
+      width: { xs: '100%', xm: 200, md: 350, lg: 350 },
       height: 250,
       backgroundImage: `url('/background/encaixe.jpeg')`,
    },
