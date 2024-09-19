@@ -34,6 +34,7 @@ function Home() {
    const [calendarHours, setCalendarHours] = useState([])
    const [loadingDate, setLoadingDate] = useState(false)
    const [showEmployeeList, setShowEmployeeList] = useState(false)
+   const [showContactWpp, setShowContactWpp] = useState(false)
    const [selectedEvent, setSelectedEvent] = useState(null);
    const [showEventForm, setShowEventForm] = useState(false);
    const [eventData, setEventData] = useState({
@@ -322,11 +323,12 @@ function Home() {
          const verifyToday = await api.get(`/consultation/patients/verify-qnt-curr-today/${dateSelected?.userId || user?.id}`)
          const { qntSessions } = verifyToday.data
          const currentDate = new Date();
-         const currentDay = currentDate.getDate();
+         const currentDay = currentDate.getDate() + 1;
          const daySelected = new Date(dateSelected.day).getDate();
 
          if ((daySelected === currentDay) && qntSessions >= 1) {
             alert.info('Você já possúi uma sessão agendada para hoje. Para agendar mais uma sessão para hoje, entre em contato pelo WhatsApp com o atendimento, para verificar um encaixe.')
+            setShowContactWpp(true)
             return false
          }
 
@@ -368,6 +370,7 @@ function Home() {
             <meta charset="utf-8" />
             <link rel="icon" href="https://minhaclinicatrindade.s3.amazonaws.com/Afectu+-+PNG+-+Fundo+Tranparente-8%402x.png" />
          </Head>
+
          <Box sx={{ display: 'flex', gap: 1, flexDirection: { xs: 'column', xm: 'column', md: 'row', lg: 'row' } }}>
 
             <Box sx={{
@@ -580,6 +583,31 @@ function Home() {
                                  <Button text="Confirmar" onClick={() => setShowEmployeeList(false)} />
                               </ContentContainer>
                            </Backdrop>
+
+                           <Backdrop open={showContactWpp}>
+                              <ContentContainer>
+                                 <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 4, alignItems: 'center' }}>
+                                    <Text bold large>Entre em contato conosco pelo WhatsApp</Text>
+                                    <Box sx={{
+                                       ...styles.menuIcon,
+                                       width: 15, height: 15,
+                                       backgroundImage: `url(${icons.gray_close})`,
+                                       transition: '.3s',
+                                       zIndex: 999999999,
+                                       "&:hover": {
+                                          opacity: 0.8,
+                                          cursor: 'pointer'
+                                       }
+                                    }} onClick={() => setShowContactWpp(false)} />
+                                 </Box>
+                                 <Box>
+                                    <Text>Deseja marcar mais uma agenda para hoje? Entre em contato conosco no link abaixo, e tente um encaixe!</Text>
+                                    <Link href={'https://wa.me/5511916544375'} target='_blank'>+55 (11)91654-4375</Link>
+                                    <Box sx={styles.noResultsImage} />
+                                 </Box>
+                              </ContentContainer>
+                           </Backdrop>
+
                            <Box sx={{ display: 'flex', marginLeft: 2, height: '100%', width: '1px', backgroundColor: 'lightgray' }} />
                            <Box sx={{ display: { xs: 'none', xm: 'none', md: 'block', lg: 'block' }, width: '100%' }}>
                               <Box sx={{
@@ -1017,6 +1045,14 @@ const styles = {
       width: 20,
       height: 20,
 
+   },
+   noResultsImage: {
+      backgroundSize: "cover",
+      backgroundRepeat: "no-repeat",
+      backgroundPosition: "center",
+      width: 350,
+      height: 250,
+      backgroundImage: `url('/background/encaixe.jpeg')`,
    },
 }
 
