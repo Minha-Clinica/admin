@@ -323,8 +323,8 @@ function Home() {
          const verifyToday = await api.get(`/consultation/patients/verify-qnt-curr-today/${dateSelected?.userId || user?.id}`)
          const { qntSessions } = verifyToday.data
          const currentDate = new Date();
-         const currentDay = currentDate.getDate() + 1;
-         const daySelected = new Date(dateSelected.day).getDate();
+         const currentDay = currentDate.getDate()
+         const daySelected = new Date(dateSelected.day).getDate() + 1
 
          if ((daySelected === currentDay) && qntSessions >= 1) {
             alert.info('Você já possúi uma sessão agendada para hoje. Para agendar mais uma sessão para hoje, entre em contato pelo WhatsApp com o atendimento, para verificar um encaixe.')
@@ -600,9 +600,20 @@ function Home() {
                                        }
                                     }} onClick={() => setShowContactWpp(false)} />
                                  </Box>
-                                 <Box>
+                                 <Divider />
+                                 <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column' }}>
                                     <Text>Deseja marcar mais uma agenda para hoje? Entre em contato conosco no link abaixo, e tente um encaixe!</Text>
-                                    <Link href={'https://wa.me/5511916544375'} target='_blank'>+55 (11)91654-4375</Link>
+                                    <Link href={'https://wa.me/5511916544375'} target='_blank'>
+                                       <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', padding: '5px 12px', borderRadius: 2, backgroundColor: colorPalette.primary, width: 200 }}>
+                                          <Box sx={{
+                                             ...styles.menuIcon,
+                                             width: 15, height: 15,
+                                             backgroundImage: `url('/icons/whatsapp.png')`,
+                                             transition: '.3s',
+                                          }} />
+                                          <Text bold>+55 (11)91654-4375</Text>
+                                       </Box>
+                                    </Link>
                                     <Box sx={styles.noResultsImage} />
                                  </Box>
                               </ContentContainer>
