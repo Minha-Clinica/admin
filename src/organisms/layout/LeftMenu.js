@@ -407,9 +407,8 @@ const UserBadge = () => {
                         },
                         alignItems: 'center'
                      }} onClick={() => {
-                        setShowUserOptions(!showUserOptions)
                         setShowEditUser(false)
-                        router.push(`/users/${user?.id}`)
+                        router.push(`/userData`)
                      }}>
                         <Box sx={{
                            ...styles.menuIcon,

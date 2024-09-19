@@ -96,7 +96,7 @@ export default function Dashboard() {
                     </Box>
                 </Box>
             </Box>
-            <Box sx={{ display: 'flex', gap: 2, width: '100%' }}>
+            <Box sx={{ display: 'flex', gap: 2, width: '100%', flexDirection: { xs: 'column', sm: 'column', md: 'column', lg: 'row' } }}>
                 <ContentContainer fullWidth row>
                     <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', width: '100%' }}>
                         <Text light title>Sessões</Text>
@@ -158,7 +158,7 @@ export default function Dashboard() {
                     </Box>
                 </ContentContainer>
             </Box>
-            <Box sx={{ display: 'flex', gap: 2, width: '100%' }}>
+            <Box sx={{ display: 'flex', gap: 2, width: '100%', flexDirection: { xs: 'column', sm: 'column', md: 'column', lg: 'row' } }}>
                 <ContentContainer>
 
                     <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', width: '100%' }}>

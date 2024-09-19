@@ -6,7 +6,7 @@ import { icons } from '../organisms/layout/Colors'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { api } from '../api/api'
-import { Backdrop, CircularProgress } from '@mui/material'
+import { Backdrop, CircularProgress, useMediaQuery, useTheme } from '@mui/material'
 import moment from "moment";
 import "moment/locale/pt-br";
 import Calendar from "react-calendar"
@@ -57,6 +57,8 @@ function Home() {
    const profissionalId = 125;
    moment.locale("pt-br");
    const localizer = momentLocalizer(moment);
+   const themeApp = useTheme()
+   const isMobile = useMediaQuery(themeApp.breakpoints.down('sm'))
 
    const subMenu = [
       {
@@ -101,7 +103,7 @@ function Home() {
       },
       {
          id: '03', icon: '/icons/userdata.png',
-         route: `/users/${user?.id}`,
+         route: `/userData`,
          title: 'Meus Dados',
          permissions: ['parceiro', 'paciente', 'administrador'],
          filter: true,
@@ -339,7 +341,7 @@ function Home() {
             }}>
 
                {(isPacient || isPartner) &&
-                  <>
+                  <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column' }}>
                      <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', marginTop: 2 }}>
 
                         <Text light large>Minhas próximas Sessões.</Text>
@@ -543,7 +545,7 @@ function Home() {
                               </ContentContainer>
                            </Backdrop>
                            <Box sx={{ display: 'flex', marginLeft: 2, height: '100%', width: '1px', backgroundColor: 'lightgray' }} />
-                           <Box sx={{ display: 'block', width: '100%' }}>
+                           <Box sx={{ display: { xs: 'none', xm: 'none', md: 'block', lg: 'block' }, width: '100%' }}>
                               <Box sx={{
                                  display: 'flex', flexDirection: 'column', gap: 5, padding: '0px 20px',
                                  width: '100%'
@@ -617,7 +619,80 @@ function Home() {
                            </Box>
                         </Box>
                      </Box>
-                  </>}
+
+                     <Box sx={{ display: { xs: 'block', xm: 'block', md: 'none', lg: 'none' }, width: '100%' }}>
+                        <Box sx={{
+                           display: 'flex', flexDirection: 'column', gap: 5,
+                           width: '100%'
+                        }}>
+                           <Box sx={{
+                              display: 'flex', gap: 2, flexDirection: 'column',
+                              width: '100%'
+                           }}>
+                              {subMenu?.map((item, index) => {
+                                 const isPermission = item?.permissions?.some(role => user?.perfil?.includes(role))
+                                 let routeTo = item?.queryId ? `${item?.route}/${user?.id}` : item?.route;
+                                 if (item?.queryValue) {
+                                    routeTo = routeTo += item?.queryValue
+                                 }
+
+                                 return (
+                                    <Box key={index} sx={{
+                                       display: isPermission ? 'flex' : 'none', gap: 2, flexDirection: 'column',
+                                       width: '100%'
+                                    }}>
+                                       <Box sx={{
+                                          display: 'flex', backgroundColor: colorPalette.secondary, padding: '15px',
+                                          borderRadius: 2,
+                                          alignItems: 'center', gap: 2,
+                                          justifyContent: 'space-between',
+                                          width: '100%',
+                                          transition: '.3s',
+                                          boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
+                                          "&:hover": {
+                                             opacity: 0.8,
+                                             cursor: 'pointer',
+                                             transform: 'scale(1.03, 1.03)'
+                                          }
+                                       }} onClick={() => router.push(routeTo)}>
+                                          <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                                             <Box sx={{
+                                                ...styles.menuIcon,
+                                                backgroundImage: `url(${item?.icon})`,
+                                                transition: '.3s',
+                                                aspectRatio: '1/1',
+                                                width: 45, height: 45,
+                                                "&:hover": {
+                                                   opacity: 0.8,
+                                                   cursor: 'pointer'
+                                                }
+                                             }} />
+                                             <Box sx={{ display: 'flex', gap: .5, alignItems: 'start', flexDirection: 'column' }}>
+                                                <Text large bold>{item?.title}</Text>
+                                                <Text small light>{item?.text}</Text>
+                                             </Box>
+                                          </Box>
+
+                                          <Box sx={{
+                                             ...styles.menuIcon,
+                                             backgroundImage: `url(${icons.gray_arrow_down})`,
+                                             transform: 'rotate(-90deg)',
+                                             transition: '.3s',
+                                             width: 17,
+                                             height: 17,
+                                             "&:hover": {
+                                                opacity: 0.8,
+                                                cursor: 'pointer'
+                                             },
+                                          }} />
+                                       </Box>
+                                    </Box>
+                                 )
+                              })}
+                           </Box>
+                        </Box>
+                     </Box>
+                  </Box>}
 
                <Box sx={{ display: (isPacient || isPartner) ? 'none' : 'flex', gap: 2, marginTop: 5, flexDirection: 'column' }}>
                   <Box sx={{
@@ -728,7 +803,7 @@ function Home() {
                               borderRadius: '12px',
                               boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
                               padding: 10,
-                              height: 600,
+                              height: isMobile ? 400 : 600,
                               width: '100%'
                            }}
                         />

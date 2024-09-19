@@ -230,6 +230,12 @@ export const AppProvider = ({ children }) => {
 
     const menuItems = [
         {
+            text: 'Meus Dados',
+            icon: '/icons/settings.png',
+            to: `/userData`,
+            permissions: ['parceiro', 'administrador', 'paciente'],
+        },
+        {
             text: 'Usuários',
             icon: '/icons/user_mult.png',
             to: '/users/list',
@@ -240,12 +246,6 @@ export const AppProvider = ({ children }) => {
             icon: '/icons/dashboard_icon.png',
             to: '/dashboard',
             permissions: ['administrador'],
-        },
-        {
-            text: 'Meus Dados',
-            icon: '/icons/settings.png',
-            to: `/users/${user?.id}`,
-            permissions: ['parceiro, paciente, adminstrador'],
         },
         {
             text: 'Minha Empresa',
