@@ -109,14 +109,14 @@ function Home() {
          filter: true,
          text: 'Editar e atualizar seus dados.'
       },
-      {
-         id: '05', icon: '/icons/message.png',
-         route: '',
-         title: 'Ajuda',
-         permissions: ['administrador', 'parceiro', 'paciente'],
-         filter: true,
-         text: 'Está com alguma dificuldade com o Painel? Peça ajuda ao suporte.'
-      },
+      // {
+      //    id: '05', icon: '/icons/message.png',
+      //    route: '',
+      //    title: 'Ajuda',
+      //    permissions: ['administrador', 'parceiro', 'paciente'],
+      //    filter: true,
+      //    text: 'Está com alguma dificuldade com o Painel? Peça ajuda ao suporte.'
+      // },
       //Primeira fase
       // {
       //    id: '06', icon: '/icons/subscription.png',
@@ -299,6 +299,46 @@ function Home() {
       }
    }
 
+   const verifyNumberMaxSession = async () => {
+      try {
+         const verifyMaxSessions = await api.get(`/consultation/patients/verify-qnt-curr-month/${dateSelected?.userId || user?.id}`)
+         const { qntSessions } = verifyMaxSessions.data
+
+         if (user?.n_max_sessoes && user?.n_max_sessoes > 0 && qntSessions >= user?.n_max_sessoes) {
+            alert.info('Você já possúi já ultrapassou o limite de sessões por mês. Consulta o RH de sua empresa, ou entre em contato com o Suporte.')
+            return false
+         }
+
+         return true
+      } catch (error) {
+         console.log(error)
+         return false
+      }
+   }
+
+
+   const verifyNumberSessionToday = async () => {
+      try {
+         const verifyToday = await api.get(`/consultation/patients/verify-qnt-curr-today/${dateSelected?.userId || user?.id}`)
+         const { qntSessions } = verifyToday.data
+         const currentDate = new Date();
+         const currentDateUTC = (currentDate.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" }));
+
+         const currentDay = currentDateUTC.getDate();
+         const daySelected = new Date(dateSelected.day).getDate();
+
+         if ((daySelected === currentDay) && qntSessions >= 1) {
+            alert.info('Você já possúi uma sessão agendada para hoje. Para agendar mais uma sessão para hoje, entre em contato pelo WhatsApp com o atendimento, para verificar um encaixe.')
+            return false
+         }
+
+         return true
+      } catch (error) {
+         console.log(error)
+         return false
+      }
+   }
+
    const handleReservationSession = async () => {
 
       if (dateSelected?.reserva_id !== '' && dateSelected?.profissionalId === profissionalId && dateSelected?.userId !== '') {
@@ -308,12 +348,10 @@ function Home() {
          }
 
          try {
-            const verifyMaxSessions = await api.get(`/consultation/patients/verify-qnt-curr-month/${dateSelected?.userId || user?.id}`)
-            const { qntSessions } = verifyMaxSessions.data
+            const veryfySessionsUser = await verifyNumberMaxSession()
+            const verifySessionsCurrentToday = await verifyNumberSessionToday()
 
-            if (user?.n_max_sessoes && user?.n_max_sessoes > 0 && qntSessions >= user?.n_max_sessoes) {
-               alert.info('Você já possúi já ultrapassou o limite de sessões por mês. Consulta o RH de sua empresa, ou entre em contato com o Suporte.')
-            } else {
+            if (veryfySessionsUser && verifySessionsCurrentToday) {
                router.push(`/searchProfissional/${dateSelected?.reserva_id}?professionalId=${dateSelected?.profissionalId}&userId=${dateSelected?.userId}`)
             }
          } catch (error) {

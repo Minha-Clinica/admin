@@ -91,7 +91,7 @@ export const DialogNotifications = ({ notification, handleNotification = () => {
             {notificationData &&
                 <>
                     <Box sx={{
-                        display: 'flex', flexDirection: 'column', gap: 1, position: 'relative', padding: '8px 12px', width: 380,
+                        display: 'flex', flexDirection: 'column', gap: 1, position: 'relative', padding: '8px 12px', width: { xs: 345, sm: '100%', md: '100%', lg: 415 },
                         "&:hover": {
                             backgroundColor: colorPalette.primary + '99',
                             cursor: 'pointer'

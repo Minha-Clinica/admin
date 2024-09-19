@@ -149,7 +149,7 @@ export const LeftMenu = ({ }) => {
                   </Box>
                </Box>
                <Divider distance={4} color={'rgb(255 255 255 / 0.1)'} />
-               <Box sx={{ ...styles.boxMenu, marginTop: 2, ...(showMenuMobile && { overflowY: 'auto' }), ...(!showMenuHelp && { width: 40, marginLeft: 1, gap: 2 }) }}>
+               <Box sx={{ ...styles.boxMenu, marginTop: 2, ...(showMenuMobile && { overflowY: 'auto', gap: 2 }), ...(!showMenuHelp && { width: 40, marginLeft: 1, gap: 2 }) }}>
                   {showMenuHelp && <Text light large style={{ color: 'gray', padding: '15px 10px' }}>Menu</Text>}
                   {menuItems.map((group, index) => {
                      const userProfiles = user?.perfil?.split(',').map(profile => profile.trim()) || [];
@@ -311,7 +311,7 @@ const UserBadge = () => {
    const [showNotification, setShowNotification] = useState(false)
    const [showUserOptions, setShowUserOptions] = useState(false)
    const [showDialogEditUser, setShowDialogEditUser] = useState(false)
-   
+
    const [showEditUser, setShowEditUser] = useState(false)
    const router = useRouter()
    const containerRef = useRef(null);
@@ -358,6 +358,7 @@ const UserBadge = () => {
                   display: 'flex',
                   justifyContent: 'space-between',
                   position: 'relative',
+                  gap: .5,
                   alignItems: 'center',
                   borderRadius: 1.5,
                   boxSizing: 'border-box',
@@ -387,10 +388,9 @@ const UserBadge = () => {
                </Box>
                {showEditUser &&
                   <Box sx={{
-                     border: `1px solid lightgray`,
                      display: 'flex', gap: 1, alignItems: 'start',
                      top: 40,
-                     width: 300,
+                     width: 200,
                      right: { xs: -45, sm: -45, md: -45, lg: 0 },
                      transition: '.5s',
                      justifyContent: 'center', flexDirection: 'column', backgroundColor: colorPalette.secondary,
@@ -400,7 +400,7 @@ const UserBadge = () => {
 
                   }}>
                      <Box sx={{
-                        display: 'flex', gap: 1, width: '100%', padding: '12px 8px', "&:hover": {
+                        display: 'flex', gap: 1, width: '100%', padding: '5px 8px', "&:hover": {
                            opacity: 0.8,
                            cursor: 'pointer',
                            backgroundColor: colorPalette.third + '11'
@@ -410,26 +410,12 @@ const UserBadge = () => {
                         setShowEditUser(false)
                         router.push(`/userData`)
                      }}>
-                        <Box sx={{
-                           ...styles.menuIcon,
-                           backgroundImage: `url('https://mf-planejados.s3.amazonaws.com/Icon_user_edit.png')`,
-                           width: 20,
-                           height: 20,
-                           filter: 'brightness(0) invert(0)',
-                           transition: 'background-color 1s',
-                           "&:hover": {
-                              opacity: 0.8,
-                              cursor: 'pointer',
-                           }
-                        }} onClick={() => {
-                           // router.push(`/users/${user?.id}`)
-                        }} />
                         <Text light style={{ ...styles.text, textAlign: 'center', padding: `2px 0px` }}>Meus dados</Text>
 
                      </Box>
 
                      <Box sx={{
-                        display: 'flex', gap: 1, width: '100%', padding: '12px 8px', "&:hover": {
+                        display: 'flex', gap: 1, width: '100%', padding: '5px 8px', "&:hover": {
                            opacity: 0.8,
                            cursor: 'pointer',
                            backgroundColor: colorPalette.third + '11'
@@ -439,69 +425,17 @@ const UserBadge = () => {
                         setShowDialogEditUser(true)
                         setShowEditUser(false)
                      }}>
-                        <Box sx={{
-                           ...styles.menuIcon,
-                           backgroundImage: `url('/icons/padlock_icon.png')`,
-                           width: 20,
-                           height: 20,
-                           transition: 'background-color 1s',
-                           "&:hover": {
-                              opacity: 0.8,
-                              cursor: 'pointer',
-                           }
-                        }} onClick={() => {
-                           // router.push(`/users/${user?.id}`)
-                        }} />
                         <Text light style={{ ...styles.text, textAlign: 'center', padding: `2px 0px` }}>Alterar senha</Text>
-
                      </Box>
 
                      <Box sx={{
-                        display: 'flex', gap: 1, width: '100%', padding: '12px 8px', "&:hover": {
+                        display: 'flex', gap: 1, width: '100%', padding: '5px 8px', "&:hover": {
                            opacity: 0.8,
                            cursor: 'pointer',
                            backgroundColor: colorPalette.third + '11'
                         }
-                     }} onClick={() => {
-                        setShowUserOptions(!showUserOptions)
-                        setShowEditUser(false)
-                        router.push('/suport/tasks/list')
-                     }}>
-                        <Box sx={{
-                           ...styles.menuIcon,
-                           backgroundImage: `url('/icons/support-icon.png')`,
-                           width: 20,
-                           height: 20,
-                           filter: 'brightness(0) invert(0)',
-                           transition: 'background-color 1s',
-                           "&:hover": {
-                              opacity: 0.8,
-                              cursor: 'pointer',
-                           }
-                        }} />
-                        <Text light style={{ ...styles.text, textAlign: 'center', padding: `2px 0px` }}>Suporte</Text>
-
-                     </Box>
-
-                     <Box sx={{
-                        display: 'flex', gap: 1, width: '100%', padding: '10px 8px',
-                        border: '1px solid red',
-                        borderRadius: 2,
-                        justifyContent: 'center',
-                        "&:hover": {
-                           opacity: 0.8,
-                           cursor: 'pointer',
-                           backgroundColor: 'red' + '11'
-                        }
                      }} onClick={logout}>
-                        <Box sx={{
-                           ...styles.menuIcon,
-                           backgroundImage: `url(${icons.logout})`,
-                           width: 20,
-                           height: 20,
-                           transition: 'background-color 1s'
-                        }} />
-                        <Text light style={{ ...styles.text, textAlign: 'center', padding: `2px 0px`, color: 'red' }}>Sair</Text>
+                        <Text light style={{ ...styles.text, textAlign: 'center', padding: `2px 0px`, }}>Sair</Text>
                      </Box>
 
                   </Box>

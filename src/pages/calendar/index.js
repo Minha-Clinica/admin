@@ -745,8 +745,8 @@ export default function CalendarComponent() {
             </Box>
             {
                 showEventForm && (
-                    <Backdrop open={showEventForm} sx={{ zIndex: 999, paddingTop: 5 }}>
-                        <ContentContainer style={{ width: { xs: '90%', md: 400, lg: 500, xl: 500 }, maxHeight: { xs: '90%', md: 900, lg: '900px', xl: '1200px' }, overflowY: 'auto', }}>
+                    <Backdrop open={showEventForm} sx={{ zIndex: 999, paddingTop: 10 }}>
+                        <ContentContainer style={{ width: { xs: '90%', md: 400, lg: 500, xl: 500 }, maxHeight: { xs: '90%', md: 600, lg: 630, xl: '1200px' }, overflowY: 'auto', }}>
                             <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                                 <Text bold large>{selectedEvent ? eventData?.title : "Adicionar evento"}</Text>
                                 <Box sx={{

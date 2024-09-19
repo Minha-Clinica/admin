@@ -119,9 +119,9 @@ export const Notifications = ({ showNotification = false, setShowNotification })
                     <ContentContainer style={{
                         position: 'absolute',
                         zIndex: 99999,
-                        right: { xs: -70, sm: 0, md: 0, lg: 30 },
+                        right: { xs: -62, sm: 0, md: 0, lg: 30 },
                         top: 45,
-                        width: { xs: 380, sm: '100%', md: '100%', lg: 415 },
+                        width: { xs: 345, sm: '100%', md: '100%', lg: 415 },
                         maxHeight: 600,
                         overflowY: 'auto',
                         padding: 2,
@@ -206,7 +206,7 @@ export const Notifications = ({ showNotification = false, setShowNotification })
                                 const vizualized = item?.vizualizado === 0 ? false : true
                                 return (
                                     <Box key={index} sx={{
-                                        display: 'flex', flexDirection: 'column', gap: 1, position: 'relative', padding: '8px 12px', width: 380,
+                                        display: 'flex', flexDirection: 'column', gap: 1, position: 'relative', padding: '8px 12px', width: '100%',
                                         "&:hover": {
                                             backgroundColor: colorPalette.primary + '99',
                                             cursor: 'pointer'
