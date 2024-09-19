@@ -322,9 +322,7 @@ function Home() {
          const verifyToday = await api.get(`/consultation/patients/verify-qnt-curr-today/${dateSelected?.userId || user?.id}`)
          const { qntSessions } = verifyToday.data
          const currentDate = new Date();
-         const currentDateUTC = (currentDate.toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" }));
-
-         const currentDay = currentDateUTC.getDate();
+         const currentDay = currentDate.getDate();
          const daySelected = new Date(dateSelected.day).getDate();
 
          if ((daySelected === currentDay) && qntSessions >= 1) {
