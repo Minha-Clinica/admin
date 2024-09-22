@@ -49,7 +49,7 @@ export default function UserData() {
         }))
     }
 
-    
+
 
     const getUserData = async () => {
         setLoading(true)
@@ -151,12 +151,18 @@ export default function UserData() {
     return (
         <Box sx={{
             display: 'flex', gap: 1, flexDirection: 'column', alignItems: { md: 'center', lg: 'center' },
-            padding: { xs: `30px 0px`, xm: `25px`, md: `120px 65px`, lg: `50px 50px` }
+            padding: { xs: `0px 0px`, xm: `25px`, md: `120px 65px`, lg: `50px 50px` }
         }}>
+
             {(!showPage?.myData && !showPage?.changePass) && <Box sx={{
-                display: 'flex', flexDirection: 'column', 
+                display: 'flex', flexDirection: 'column',
                 width: { xs: '%100', xm: '100%', md: '100%', lg: 600 }
             }}>
+
+                <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center' }}>
+                    <Text bold title>Meu Perfil</Text>
+                </Box>
+
                 <Box sx={{
                     display: 'flex', height: 300,
                     alignItems: 'center', justifyContent: 'center', width: { xs: '%100', xm: '100%', md: '100%', lg: 600 }
@@ -352,8 +358,8 @@ export default function UserData() {
                             </Box>
                             <TextInput placeholder='Nascimento' name='nascimento' onChange={handleChange} type="date" value={(userData?.nascimento)?.split('T')[0] || ''} label='Nascimento *' sx={{ flex: 1, }} />
                             <SelectList fullWidth data={[
-                                {label: 'Masculino', value: 'Masculino'},
-                                {label: 'Feminino', value: 'Feminino'}
+                                { label: 'Masculino', value: 'Masculino' },
+                                { label: 'Feminino', value: 'Feminino' }
                             ]} valueSelection={userData?.genero || ''} onSelect={(value) => setUserData({ ...userData, genero: value })}
                                 title="Sexo *" filterOpition="value" sx={{ color: colorPalette.textColor, flex: 1 }}
                                 inputStyle={{ color: colorPalette.textColor, fontSize: '15px', fontFamily: 'MetropolisBold' }}

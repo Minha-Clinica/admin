@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react'
 import { api } from '../api/api'
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
+import { TabNavigator } from '../organisms/layout/Navigator'
 
 const PagesRoute = ({ Component, pageProps }) => {
 
@@ -28,6 +29,7 @@ const PagesRoute = ({ Component, pageProps }) => {
             <ProtectRoute>
                 <Box sx={{ ...styles.bodyContainer, backgroundColor: colorPalette.primary }}>
                     <LeftMenu />
+                    <TabNavigator />
                     <UserHeader />
                     <Box sx={{
                         ...styles.contentContainer, backgroundColor: colorPalette.primary, transition: 'background-color 1s',

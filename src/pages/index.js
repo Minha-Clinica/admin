@@ -34,6 +34,7 @@ function Home() {
    const [calendarHours, setCalendarHours] = useState([])
    const [loadingDate, setLoadingDate] = useState(false)
    const [showEmployeeList, setShowEmployeeList] = useState(false)
+   const [showReserveSession, setShowReserveSession] = useState(false)
    const [showContactWpp, setShowContactWpp] = useState(false)
    const [selectedEvent, setSelectedEvent] = useState(null);
    const [showEventForm, setShowEventForm] = useState(false);
@@ -278,6 +279,61 @@ function Home() {
       event: "Evento",
    };
 
+   const CustomToolbar = (toolbar) => {
+
+      const goToNext = () => {
+         toolbar.onNavigate('NEXT');
+      };
+
+      const goToPrev = () => {
+         toolbar.onNavigate('PREV');
+      };
+
+      const firstLetter = toolbar?.label?.charAt(0).toUpperCase();
+      const restOfMonth = toolbar?.label?.slice(1);
+      const formattedMonth = `${firstLetter}${restOfMonth}`;
+
+
+      return (
+         <div className="rbc-toolbar">
+            <Box sx={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+               <Box sx={{
+                  ...styles.menuIcon,
+                  padding: '8px',
+                  margin: '0px 5px',
+                  backgroundImage: `url(${icons.gray_arrow_down})`,
+                  // filter: theme ? 'brightness(0) invert(0)' : 'brightness(0) invert(1)',
+                  transform: 'rotate(90deg)',
+                  transition: '.3s',
+                  width: 18, height: 18,
+                  aspectRatio: '1/1',
+                  "&:hover": {
+                     opacity: 0.8,
+                     cursor: 'pointer',
+                     backgroundColor: colorPalette.primary
+                  }
+               }} onClick={goToPrev} />
+               <Text bold>{formattedMonth}</Text>
+               <Box sx={{
+                  ...styles.menuIcon,
+                  margin: '0px 5px',
+                  backgroundImage: `url(${icons.gray_arrow_down})`,
+                  // filter: theme ? 'brightness(0) invert(0)' : 'brightness(0) invert(1)',
+                  transform: 'rotate(-90deg)',
+                  transition: '.3s',
+                  width: 18, height: 18,
+                  aspectRatio: '1/1',
+                  "&:hover": {
+                     opacity: 0.8,
+                     cursor: 'pointer',
+                     backgroundColor: colorPalette.primary
+                  }
+               }} onClick={goToNext} />
+            </Box>
+         </div>
+      );
+   };
+
    const handleSelectEvent = (event) => {
       setSelectedEvent(event);
       setEventData(event);
@@ -376,7 +432,7 @@ function Home() {
             <Box sx={{
                display: 'flex', flexDirection: 'column', width: { xs: '100%', xm: '100%', md: '100%', lg: '100%' },
                transition: '0.5s', marginTop: { xs: 0, xm: 0, md: 10, lg: 10 },
-               padding: { xs: '10px 20px', xm: '10px 20px', md: '10px 50px', lg: '10px 50px' }
+               padding: { xs: '10px 10px 100px 10px', xm: '10px 20px', md: '10px 50px', lg: '10px 50px' }
             }}>
 
                {(isPacient || isPartner) &&
@@ -387,7 +443,7 @@ function Home() {
                         <Box sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', xm: 'column', md: 'row', lg: 'row' } }}>
 
                            {myEvents?.filter(item => item.disponivel === 1 && (new Date(item?.start) >= new Date()))?.length > 0 ?
-                              <Box sx={{ display: 'flex', flexDirection: 'row', gap: .5, width: '100%', }}>
+                              <Box sx={{ display: 'flex', flexDirection: 'row', gap: .5, width: '100%', overflowX: 'auto' }}>
                                  {myEvents?.filter(item => item.disponivel === 1 && (new Date(item?.start) >= new Date()))?.map((item, index) => {
                                     return (
                                        <Box sx={{
@@ -439,7 +495,7 @@ function Home() {
                               // boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
                               borderRadius: 2
                            }}>
-                              <Box sx={{ display: 'flex', width: '100%', flexDirection: 'column', gap: 1 }}>
+                              <Box sx={{ display: { xs: 'none', xm: 'none', md: 'block', lg: 'block' }, width: '100%', flexDirection: 'column', gap: 1 }}>
                                  {loadingDate ? <CircularProgress /> : <>
                                     <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
                                        <Text bold large style={{ color: colorPalette.buttonColor, textAlign: 'center' }}>AGENDA DÍSPONIVEL</Text>
@@ -550,7 +606,173 @@ function Home() {
                                     </Box>
                                  </Box>
                               </Box>
+
+                              <Box sx={{
+                                 display: { xs: 'flex', xm: 'flex', md: 'none', lg: 'none' }, padding: '10px 8px', gap: 2, alignItems: 'center', flexDirection: 'column', borderRadius: 2, backgroundColor: colorPalette.secondary,
+                              }}>
+                                 <Text large light>Deseja marcar uma sessão? Verifique a dísponibilidade, e reserve agora mesmo!</Text>
+                                 <Box sx={styles.noResultsImage} />
+                                 <Box sx={{
+                                    display: 'flex',
+                                    gap: 2,
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    padding: '10px 12px',
+                                    borderRadius: 2,
+                                    backgroundColor: colorPalette.buttonColor,
+                                    "&:hover": {
+                                       opacity: 0.8,
+                                       cursor: 'pointer'
+                                    }
+                                 }} onClick={() => setShowReserveSession(true)} >
+                                    <Text light large style={{ color: '#fff' }}>Agendar Sessão</Text>
+                                    <Box sx={{
+                                       ...styles.menuIcon,
+                                       marginTop: '2px',
+                                       width: 17, height: 18,
+                                       aspectRatio: '1/1',
+                                       backgroundImage: `url('/icons/next_arrow.png')`,
+                                       transition: '.3s',
+                                    }} />
+                                 </Box>
+
+                              </Box>
                            </Box>
+
+                           <Backdrop open={showReserveSession} sx={{ display: 'flex', alignItems: 'end', zIndex: 99999999999999 }}>
+                              <Box sx={{
+                                 display: 'flex', gap: 2, transition: '.3s', height: showReserveSession ? '80%' : '0%', width: '100%', backgroundColor: colorPalette.secondary, flexDirection: 'column',
+                                 borderTopLeftRadius: 20, // Bordas arredondadas
+                                 borderTopRightRadius: 20,
+                              }}>
+                                 <Box sx={{
+                                    display: 'flex', justifyContent: 'space-between', gap: 4, alignItems: 'center', padding: '20px 20px 0px 20px',
+                                 }}>
+                                    <Text bold large>Agendar Sessão</Text>
+                                    <Box sx={{
+                                       ...styles.menuIcon,
+                                       width: 15, height: 15,
+                                       backgroundImage: `url(${icons.gray_close})`,
+                                       transition: '.3s',
+                                       zIndex: 999999999,
+                                       "&:hover": {
+                                          opacity: 0.8,
+                                          cursor: 'pointer'
+                                       }
+                                    }} onClick={() => setShowReserveSession(false)} />
+                                 </Box>
+                                 <Divider />
+                                 <Box sx={{ display: 'flex', width: '100%', flexDirection: 'column', gap: 1, overflowY: 'scroll', padding: '10px 20px', paddingBottom: 5 }}>
+                                    {loadingDate ? <CircularProgress /> : <>
+                                       <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                                          <Text bold large style={{ color: colorPalette.buttonColor, textAlign: 'center' }}>Datas disponíveis</Text>
+                                       </Box>
+                                       {calendarSessions?.length > 0 ?
+                                          <Box sx={{ display: 'flex', gap: 3, flexDirection: 'column' }}>
+                                             <Box sx={{
+                                                display: 'flex', gap: 2, justifyContent: 'space-between',
+                                                flexDirection: { xs: 'column', xm: 'column', md: 'row', lg: 'row' },
+                                             }}>
+                                                <Box sx={{
+                                                   display: 'flex', gap: 2, width: '100%', justifyContent: 'center', marginTop: 1,
+                                                   alignItems: 'center'
+                                                }}>
+                                                   <Calendar
+                                                      defaultActiveStartDate={new Date()}
+                                                      onChange={(date) => handleSelectedDate(date, profissionalId)}
+                                                      style={{
+                                                         border: 'none'
+                                                      }}
+                                                      tileDisabled={({ date }) =>
+                                                         !calendarHours.includes(moment(date).format("YYYY-MM-DD")
+                                                         )
+                                                      }
+                                                   />
+                                                </Box>
+                                                <Box sx={{ display: 'flex', height: `100%`, width: '2px', backgroundColor: '#eaeaea' }} />
+                                                {(dateSelected?.day && dateSelected?.profissionalId === profissionalId) ?
+                                                   <Box sx={{
+                                                      display: 'flex', flexDirection: 'column', gap: 1, marginTop: 1,
+                                                      justifyContent: 'flex-start', width: '100%', minWidth: 200
+                                                   }}>
+                                                      <Box sx={{ display: 'flex', padding: '12px 10px', backgroundColor: colorPalette?.primary, justifyContent: 'center' }}>
+                                                         <Text bold style={{ color: colorPalette.buttonColor }}>Selecione um horário:</Text>
+                                                      </Box>
+                                                      <Box sx={{
+                                                         display: 'flex', gap: 2, width: '100%', justifyContent: 'flex-start', marginTop: 1,
+                                                      }}>
+                                                         <Box sx={{
+                                                            display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'flex-start', overflowY: 'auto',
+                                                            maxHeight: 200,
+                                                            width: '100%',
+                                                            padding: '5px 12px',
+                                                         }}>
+                                                            {calendarSessions?.filter(agend => (moment(agend.inicio).format("YYYY-MM-DD") === dateSelected?.day) &&
+                                                               (agend.disponivel === 0))?.map((hour, index) => {
+                                                                  const hourFormatted = horarios(hour.inicio)
+                                                                  const selected = dateSelected?.hour === hourFormatted;
+                                                                  return (
+                                                                     <Box key={index} sx={{
+                                                                        display: 'flex', gap: .5, padding: '8px 12px', borderRadius: 2,
+                                                                        width: '100%',
+                                                                        backgroundColor: colorPalette.primary,
+                                                                        border: selected && `1px solid ${colorPalette?.buttonColor}`,
+                                                                        justifyContent: 'space-between',
+                                                                        alignItems: 'center',
+                                                                        "&:hover": {
+                                                                           opacity: 0.8,
+                                                                           cursor: 'pointer'
+                                                                        }
+                                                                     }} onClick={() => {
+                                                                        if (selected) {
+                                                                           setDateSelected({ ...dateSelected, hour: '', reserva_id: '' })
+                                                                        } else {
+                                                                           if (isPartner) {
+                                                                              setShowEmployeeList(true)
+                                                                           }
+                                                                           setDateSelected({ ...dateSelected, hour: hourFormatted, reserva_id: hour?.id_evento_calendario, userId: !isPartner && user.id })
+                                                                        }
+                                                                     }}>
+                                                                        <Text large bold={selected ? true : false}>{hourFormatted}</Text>
+                                                                        {selected && <CheckCircleIcon style={{ color: 'green', fontSize: 17 }} />}
+                                                                     </Box>
+                                                                  )
+                                                               })}
+                                                         </Box>
+                                                      </Box>
+                                                   </Box>
+                                                   :
+                                                   <></>
+                                                }
+                                             </Box>
+                                          </Box>
+                                          :
+                                          <Text light large style={{ textAlign: 'center' }}>Profissional sem agenda disponível</Text>
+                                       }
+                                    </>
+                                    }
+                                    <Box sx={{ display: calendarSessions?.length > 0 ? 'flex' : 'none', width: '100%', justifyContent: 'center' }}>
+                                       <Box sx={{
+                                          padding: '5px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                          width: 150,
+                                          marginTop: 3,
+                                          transition: '.5s',
+                                          gap: 2,
+                                          backgroundColor: colorPalette.buttonColor,
+                                          borderRadius: 2,
+                                          opacity: (dateSelected?.reserva_id !== '' && dateSelected?.profissionalId === profissionalId && dateSelected?.userId !== '') ? 1 : 0.5,
+                                          "&:hover": {
+                                             opacity: (dateSelected?.reserva_id !== '' && dateSelected?.profissionalId === profissionalId && dateSelected?.userId !== '') ? 1 : 0.5,
+                                             cursor: 'pointer',
+                                             transform: (dateSelected?.reserva_id !== '' && dateSelected?.profissionalId === profissionalId && dateSelected?.userId !== '') ? 'scale(1.1, 1.1)' : 'none'
+                                          }
+                                       }} onClick={() => handleReservationSession()}>
+                                          <Text bold style={{ color: '#fff' }}>Agendar</Text>
+                                       </Box>
+                                    </Box>
+                                 </Box>
+                              </Box>
+                           </Backdrop>
 
                            <Backdrop open={showEmployeeList}>
                               <ContentContainer>
@@ -777,7 +999,7 @@ function Home() {
                      borderRadius: 2
                   }}>
                      <Box sx={{
-                        display: 'flex', flexDirection: 'column', gap: 5, padding: '0px 20px 0px 0px',
+                        display: 'flex', flexDirection: 'column', gap: 5, padding: { xs: '0px', xm: '0px', md: '0px 20px 0px 0px', lg: '0px 20px 0px 0px' },
                         width: { xs: '100%', xm: '100%', md: '40%', lg: '40%' }, alignItems: 'start'
                      }}>
                         <Text large bold>{(isPacient || isPartner) ? 'Atendimento' : 'Próximas Sessões'}</Text>
@@ -848,7 +1070,7 @@ function Home() {
                         </Box>
                      </Box>
 
-                     <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'start', gap: 5, width: '100%' }}>
+                     <Box sx={{ display: { xs: 'none', xm: 'none', md: 'flex', lg: 'flex' }, flexDirection: 'column', alignItems: 'start', gap: 5, width: '100%' }}>
                         <Text large bold>Calendário</Text>
 
                         <BigCalendar
@@ -879,6 +1101,46 @@ function Home() {
                               boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
                               padding: 10,
                               height: isMobile ? 400 : 600,
+                              width: '100%'
+                           }}
+                        />
+                     </Box>
+
+                     <Box sx={{ display: { xs: 'flex', xm: 'flex', md: 'none', lg: 'none' }, flexDirection: 'column', alignItems: 'start', gap: 5, width: '100%' }}>
+                        <Text large bold>Calendário</Text>
+
+                        <BigCalendar
+                           localizer={localizer}
+                           // defaultDate={month?.start}
+                           culture="pt-br"
+                           events={myEvents?.filter(item => item.disponivel === 1)}
+                           startAccessor="start"
+                           endAccessor="end"
+                           selectable
+                           onSelectSlot={(slotInfo) => {
+                              setEventData({
+                                 ...eventData,
+                                 start: slotInfo.start,
+                                 end: slotInfo.end,
+                              });
+                              setSelectedEvent(null);
+                              setShowEventForm(true);
+                           }}
+                           onSelectEvent={handleSelectEvent}
+                           eventPropGetter={eventStyleGetter}
+                           messages={messages}
+                           components={{
+                              toolbar: CustomToolbar,
+                           }}
+                           // messages={messages}
+                           style={{
+                              fontFamily: 'MetropolisBold',
+                              color: colorPalette.textColor,
+                              backgroundColor: colorPalette.secondary,
+                              borderRadius: '12px',
+                              boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
+                              padding: 10,
+                              height: isMobile ? 320 : 600,
                               width: '100%'
                            }}
                         />
@@ -1034,7 +1296,7 @@ function Home() {
                      </Box>
                   </Box> */}
             </Box>
-         </Box>
+         </Box >
       </>
    )
 }
