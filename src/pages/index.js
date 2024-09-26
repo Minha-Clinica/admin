@@ -384,7 +384,6 @@ function Home() {
 
          console.log('currentDay: ', currentDay)
          console.log('daySelected: ', daySelected)
-         console.log('qntSessions: ', qntSessions)
 
          if ((daySelected === currentDay)) {
          // if ((daySelected === currentDay) && qntSessions >= 1) {
@@ -831,7 +830,7 @@ function Home() {
                                  </Box>
                                  <Divider />
                                  <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column' }}>
-                                    <Text>Deseja marcar uma agenda para hoje? Entre em contato conosco no link abaixo, e tente um encaixe!</Text>
+                                    <Text>Deseja marcar uma agenda para hoje? Para agendar uma sessão 24 horas antes, entre em contato conosco no link abaixo, e tente um encaixe!</Text>
                                     <Link href={'https://wa.me/5511916544375'} target='_blank'>
                                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', padding: '5px 12px', borderRadius: 2, backgroundColor: colorPalette.primary, width: 200 }}>
                                           <Box sx={{
