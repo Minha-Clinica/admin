@@ -386,10 +386,10 @@ function Home() {
          console.log('daySelected: ', daySelected)
 
          if ((daySelected === currentDay)) {
-         // if ((daySelected === currentDay) && qntSessions >= 1) {
+            // if ((daySelected === currentDay) && qntSessions >= 1) {
             // alert.info('Você já possúi uma sessão agendada para hoje. Para agendar mais uma sessão para hoje, entre em contato pelo WhatsApp com o atendimento, para verificar um encaixe.')
             alert.info('Para agendar uma sessão para 24 horas antes da data, entre em contato pelo WhatsApp com o atendimento, para verificar um encaixe.')
-            
+
             setShowContactWpp(true)
             return false
          }
@@ -548,8 +548,10 @@ function Home() {
                                                          padding: '5px 12px',
                                                          flexDirection: 'column'
                                                       }}>
-                                                         {calendarSessions?.filter(agend => (moment(agend.inicio).format("YYYY-MM-DD") === dateSelected?.day) &&
-                                                            (agend.disponivel === 0))?.map((hour, index) => {
+                                                         {calendarSessions
+                                                            ?.filter(agend => moment(agend.inicio).format("YYYY-MM-DD") === dateSelected?.day && agend.disponivel === 0)
+                                                            ?.sort((a, b) => moment(a.inicio).valueOf() - moment(b.inicio).valueOf()) // Ordenando em ordem crescente
+                                                            ?.map((hour, index) => {
                                                                const hourFormatted = horarios(hour.inicio)
                                                                const selected = dateSelected?.hour === hourFormatted;
                                                                return (

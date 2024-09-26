@@ -396,7 +396,7 @@ const ConsultionsTable = ({ consultionList }) => {
 
     const statusColor = (data) => ((data === 'Agendado' && 'yellow') ||
     (data === 'Cancelada' && 'red') ||
-    (data === 'Atendida' && 'green') ||
+    (data === 'Concluído' && 'green') ||
     (data === 'Remarcada' && 'blue'))
 
     const columns = [

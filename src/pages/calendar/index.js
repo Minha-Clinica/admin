@@ -125,7 +125,7 @@ export default function CalendarComponent() {
     const [isPermissionEdit, setIsPermissionEdit] = useState(false)
     const isAdminstrator = user.perfil.includes('adminstrador')
     const isProfissional = user.perfil.includes('profissional')
-    const [users, setUsers] = useState(false)
+    const [users, setUsers] = useState([])
     const [duration, setDuration] = useState(60);
 
     const filter = (item) => {
@@ -239,7 +239,8 @@ export default function CalendarComponent() {
                     value: item.id,
                     email: item.email
                 }))
-                setUsers(employeeMap)
+                const sortedUsers = employeeMap.sort((a, b) => a.label.localeCompare(b.label))
+                setUsers(sortedUsers)
             }
         } catch (error) {
             console.log(error)
@@ -858,12 +859,15 @@ export default function CalendarComponent() {
                                     data={users}
                                     valueSelection={eventData.usuario_agendado}
                                     onSelect={(value) => {
+                                        const userSelected = users.filter(u => u.value === value)[0]
                                         setEventData({
                                             ...eventData, usuario_agendado: value,
-                                            email_agendado: users.filter(u => u.value === value).map(i => i.email)[0],
-                                            nome_agendado: users.filter(u => u.value === value).map(i => i.label)[0],
+                                            email_agendado: userSelected.email,
+                                            nome_agendado: userSelected.label,
                                             disponivel: 1,
-                                            color: '#2E93EE'
+                                            color: '#2E93EE',
+                                            title: `Consulta Agendada - ${userSelected.label}`,
+                                            description: `Horário reservado para ${userSelected.label}, para atendimento.`
                                         })
                                     }}
                                     title="Selecione um paciente:"

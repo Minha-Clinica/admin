@@ -1,16 +1,14 @@
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
-import axios from "axios"
-import { Avatar, Backdrop, FormControlLabel, Switch, useMediaQuery, useTheme } from "@mui/material"
+import { Avatar, Backdrop, useMediaQuery, useTheme } from "@mui/material"
 import { api } from "../../api/api"
-import { Box, ContentContainer, TextInput, Text, Button, PhoneInputField, FileInput, Divider } from "../../atoms"
-import { CheckBoxComponent, CustomDropzone, RadioItem, SectionHeader, TableOfficeHours, Table_V1 } from "../../organisms"
+import { Box, ContentContainer, TextInput, Text, Button, Divider } from "../../atoms"
+import { CheckBoxComponent, CustomDropzone, RadioItem, SectionHeader } from "../../organisms"
 import { useAppContext } from "../../context/AppContext"
 import { icons } from "../../organisms/layout/Colors"
-import { createUser, deleteFile, deleteUser, editContract, editeEnrollment, editeUser } from "../../validators/api-requests"
-import { emailValidator, formatCEP, formatCPF, formatDate, formatRg, formatTimeStamp } from "../../helpers"
+import { createUser, deleteFile, deleteUser, editeUser } from "../../validators/api-requests"
+import { emailValidator, formatCPF, formatterHours, horarios, statusColor } from "../../helpers"
 import { SelectList } from "../../organisms/select/SelectList"
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import Link from "next/link"
 import { checkUserPermissions } from "../../validators/checkPermissionUser"
 import AnamneseUser from "./Components/anamnese"
@@ -24,6 +22,7 @@ export default function EditUser() {
     const newUser = id === 'new';
     const [fileCallback, setFileCallback] = useState()
     const [companies, setCompanyList] = useState([])
+    const [consultions, setConsultions] = useState([])
     const [bgPhoto, setBgPhoto] = useState({})
     const [userData, setUserData] = useState({
         cpf: null,
@@ -156,22 +155,34 @@ export default function EditUser() {
         }
     }
 
-
-
-    const getPermissionUser = async () => {
+    const getConsultion = async () => {
         try {
-            const response = await api.get(`/permissionPerfil/${id}`)
-            const { data } = response
-            if (response.status === 200) {
-                setPermissionPerfil(data)
-                setPermissionPerfilBefore(data)
-                return
+            let query = `/consultation/pacient/${id}`
+
+            const response = await api.get(query, {
+                params: {
+                    date: {
+                        startDate: null,
+                        endDate: null
+                    },
+                    status_pagamento: null,
+                    status: null,
+                    paciente_id: null
+                }
+            });
+            const { data = [] } = response;
+
+            console.log(data)
+            if (Array.isArray(data) && data.length > 0) {
+                setConsultions(data);
+            } else {
+                setConsultions([]); // Certifique-se de definir um array vazio se os dados não forem um array ou estiverem vazios
             }
         } catch (error) {
-            console.log(error)
-            return error
+            console.log(error);
+            return error;
         }
-    }
+    };
 
 
 
@@ -198,6 +209,7 @@ export default function EditUser() {
             await getUserData()
             await getPhoto()
             await getFileUser()
+            await getConsultion()
         } catch (error) {
             alert.error('Ocorreu um arro ao carregar Usuarios')
         } finally {
@@ -360,7 +372,7 @@ export default function EditUser() {
             icon: 'patient.png'
         },
         {
-            label: 'Sessões', value: 'consultion', showPerfil: ['paciente'],
+            label: 'Sessões', value: 'sessoes', showPerfil: ['paciente'],
             icon: 'chat.png'
         },
     ]
@@ -558,275 +570,71 @@ export default function EditUser() {
                     </ContentContainer>
                 </>
             }
+
+            {menuSelected === 'sessoes' &&
+                <>
+                    <ContentContainer>
+                        <SessionsPacient data={consultions} />
+                    </ContentContainer>
+                </>
+            }
         </>
     )
 }
 
 
-const PaymentConfigScreen = () => {
-
-    const { setLoading, alert, colorPalette, user, theme } = useAppContext()
-
-
-    const [showSection, setShowSection] = useState({
-        paymentPlataform: true,
-        consultValues: true,
-        typesPayment: false,
-    })
-    const [consultValues, setConsultValues] = useState({
-        valor_terapeuta: '',
-        valor_final: '',
-        comissao_valor: '',
-        comissao_porcentagem: 10
-    })
-    const [paymentsPreference, setPaymentsPreference] = useState({
-        pagamentos_plataforma: 0,
-        forma_pagamento: {
-            pix: true,
-            boleto: true,
-            creditCard: true
-        },
-    })
-
-    const handleChange = (event) => {
-
-        const rawValue = event.target.value.replace(/[^\d]/g, ''); // Remove todos os caracteres não numéricos
-
-        if (rawValue === '') {
-            event.target.value = '';
-        } else {
-            let intValue = rawValue.slice(0, -2) || '0'; // Parte inteira
-            const decimalValue = rawValue.slice(-2).padStart(2, '0');; // Parte decimal
-
-            if (intValue === '0' && rawValue.length > 2) {
-                intValue = '';
-            }
-
-            const formattedValue = `${parseInt(intValue, 10).toLocaleString()},${decimalValue}`; // Adicionando o separador de milhares
-            event.target.value = formattedValue;
-
-        }
-
-        setConsultValues((prevValues) => ({
-            ...prevValues,
-            [event.target.name]: event.target.value,
-        }));
-
-    }
-
-    const handleCalculateComission = async (consultValues) => {
-        if (consultValues?.valor_terapeuta) {
-            const terapeutaValue = consultValues?.valor_terapeuta?.replace(/\./g, '').replace(',', '.');
-            const comissionPorcent = consultValues?.comissao_porcentagem;
-            const comissionValueCalculate = (parseFloat(terapeutaValue) * parseInt(comissionPorcent)) / 100;
-            const totalValue = parseFloat(terapeutaValue) + comissionValueCalculate;
-
-            setConsultValues((prevValues) => ({
-                ...prevValues,
-                comissao_valor: parseFloat(comissionValueCalculate),
-                valor_final: parseFloat(totalValue),
-            }));
-        }
-    }
-
-
-    const handleFormattedValue = (value) => {
-
-        let valueFinally = value;
-        let intValue = valueFinally.slice(0, -2) || '0'; // Parte inteira
-        const decimalValue = valueFinally.slice(-2).padStart(2, '0');; // Parte decimal
-
-        if (intValue === '0' && value.length > 2) {
-            intValue = '';
-        }
-
-        const formattedValue = `${parseInt(intValue, 10).toLocaleString()},${decimalValue}`; // Adicionando o separador de milhares
-        valueFinally = formattedValue;
-
-        return valueFinally
-
-    }
-
-
-    const handleUpdatePreferences = (event) => {
-        const { checked } = event.target;
-        const paymentPlataform = checked === true ? 1 : 0;
-
-        setPaymentsPreference((prevValues) => ({
-            ...prevValues,
-            pagamentos_plataforma: paymentPlataform
-        }))
-    }
-
-    const handleUpdateFormsPayment = (field) => {
-        setPaymentsPreference((prevValues) => ({
-            ...prevValues,
-            forma_pagamento: {
-                ...prevValues.forma_pagamento,
-                [field]: !prevValues.forma_pagamento[field]
-            }
-        }));
-    };
-
-
-    const formsPayment = [
-        {
-            id: '01', icon: '/icons/pix_icon.png', title: 'Pix', key: 'pix',
-            description: 'Recebimento em até 2 horas.'
-        },
-        {
-            id: '02', icon: '/icons/creditCard_icon.png', title: 'Cartão de Crédito', key: 'creditCard',
-            to: `/assignmentPlan/subscriptions`,
-            description: 'Recebimento em até 7 dias.'
-        },
-        {
-            id: '02', icon: '/icons/barcode.png', title: 'Boleto', key: 'boleto',
-            to: `/assignmentPlan/subscriptions`,
-            description: 'Recebimento em até 72 horas.'
-        },
-    ]
-
-    const formatter = new Intl.NumberFormat('pt-BR', {
-        style: 'currency',
-        currency: 'BRL'
-    });
-
+const SessionsPacient = ({ data }) => {
+    const { colorPalette } = useAppContext()
     return (
-        <Box sx={{ display: 'flex', gap: 1.8, flexDirection: 'column' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: .5, width: '100%', alignItems: 'start' }}>
 
-            <ContentContainer>
-                <Box sx={{
-                    display: 'flex', alignItems: 'center', gap: 1, padding: showSection?.consultValues ? '0px 0px 20px 0px' : '0px', "&:hover": {
-                        opacity: 0.8,
-                        cursor: 'pointer'
-                    },
-                    justifyContent: 'space-between'
-                }} onClick={() => setShowSection({ ...showSection, consultValues: !showSection?.consultValues })}>
-                    <Text title bold>Valor da Sessão</Text>
+            <Box sx={{ paddingBottom: 5 }}>
+                <Text bold title>Minhas Sessões</Text>
+            </Box>
+            {data?.map((item, index) => {
+                return (
                     <Box sx={{
-                        ...styles.menuIcon,
-                        backgroundImage: `url(${icons.gray_arrow_down})`,
-                        transform: showSection?.consultValues ? 'rotate(0deg)' : 'rotate(-90deg)',
-                        transition: '.3s',
-                    }} />
-                </Box>
-                {showSection?.consultValues &&
-                    <Box>
-                        <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', alignItems: 'start' }}>
-
-                            <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column' }}>
-                                <Text large>Defina o valor de sua sessão:</Text>
-                                <TextInput
-                                    placeholder='0,00'
-                                    name='valor_terapeuta'
-                                    type="coin"
-                                    onChange={handleChange}
-                                    value={consultValues?.valor_terapeuta || ''}
-                                    onBlur={() => handleCalculateComission(consultValues)}
-                                />
-                            </Box>
-
-                            <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column', alignItems: 'start' }}>
-                                <Text light>Ao definir o valor que será cobrado em suas sessões, geramos automáticamente a taxa cobrada pela plataforma. Fique tranquilo,
-                                    o valor da taxa é "repassado" para o paciente, sem afetar seu lucro líquido.</Text>
-                                <Text light>Os valores podem ser alterado depois, e é possível criar "Cupons" de desconto, caso queira dar algum desconto sobre o valor da sessão para algum paciente.</Text>
-                                <Text bold large style={{ color: colorPalette?.buttonColor, marginTop: '5px' }}>O valor que irá ser disponibilizado para pagamento do paciente, está abaixo (Já incluso na taxa)!</Text>
-                            </Box>
-                            <Box sx={{ display: 'flex', gap: 1, flexDirection: 'row', alignItems: 'center' }}>
-                                <Text bold>Comissão cobrada: </Text>
-                                <Text>{consultValues?.comissao_porcentagem?.toFixed(1)}%</Text>
-                            </Box>
-                            <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column', alignItems: 'center', padding: '8px 12px', border: `1px solid ${colorPalette?.buttonColor}`, borderRadius: 2 }}>
-                                <Text bold>Valor Final para o paciente: </Text>
-                                <Text veryLarge>{formatter.format(consultValues?.valor_final)}</Text>
-                            </Box>
+                        display: 'flex', gap: 1, flexDirection: 'row',
+                        transition: '.2s', borderRadius: 2, height: 90, backgroundColor: colorPalette?.secondary,
+                        boxShadow: `rgba(35, 32, 51, 0.27) 0px 6px 24px`,
+                        justifyContent: 'space-between', alignItems: 'center',
+                        width: '100%', padding: '10px 20px',
+                    }} key={index}>
+                        <Box sx={{ display: 'flex', gap: .2, flexDirection: 'column' }}>
+                            <Text bold large>{formatterHours(item?.data)}</Text>
+                            <Text large>{horarios(item?.data)}</Text>
                         </Box>
-                    </Box>
-                }
-            </ContentContainer>
+                        <Box sx={{ display: 'flex', gap: 1, flexDirection: 'row', alignItems: 'center', padding: '0px 8px' }}>
 
-            <ContentContainer>
-                <Box sx={{
-                    display: 'flex', alignItems: 'center', gap: 1, padding: showSection?.paymentPlataform ? '0px 0px 20px 0px' : '0px', "&:hover": {
-                        opacity: 0.8,
-                        cursor: 'pointer'
-                    },
-                    justifyContent: 'space-between'
-                }} onClick={() => setShowSection({ ...showSection, paymentPlataform: !showSection?.paymentPlataform })}>
-                    <Text title bold >Preferências de Pagamento</Text>
-                    <Box sx={{
-                        ...styles.menuIcon,
-                        backgroundImage: `url(${icons.gray_arrow_down})`,
-                        transform: showSection?.paymentPlataform ? 'rotate(0deg)' : 'rotate(-90deg)',
-                        transition: '.3s',
-                    }} />
-                </Box>
-                {showSection?.paymentPlataform &&
-                    <Box>
-                        <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', alignItems: 'start' }}>
-
-                            <FormControlLabel small
-                                control={
-                                    <Switch checked={paymentsPreference?.pagamentos_plataforma} name="pagamentos_plataforma" size="small" onChange={(e) => handleUpdatePreferences(e)} />
-                                }
-                                label="Controlar Pagamentos por meio da Plataforma"
+                            <Avatar src={item?.url_foto_prof || ''} sx={{
+                                height: { xs: 50, sm: 50, md: 50, lg: 50 },
+                                width: { xs: 50, sm: 50, md: 50, lg: 50 },
+                            }} variant="rounded"
                             />
-
-                            <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column', alignItems: 'start' }}>
-                                <Text light>Ao optar pelo gerenciamento dos pagamentos pela própria plataforma, nós cuidamos de tudo para você!</Text>
-                                <Text light>Além de não ter a responsabilidade de gerenciar os pagamentos, a nossa plataforma oferece um leque de opcões de pagamento para o paciente, como <strong style={{ color: colorPalette?.buttonColor, fontFamily: 'MetropolisBold' }}>PIX, Boleto e Cartão de Crédito!</strong></Text>
-                                <Text bold large style={{ color: colorPalette?.buttonColor, marginTop: '5px' }}>Nunca mais deixe de dar atendimento por questões de pagamento!</Text>
+                            <Box sx={{ display: 'flex', gap: .3, flexDirection: 'column', padding: '0px 8px' }}>
+                                <Text small bold>Consulta agendada com - {item?.profissional}</Text>
+                                <Text small light>{item?.paciente}</Text>
                             </Box>
                         </Box>
 
-                        {paymentsPreference?.pagamentos_plataforma === 1 && <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', marginTop: 5 }}>
-                            <Text bold large>Escolha as Formas de Pagamento que deseja disponibilizar:</Text>
-
-                            <Box sx={{ display: 'flex', gap: 2, flexDirection: 'row' }}>
-                                {formsPayment?.map((item, index) => {
-                                    const isSelected = paymentsPreference?.forma_pagamento[item?.key];
-                                    return (
-                                        <Box key={index} sx={{
-                                            display: 'flex', padding: '25px',
-                                            borderRadius: 2,
-                                            backgroundColor: colorPalette.secondary,
-                                            border: isSelected && `1px solid ${colorPalette?.buttonColor}`,
-                                            boxShadow: theme ? `rgba(149, 157, 165, 0.27) 0px 6px 24px` : `rgba(35, 32, 51, 0.27) 0px 6px 24px`,
-                                            alignItems: 'center',
-                                            justifyContent: 'flex-start',
-                                            position: 'relative',
-                                            gap: 2,
-                                            transition: '.3s',
-                                            "&:hover": {
-                                                opacity: 0.8,
-                                                cursor: 'pointer',
-                                                transform: 'scale(1.05, 1.05)'
-                                            }
-
-                                        }} onClick={() => {
-                                            handleUpdateFormsPayment(item?.key)
-                                        }}>
-                                            {isSelected && <CheckCircleIcon style={{ color: 'green', fontSize: 18, position: 'absolute', top: 5, left: 5 }} />}
-                                            <Box sx={{
-                                                ...styles.menuIcon,
-                                                width: 30, height: 30, aspectRatio: '1/1',
-                                                backgroundImage: `url('${item?.icon}')`,
-                                                transition: '.3s'
-
-                                            }} />
-                                            <Box sx={{ display: 'flex', alignItems: 'start', flexDirection: 'column' }}>
-                                                <Text large bold>{item?.title}</Text>
-                                                <Text small light>{item?.description}</Text>
-                                            </Box>
-                                        </Box>
-                                    )
-                                })
-                                }
-                            </Box>
-                        </Box>}
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                backgroundColor: colorPalette.primary,
+                                height: 30,
+                                gap: 2,
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                borderRadius: 2,
+                                justifyContent: 'flex-start', paddingRight: 5
+                            }}
+                        >
+                            <Box sx={{ display: 'flex', backgroundColor: statusColor(item?.status), padding: '0px 5px', height: '100%', borderRadius: '8px 0px 0px 8px' }} />
+                            <Text small bold style={{ textAlign: 'center' }}>{item?.status}</Text>
+                        </Box>
                     </Box>
-                }
-            </ContentContainer>
+                )
+            })}
         </Box>
     )
 }

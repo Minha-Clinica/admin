@@ -1,4 +1,5 @@
 import axios from "axios";
+import moment from "moment";
 
 
 export const horarios = (obj) => {
@@ -6,6 +7,11 @@ export const horarios = (obj) => {
    const horaFormatada = horaMoment.format("HH:mm");
    return horaFormatada
 }
+
+export const statusColor = (data) => ((data === 'Agendado' && 'yellow') ||
+(data === 'Cancelada' && 'red') ||
+(data === 'Concluído' && 'green') ||
+(data === 'Remarcada' && 'blue'))
 
 export const formatterHours = (date) => {
    const data = new Date(date);
