@@ -376,8 +376,8 @@ function Home() {
 
    const verifyNumberSessionToday = async () => {
       try {
-         const verifyToday = await api.get(`/consultation/patients/verify-qnt-curr-today/${dateSelected?.userId || user?.id}`)
-         const { qntSessions } = verifyToday.data
+         // const verifyToday = await api.get(`/consultation/patients/verify-qnt-curr-today/${dateSelected?.userId || user?.id}`)
+         // const { qntSessions } = verifyToday.data
          const currentDate = new Date();
          const currentDay = currentDate.getDate()
          const daySelected = new Date(dateSelected.day).getDate() + 1
@@ -386,8 +386,11 @@ function Home() {
          console.log('daySelected: ', daySelected)
          console.log('qntSessions: ', qntSessions)
 
-         if ((daySelected === currentDay) && qntSessions >= 1) {
-            alert.info('Você já possúi uma sessão agendada para hoje. Para agendar mais uma sessão para hoje, entre em contato pelo WhatsApp com o atendimento, para verificar um encaixe.')
+         if ((daySelected === currentDay)) {
+         // if ((daySelected === currentDay) && qntSessions >= 1) {
+            // alert.info('Você já possúi uma sessão agendada para hoje. Para agendar mais uma sessão para hoje, entre em contato pelo WhatsApp com o atendimento, para verificar um encaixe.')
+            alert.info('Para agendar uma sessão para 24 horas antes da data, entre em contato pelo WhatsApp com o atendimento, para verificar um encaixe.')
+            
             setShowContactWpp(true)
             return false
          }
@@ -828,7 +831,7 @@ function Home() {
                                  </Box>
                                  <Divider />
                                  <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column' }}>
-                                    <Text>Deseja marcar mais uma agenda para hoje? Entre em contato conosco no link abaixo, e tente um encaixe!</Text>
+                                    <Text>Deseja marcar uma agenda para hoje? Entre em contato conosco no link abaixo, e tente um encaixe!</Text>
                                     <Link href={'https://wa.me/5511916544375'} target='_blank'>
                                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', padding: '5px 12px', borderRadius: 2, backgroundColor: colorPalette.primary, width: 200 }}>
                                           <Box sx={{
