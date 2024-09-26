@@ -382,6 +382,10 @@ function Home() {
          const currentDay = currentDate.getDate()
          const daySelected = new Date(dateSelected.day).getDate() + 1
 
+         console.log('currentDay: ', currentDay)
+         console.log('daySelected: ', daySelected)
+         console.log('qntSessions: ', qntSessions)
+
          if ((daySelected === currentDay) && qntSessions >= 1) {
             alert.info('Você já possúi uma sessão agendada para hoje. Para agendar mais uma sessão para hoje, entre em contato pelo WhatsApp com o atendimento, para verificar um encaixe.')
             setShowContactWpp(true)
