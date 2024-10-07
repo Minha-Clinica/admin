@@ -277,7 +277,7 @@ export default function ListConsultions(props) {
                                 { label: 'Agendado', value: 'Agendado' },
                                 { label: 'Concluído', value: 'Concluído' },
                                 { label: 'Remarcado', value: 'Remarcado' },
-                                { label: 'Cancelado', value: 'Cancelado' }
+                                { label: 'Cancelado', value: 'Cancelada' }
                             ]}
                             valueSelection={filtersField?.status}
                             onSelect={(value) => setFiltersField({ ...filtersField, status: value })}

@@ -168,8 +168,15 @@ function Home() {
    const handleEvents = async () => {
       try {
          setLoading(true)
+         let query = `/event/`
          const perfil = (user?.perfil?.includes('profissional') || user?.perfil?.includes('administrador')) ? 'profissional' : 'paciente'
-         const response = await api.get(`/event/${perfil}/agenda/${user?.id}`)
+         query += perfil
+         if (perfil === 'profissional') {
+            query += `/agenda/125`
+         } else {
+            query += `/agenda/${user?.id}`
+         }
+         const response = await api.get(query)
          const { data } = response
          if (data) {
             const eventsMap = data?.map((event) => ({
@@ -1078,7 +1085,7 @@ function Home() {
                         </Box>
                      </Box>
 
-                     <Box sx={{ display: { xs: 'none', xm: 'none', md: 'flex', lg: 'flex' }, flexDirection: 'column', alignItems: 'start', gap: 5, width: '100%' }}>
+                     <Box sx={{ display: { xs: 'none', xm: 'none', md: 'flex', lg: 'flex' }, flexDirection: 'column', alignItems: 'start', gap: 5, width: '80%' }}>
                         <Text large bold>Calendário</Text>
 
                         <BigCalendar
@@ -1109,7 +1116,7 @@ function Home() {
                               boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
                               padding: 10,
                               height: isMobile ? 400 : 600,
-                              width: '100%'
+                              maxWidth: '100%'
                            }}
                         />
                      </Box>
