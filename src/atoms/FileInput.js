@@ -9,7 +9,7 @@ export const FileInput = (props) => {
         style = {},
         left = false
     } = props;
-
+ 
     return (
         <Box sx={{ ...styles.inputSection, alignItems: 'start', gap: 0.5, flexDirection: left && 'row-reverse', ...style }}>
 
