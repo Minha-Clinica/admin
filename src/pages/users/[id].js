@@ -632,6 +632,10 @@ const SessionsPacient = ({ data }) => {
                             <Box sx={{ display: 'flex', backgroundColor: statusColor(item?.status), padding: '0px 5px', height: '100%', borderRadius: '8px 0px 0px 8px' }} />
                             <Text small bold style={{ textAlign: 'center' }}>{item?.status}</Text>
                         </Box>
+
+                        <Link href={`/consultation/${item.id_consulta}`} target="_blank">
+                            <Button text="Detalhes da Sessão"/>
+                        </Link>
                     </Box>
                 )
             })}
