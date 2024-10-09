@@ -278,6 +278,12 @@ export const AppProvider = ({ children }) => {
             permissions: ['administrador'],
         },
         {
+            text: 'Políticas',
+            icon: '/icons/google-forms.png',
+            to: '/privacidade',
+            permissions: ['parceiro', 'administrador', 'paciente'],
+        },
+        {
             text: 'Ajuda',
             icon: '/icons/help.png',
             to: '/tasks/list',

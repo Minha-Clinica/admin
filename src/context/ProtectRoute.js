@@ -4,6 +4,7 @@ import Login from "../auth/login";
 import { useAppContext } from "./AppContext";
 import RegisterFromCompany from "../pages/company";
 import Register from "../pages/register";
+import Privacity from "../pages/privacidade";
 
 export const ProtectRoute = ({ children }) => {
    const { isAuthenticated, loading, colorPalette } = useAppContext()
@@ -11,6 +12,8 @@ export const ProtectRoute = ({ children }) => {
    const { cod_key } = router.query;
    const companyCode = cod_key;
    const currentPath = router.pathname
+
+   const isPrivacityPage = router.asPath === '/privacidade'
 
    if (isAuthenticated) return children;
    if (loading) return <Loading />
@@ -21,6 +24,18 @@ export const ProtectRoute = ({ children }) => {
                ...styles.contentContainer, backgroundColor: colorPalette.third,
             }}>
                <RegisterFromCompany companyCode={companyCode} />;
+            </Box>
+         </Box>
+      )
+   }
+
+   if (isPrivacityPage) {
+      return (
+         <Box sx={{ ...styles.bodyContainer, backgroundColor: colorPalette.third }}>
+            <Box sx={{
+               ...styles.contentContainer, backgroundColor: colorPalette.third,
+            }}>
+               <Privacity />
             </Box>
          </Box>
       )
