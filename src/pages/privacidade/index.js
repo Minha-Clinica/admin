@@ -11,6 +11,7 @@ function Privacity() {
         document.title = `Afectu - Política de Privacidade`;
         return () => window.removeEventListener("resize", () => { });
     }, []);
+    
 
     return (
         <>
