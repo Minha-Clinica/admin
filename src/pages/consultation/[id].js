@@ -28,6 +28,7 @@ export default function ConsultationRecord(props) {
         threeP: false
     })
     const [consultRecordData, setConsultRecordData] = useState({
+        anotacoes: ''
     })
     const [selectedConditions, setSelectedConditions] = useState([])
     const themeApp = useTheme()
@@ -42,8 +43,40 @@ export default function ConsultationRecord(props) {
         } catch (error) {
             console.log(error)
             return error
-        } finally { }
-        setLoading(false)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+
+    const getThemes = async () => {
+        setLoading(true)
+        try {
+            const response = await api.get(`/session/theme/${id}`)
+            const { data } = response
+            if (data.length > 0) {
+                setArrayTematic(data)
+            } else {
+                setArrayTematic([])
+            }
+        } catch (error) {
+            console.log(error)
+            return error
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleUpdateNotes = async () => {
+        setLoading(true)
+        try {
+            await api.patch(`/session/theme/notes/update/${id}`, { notes: consultRecordData?.anotacoes })
+        } catch (error) {
+            console.log(error)
+            return error
+        } finally {
+            setLoading(false)
+        }
     }
 
     useEffect(() => {
@@ -59,6 +92,7 @@ export default function ConsultationRecord(props) {
         setLoading(true)
         try {
             await getConsult()
+            await getThemes()
         } catch (error) {
             alert.error('Ocorreu um arro ao carregar A instituição')
         } finally {
@@ -81,9 +115,6 @@ export default function ConsultationRecord(props) {
         // }
         return true
     }
-
-    console.log(discomfortLevel)
-    console.log(cronologicData)
 
     const handleCreateInstitution = async () => {
         setLoading(true)
@@ -144,6 +175,50 @@ export default function ConsultationRecord(props) {
     //         [value.target.name]: value.target.value,
     //     }))
     // };
+
+    const handleAddTheme = async () => {
+        try {
+            const response = await api.post(`/session/theme/create`, {
+                themeData: {
+                    consultId: id,
+                    profissionalId: consultRecordData?.profissional_id,
+                    pacientId: consultRecordData?.paciente_id,
+                    nameTheme: tematicName.tema
+                }
+            })
+
+            if (response.status === 201) {
+                alert.success('Thema adicionado.')
+                await getThemes()
+                setTematicName({ tema: '' })
+                setShowTematic(false)
+            } else {
+                alert.error('Ocorreu um erro ao adicionar tema.')
+            }
+        } catch (error) {
+            console.log(error)
+            alert.error('Ocorreu um erro ao adicionar tema.')
+            return error
+        }
+    }
+
+
+    const handleDeleteTheme = async (themeId) => {
+        try {
+            const response = await api.delete(`/session/theme/delete/${themeId}`)
+
+            if (response.status === 200) {
+                alert.success('Thema excluído.')
+                await getThemes()
+            } else {
+                alert.error('Ocorreu um erro ao deletar tema.')
+            }
+        } catch (error) {
+            console.log(error)
+            alert.error('Ocorreu um erro ao deletar tema.')
+            return error
+        }
+    }
 
     const addTematic = () => {
         setArrayTematic((prevArray) => [...prevArray, { tema: tematicName.tema }])
@@ -298,7 +373,9 @@ export default function ConsultationRecord(props) {
                 perfil={consultRecordData?.paciente}
                 title={`${consultRecordData?.paciente} (${calculationAgeUser(consultRecordData?.nascimento)} Anos) - 1º Sessão (${formatTimeStamp(consultRecordData?.data)})` || `Novo Prontuário da Consulta`}
             />
-            <Button text="Finalizar sessão" style={{ position: 'absolute', top: 130, right: 100 }} />
+            <Button text="Finalizar sessão" style={{ position: 'absolute', top: 130, right: 100 }} onClick={() => {
+                handleUpdateNotes()
+            }} />
             <Box sx={{
                 display: 'flex', position: 'fixed', bottom: 30, right: 30, padding: '8px 12px',
                 alignItems: 'center', justifyContent: 'center', gap: 1, border: `1px solid green`,
@@ -309,6 +386,8 @@ export default function ConsultationRecord(props) {
                     cursor: 'pointer',
                     transform: 'scale(1.03, 1.03)'
                 }
+            }} onClick={() => {
+                handleUpdateNotes()
             }}>
                 <Box sx={{
                     ...styles.menuIcon,
@@ -377,7 +456,7 @@ export default function ConsultationRecord(props) {
                                         display: 'flex', gap: 2, alignItems: 'center', justifyContent: 'center',
                                         backgroundColor: colorPalette?.primary, padding: '12px 15px'
                                     }}>
-                                        <Text bold>{item?.tema}</Text>
+                                        <Text bold>{item?.nome_tema}</Text>
                                         <Box sx={{
                                             ...styles.menuIcon,
                                             backgroundImage: `url('/icons/remove_icon.png')`,
@@ -388,7 +467,7 @@ export default function ConsultationRecord(props) {
                                                 cursor: 'pointer',
                                                 transform: 'scale(1.1, 1.1)'
                                             },
-                                        }} onClick={() => deleteTematicName(tematicIndex)} text="Remover" />
+                                        }} onClick={() => handleDeleteTheme(item.id_tema_sessao)} text="Remover" />
                                     </Box>
                                 ))}
                             </Box>
@@ -400,9 +479,10 @@ export default function ConsultationRecord(props) {
                         label="Anotações do paciente:"
                         multiline={true}
                         rows={3}
-                        maxRows={8}
-                        value={patientNotes}
-                        onChange={(e) => setPatientNotes(e.target.value)}
+                        // maxRows={8}
+                        value={consultRecordData?.anotacoes || ''}
+                        onChange={(e) => setConsultRecordData({ ...consultRecordData, anotacoes: e.target.value })}
+                        onBlur={() => handleUpdateNotes()}
                     />
                     {selectedConditions.includes('cronologico') &&
                         <Box sx={{
@@ -699,7 +779,7 @@ export default function ConsultationRecord(props) {
                         />
                     </Box>
                     <Box sx={{ display: 'flex', width: '100%', gap: 1 }}>
-                        <Button small text="Adicionar" style={{ width: '100%' }} onClick={() => addTematic()} />
+                        <Button small text="Adicionar" style={{ width: '100%' }} onClick={() => handleAddTheme()} />
                         <Button small secondary text="Cancelar" style={{ width: '100%' }} onClick={() => setShowTematic(false)} />
                     </Box>
                 </ContentContainer>
