@@ -409,6 +409,7 @@ export default function AnamneseForms() {
                     </Box>
                 </Box>
             }
+            
             {page === 3 &&
                 <Box sx={{
                     display: 'flex', gap: 2, padding: '15px', backgroundColor: colorPalette.secondary, borderRadius: 2,
