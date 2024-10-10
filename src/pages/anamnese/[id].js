@@ -542,9 +542,9 @@ export default function AnamneseForms() {
                                 <Text light>Por quê? (comente com base na resposta anterior)</Text>
                                 <TextInput
                                     onBlur={handleBlur}
-                                    name='just_contx_familiar'
+                                    name='just_contx_social'
                                     onChange={handleChange}
-                                    value={anamnese?.just_contx_familiar || ''}
+                                    value={anamnese?.just_contx_social || ''}
                                     sx={{ flex: 1, }}
                                 />
                             </Box>
