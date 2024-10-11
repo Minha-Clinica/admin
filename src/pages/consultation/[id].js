@@ -1,9 +1,10 @@
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
-import { Backdrop, useMediaQuery, useTheme } from "@mui/material"
+import { Avatar, Backdrop, useMediaQuery, useTheme } from "@mui/material"
 import { api } from "../../api/api"
 import { Box, ContentContainer, TextInput, Text, Button, Divider } from "../../atoms"
-import { RadioItem, SectionHeader } from "../../organisms"
+import { SectionHeader } from "../../organisms"
+import moment from "moment";
 import { useAppContext } from "../../context/AppContext"
 import { calculationAgeUser, formatTimeStamp } from "../../helpers"
 import { icons } from "../../organisms/layout/Colors"
@@ -23,6 +24,7 @@ export default function ConsultationRecord(props) {
     const [arrayTematic, setArrayTematic] = useState([])
     const [tematicName, setTematicName] = useState({ tema: '' })
     const [showTematic, setShowTematic] = useState(false)
+    const [currentSessionNumber, setCurrentSessionNumber] = useState(1)
     const [opitionsMark, setOpitionsMark] = useState({
         microfase: false,
         threeP: false
@@ -30,6 +32,7 @@ export default function ConsultationRecord(props) {
     const [consultRecordData, setConsultRecordData] = useState({
         anotacoes: ''
     })
+    const [sessions, setSessions] = useState([])
     const [selectedConditions, setSelectedConditions] = useState([])
     const themeApp = useTheme()
     const mobile = useMediaQuery(themeApp.breakpoints.down('sm'))
@@ -40,6 +43,7 @@ export default function ConsultationRecord(props) {
             const response = await api.get(`/consultation/${id}`)
             const { data } = response
             setConsultRecordData(data)
+            return data
         } catch (error) {
             console.log(error)
             return error
@@ -47,6 +51,44 @@ export default function ConsultationRecord(props) {
             setLoading(false)
         }
     }
+
+    const getSessions = async (pacientId, sessionId) => {
+        try {
+            let query = `/consultation/pacient/${pacientId}`
+
+            const response = await api.get(query, {
+                params: {
+                    date: {
+                        startDate: null,
+                        endDate: null
+                    },
+                    status_pagamento: null,
+                    status: null,
+                    paciente_id: null
+                }
+            });
+            const { data = [] } = response;
+
+            if (Array.isArray(data) && data.length > 0) {
+                setSessions(data);
+                let count = 1
+                const sortedData = data.sort((a, b) => new Date(a.data) - new Date(b.data))
+                for (let session of sortedData) {
+                    if (session.id_consulta == sessionId) {
+                        setCurrentSessionNumber(count)
+                        break
+                    } else {
+                        count++
+                    }
+                }
+            } else {
+                setSessions([]); // Certifique-se de definir um array vazio se os dados não forem um array ou estiverem vazios
+            }
+        } catch (error) {
+            console.log(error);
+            return error;
+        }
+    };
 
 
     const getThemes = async () => {
@@ -91,8 +133,11 @@ export default function ConsultationRecord(props) {
     const handleItems = async () => {
         setLoading(true)
         try {
-            await getConsult()
-            await getThemes()
+            const consult = await getConsult()
+            if (consult) {
+                await getThemes()
+                await getSessions(consult.paciente_id, id)
+            }
         } catch (error) {
             alert.error('Ocorreu um arro ao carregar A instituição')
         } finally {
@@ -370,357 +415,304 @@ export default function ConsultationRecord(props) {
     return (
         <>
             <SectionHeader
-                perfil={consultRecordData?.paciente}
-                title={`${consultRecordData?.paciente} (${calculationAgeUser(consultRecordData?.nascimento)} Anos) - 1º Sessão (${formatTimeStamp(consultRecordData?.data)})` || `Novo Prontuário da Consulta`}
+                perfil={'Prontuário Online'}
+                title={`${consultRecordData?.paciente} - (${formatTimeStamp(consultRecordData?.data)})` || `Novo Prontuário da Consulta`}
             />
-            <Button text="Finalizar sessão" style={{ position: 'absolute', top: 130, right: 100 }} onClick={() => {
-                handleUpdateNotes()
-            }} />
-            <Box sx={{
-                display: 'flex', position: 'fixed', bottom: 30, right: 30, padding: '8px 12px',
-                alignItems: 'center', justifyContent: 'center', gap: 1, border: `1px solid green`,
-                borderRadius: 2,
-                transition: '.3s',
-                "&:hover": {
-                    opacity: 0.8,
-                    cursor: 'pointer',
-                    transform: 'scale(1.03, 1.03)'
-                }
-            }} onClick={() => {
-                handleUpdateNotes()
-            }}>
-                <Box sx={{
-                    ...styles.menuIcon,
-                    backgroundImage: `url('/icons/include_icon.png')`,
-                    transition: '.3s',
-                    width: 25, height: 25,
-                }} />
-                <Text>Salvar Etapa</Text>
+
+            <Box
+                sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 3,
+                    backgroundColor: colorPalette.secondary,
+                    padding: '10px 20px',
+                    borderRadius: 2,
+                    overflowX: 'auto', // Permite o scroll horizontal
+                    whiteSpace: 'nowrap', // Mantém o conteúdo em linha única
+                    scrollbarWidth: 'thin', // Para navegadores que suportam, diminui a largura da barra de rolagem
+                    '&::-webkit-scrollbar': {
+                        height: '8px', // Altura da barra de rolagem no Chrome/Safari
+                    },
+                    '&::-webkit-scrollbar-thumb': {
+                        backgroundColor: '#ccc', // Cor da barra de rolagem
+                        borderRadius: '10px', // Borda arredondada para estilo
+                    },
+                }}
+            >
+                {sessions?.map((item, index) => {
+                    const currentSession = item.id_consulta == id;
+                    let formattedDate = item?.data;
+                    let formattedHour = item?.data;
+
+                    const currentDate = new Date(item?.data);
+                    const options = {
+                        day: 'numeric',
+                        month: 'short',
+                    };
+
+                    formattedDate = currentDate
+                        ? new Intl.DateTimeFormat('pt-BR', options).format(currentDate)
+                        : 'none';
+                    const horaMoment = moment(item?.data);
+                    formattedHour = horaMoment.format('HH:mm');
+
+                    return (
+                        <Box key={index} sx={{ display: 'flex', alignItems: 'center', position: 'relative', }}>
+                            {/* Data e hora */}
+                            <Box sx={{
+                                display: 'flex', flexDirection: 'column', alignItems: 'center',
+                                backgroundColor: currentSession ? 'green' : colorPalette.primary,
+                                padding: '5px 10px', borderRadius: 2,
+                                '&:hover': {
+                                    cursor: !currentSession && 'pointer',
+                                    transform: !currentSession && 'scale(1.05, 1.05)',
+                                    transition: '.3s'
+                                }
+                            }} onClick={() => {
+                                if (!currentSession) {
+                                    router.push(`/consultation/${item.id_consulta}`)
+                                }
+                            }}>
+                                <Text bold large style={{ color: currentSession && 'white' }}>{formattedDate}</Text>
+                                <Text light small style={{ color: currentSession && 'white' }}>{formattedHour}</Text>
+                            </Box>
+
+                            {/* Linha horizontal entre os steps */}
+                            {(index < sessions.length - 1) && <Box sx={{
+                                ...styles.menuIcon,
+                                left: -6,
+                                width: 12,
+                                height: 12,
+                                backgroundImage: `url('/icons/next.png')`,
+                            }} />}
+                        </Box>
+                    );
+                })}
             </Box>
 
-            {/* usuario */}
-            <Box style={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 1.8, padding: 5, }}>
-                <Box sx={{ display: 'flex', gap: 3 }}>
-                    {groupCondition?.map((item, index) => {
-                        const selected = selectedConditions?.includes(item.value);
-                        return (
-                            <Box key={index} sx={{
-                                display: 'flex', gap: .5, width: '120px', padding: '10px 12px', borderRadius: 4,
-                                alignItems: 'center', justifyContent: 'center',
-                                transition: '.3s',
-                                flexDirection: 'column',
-                                backgroundColor: selected ? colorPalette?.buttonColor : 'transparent',
-                                "&:hover": {
-                                    opacity: 0.8,
-                                    cursor: 'pointer',
-                                    transform: 'scale(1.1, 1.1)'
-                                },
-                            }} onClick={() => toggleCondition(item?.value)}>
-                                <Box sx={{
-                                    ...styles.menuIcon,
-                                    backgroundImage: `url('/icons/${item?.value}_anaminese.png')`,
-                                    transition: '.3s',
-                                    width: 30, height: 30,
-                                    "&:hover": {
-                                        opacity: 0.8,
-                                        cursor: 'pointer'
-                                    }
-                                }} />
-                                <Text style={{ color: selected ? '#fff' : colorPalette?.buttonColor }}>{item?.label}</Text>
-                            </Box>
-                        )
-                    })}
-                </Box>
 
-                <Box sx={{
-                    display: 'flex', width: '100%', padding: '30px', flexDirection: 'column',
-                    backgroundColor: '#fff', marginTop: 2, gap: 2,
-                    boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
-                }}>
 
-                    <Box sx={{
-                        display: 'flex', gap: 1, justifyContent: 'flex-start', width: '100%'
-                    }}>
 
-                        <Box sx={{
-                            display: 'flex', gap: 1, flexDirection: 'column', padding: '10px 20px', border: `1px solid ${colorPalette?.buttonColor}`,
-                            borderRadius: 2
-                        }}>
-                            <Box sx={{ display: 'flex', gap: 4, justifyContent: 'space-between', alignItems: 'center' }}>
-                                <Text bold style={{ color: colorPalette?.buttonColor }}>Temas salvos</Text>
-                                <Button small text="Novo tema" onClick={() => setShowTematic(true)} />
-                            </Box>
-                            <Box sx={{ display: 'flex', gap: 1.8, justifyContent: 'flex-start', flexDirection: 'row', flexWrap: `wrap` }}>
-                                {arrayTematic?.map((item, tematicIndex) => (
-                                    <Box key={tematicIndex} sx={{
-                                        display: 'flex', gap: 2, alignItems: 'center', justifyContent: 'center',
-                                        backgroundColor: colorPalette?.primary, padding: '12px 15px'
-                                    }}>
-                                        <Text bold>{item?.nome_tema}</Text>
+            <Box sx={{ display: 'flex', gap: 2 }}>
+                <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', width: '100%' }}>
+
+                    <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 1.8, height: '100%' }}>
+                        <Box sx={{ display: 'flex', gap: 3, backgroundColor: colorPalette.secondary, padding: '10px 12px', borderRadius: 2 }}>
+                            {groupCondition?.map((item, index) => {
+                                const selected = selectedConditions?.includes(item.value);
+                                return (
+                                    <Box key={index} sx={{
+                                        display: 'flex', gap: .5, width: '120px', padding: '10px 12px', borderRadius: 4,
+                                        alignItems: 'center', justifyContent: 'center',
+                                        transition: '.3s',
+                                        flexDirection: 'column',
+                                        backgroundColor: selected ? colorPalette?.buttonColor : 'transparent',
+                                        "&:hover": {
+                                            opacity: 0.8,
+                                            cursor: 'pointer',
+                                            transform: 'scale(1.1, 1.1)'
+                                        },
+                                    }} onClick={() => toggleCondition(item?.value)}>
                                         <Box sx={{
                                             ...styles.menuIcon,
-                                            backgroundImage: `url('/icons/remove_icon.png')`,
-                                            width: 13,
-                                            height: 13,
+                                            backgroundImage: `url('/icons/${item?.value}_anaminese.png')`,
+                                            transition: '.3s',
+                                            width: 30, height: 30,
                                             "&:hover": {
                                                 opacity: 0.8,
-                                                cursor: 'pointer',
-                                                transform: 'scale(1.1, 1.1)'
-                                            },
-                                        }} onClick={() => handleDeleteTheme(item.id_tema_sessao)} text="Remover" />
+                                                cursor: 'pointer'
+                                            }
+                                        }} />
+                                        <Text style={{ color: selected ? '#fff' : colorPalette?.buttonColor }}>{item?.label}</Text>
                                     </Box>
-                                ))}
-                            </Box>
+                                )
+                            })}
                         </Box>
 
-                    </Box>
-
-                    <TextInput
-                        label="Anotações do paciente:"
-                        multiline={true}
-                        rows={3}
-                        // maxRows={8}
-                        value={consultRecordData?.anotacoes || ''}
-                        onChange={(e) => setConsultRecordData({ ...consultRecordData, anotacoes: e.target.value })}
-                        onBlur={() => handleUpdateNotes()}
-                    />
-                    {selectedConditions.includes('cronologico') &&
                         <Box sx={{
-                            display: 'flex', width: '100%', padding: '10px 10px', marginTop: 2, flexDirection: 'column', alignItems: 'start',
-                            // border: `1px solid ${colorPalette?.buttonColor}`, 
-                            gap: 1.8
+                            display: 'flex', width: '100%', padding: '30px', flexDirection: 'column', height: '100%',
+                            backgroundColor: '#fff', gap: 2,
+                            boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
                         }}>
-                            <Text bold title style={{ color: colorPalette?.buttonColor }}>{titleName()}</Text>
 
-                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                                    <Text bold>Insira a faixa da Idade:</Text>
-                                    <Button small onClick={addNewCronologicData} text="Novo" style={{ width: 90, height: 25 }} />
+                            <Box sx={{
+                                display: 'flex', gap: 1, justifyContent: 'flex-start', width: '100%'
+                            }}>
+
+                                <Box sx={{
+                                    display: 'flex', gap: 1, flexDirection: 'column', padding: '10px 20px', border: `1px solid ${colorPalette?.buttonColor}`,
+                                    borderRadius: 2
+                                }}>
+                                    <Box sx={{ display: 'flex', gap: 4, justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <Text bold style={{ color: colorPalette?.buttonColor }}>Temas salvos</Text>
+                                        <Button small text="Novo tema" onClick={() => setShowTematic(true)} />
+                                    </Box>
+                                    <Box sx={{ display: 'flex', gap: 1.8, justifyContent: 'flex-start', flexDirection: 'row', flexWrap: `wrap` }}>
+                                        {arrayTematic?.map((item, tematicIndex) => (
+                                            <Box key={tematicIndex} sx={{
+                                                display: 'flex', gap: 2, alignItems: 'center', justifyContent: 'center',
+                                                backgroundColor: colorPalette?.primary, padding: '12px 15px'
+                                            }}>
+                                                <Text bold>{item?.nome_tema}</Text>
+                                                <Box sx={{
+                                                    ...styles.menuIcon,
+                                                    backgroundImage: `url('/icons/remove_icon.png')`,
+                                                    width: 13,
+                                                    height: 13,
+                                                    "&:hover": {
+                                                        opacity: 0.8,
+                                                        cursor: 'pointer',
+                                                        transform: 'scale(1.1, 1.1)'
+                                                    },
+                                                }} onClick={() => handleDeleteTheme(item.id_tema_sessao)} text="Remover" />
+                                            </Box>
+                                        ))}
+                                    </Box>
                                 </Box>
 
-                                {cronologicData?.map((data, index) => (
-                                    <Box key={index} sx={{ display: 'flex', flexDirection: 'column', gap: 1.8 }}>
-                                        <Text bold small style={{ color: colorPalette?.buttonColor }}>{index + 1}º Faixa</Text>
+                            </Box>
 
-                                        <Box sx={{ display: 'flex', width: '100%', gap: 2, alignItems: 'center' }}>
-                                            <TextInput
-                                                type="number"
-                                                value={data?.idade_inicial}
-                                                onChange={(e) => handleInputCronologicChange(index, 'idade_inicial', parseInt(e.target.value))}
-                                            />
-                                            <TextInput
-                                                type="number"
-                                                value={data?.idade_final}
-                                                onChange={(e) => handleInputCronologicChange(index, 'idade_final', parseInt(e.target.value))}
-                                            />
-                                            <Text>Anos</Text>
-                                            <Button secondary onClick={() => removeCronologicData(index)} text="Remover" />
+                            <TextInput
+                                label="Anotações do paciente:"
+                                multiline={true}
+                                rows={3}
+                                // maxRows={8}
+                                value={consultRecordData?.anotacoes || ''}
+                                onChange={(e) => setConsultRecordData({ ...consultRecordData, anotacoes: e.target.value })}
+                                onBlur={() => handleUpdateNotes()}
+                            />
+
+                            {selectedConditions.includes('cronologico') &&
+                                <Box sx={{
+                                    display: 'flex', width: '100%', padding: '10px 10px', marginTop: 2, flexDirection: 'column', alignItems: 'start',
+                                    gap: 1.8
+                                }}>
+                                    <Text bold title style={{ color: colorPalette?.buttonColor }}>{titleName()}</Text>
+
+                                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                        <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                                            <Text bold>Insira a faixa da Idade:</Text>
+                                            <Button small onClick={addNewCronologicData} text="Novo" style={{ width: 90, height: 25 }} />
                                         </Box>
 
-                                        <Box sx={{
-                                            display: 'flex', gap: 1.8, justifyContent: 'flex-start', flexDirection: 'column', border: `1px solid #eaeaea`,
-                                            padding: '15px 12px', borderRadius: 2
-                                        }}>
-                                            <Box sx={{ display: 'flex', gap: 1.8, alignItems: 'center' }}>
-                                                <Box sx={{ display: 'flex', gap: 1.8, alignItems: 'center' }}>
-                                                    <Text bold>Nível de Desconforto - Filme:</Text>
-                                                    <Box sx={{
-                                                        ...styles.menuIcon,
-                                                        backgroundImage: `url('/icons/include_icon.png')`,
-                                                        transition: '.3s',
-                                                        width: 22,
-                                                        height: 22,
-                                                        "&:hover": {
-                                                            opacity: 0.8,
-                                                            cursor: 'pointer',
-                                                            transform: 'scale(1.1, 1.1)'
-                                                        },
-                                                    }} onClick={() => addNewDiscomfortData(data.id)} />
+                                        {cronologicData?.map((data, index) => (
+                                            <Box key={index} sx={{ display: 'flex', flexDirection: 'column', gap: 1.8 }}>
+                                                <Text bold small style={{ color: colorPalette?.buttonColor }}>{index + 1}º Faixa</Text>
+
+                                                <Box sx={{ display: 'flex', width: '100%', gap: 2, alignItems: 'center' }}>
+                                                    <TextInput
+                                                        type="number"
+                                                        value={data?.idade_inicial}
+                                                        onChange={(e) => handleInputCronologicChange(index, 'idade_inicial', parseInt(e.target.value))}
+                                                    />
+                                                    <TextInput
+                                                        type="number"
+                                                        value={data?.idade_final}
+                                                        onChange={(e) => handleInputCronologicChange(index, 'idade_final', parseInt(e.target.value))}
+                                                    />
+                                                    <Text>Anos</Text>
+                                                    <Button secondary onClick={() => removeCronologicData(index)} text="Remover" />
                                                 </Box>
 
                                                 <Box sx={{
-                                                    display: 'flex', gap: 1.5, border: `1px solid ${colorPalette?.buttonColor}`, padding: '8px 12px',
-                                                    flexDirection: 'row'
+                                                    display: 'flex', gap: 1.8, justifyContent: 'flex-start', flexDirection: 'column', border: `1px solid #eaeaea`,
+                                                    padding: '15px 12px', borderRadius: 2
                                                 }}>
-                                                    <Text bold>Marcadores:</Text>
-                                                    <Box sx={{ display: 'flex', gap: 2 }}>
-                                                        <Box sx={{
-                                                            display: 'flex', gap: 1.8, alignItems: 'center',
-                                                        }}>
-                                                            <Box sx={{
-                                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                                '&:hover': {
-                                                                    opacity: .7,
-                                                                    cursor: 'pointer',
-                                                                    backgroundColor: 'green' + '77'
-                                                                }
-                                                            }} onClick={() => setOpitionsMark({ ...opitionsMark, microfase: !opitionsMark?.microfase })}>
-                                                                {opitionsMark?.microfase ?
-                                                                    <CheckCircleIcon style={{ color: 'green', fontSize: 20 }} />
-                                                                    :
-                                                                    <Box sx={{
-                                                                        display: 'flex', border: `1px solid black`,
-                                                                        width: 17, height: 17, borderRadius: 17,
-                                                                        transition: '.3s',
-                                                                    }} />
-                                                                }
-                                                            </Box>
-                                                            <Text light>MicroFase (MF)</Text>
-                                                        </Box>
-                                                        <Box sx={{
-                                                            display: 'flex', gap: 1.8, alignItems: 'center',
-                                                        }}>
-                                                            <Box sx={{
-                                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                                '&:hover': {
-                                                                    opacity: .7,
-                                                                    cursor: 'pointer',
-                                                                    backgroundColor: 'green' + '77'
-                                                                }
-                                                            }} onClick={() => setOpitionsMark({ ...opitionsMark, threeP: !opitionsMark?.threeP })}>
-                                                                {opitionsMark?.threeP ?
-                                                                    <CheckCircleIcon style={{ color: 'green', fontSize: 20 }} />
-                                                                    :
-                                                                    <Box sx={{
-                                                                        display: 'flex', border: `1px solid black`,
-                                                                        width: 17, height: 17, borderRadius: 17,
-                                                                        transition: '.3s'
-                                                                    }} />
-                                                                }
-                                                            </Box>
-                                                            <Text light>3P</Text>
-                                                        </Box>
-                                                    </Box>
-                                                </Box>
-                                            </Box>
-
-                                            <Box sx={{
-                                                display: 'flex', gap: 1.8, justifyContent: 'flex-start', flexDirection: 'row', flexWrap: `wrap`,
-                                                // backgroundColor: colorPalette?.buttonColor + '77',
-                                                padding: '5px 8px'
-                                            }}>
-                                                {discomfortLevel?.map((data, discomfortIndex) => (
-                                                    data.parentId === cronologicData[index].id && (
-                                                        <Box key={discomfortIndex} sx={{
-                                                            display: 'flex', gap: 2, alignItems: 'center', justifyContent: 'flex-start',
-                                                            padding: '8px 12px',
-                                                            // backgroundColor: colorPalette?.buttonColor + '66',
-                                                            backgroundColor: colorPalette?.secondary,
-                                                            border: `1px solid #eaeaea`,
-                                                            borderRadius: 2,
-                                                            boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
-                                                        }}>
-                                                            {data?.microfase && <Box sx={{ display: 'flex', padding: '2px 4px', backgroundColor: 'orange' }}><Text>{data?.microfase && 'MF'}</Text></Box>}
-                                                            {data?.threeP && <Box sx={{ display: 'flex', padding: '2px 4px', backgroundColor: 'lightgreen' }}><Text>{data?.threeP && '3P'}</Text></Box>}
-                                                            <TextInput
-                                                                type="number"
-                                                                value={data?.nivel_desc}
-                                                                onChange={(e) => handleInputDiscomfortChange(discomfortIndex, 'nivel_desc', parseInt(e.target.value))}
-                                                                sx={{ width: 80 }}
-                                                            />
+                                                    <Box sx={{ display: 'flex', gap: 1.8, alignItems: 'center' }}>
+                                                        <Box sx={{ display: 'flex', gap: 1.8, alignItems: 'center' }}>
+                                                            <Text bold>Nível de Desconforto - Filme:</Text>
                                                             <Box sx={{
                                                                 ...styles.menuIcon,
-                                                                backgroundImage: `url('/icons/remove_icon.png')`,
+                                                                backgroundImage: `url('/icons/include_icon.png')`,
                                                                 transition: '.3s',
-                                                                width: 13,
-                                                                height: 13,
+                                                                width: 22,
+                                                                height: 22,
                                                                 "&:hover": {
                                                                     opacity: 0.8,
                                                                     cursor: 'pointer',
                                                                     transform: 'scale(1.1, 1.1)'
                                                                 },
-                                                            }} onClick={() => removeDiscomfortData(discomfortIndex)} text="Remover" />
+                                                            }} onClick={() => addNewDiscomfortData(data.id)} />
                                                         </Box>
-                                                    )
-                                                ))}
-                                            </Box>
-                                        </Box>
 
-                                        {selectedConditions.includes('somatico') &&
-
-                                            <Box sx={{
-                                                display: 'flex', gap: 1.8, justifyContent: 'flex-start', flexDirection: 'column', border: `1px solid #eaeaea`,
-                                                padding: '15px 12px', borderRadius: 2
-                                            }}>
-                                                <Box sx={{ display: 'flex', gap: 1.8, alignItems: 'center' }}>
-                                                    <Text bold>Nível de Desconforto - Corpo:</Text>
-                                                    <Box sx={{
-                                                        ...styles.menuIcon,
-                                                        backgroundImage: `url('/icons/include_icon.png')`,
-                                                        transition: '.3s',
-                                                        width: 22,
-                                                        height: 22,
-                                                        "&:hover": {
-                                                            opacity: 0.8,
-                                                            cursor: 'pointer',
-                                                            transform: 'scale(1.1, 1.1)'
-                                                        },
-                                                    }} onClick={() => addNewSomaticData(data.id)} />
-
-                                                    <Box sx={{
-                                                        display: 'flex', gap: 1.5, border: `1px solid ${colorPalette?.buttonColor}`, padding: '8px 12px',
-                                                        flexDirection: 'row'
-                                                    }}>
-                                                        <Text bold>Marcadores:</Text>
-                                                        <Box sx={{ display: 'flex', gap: 2 }}>
-                                                            <Box sx={{
-                                                                display: 'flex', gap: 1.8, alignItems: 'center',
-                                                            }}>
+                                                        <Box sx={{
+                                                            display: 'flex', gap: 1.5, border: `1px solid ${colorPalette?.buttonColor}`, padding: '8px 12px',
+                                                            flexDirection: 'row'
+                                                        }}>
+                                                            <Text bold>Marcadores:</Text>
+                                                            <Box sx={{ display: 'flex', gap: 2 }}>
                                                                 <Box sx={{
-                                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                                    '&:hover': {
-                                                                        opacity: .7,
-                                                                        cursor: 'pointer',
-                                                                        backgroundColor: 'green' + '77'
-                                                                    }
-                                                                }} onClick={() => setOpitionsMark({ ...opitionsMark, microfase: !opitionsMark?.microfase })}>
-                                                                    {opitionsMark?.microfase ?
-                                                                        <CheckCircleIcon style={{ color: 'green', fontSize: 20 }} />
-                                                                        :
-                                                                        <Box sx={{
-                                                                            display: 'flex', border: `1px solid black`,
-                                                                            width: 17, height: 17, borderRadius: 17,
-                                                                            transition: '.3s',
-                                                                        }} />
-                                                                    }
+                                                                    display: 'flex', gap: 1.8, alignItems: 'center',
+                                                                }}>
+                                                                    <Box sx={{
+                                                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                                        '&:hover': {
+                                                                            opacity: .7,
+                                                                            cursor: 'pointer',
+                                                                            backgroundColor: 'green' + '77'
+                                                                        }
+                                                                    }} onClick={() => setOpitionsMark({ ...opitionsMark, microfase: !opitionsMark?.microfase })}>
+                                                                        {opitionsMark?.microfase ?
+                                                                            <CheckCircleIcon style={{ color: 'green', fontSize: 20 }} />
+                                                                            :
+                                                                            <Box sx={{
+                                                                                display: 'flex', border: `1px solid black`,
+                                                                                width: 17, height: 17, borderRadius: 17,
+                                                                                transition: '.3s',
+                                                                            }} />
+                                                                        }
+                                                                    </Box>
+                                                                    <Text light>MicroFase (MF)</Text>
                                                                 </Box>
-                                                                <Text light>MicroFase (MF)</Text>
-                                                            </Box>
-                                                            <Box sx={{
-                                                                display: 'flex', gap: 1.8, alignItems: 'center',
-                                                            }}>
                                                                 <Box sx={{
-                                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                                    '&:hover': {
-                                                                        opacity: .7,
-                                                                        cursor: 'pointer',
-                                                                        backgroundColor: 'green' + '77'
-                                                                    }
-                                                                }} onClick={() => setOpitionsMark({ ...opitionsMark, threeP: !opitionsMark?.threeP })}>
-                                                                    {opitionsMark?.threeP ?
-                                                                        <CheckCircleIcon style={{ color: 'green', fontSize: 20 }} />
-                                                                        :
-                                                                        <Box sx={{
-                                                                            display: 'flex', border: `1px solid black`,
-                                                                            width: 17, height: 17, borderRadius: 17,
-                                                                            transition: '.3s'
-                                                                        }} />
-                                                                    }
+                                                                    display: 'flex', gap: 1.8, alignItems: 'center',
+                                                                }}>
+                                                                    <Box sx={{
+                                                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                                        '&:hover': {
+                                                                            opacity: .7,
+                                                                            cursor: 'pointer',
+                                                                            backgroundColor: 'green' + '77'
+                                                                        }
+                                                                    }} onClick={() => setOpitionsMark({ ...opitionsMark, threeP: !opitionsMark?.threeP })}>
+                                                                        {opitionsMark?.threeP ?
+                                                                            <CheckCircleIcon style={{ color: 'green', fontSize: 20 }} />
+                                                                            :
+                                                                            <Box sx={{
+                                                                                display: 'flex', border: `1px solid black`,
+                                                                                width: 17, height: 17, borderRadius: 17,
+                                                                                transition: '.3s'
+                                                                            }} />
+                                                                        }
+                                                                    </Box>
+                                                                    <Text light>3P</Text>
                                                                 </Box>
-                                                                <Text light>3P</Text>
                                                             </Box>
                                                         </Box>
                                                     </Box>
-                                                </Box>
-                                                {selectedConditions.includes('cronologico') &&
-                                                    <Box sx={{ display: 'flex', gap: 1.8, justifyContent: 'flex-start', flexDirection: 'row', flexWrap: `wrap` }}>
-                                                        {somaticData?.map((data, somaticIndex) => (
+
+                                                    <Box sx={{
+                                                        display: 'flex', gap: 1.8, justifyContent: 'flex-start', flexDirection: 'row', flexWrap: `wrap`,
+                                                        // backgroundColor: colorPalette?.buttonColor + '77',
+                                                        padding: '5px 8px'
+                                                    }}>
+                                                        {discomfortLevel?.map((data, discomfortIndex) => (
                                                             data.parentId === cronologicData[index].id && (
-                                                                <Box key={somaticIndex} sx={{ display: 'flex', gap: 2, alignItems: 'center', justifyContent: 'flex-start' }}>
+                                                                <Box key={discomfortIndex} sx={{
+                                                                    display: 'flex', gap: 2, alignItems: 'center', justifyContent: 'flex-start',
+                                                                    padding: '8px 12px',
+                                                                    // backgroundColor: colorPalette?.buttonColor + '66',
+                                                                    backgroundColor: colorPalette?.secondary,
+                                                                    border: `1px solid #eaeaea`,
+                                                                    borderRadius: 2,
+                                                                    boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
+                                                                }}>
+                                                                    {data?.microfase && <Box sx={{ display: 'flex', padding: '2px 4px', backgroundColor: 'orange' }}><Text>{data?.microfase && 'MF'}</Text></Box>}
+                                                                    {data?.threeP && <Box sx={{ display: 'flex', padding: '2px 4px', backgroundColor: 'lightgreen' }}><Text>{data?.threeP && '3P'}</Text></Box>}
                                                                     <TextInput
                                                                         type="number"
-                                                                        value={data?.nivel_sintoma}
-                                                                        onChange={(e) => handleInputSomaticChange(index, somaticIndex, 'nivel_sintoma', parseInt(e.target.value), 'somatico')}
+                                                                        value={data?.nivel_desc}
+                                                                        onChange={(e) => handleInputDiscomfortChange(discomfortIndex, 'nivel_desc', parseInt(e.target.value))}
                                                                         sx={{ width: 80 }}
                                                                     />
                                                                     <Box sx={{
@@ -734,23 +726,194 @@ export default function ConsultationRecord(props) {
                                                                             cursor: 'pointer',
                                                                             transform: 'scale(1.1, 1.1)'
                                                                         },
-                                                                    }} onClick={() => removeSomaticData(somaticIndex)} text="Remover" />
+                                                                    }} onClick={() => removeDiscomfortData(discomfortIndex)} text="Remover" />
                                                                 </Box>
                                                             )
                                                         ))}
                                                     </Box>
+                                                </Box>
+
+                                                {selectedConditions.includes('somatico') &&
+
+                                                    <Box sx={{
+                                                        display: 'flex', gap: 1.8, justifyContent: 'flex-start', flexDirection: 'column', border: `1px solid #eaeaea`,
+                                                        padding: '15px 12px', borderRadius: 2
+                                                    }}>
+                                                        <Box sx={{ display: 'flex', gap: 1.8, alignItems: 'center' }}>
+                                                            <Text bold>Nível de Desconforto - Corpo:</Text>
+                                                            <Box sx={{
+                                                                ...styles.menuIcon,
+                                                                backgroundImage: `url('/icons/include_icon.png')`,
+                                                                transition: '.3s',
+                                                                width: 22,
+                                                                height: 22,
+                                                                "&:hover": {
+                                                                    opacity: 0.8,
+                                                                    cursor: 'pointer',
+                                                                    transform: 'scale(1.1, 1.1)'
+                                                                },
+                                                            }} onClick={() => addNewSomaticData(data.id)} />
+
+                                                            <Box sx={{
+                                                                display: 'flex', gap: 1.5, border: `1px solid ${colorPalette?.buttonColor}`, padding: '8px 12px',
+                                                                flexDirection: 'row'
+                                                            }}>
+                                                                <Text bold>Marcadores:</Text>
+                                                                <Box sx={{ display: 'flex', gap: 2 }}>
+                                                                    <Box sx={{
+                                                                        display: 'flex', gap: 1.8, alignItems: 'center',
+                                                                    }}>
+                                                                        <Box sx={{
+                                                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                                            '&:hover': {
+                                                                                opacity: .7,
+                                                                                cursor: 'pointer',
+                                                                                backgroundColor: 'green' + '77'
+                                                                            }
+                                                                        }} onClick={() => setOpitionsMark({ ...opitionsMark, microfase: !opitionsMark?.microfase })}>
+                                                                            {opitionsMark?.microfase ?
+                                                                                <CheckCircleIcon style={{ color: 'green', fontSize: 20 }} />
+                                                                                :
+                                                                                <Box sx={{
+                                                                                    display: 'flex', border: `1px solid black`,
+                                                                                    width: 17, height: 17, borderRadius: 17,
+                                                                                    transition: '.3s',
+                                                                                }} />
+                                                                            }
+                                                                        </Box>
+                                                                        <Text light>MicroFase (MF)</Text>
+                                                                    </Box>
+                                                                    <Box sx={{
+                                                                        display: 'flex', gap: 1.8, alignItems: 'center',
+                                                                    }}>
+                                                                        <Box sx={{
+                                                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                                            '&:hover': {
+                                                                                opacity: .7,
+                                                                                cursor: 'pointer',
+                                                                                backgroundColor: 'green' + '77'
+                                                                            }
+                                                                        }} onClick={() => setOpitionsMark({ ...opitionsMark, threeP: !opitionsMark?.threeP })}>
+                                                                            {opitionsMark?.threeP ?
+                                                                                <CheckCircleIcon style={{ color: 'green', fontSize: 20 }} />
+                                                                                :
+                                                                                <Box sx={{
+                                                                                    display: 'flex', border: `1px solid black`,
+                                                                                    width: 17, height: 17, borderRadius: 17,
+                                                                                    transition: '.3s'
+                                                                                }} />
+                                                                            }
+                                                                        </Box>
+                                                                        <Text light>3P</Text>
+                                                                    </Box>
+                                                                </Box>
+                                                            </Box>
+                                                        </Box>
+                                                        {selectedConditions.includes('cronologico') &&
+                                                            <Box sx={{ display: 'flex', gap: 1.8, justifyContent: 'flex-start', flexDirection: 'row', flexWrap: `wrap` }}>
+                                                                {somaticData?.map((data, somaticIndex) => (
+                                                                    data.parentId === cronologicData[index].id && (
+                                                                        <Box key={somaticIndex} sx={{ display: 'flex', gap: 2, alignItems: 'center', justifyContent: 'flex-start' }}>
+                                                                            <TextInput
+                                                                                type="number"
+                                                                                value={data?.nivel_sintoma}
+                                                                                onChange={(e) => handleInputSomaticChange(index, somaticIndex, 'nivel_sintoma', parseInt(e.target.value), 'somatico')}
+                                                                                sx={{ width: 80 }}
+                                                                            />
+                                                                            <Box sx={{
+                                                                                ...styles.menuIcon,
+                                                                                backgroundImage: `url('/icons/remove_icon.png')`,
+                                                                                transition: '.3s',
+                                                                                width: 13,
+                                                                                height: 13,
+                                                                                "&:hover": {
+                                                                                    opacity: 0.8,
+                                                                                    cursor: 'pointer',
+                                                                                    transform: 'scale(1.1, 1.1)'
+                                                                                },
+                                                                            }} onClick={() => removeSomaticData(somaticIndex)} text="Remover" />
+                                                                        </Box>
+                                                                    )
+                                                                ))}
+                                                            </Box>
+                                                        }
+                                                    </Box>
                                                 }
                                             </Box>
-                                        }
-                                    </Box>
-                                ))}
-                            </Box >
+                                        ))}
+                                    </Box >
+                                </Box>
+                            }
+                            <Divider distance={5} />
                         </Box>
-                    }
-                    <Divider distance={5} />
+                    </Box>
+                </Box>
+
+                <Box sx={{
+                    display: 'flex', gap: 2, backgroundColor: colorPalette.secondary, padding: '15px 10px', borderRadius: 2,
+                    flexDirection: 'column', alignItems: 'center', width: '30%'
+                }}>
+                    <Text light large>Dados do Paciente/Sessão</Text>
+                    <Avatar src={consultRecordData?.url_foto_paci || ''} sx={{
+                        height: { xs: 45, sm: 45, md: 45, lg: 120 },
+                        width: { xs: 45, sm: 45, md: 45, lg: 120 },
+                    }} variant="circle"
+                    />
+
+                    <Divider />
+
+                    <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', width: '100%', padding: '10px 15px' }}>
+                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'space-between' }}>
+                            <Text light style={{ color: colorPalette.third }}>Nome:</Text>
+                            <Text bold style={{ color: colorPalette.third }}>{consultRecordData?.paciente}</Text>
+                        </Box>
+                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'space-between' }}>
+                            <Text light style={{ color: colorPalette.third }}>Idade:</Text>
+                            <Text bold style={{ color: colorPalette.third }}>{formatTimeStamp(consultRecordData?.nascimento)} - ({calculationAgeUser(consultRecordData?.nascimento)} Anos)</Text>
+                        </Box>
+                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'space-between' }}>
+                            <Text light style={{ color: colorPalette.third }}>Empresa:</Text>
+                            <Text bold style={{ color: colorPalette.third }}>{consultRecordData?.empresa || 'Particular'}</Text>
+                        </Box>
+                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'space-between' }}>
+                            <Text light style={{ color: colorPalette.third }}>Agendamento:</Text>
+                            <Text bold style={{ color: colorPalette.third }}>{formatTimeStamp(consultRecordData?.data, true) || '-'}</Text>
+                        </Box>
+                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'space-between' }}>
+                            <Text light style={{ color: colorPalette.third }}>Nº Sessão:</Text>
+                            <Text bold style={{ color: colorPalette.third }}>{currentSessionNumber || '-'}</Text>
+                        </Box>
+
+                        <Divider />
+
+
+                        <Button text="Finalizar sessão" style={{}} onClick={() => {
+                            handleUpdateNotes()
+                        }} />
+                        <Box sx={{
+                            display: 'flex', padding: '5px 12px',
+                            alignItems: 'center', justifyContent: 'center', gap: 1, border: `1px solid green`,
+                            borderRadius: 2,
+                            transition: '.3s',
+                            "&:hover": {
+                                opacity: 0.8,
+                                cursor: 'pointer',
+                                transform: 'scale(1.03, 1.03)'
+                            }
+                        }} onClick={() => {
+                            handleUpdateNotes()
+                        }}>
+                            <Box sx={{
+                                ...styles.menuIcon,
+                                backgroundImage: `url('/icons/include_icon.png')`,
+                                transition: '.3s',
+                                width: 25, height: 25,
+                            }} />
+                            <Text>Salvar Etapa</Text>
+                        </Box>
+                    </Box>
                 </Box>
             </Box>
-
             <Backdrop open={showTematic}>
                 <ContentContainer>
                     <Box sx={{ display: 'flex', gap: 3, justifyContent: 'space-between', alignItems: 'center' }}>

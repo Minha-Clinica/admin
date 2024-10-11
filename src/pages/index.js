@@ -1085,7 +1085,7 @@ function Home() {
                         </Box>
                      </Box>
 
-                     <Box sx={{ display: { xs: 'none', xm: 'none', md: 'flex', lg: 'flex' }, flexDirection: 'column', alignItems: 'start', gap: 5, width: '80%' }}>
+                     <Box sx={{ display: { xs: 'none', xm: 'none', md: 'flex', lg: 'flex' }, flexDirection: 'column', alignItems: 'start', gap: 5, width: '70%' }}>
                         <Text large bold>Calendário</Text>
 
                         <BigCalendar
