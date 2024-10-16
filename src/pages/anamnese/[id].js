@@ -504,7 +504,7 @@ export default function AnamneseForms() {
                             valueRadio={anamnese?.pertence_contx_familiar}
                             group={[
                                 { label: 'Sim', value: 'Sim' },
-                                { label: 'Não', value: 'Não' }
+                                { label: 'Não', value: 'Não' } 
                             ]}
                             onSelect={(value) => handleBlurSelecAndRadio('pertence_contx_familiar', value)} />
                     </Box>
