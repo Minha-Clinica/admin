@@ -54,7 +54,8 @@ function Home() {
       nome_agendado: '',
       disponivel: 0,
       usuario_id: '',
-      allDay: false
+      allDay: false,
+      evento_google_id: null
    });
    const profissionalId = 125;
    moment.locale("pt-br");
@@ -78,6 +79,15 @@ function Home() {
          permissions: ['parceiro',],
          filter: true,
          text: 'Visualizar os dados de sua empresa. Cadastre e veja os colaboradores vínculados a sua sua empresa.'
+      },
+
+      {
+         id: '08', icon: '/icons/search.png',
+         route: `/integrar-calendario-google`,
+         title: 'Integrar Agenda com Google Agenda',
+         permissions: ['administrador'],
+         filter: true,
+         text: 'Vincule sua agenda do Sistema com sua agenda do Google.'
       },
       {
          id: '02', icon: '/icons/technology.png',
@@ -195,7 +205,8 @@ function Home() {
                disponivel: event?.disponivel,
                usuario_id: event?.usuario_id,
                allDay: false, // Ajuste isso com base no seu caso de uso
-               consulta_id: event?.id_consulta
+               consulta_id: event?.id_consulta,
+               evento_google_id: event?.evento_google_id
             }));
             setMyEvents([...eventsMap, ...Holidays]);
             return
@@ -388,9 +399,6 @@ function Home() {
          const currentDate = new Date();
          const currentDay = currentDate.getDate()
          const daySelected = new Date(dateSelected.day).getDate() + 1
-
-         console.log('currentDay: ', currentDay)
-         console.log('daySelected: ', daySelected)
 
          if ((daySelected === currentDay)) {
             // if ((daySelected === currentDay) && qntSessions >= 1) {
@@ -1196,7 +1204,8 @@ function Home() {
                                     nome_usuario_agendado: '',
                                     disponivel: 0,
                                     usuario_id: '',
-                                    allDay: false
+                                    allDay: false,
+                                    evento_google_id: null
                                  });
                               }} />
                            </Box>
@@ -1210,6 +1219,32 @@ function Home() {
                                  <Text>{horarios(eventData?.end)}</Text>
                               </Box>
                            </Box>
+
+                           {eventData?.evento_google_id && <Box
+                              sx={{
+                                 padding: '10px 30px',
+                                 gap: 2,
+                                 backgroundColor: colorPalette.secondary,
+                                 border: `1px solid`,
+                                 borderRadius: '100px',
+                                 transition: 'background-color 1s',
+                                 transition: '.3s',
+                                 display: 'flex',
+                                 justifyContent: 'center',
+                                 alignItems: 'center',
+                                 borderRadius: '20px',
+                                 boxShadow: `rgba(35, 32, 51, 0.27) 0px 6px 24px`,
+                              }}
+                           >
+                              <Box sx={{
+                                 ...styles.menuIcon,
+                                 backgroundImage: `url('/icons/search.png')`,
+                                 transition: '.3s',
+                              }} />
+
+                              <Text small bold>Vínculado ao Google Agenda</Text>
+                           </Box>}
+
                            <Divider />
                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto', maxHeight: 600, paddingTop: 3 }}>
                               <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>

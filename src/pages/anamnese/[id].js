@@ -409,7 +409,7 @@ export default function AnamneseForms() {
                     </Box>
                 </Box>
             }
-            
+
             {page === 3 &&
                 <Box sx={{
                     display: 'flex', gap: 2, padding: '15px', backgroundColor: colorPalette.secondary, borderRadius: 2,
@@ -1414,13 +1414,13 @@ export default function AnamneseForms() {
                     {anamnese.pais_agressivos === 'Sim' && <>
                         <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                             <Text light>Como?</Text>
-                            <RadioItem
-                                valueRadio={anamnese?._como_pais_agressivos}
-                                group={[
-                                    { label: 'Sim', value: 'Sim' },
-                                    { label: 'Não', value: 'Não' },
-                                ]}
-                                onSelect={(value) => handleBlurSelecAndRadio('_como_pais_agressivos', value)} />
+                            <TextInput
+                                onBlur={handleBlur}
+                                name='como_pais_agressivos'
+                                onChange={handleChange}
+                                value={anamnese?.como_pais_agressivos || ''}
+                                sx={{ flex: 1, }}
+                            />
                         </Box>
                         <Divider />
                     </>}

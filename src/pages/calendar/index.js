@@ -118,7 +118,8 @@ export default function CalendarComponent() {
         nome_agendado: '',
         disponivel: 0,
         usuario_id: '',
-        allDay: false
+        allDay: false,
+        evento_google_id: null
     });
     const router = useRouter()
     const { setLoading, alert, colorPalette, matches, user, userPermissions, menuItemsList, mobile } = useAppContext()
@@ -172,7 +173,8 @@ export default function CalendarComponent() {
                     disponivel: event?.disponivel,
                     usuario_id: event?.usuario_id,
                     allDay: false, // Ajuste isso com base no seu caso de uso
-                    consulta_id: event?.id_consulta
+                    consulta_id: event?.id_consulta,
+                    evento_google_id: event?.evento_google_id
                 }));
                 setEvents([...eventsMap, ...Holidays]);
                 return
@@ -393,7 +395,8 @@ export default function CalendarComponent() {
             nome_usuario_agendado: '',
             disponivel: 0,
             usuario_id: '',
-            allDay: false
+            allDay: false,
+            evento_google_id: null
         });
 
         // Fechar o formulário
@@ -777,7 +780,8 @@ export default function CalendarComponent() {
                                         nome_usuario_agendado: '',
                                         disponivel: 0,
                                         usuario_id: '',
-                                        allDay: false
+                                        allDay: false,
+                                        evento_google_id: null
                                     });
                                 }} />
                             </Box>
@@ -791,6 +795,31 @@ export default function CalendarComponent() {
                                     <Text>{horarios(eventData?.end)}</Text>
                                 </Box>
                             </Box>
+
+                            {eventData?.evento_google_id && <Box
+                                sx={{
+                                    padding: '10px 30px',
+                                    gap: 2,
+                                    backgroundColor: colorPalette.secondary,
+                                    border: `1px solid`,
+                                    borderRadius: '100px',
+                                    transition: 'background-color 1s',
+                                    transition: '.3s',
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    borderRadius: '20px',
+                                    boxShadow: `rgba(35, 32, 51, 0.27) 0px 6px 24px`,
+                                }}
+                            >
+                                <Box sx={{
+                                    ...styles.menuIcon,
+                                    backgroundImage: `url('/icons/search.png')`,
+                                    transition: '.3s',
+                                }} />
+
+                                <Text small bold>Vínculado ao Google Agenda</Text>
+                            </Box>}
                             <Divider />
                             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto', maxHeight: 600, paddingTop: 3 }}>
                                 <TextInput
@@ -877,46 +906,47 @@ export default function CalendarComponent() {
                                 />
                                 <Divider />
 
-                                {eventData?.consulta_id &&
-                                    < Link href={`/consultation/${eventData?.consulta_id}`} target="_blank">
-                                        <Button
-                                            secondary
-                                            disabled={!isPermissionEdit && true}
-                                            small
-                                            text="Prontuário"
-                                            style={{ height: 30, width: 120 }}
-                                        />
-                                    </Link>
-                                }
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1, alignItems: 'center', marginTop: 2 }}>
+                                    {eventData?.consulta_id &&
+                                        < Link href={`/consultation/${eventData?.consulta_id}`} target="_blank">
+                                            <Button
+                                                secondary
+                                                disabled={!isPermissionEdit && true}
+                                                small
+                                                text="Prontuário"
+                                                style={{ height: 30, width: 120 }}
+                                            />
+                                        </Link>
+                                    }
 
-                                <Box sx={{ display: 'flex', justifyContent: 'start', gap: 1, alignItems: 'center', marginTop: 2 }}>
-                                    <Button
-                                        disabled={!isPermissionEdit && true}
-                                        small
-                                        type="submit"
-                                        text={selectedEvent ? "Atualizar" : "Adicionar"}
-                                        style={{ padding: '5px 6px 5px 6px', width: 100 }}
-                                        onClick={(event) => handleEventFormSubmit(event)}
-                                    />
-                                    {(selectedEvent)
-                                        &&
-                                        < Button
+                                    <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, alignItems: 'center' }}>
+                                        <Button
                                             disabled={!isPermissionEdit && true}
-                                            secondary
-                                            small
-                                            text='Deletar'
+                                            type="submit"
+                                            text={selectedEvent ? "Atualizar" : "Adicionar"}
                                             style={{ padding: '5px 6px 5px 6px', width: 100 }}
-                                            onClick={(event) => {
-                                                handleDeleteEvent(event)
-                                                setShowEventForm(false)
-                                                setEventData({
-                                                    title: "",
-                                                    description: "",
-                                                    location: "",
-                                                    color: "#808080",
-                                                });
-                                            }}
-                                        />}
+                                            onClick={(event) => handleEventFormSubmit(event)}
+                                        />
+                                        {(selectedEvent)
+                                            &&
+                                            < Button
+                                                disabled={!isPermissionEdit && true}
+                                                secondary
+                                                text='Deletar'
+                                                style={{ padding: '5px 6px 5px 6px', width: 100 }}
+                                                onClick={(event) => {
+                                                    handleDeleteEvent(event)
+                                                    setShowEventForm(false)
+                                                    setEventData({
+                                                        title: "",
+                                                        description: "",
+                                                        location: "",
+                                                        color: "#808080",
+                                                        evento_google_id: null
+                                                    });
+                                                }}
+                                            />}
+                                    </Box>
                                 </Box>
                             </Box>
                         </ContentContainer>

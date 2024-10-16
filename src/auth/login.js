@@ -67,6 +67,15 @@ export default function Login() {
         }
     }
 
+    const handleGoogleLogin = async () => {
+        try {
+            window.location.href = `${process.env.NEXT_PUBLIC_API_URL}/loginGoogle`;
+        } catch (error) {
+            console.log(error)
+            return error
+        }
+    };
+
     const checkedReset = (email) => {
 
         if (!email) {
@@ -171,14 +180,15 @@ export default function Login() {
                             <Text sx={{}}>Voltar</Text>
                         </Box>
                     }
+
                     <Box sx={{
                         display: 'flex',
                         flexDirection: 'column',
                         justifyContent: 'flex-start',
                         alignItems: 'center',
                         width: '100%',
-                        padding: '10px 15px 30px 15px',
-                        gap: 3,
+                        padding: '10px 15px 10px 15px',
+                        gap: 2,
                         marginTop: 5,
                         position: 'relative'
                     }}>
@@ -194,14 +204,14 @@ export default function Login() {
                             backgroundPosition: 'center center',
                             width: 150,
                             height: 90,
-                            margin: '30px 0px',
+                            margin: '10px 0px',
                             display: 'flex',
 
                         }} />
 
                         <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 3, width: '100%', }}>
                             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, width: '100%', padding: '10px 30px' }}>
-                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'start', width: '100%', }}>
+                                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center', width: '100%', }}>
                                     <Text bold indicator style={{ color: !theme ? '#fff' : Colors.backgroundPrimary, transition: 'background-color 1s', textAlign: 'center' }}>Faça seu Login</Text>
                                 </Box>
                                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, width: '100%', alignItems: 'center' }}>
@@ -299,6 +309,7 @@ export default function Login() {
                                 </Box>
                             </Box>
                         </form>
+
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: .5, justifyContent: 'center', width: '100%', padding: '10px 30px' }}>
                             <Link href={'/register'} style={{ width: '100%', display: 'flex' }}>
                                 <Button
@@ -326,6 +337,46 @@ export default function Login() {
                                 </Button>
                             </Link>
                         </Box>
+
+
+                        {/* <Box sx={{ display: 'flex', gap: 3, flexDirection: 'column', alignItems: 'center' }}>
+                            <Text light>Vincular com Google Agenda</Text>
+
+                            <Button
+                                sx={{
+                                    width: '100%',
+                                    padding: '10px 30px',
+                                    gap: 2,
+                                    backgroundColor: colorPalette.secondary,
+                                    border: `1px solid`,
+                                    marginBottom: 5,
+                                    borderRadius: '100px',
+                                    transition: 'background-color 1s',
+                                    transition: '.3s',
+                                    "&:hover": {
+                                        opacity: 0.8,
+                                        cursor: 'pointer',
+                                        transform: 'scale(1.05, 1.05)'
+                                    },
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    color: '#f0f0f0',
+                                    borderRadius: '20px',
+                                    boxShadow: `rgba(35, 32, 51, 0.27) 0px 6px 24px`,
+                                }}
+                                onClick={handleGoogleLogin}
+                            >
+                                <Box sx={{
+                                    ...styles.menuIcon,
+                                    backgroundImage: `url('/icons/search.png')`,
+                                    transition: '.3s',
+                                }} />
+
+                                <Text small bold>Entrar com Google</Text>
+                            </Button>
+                        </Box> */}
+
                     </Box>
 
                 </Box>
