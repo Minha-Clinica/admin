@@ -6,10 +6,11 @@ import { Box, ContentContainer, TextInput, Text, Button, Divider } from "../../a
 import { SectionHeader } from "../../organisms"
 import moment from "moment";
 import { useAppContext } from "../../context/AppContext"
-import { calculationAgeUser, formatTimeStamp } from "../../helpers"
+import { calculationAgeUser, formatTimeStamp, getRandomInt } from "../../helpers"
 import { icons } from "../../organisms/layout/Colors"
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-
+import Dropzone from "react-dropzone"
+import Link from "next/link"
 
 export default function ConsultationRecord(props) {
     const { setLoading, alert, colorPalette, user, setShowConfirmationDialog, userPermissions, menuItemsList } = useAppContext()
@@ -25,6 +26,7 @@ export default function ConsultationRecord(props) {
     const [tematicName, setTematicName] = useState({ tema: '' })
     const [showTematic, setShowTematic] = useState(false)
     const [currentSessionNumber, setCurrentSessionNumber] = useState(1)
+    const [filesDrop, setFilesDrop] = useState([])
     const [opitionsMark, setOpitionsMark] = useState({
         microfase: false,
         threeP: false
@@ -91,6 +93,22 @@ export default function ConsultationRecord(props) {
     };
 
 
+
+    const handleGetFiles = async () => {
+        try {
+            const response = await api.get(`/consultion/files/${id}`)
+            const { data } = response
+            if (data.length > 0) {
+                setFilesDrop(data)
+            } else {
+                setFilesDrop([])
+            }
+        } catch (error) {
+            console.log(error)
+            return error
+        }
+    }
+
     const getThemes = async () => {
         setLoading(true)
         try {
@@ -137,6 +155,7 @@ export default function ConsultationRecord(props) {
             if (consult) {
                 await getThemes()
                 await getSessions(consult.paciente_id, id)
+                await handleGetFiles()
             }
         } catch (error) {
             alert.error('Ocorreu um arro ao carregar A instituição')
@@ -356,6 +375,26 @@ export default function ConsultationRecord(props) {
         setCronologicData(newData);
     };
 
+    const handleRemoveFile = async (fileId, key_file) => {
+        setLoading(true)
+        try {
+            const response = await api.delete(`/consultion/file/delete/${fileId}?key_file=${key_file}`)
+
+            if (response.status === 200) {
+                alert.success('Arquivo excluído.')
+                await handleGetFiles()
+            } else {
+                alert.error('Ocorreu um erro ao deletar Arquivo.')
+            }
+        } catch (error) {
+            console.log(error)
+            alert.error('Ocorreu um erro ao deletar Arquivo.')
+            return error
+        } finally {
+            setLoading(false)
+        }
+    };
+
     // const addNewCronologicData = () => {
     //     setCronologicData([...cronologicData, { idade_inicial: 0, idade_final: 5 }]);
     // };
@@ -489,8 +528,6 @@ export default function ConsultationRecord(props) {
                     );
                 })}
             </Box>
-
-
 
 
             <Box sx={{ display: 'flex', gap: 2 }}>
@@ -847,73 +884,126 @@ export default function ConsultationRecord(props) {
                             <Divider distance={5} />
                         </Box>
                     </Box>
-                </Box>
 
-                <Box sx={{
-                    display: 'flex', gap: 2, backgroundColor: colorPalette.secondary, padding: '15px 10px', borderRadius: 2,
-                    flexDirection: 'column', alignItems: 'center', width: '30%'
-                }}>
-                    <Text light large>Dados do Paciente/Sessão</Text>
-                    <Avatar src={consultRecordData?.url_foto_paci || ''} sx={{
-                        height: { xs: 45, sm: 45, md: 45, lg: 120 },
-                        width: { xs: 45, sm: 45, md: 45, lg: 120 },
-                    }} variant="circle"
-                    />
+
+                    <Box sx={{
+                        display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 1.8, backgroundColor: colorPalette.secondary,
+                        padding: '30px', gap: 2
+                    }}>
+                        <Text bold title>Arquivos</Text>
+                        <DropZoneSession callBack={() => handleGetFiles()} filesDrop={filesDrop} id={id} />
+                        {filesDrop?.length > 0 &&
+                            <Box sx={{ display: 'flex', gap: 2 }}>
+                                {filesDrop?.map((item, index) => {
+                                    const typePdf = item?.name?.includes('pdf') || null;
+                                    return (
+                                        <Box key={index} sx={{ display: 'flex', gap: 1, backgroundColor: colorPalette.primary, padding: '5px 12px', borderRadius: 2, alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }} >
+                                            <Box sx={{ display: 'flex', gap: 1, padding: '0px 12px', borderRadius: 2, alignItems: 'center', justifyContent: 'space-between' }} >
+                                                <Text small style={{
+                                                    whiteSpace: 'nowrap',
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis',
+                                                    maxWidth: '150px'
+                                                }}>
+                                                    {encodeURIComponent(item?.name_file)}
+                                                </Text>
+                                                <Box sx={{
+                                                    ...styles.menuIcon,
+                                                    width: 12,
+                                                    height: 12,
+                                                    aspectRatio: '1:1',
+                                                    backgroundImage: `url(${icons.gray_close})`,
+                                                    transition: '.3s',
+                                                    zIndex: 9999,
+                                                    "&:hover": {
+                                                        opacity: 0.8,
+                                                        cursor: 'pointer'
+                                                    }
+                                                }} onClick={() => handleRemoveFile(item?.id_arq_sessao, item?.key_file)} />
+                                            </Box>
+                                            <Link href={item?.location || ''} target="_blank">
+                                                <Box
+                                                    sx={{
+                                                        backgroundImage: `url('${typePdf ? '/icons/pdf_icon.png' : item?.location}')`,
+                                                        backgroundSize: 'cover',
+                                                        backgroundRepeat: 'no-repeat',
+                                                        backgroundPosition: 'center center',
+                                                        width: { xs: '100%', sm: 100, md: 100, lg: 150, xl: 150 },
+                                                        aspectRatio: '1/1',
+                                                    }} />
+                                            </Link>
+                                        </Box>
+                                    )
+                                })}
+                    </Box>}
+                </Box>
+            </Box>
+
+            <Box sx={{
+                display: 'flex', gap: 2, backgroundColor: colorPalette.secondary, padding: '15px 10px', borderRadius: 2,
+                flexDirection: 'column', alignItems: 'center', width: '30%'
+            }}>
+                <Text light large>Dados do Paciente/Sessão</Text>
+                <Avatar src={consultRecordData?.url_foto_paci || ''} sx={{
+                    height: { xs: 45, sm: 45, md: 45, lg: 120 },
+                    width: { xs: 45, sm: 45, md: 45, lg: 120 },
+                }} variant="circle"
+                />
+
+                <Divider />
+
+                <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', width: '100%', padding: '10px 15px' }}>
+                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Text light style={{ color: colorPalette.third }}>Nome:</Text>
+                        <Text bold style={{ color: colorPalette.third }}>{consultRecordData?.paciente}</Text>
+                    </Box>
+                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Text light style={{ color: colorPalette.third }}>Idade:</Text>
+                        <Text bold style={{ color: colorPalette.third }}>{formatTimeStamp(consultRecordData?.nascimento)} - ({calculationAgeUser(consultRecordData?.nascimento)} Anos)</Text>
+                    </Box>
+                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Text light style={{ color: colorPalette.third }}>Empresa:</Text>
+                        <Text bold style={{ color: colorPalette.third }}>{consultRecordData?.empresa || 'Particular'}</Text>
+                    </Box>
+                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Text light style={{ color: colorPalette.third }}>Agendamento:</Text>
+                        <Text bold style={{ color: colorPalette.third }}>{formatTimeStamp(consultRecordData?.data, true) || '-'}</Text>
+                    </Box>
+                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Text light style={{ color: colorPalette.third }}>Nº Sessão:</Text>
+                        <Text bold style={{ color: colorPalette.third }}>{currentSessionNumber || '-'}</Text>
+                    </Box>
 
                     <Divider />
 
-                    <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', width: '100%', padding: '10px 15px' }}>
-                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'space-between' }}>
-                            <Text light style={{ color: colorPalette.third }}>Nome:</Text>
-                            <Text bold style={{ color: colorPalette.third }}>{consultRecordData?.paciente}</Text>
-                        </Box>
-                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'space-between' }}>
-                            <Text light style={{ color: colorPalette.third }}>Idade:</Text>
-                            <Text bold style={{ color: colorPalette.third }}>{formatTimeStamp(consultRecordData?.nascimento)} - ({calculationAgeUser(consultRecordData?.nascimento)} Anos)</Text>
-                        </Box>
-                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'space-between' }}>
-                            <Text light style={{ color: colorPalette.third }}>Empresa:</Text>
-                            <Text bold style={{ color: colorPalette.third }}>{consultRecordData?.empresa || 'Particular'}</Text>
-                        </Box>
-                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'space-between' }}>
-                            <Text light style={{ color: colorPalette.third }}>Agendamento:</Text>
-                            <Text bold style={{ color: colorPalette.third }}>{formatTimeStamp(consultRecordData?.data, true) || '-'}</Text>
-                        </Box>
-                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'space-between' }}>
-                            <Text light style={{ color: colorPalette.third }}>Nº Sessão:</Text>
-                            <Text bold style={{ color: colorPalette.third }}>{currentSessionNumber || '-'}</Text>
-                        </Box>
 
-                        <Divider />
-
-
-                        <Button text="Finalizar sessão" style={{}} onClick={() => {
-                            handleUpdateNotes()
-                        }} />
+                    <Button text="Finalizar sessão" style={{}} onClick={() => {
+                        handleUpdateNotes()
+                    }} />
+                    <Box sx={{
+                        display: 'flex', padding: '5px 12px',
+                        alignItems: 'center', justifyContent: 'center', gap: 1, border: `1px solid green`,
+                        borderRadius: 2,
+                        transition: '.3s',
+                        "&:hover": {
+                            opacity: 0.8,
+                            cursor: 'pointer',
+                            transform: 'scale(1.03, 1.03)'
+                        }
+                    }} onClick={() => {
+                        handleUpdateNotes()
+                    }}>
                         <Box sx={{
-                            display: 'flex', padding: '5px 12px',
-                            alignItems: 'center', justifyContent: 'center', gap: 1, border: `1px solid green`,
-                            borderRadius: 2,
+                            ...styles.menuIcon,
+                            backgroundImage: `url('/icons/include_icon.png')`,
                             transition: '.3s',
-                            "&:hover": {
-                                opacity: 0.8,
-                                cursor: 'pointer',
-                                transform: 'scale(1.03, 1.03)'
-                            }
-                        }} onClick={() => {
-                            handleUpdateNotes()
-                        }}>
-                            <Box sx={{
-                                ...styles.menuIcon,
-                                backgroundImage: `url('/icons/include_icon.png')`,
-                                transition: '.3s',
-                                width: 25, height: 25,
-                            }} />
-                            <Text>Salvar Etapa</Text>
-                        </Box>
+                            width: 25, height: 25,
+                        }} />
+                        <Text>Salvar Etapa</Text>
                     </Box>
                 </Box>
             </Box>
+        </Box >
             <Backdrop open={showTematic}>
                 <ContentContainer>
                     <Box sx={{ display: 'flex', gap: 3, justifyContent: 'space-between', alignItems: 'center' }}>
@@ -948,6 +1038,93 @@ export default function ConsultationRecord(props) {
                 </ContentContainer>
             </Backdrop>
         </>
+    )
+}
+
+
+const DropZoneSession = ({ callBack = () => { }, setFilesDrop, id }) => {
+
+    const { setLoading, alert, theme } = useAppContext()
+
+
+    const onDropFiles = async (files) => {
+        try {
+            setLoading(true);
+            const uploadedFiles = files.map(file => ({
+                file,
+                id: getRandomInt(1, 999),
+                name: file.name,
+                preview: URL.createObjectURL(file),
+                progress: 0,
+                uploaded: false,
+                error: false,
+                url: null
+            }));
+
+            // Iniciar o upload imediatamente
+            for (const uploadedFile of uploadedFiles) {
+                await handleUpload(uploadedFile);
+            }
+
+            callBack()
+
+        } catch (error) {
+            console.log(error);
+            alert.error('Erro ao processar os arquivos.');
+        } finally {
+            setLoading(false);
+        }
+    }
+
+
+    const handleUpload = async (uploadedFile) => {
+        setLoading(true);
+        const formData = new FormData();
+        formData.append('file', uploadedFile?.file, encodeURIComponent(uploadedFile?.name));
+
+        try {
+            const response = await api.post(`/consultion/file/upload?consultionId=${id}`, formData);
+            const { status } = response;
+
+            if (status === 201) {
+                alert.info('Arquivo(s) atualizado(s).');
+            } else {
+                alert.error('Tivemos um problema ao fazer upload do arquivo.');
+            }
+        } catch (error) {
+            alert.error('Tivemos um problema ao fazer upload do arquivo.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
+    return (
+        <Dropzone
+            accept={{
+                'image/jpeg': ['.jpeg', '.JPEG', '.jpg', '.JPG'],
+                'image/png': ['.png', '.PNG'],
+                'application/pdf': ['.pdf'],
+                'text/csv': ['.csv'], // Adicionando suporte para arquivos CSV
+                'application/vnd.ms-excel': ['.xls'], // Adicionando suporte para arquivos XLS
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'] // Adicionando suporte para arquivos XLSX
+            }}
+            onDrop={onDropFiles}
+            addRemoveLinks={true}
+            removeLink={(file) => handleRemoveFile(file)}
+        >
+            {({ getRootProps, getInputProps, isDragActive, isDragReject }) => (
+                <Box {...getRootProps()}>
+                    <input {...getInputProps()} />
+                    <Box sx={{ textAlign: 'center', display: 'flex', fontSize: 12, gap: 0, alignItems: 'center' }}>
+                        <Button small style={{ height: 25, borderRadius: '6px 0px 0px 6px' }} text="Selecionar" />
+                        <Box sx={{ textAlign: 'center', display: 'flex', border: `1px solid ${(theme ? '#eaeaea' : '#404040')}`, padding: '0px 15px', maxWidth: 400, height: 25, alignItems: 'center' }}>
+                            <Text light small>Selecione um arquivo ou foto</Text>
+                        </Box>
+                    </Box>
+                </Box>
+            )}
+        </Dropzone>
     )
 }
 
