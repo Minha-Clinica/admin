@@ -373,7 +373,7 @@ export default function ConsultationRecord(props) {
         const newData = [...cronologicData];
         newData[index][key] = value;
         setCronologicData(newData);
-    }; 
+    };  
 
     const handleRemoveFile = async (fileId, key_file) => {
         setLoading(true)
