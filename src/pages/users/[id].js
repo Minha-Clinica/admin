@@ -4,10 +4,11 @@ import { Avatar, Backdrop, useMediaQuery, useTheme } from "@mui/material"
 import { api } from "../../api/api"
 import { Box, ContentContainer, TextInput, Text, Button, Divider } from "../../atoms"
 import { CheckBoxComponent, CustomDropzone, RadioItem, SectionHeader } from "../../organisms"
+import Dropzone from "react-dropzone"
 import { useAppContext } from "../../context/AppContext"
-import { icons } from "../../organisms/layout/Colors"
+import { Colors, icons } from "../../organisms/layout/Colors"
 import { createUser, deleteFile, deleteUser, editeUser } from "../../validators/api-requests"
-import { emailValidator, formatCPF, formatterHours, horarios, statusColor } from "../../helpers"
+import { emailValidator, formatCPF, formatterHours, getRandomInt, horarios, statusColor } from "../../helpers"
 import { SelectList } from "../../organisms/select/SelectList"
 import Link from "next/link"
 import { checkUserPermissions } from "../../validators/checkPermissionUser"
@@ -181,6 +182,27 @@ export default function EditUser() {
         } catch (error) {
             console.log(error);
             return error;
+        }
+    };
+
+
+    const handleRemoveFile = async (fileId, key_file) => {
+        setLoading(true)
+        try {
+            const response = await api.delete(`/file/delete/${fileId}?key_file=${key_file}`)
+
+            if (response.status === 200) {
+                alert.success('Arquivo excluído.')
+                await getFileUser()
+            } else {
+                alert.error('Ocorreu um erro ao deletar Arquivo.')
+            }
+        } catch (error) {
+            console.log(error)
+            alert.error('Ocorreu um erro ao deletar Arquivo.')
+            return error
+        } finally {
+            setLoading(false)
         }
     };
 
@@ -373,6 +395,10 @@ export default function EditUser() {
         },
         {
             label: 'Sessões', value: 'sessoes', showPerfil: ['paciente'],
+            icon: 'chat.png'
+        },
+        {
+            label: 'Documentos', value: 'documents', showPerfil: ['paciente'],
             icon: 'chat.png'
         },
     ]
@@ -578,6 +604,68 @@ export default function EditUser() {
                     </ContentContainer>
                 </>
             }
+
+
+            {menuSelected === 'documents' &&
+                <>
+                    <ContentContainer>
+                        <Text title bold>Arquivos</Text>
+
+                        {filesUser?.length > 0 ? (
+                            <Box sx={{ display: 'flex', gap: 2 }}>
+                                {filesUser?.map((item, index) => {
+                                    const typePdf = item?.name?.includes('pdf') || null;
+                                    return (
+                                        <Box key={index} sx={{ display: 'flex', gap: 1, backgroundColor: colorPalette.primary, padding: '5px 12px', borderRadius: 2, alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }} >
+                                            <Box sx={{ display: 'flex', gap: 1, padding: '0px 12px', borderRadius: 2, alignItems: 'center', justifyContent: 'space-between', width: '100%' }} >
+                                                <Text small style={{
+                                                    whiteSpace: 'nowrap',
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis',
+                                                    maxWidth: '150px'
+                                                }}>
+                                                    {encodeURIComponent(item?.name_file)}
+                                                </Text>
+                                                <Box sx={{
+                                                    ...styles.menuIcon,
+                                                    width: 12,
+                                                    height: 12,
+                                                    aspectRatio: '1:1',
+                                                    backgroundImage: `url(${icons.gray_close})`,
+                                                    transition: '.3s',
+                                                    zIndex: 9999,
+                                                    "&:hover": {
+                                                        opacity: 0.8,
+                                                        cursor: 'pointer'
+                                                    }
+                                                }} onClick={() => handleRemoveFile(item?.id_doc_usuario, item?.key_file)} />
+                                            </Box>
+                                            <Link href={item?.location || ''} target="_blank">
+                                                <Box
+                                                    sx={{
+                                                        backgroundImage: `url('${typePdf ? '/icons/pdf_icon.png' : item?.location}')`,
+                                                        backgroundSize: 'cover',
+                                                        backgroundRepeat: 'no-repeat',
+                                                        backgroundPosition: 'center center',
+                                                        width: { xs: '100%', sm: 100, md: 100, lg: 150, xl: 150 },
+                                                        aspectRatio: '1/1',
+                                                    }} />
+                                            </Link>
+                                        </Box>
+                                    )
+                                })}
+                            </Box>
+                            ) : (
+                                <Box>
+                                    <Text light>O usuário não possúi arquivos armazenados.</Text>
+                                </Box>
+                            )
+                        }
+                        <DropZoneSession callBack={() => getFileUser()} id={id} />
+
+                    </ContentContainer>
+                </>
+            }
         </>
     )
 }
@@ -634,12 +722,112 @@ const SessionsPacient = ({ data }) => {
                         </Box>
 
                         <Link href={`/consultation/${item.id_consulta}`} target="_blank">
-                            <Button text="Detalhes da Sessão"/>
+                            <Button text="Detalhes da Sessão" />
                         </Link>
                     </Box>
                 )
             })}
         </Box>
+    )
+}
+
+
+const DropZoneSession = ({ callBack = () => { }, setFilesDrop, id }) => {
+
+    const { setLoading, alert, colorPalette } = useAppContext()
+
+
+    const onDropFiles = async (files) => {
+        try {
+            setLoading(true);
+            const uploadedFiles = files.map(file => ({
+                file,
+                id: getRandomInt(1, 999),
+                name: file.name,
+                preview: URL.createObjectURL(file),
+                progress: 0,
+                uploaded: false,
+                error: false,
+                url: null
+            }));
+
+            // Iniciar o upload imediatamente
+            for (const uploadedFile of uploadedFiles) {
+                await handleUpload(uploadedFile);
+            }
+
+            callBack()
+
+        } catch (error) {
+            console.log(error);
+            alert.error('Erro ao processar os arquivos.');
+        } finally {
+            setLoading(false);
+        }
+    }
+
+
+    const handleUpload = async (uploadedFile) => {
+        setLoading(true);
+        const formData = new FormData();
+        formData.append('file', uploadedFile?.file, encodeURIComponent(uploadedFile?.name));
+
+        try {
+            const response = await api.post(`/file/user/upload?usuario_id=${id}`, formData);
+            const { status } = response;
+
+            if (status === 201) {
+                alert.info('Arquivo(s) atualizado(s).');
+            } else {
+                alert.error('Tivemos um problema ao fazer upload do arquivo.');
+            }
+        } catch (error) {
+            alert.error('Tivemos um problema ao fazer upload do arquivo.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
+    return (
+        <Dropzone
+            accept={{
+                'image/jpeg': ['.jpeg', '.JPEG', '.jpg', '.JPG'],
+                'image/png': ['.png', '.PNG'],
+                'application/pdf': ['.pdf'],
+                'text/csv': ['.csv'], // Adicionando suporte para arquivos CSV
+                'application/vnd.ms-excel': ['.xls'], // Adicionando suporte para arquivos XLS
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'] // Adicionando suporte para arquivos XLSX
+            }}
+            onDrop={onDropFiles}
+            addRemoveLinks={true}
+            removeLink={(file) => handleRemoveFile(file)}
+        >
+            {({ getRootProps, getInputProps, isDragActive, isDragReject }) => (
+                <Box {...getRootProps()}
+                    sx={{
+                        ...styles.dropZoneContainer,
+                        backgroundColor: colorPalette?.primary + '55',
+                        gap: 2
+                    }}
+                >
+                    <input {...getInputProps()} />
+                    <Box style={{ textAlign: 'center', display: 'flex', fontSize: 12 }}>
+                        <Text small light>
+                            {'Clique ou arraste aqui seus arquivos para upload'}
+                        </Text>
+                    </Box>
+                    <Box sx={{
+                        ...styles.icon,
+                        backgroundImage: `url('/icons/upload_icon.png')`,
+                        mixBlendMode: 'multiply',
+                        backgroundSize: 'contain',
+                        width: 50,
+                        height: 50,
+                    }} />
+                </Box>
+            )}
+        </Dropzone>
     )
 }
 
@@ -650,6 +838,18 @@ const styles = {
         justifyContent: 'space-between',
         gap: 1.5,
         padding: '40px'
+    },
+    dropZoneContainer: {
+        display: 'flex',
+        width: '100%',
+        padding: '40px',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 2,
+        flexDirection: 'column',
+        border: `2px dashed ${Colors.clearInput + 'aa'}`,
+        cursor: 'pointer',
+
     },
     containerContract: {
         display: 'flex',
@@ -854,3 +1054,5 @@ export const EditFile = (props) => {
         </Backdrop>
     )
 }
+
+
