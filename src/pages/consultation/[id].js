@@ -1,6 +1,6 @@
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
-import { Avatar, Backdrop, useMediaQuery, useTheme } from "@mui/material"
+import { Avatar, Backdrop, Tooltip, useMediaQuery, useTheme } from "@mui/material"
 import { api } from "../../api/api"
 import { Box, ContentContainer, TextInput, Text, Button, Divider } from "../../atoms"
 import { SectionHeader } from "../../organisms"
@@ -25,6 +25,8 @@ export default function ConsultationRecord(props) {
     const [arrayTematic, setArrayTematic] = useState([])
     const [tematicName, setTematicName] = useState({ tema: '' })
     const [showTematic, setShowTematic] = useState(false)
+    const [showComment, setShowComment] = useState({ active: false, index: 0, text: '', new: true })
+
     const [currentSessionNumber, setCurrentSessionNumber] = useState(1)
     const [filesDrop, setFilesDrop] = useState([])
     const [opitionsMark, setOpitionsMark] = useState({
@@ -322,6 +324,23 @@ export default function ConsultationRecord(props) {
         setDiscomfortLevel(newData);
     };
 
+    const handleAddComment = () => {
+        const newData = [...discomfortLevel];
+        newData[showComment.index] = { ...newData[showComment.index], comment: showComment.text };
+        setDiscomfortLevel(newData);
+        setShowComment({ active: false, index: null, text: null, new: true });
+    };
+
+    const handleDeleteComment = () => {
+        const newData = [...discomfortLevel];
+        newData[showComment.index] = { ...newData[showComment.index], comment: null };
+        setDiscomfortLevel(newData);
+        setShowComment({ active: false, index: null, text: '', new: true });
+    };
+
+
+
+
     // const handleInputSomaticChange = (cronoIndex, somaticIndex, key, value, type) => {
     //     const newData = [...somaticData];
     //     newData[somaticIndex][key] = value;
@@ -373,7 +392,7 @@ export default function ConsultationRecord(props) {
         const newData = [...cronologicData];
         newData[index][key] = value;
         setCronologicData(newData);
-    };  
+    };
 
     const handleRemoveFile = async (fileId, key_file) => {
         setLoading(true)
@@ -738,12 +757,33 @@ export default function ConsultationRecord(props) {
                                                                 <Box key={discomfortIndex} sx={{
                                                                     display: 'flex', gap: 2, alignItems: 'center', justifyContent: 'flex-start',
                                                                     padding: '8px 12px',
+                                                                    position: 'relative',
                                                                     // backgroundColor: colorPalette?.buttonColor + '66',
                                                                     backgroundColor: colorPalette?.secondary,
                                                                     border: `1px solid #eaeaea`,
                                                                     borderRadius: 2,
                                                                     boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
                                                                 }}>
+                                                                    {data?.comment &&
+                                                                        <Box sx={{ display: 'flex', padding: '2px 4px', position: 'absolute', top: -8, left: -8 }}
+                                                                            onClick={() => setShowComment({ active: true, index: discomfortIndex, text: data?.comment, new: false })}>
+                                                                            <Tooltip title="Possúi comentário">
+                                                                                <div>
+                                                                                    <Box sx={{
+                                                                                        ...styles.menuIcon,
+                                                                                        backgroundImage: `url('/icons/messenger.png')`,
+                                                                                        transition: '.1s',
+                                                                                        width: 13,
+                                                                                        height: 13,
+                                                                                        "&:hover": {
+                                                                                            cursor: 'pointer',
+                                                                                            transform: 'scale(1.03, 1.03)'
+                                                                                        },
+                                                                                    }} />
+                                                                                </div>
+                                                                            </Tooltip>
+                                                                        </Box>
+                                                                    }
                                                                     {data?.microfase && <Box sx={{ display: 'flex', padding: '2px 4px', backgroundColor: 'orange' }}><Text>{data?.microfase && 'MF'}</Text></Box>}
                                                                     {data?.threeP && <Box sx={{ display: 'flex', padding: '2px 4px', backgroundColor: 'lightgreen' }}><Text>{data?.threeP && '3P'}</Text></Box>}
                                                                     <TextInput
@@ -752,25 +792,42 @@ export default function ConsultationRecord(props) {
                                                                         onChange={(e) => handleInputDiscomfortChange(discomfortIndex, 'nivel_desc', parseInt(e.target.value))}
                                                                         sx={{ width: 80 }}
                                                                     />
-                                                                    <Box sx={{
-                                                                        ...styles.menuIcon,
-                                                                        backgroundImage: `url('/icons/remove_icon.png')`,
-                                                                        transition: '.3s',
-                                                                        width: 13,
-                                                                        height: 13,
-                                                                        "&:hover": {
-                                                                            opacity: 0.8,
-                                                                            cursor: 'pointer',
-                                                                            transform: 'scale(1.1, 1.1)'
-                                                                        },
-                                                                    }} onClick={() => removeDiscomfortData(discomfortIndex)} text="Remover" />
+                                                                    <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column' }}>
+                                                                        <Box sx={{
+                                                                            ...styles.menuIcon,
+                                                                            backgroundImage: `url('/icons/comment.png')`,
+                                                                            transition: '.1s',
+                                                                            width: 13,
+                                                                            height: 13,
+                                                                            "&:hover": {
+                                                                                cursor: 'pointer',
+                                                                                transform: 'scale(1.03, 1.03)'
+                                                                            },
+                                                                        }}
+                                                                            onClick={() => setShowComment({ active: true, index: discomfortIndex, new: true })}
+                                                                            text="Remover" />
+                                                                        <Box sx={{
+                                                                            ...styles.menuIcon,
+                                                                            backgroundImage: `url('/icons/remove_icon.png')`,
+                                                                            transition: '.1s',
+                                                                            width: 13,
+                                                                            height: 13,
+                                                                            "&:hover": {
+                                                                                cursor: 'pointer',
+                                                                                transform: 'scale(1.03, 1.03)'
+                                                                            },
+                                                                        }}
+                                                                            onClick={() => removeDiscomfortData(discomfortIndex)}
+                                                                            text="Remover" />
+                                                                    </Box>
                                                                 </Box>
                                                             )
                                                         ))}
                                                     </Box>
                                                 </Box>
 
-                                                {selectedConditions.includes('somatico') &&
+                                                {
+                                                    selectedConditions.includes('somatico') &&
 
                                                     <Box sx={{
                                                         display: 'flex', gap: 1.8, justifyContent: 'flex-start', flexDirection: 'column', border: `1px solid #eaeaea`,
@@ -935,75 +992,75 @@ export default function ConsultationRecord(props) {
                                         </Box>
                                     )
                                 })}
-                    </Box>}
+                            </Box>}
+                    </Box>
                 </Box>
-            </Box>
 
-            <Box sx={{
-                display: 'flex', gap: 2, backgroundColor: colorPalette.secondary, padding: '15px 10px', borderRadius: 2,
-                flexDirection: 'column', alignItems: 'center', width: '30%'
-            }}>
-                <Text light large>Dados do Paciente/Sessão</Text>
-                <Avatar src={consultRecordData?.url_foto_paci || ''} sx={{
-                    height: { xs: 45, sm: 45, md: 45, lg: 120 },
-                    width: { xs: 45, sm: 45, md: 45, lg: 120 },
-                }} variant="circle"
-                />
-
-                <Divider />
-
-                <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', width: '100%', padding: '10px 15px' }}>
-                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'space-between' }}>
-                        <Text light style={{ color: colorPalette.third }}>Nome:</Text>
-                        <Text bold style={{ color: colorPalette.third }}>{consultRecordData?.paciente}</Text>
-                    </Box>
-                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'space-between' }}>
-                        <Text light style={{ color: colorPalette.third }}>Idade:</Text>
-                        <Text bold style={{ color: colorPalette.third }}>{formatTimeStamp(consultRecordData?.nascimento)} - ({calculationAgeUser(consultRecordData?.nascimento)} Anos)</Text>
-                    </Box>
-                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'space-between' }}>
-                        <Text light style={{ color: colorPalette.third }}>Empresa:</Text>
-                        <Text bold style={{ color: colorPalette.third }}>{consultRecordData?.empresa || 'Particular'}</Text>
-                    </Box>
-                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'space-between' }}>
-                        <Text light style={{ color: colorPalette.third }}>Agendamento:</Text>
-                        <Text bold style={{ color: colorPalette.third }}>{formatTimeStamp(consultRecordData?.data, true) || '-'}</Text>
-                    </Box>
-                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'space-between' }}>
-                        <Text light style={{ color: colorPalette.third }}>Nº Sessão:</Text>
-                        <Text bold style={{ color: colorPalette.third }}>{currentSessionNumber || '-'}</Text>
-                    </Box>
+                <Box sx={{
+                    display: 'flex', gap: 2, backgroundColor: colorPalette.secondary, padding: '15px 10px', borderRadius: 2,
+                    flexDirection: 'column', alignItems: 'center', width: '30%'
+                }}>
+                    <Text light large>Dados do Paciente/Sessão</Text>
+                    <Avatar src={consultRecordData?.url_foto_paci || ''} sx={{
+                        height: { xs: 45, sm: 45, md: 45, lg: 120 },
+                        width: { xs: 45, sm: 45, md: 45, lg: 120 },
+                    }} variant="circle"
+                    />
 
                     <Divider />
 
+                    <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', width: '100%', padding: '10px 15px' }}>
+                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'space-between' }}>
+                            <Text light style={{ color: colorPalette.third }}>Nome:</Text>
+                            <Text bold style={{ color: colorPalette.third }}>{consultRecordData?.paciente}</Text>
+                        </Box>
+                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'space-between' }}>
+                            <Text light style={{ color: colorPalette.third }}>Idade:</Text>
+                            <Text bold style={{ color: colorPalette.third }}>{formatTimeStamp(consultRecordData?.nascimento)} - ({calculationAgeUser(consultRecordData?.nascimento)} Anos)</Text>
+                        </Box>
+                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'space-between' }}>
+                            <Text light style={{ color: colorPalette.third }}>Empresa:</Text>
+                            <Text bold style={{ color: colorPalette.third }}>{consultRecordData?.empresa || 'Particular'}</Text>
+                        </Box>
+                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'space-between' }}>
+                            <Text light style={{ color: colorPalette.third }}>Agendamento:</Text>
+                            <Text bold style={{ color: colorPalette.third }}>{formatTimeStamp(consultRecordData?.data, true) || '-'}</Text>
+                        </Box>
+                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'space-between' }}>
+                            <Text light style={{ color: colorPalette.third }}>Nº Sessão:</Text>
+                            <Text bold style={{ color: colorPalette.third }}>{currentSessionNumber || '-'}</Text>
+                        </Box>
 
-                    <Button text="Finalizar sessão" style={{}} onClick={() => {
-                        handleUpdateNotes()
-                    }} />
-                    <Box sx={{
-                        display: 'flex', padding: '5px 12px',
-                        alignItems: 'center', justifyContent: 'center', gap: 1, border: `1px solid green`,
-                        borderRadius: 2,
-                        transition: '.3s',
-                        "&:hover": {
-                            opacity: 0.8,
-                            cursor: 'pointer',
-                            transform: 'scale(1.03, 1.03)'
-                        }
-                    }} onClick={() => {
-                        handleUpdateNotes()
-                    }}>
-                        <Box sx={{
-                            ...styles.menuIcon,
-                            backgroundImage: `url('/icons/include_icon.png')`,
-                            transition: '.3s',
-                            width: 25, height: 25,
+                        <Divider />
+
+
+                        <Button text="Finalizar sessão" style={{}} onClick={() => {
+                            handleUpdateNotes()
                         }} />
-                        <Text>Salvar Etapa</Text>
+                        <Box sx={{
+                            display: 'flex', padding: '5px 12px',
+                            alignItems: 'center', justifyContent: 'center', gap: 1, border: `1px solid green`,
+                            borderRadius: 2,
+                            transition: '.3s',
+                            "&:hover": {
+                                opacity: 0.8,
+                                cursor: 'pointer',
+                                transform: 'scale(1.03, 1.03)'
+                            }
+                        }} onClick={() => {
+                            handleUpdateNotes()
+                        }}>
+                            <Box sx={{
+                                ...styles.menuIcon,
+                                backgroundImage: `url('/icons/include_icon.png')`,
+                                transition: '.3s',
+                                width: 25, height: 25,
+                            }} />
+                            <Text>Salvar Etapa</Text>
+                        </Box>
                     </Box>
                 </Box>
-            </Box>
-        </Box >
+            </Box >
             <Backdrop open={showTematic}>
                 <ContentContainer>
                     <Box sx={{ display: 'flex', gap: 3, justifyContent: 'space-between', alignItems: 'center' }}>
@@ -1034,6 +1091,48 @@ export default function ConsultationRecord(props) {
                     <Box sx={{ display: 'flex', width: '100%', gap: 1 }}>
                         <Button small text="Adicionar" style={{ width: '100%' }} onClick={() => handleAddTheme()} />
                         <Button small secondary text="Cancelar" style={{ width: '100%' }} onClick={() => setShowTematic(false)} />
+                    </Box>
+                </ContentContainer>
+            </Backdrop>
+
+
+            <Backdrop open={showComment.active}>
+                <ContentContainer>
+                    <Box sx={{ display: 'flex', gap: 3, justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Text bold large>Adicionar Comentário</Text>
+                        <Box sx={{
+                            ...styles.menuIcon,
+                            backgroundImage: `url(${icons.gray_close})`,
+                            transition: '.3s',
+                            width: 15,
+                            height: 15,
+                            "&:hover": {
+                                opacity: 0.8,
+                                cursor: 'pointer'
+                            },
+                        }}
+                            onClick={() => setShowComment({ active: false, index: null, text: '', new: true })} />
+                    </Box>
+                    <Divider />
+                    <Box sx={{ display: 'flex', width: '100%' }}>
+                        <TextInput
+                            label="Comentário:"
+                            multiline={true}
+                            value={showComment?.text || ''}
+                            rows={3}
+                            onChange={(e) => setShowComment({ ...showComment, text: e.target.value })}
+                            sx={{ width: '100%' }}
+                        />
+                    </Box>
+                    <Box sx={{ display: 'flex', width: '100%', gap: 1 }}>
+                        <Button small text={showComment.new ? "Adicionar" : "Atualizar"} style={{ width: '100%' }} onClick={() => {
+                            if (showComment.text) {
+                                handleAddComment()
+                            } else {
+                                alert.info('Escreva algum comentário')
+                            }
+                        }} />
+                        <Button small secondary text={showComment.new ? "Cancelar" : "Deletar"} style={{ width: '100%' }} onClick={() => handleDeleteComment()} />
                     </Box>
                 </ContentContainer>
             </Backdrop>

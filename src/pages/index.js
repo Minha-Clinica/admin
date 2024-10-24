@@ -394,27 +394,41 @@ function Home() {
 
    const verifyNumberSessionToday = async () => {
       try {
-         // const verifyToday = await api.get(`/consultation/patients/verify-qnt-curr-today/${dateSelected?.userId || user?.id}`)
-         // const { qntSessions } = verifyToday.data
-         const currentDate = new Date();
-         const currentDay = currentDate.getDate()
-         const daySelected = new Date(dateSelected.day).getDate() + 1
-
-         if ((daySelected === currentDay)) {
-            // if ((daySelected === currentDay) && qntSessions >= 1) {
-            // alert.info('Você já possúi uma sessão agendada para hoje. Para agendar mais uma sessão para hoje, entre em contato pelo WhatsApp com o atendimento, para verificar um encaixe.')
-            alert.info('Para agendar uma sessão para 24 horas antes da data, entre em contato pelo WhatsApp com o atendimento, para verificar um encaixe.')
-
-            setShowContactWpp(true)
-            return false
-         }
-
-         return true
+        const currentDate = new Date(); // Data e hora atual
+    
+        // Converte a data selecionada para um objeto Date
+        const selectedDate = new Date(`${dateSelected.day}T${dateSelected.hour}:00`); // Formato ISO adequado
+    
+        // Ajusta a data atual para o fuso horário de Brasília (UTC-3)
+        const offset = currentDate.getTimezoneOffset() * 60000; // Converte minutos para milissegundos
+        const currentDateInBrazil = new Date(currentDate.getTime() + offset - (3 * 60 * 60 * 1000)); // UTC-3
+    
+        // Ajusta a data selecionada para o fuso horário de Brasília (UTC-3)
+        const selectedDateInBrazil = new Date(selectedDate.getTime() + offset - (3 * 60 * 60 * 1000)); // UTC-3
+    
+        // Verifica se as datas foram criadas corretamente
+        if (isNaN(currentDateInBrazil) || isNaN(selectedDateInBrazil)) {
+          console.error('Data inválida:', { currentDateInBrazil, selectedDateInBrazil });
+          return false;
+        }
+    
+        // Calcula a diferença entre as datas em milissegundos
+        const timeDifference = selectedDateInBrazil.getTime() - currentDateInBrazil.getTime();
+    
+        // Verifica se a diferença é menor que 24 horas (24 * 60 * 60 * 1000 milissegundos)
+        if (timeDifference <= 24 * 60 * 60 * 1000) {
+          alert.info('Para agendar uma sessão para menos de 24 horas, entre em contato pelo WhatsApp com o atendimento, para verificar um encaixe.');
+          setShowContactWpp(true);
+          return false;
+        }
+    
+        return true;
       } catch (error) {
-         console.log(error)
-         return false
+        console.log(error);
+        return false;
       }
-   }
+    };
+    
 
    const handleReservationSession = async () => {
 
