@@ -395,15 +395,10 @@ function Home() {
    const verifyNumberSessionToday = async () => {
       try {
         const currentDate = new Date(); // Data e hora atual
-    
-        // Converte a data selecionada para um objeto Date
         const selectedDate = new Date(`${dateSelected.day}T${dateSelected.hour}:00`); // Formato ISO adequado
     
-        // Ajusta a data atual para o fuso horário de Brasília (UTC-3)
         const offset = currentDate.getTimezoneOffset() * 60000; // Converte minutos para milissegundos
         const currentDateInBrazil = new Date(currentDate.getTime() + offset - (3 * 60 * 60 * 1000)); // UTC-3
-    
-        // Ajusta a data selecionada para o fuso horário de Brasília (UTC-3)
         const selectedDateInBrazil = new Date(selectedDate.getTime() + offset - (3 * 60 * 60 * 1000)); // UTC-3
     
         // Verifica se as datas foram criadas corretamente
