@@ -124,7 +124,7 @@ export default function CalendarComponent() {
     const router = useRouter()
     const { setLoading, alert, colorPalette, matches, user, userPermissions, menuItemsList, mobile } = useAppContext()
     const [isPermissionEdit, setIsPermissionEdit] = useState(false)
-    const isAdminstrator = user.perfil.includes('adminstrador')
+    const isAdminstrator = user.perfil.includes('administrador')
     const isProfissional = user.perfil.includes('profissional')
     const [users, setUsers] = useState([])
     const [duration, setDuration] = useState(60);
@@ -133,11 +133,13 @@ export default function CalendarComponent() {
         return filterReservas ? (parseInt(item.disponivel) === 1) : (item);
     };
 
+
     const fetchPermissions = () => {
         if (isAdminstrator || isProfissional) {
             setIsPermissionEdit(true)
         }
     }
+
 
     useEffect(() => {
         handleItems()

@@ -412,7 +412,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
     const [dateSelected, setDateSelected] = useState({ day: '', hour: '', profissionalId: '', reserva_id: '', consultId: '' })
     const isProfissional = user?.perfil?.includes('profissional')
     const isPartner = user?.perfil?.includes('parceiro')
-    const isAdministrator = user?.perfil?.includes('adminstrador')
+    const isAdministrator = user?.perfil?.includes('administrador')
 
     const [showAgendas, setShowAgendas] = useState({ active: false, profissionalId: null, profissionalData: {}, consultionDate: '' })
 
@@ -558,7 +558,6 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
         setLoadingPayment({ active: true, success: false, error: false, message: 'Excluíndo Sessão...' });
 
         try {
-            console.log(consultId)
             const response = await api.delete(`/consultation/delete/${consultId}`);
 
             if (response.status === 200) {
