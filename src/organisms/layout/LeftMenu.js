@@ -263,7 +263,7 @@ export const LeftMenu = ({ }) => {
 
          <Box sx={{ ...styles.menuResponsive, backgroundColor: theme ? '#fff' : colorPalette.primary + '88', gap: 2, }}>
 
-            <Box sx={{
+            <Box sx={{ 
                ...styles.icon,
                backgroundImage: `url('/icons/afectu_dark.png')`,
                backgroundSize: 'cover',
