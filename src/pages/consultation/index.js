@@ -879,7 +879,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                                                                     label="pago"
                                                                 />
 
-                                                                <Button delete text="Deletar" small
+                                                                <Button delete text="Cancelar" small
                                                                     onClick={(event) => setShowConfirmationDialog({
                                                                         active: true,
                                                                         event,
