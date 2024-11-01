@@ -387,19 +387,19 @@ export default function EditUser() {
     const showMenu = [
         {
             label: 'Dados do Usuário', value: 'userdata', showPerfil: ['administrador', 'paciente', 'parceiro'],
-            icon: 'personal-data.png'
+            icon: 'personal-data.png', permission: ['administrador', 'paciente', 'parceiro']
         },
         {
             label: 'Anamnese', value: 'anamnese', showPerfil: ['paciente'],
-            icon: 'patient.png'
+            icon: 'patient.png', permission: ['administrador']
         },
         {
             label: 'Sessões', value: 'sessoes', showPerfil: ['paciente'],
-            icon: 'chat.png'
+            icon: 'chat.png', permission: ['administrador', 'paciente', 'parceiro']
         },
         {
             label: 'Documentos', value: 'documents', showPerfil: ['paciente'],
-            icon: 'chat.png'
+            icon: 'chat.png', permission: ['administrador', 'paciente', 'parceiro']
         },
     ]
 
@@ -424,7 +424,8 @@ export default function EditUser() {
                 {showMenu?.map((item, index) => {
                     const isSelected = menuSelected === item.value
                     const isPerfil = item?.showPerfil?.some(role => userData?.perfil?.includes(role))
-                    if (userData?.perfil && isPerfil) {
+                    const permission = item?.permission?.some(role => user?.perfil?.includes(role))
+                    if (userData?.perfil && isPerfil && permission) {
 
                         return (
                             <Box key={index} sx={{

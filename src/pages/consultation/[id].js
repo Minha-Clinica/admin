@@ -351,11 +351,11 @@ export default function ConsultationRecord(props) {
         let cronologicKeyId = generateUniqueId()
         const newCronoData = { idade_inicial: 0, idade_final: 5, id: cronologicKeyId }; // Adiciona um ID único
         setCronologicData([...cronologicData, newCronoData]);
-        setDiscomfortLevel([...discomfortLevel, {
-            nivel_desc: 10, parentId: cronologicKeyId,
-            microfase: opitionsMark?.microfase,
-            threeP: opitionsMark?.threeP
-        }]);
+        // setDiscomfortLevel([...discomfortLevel, {
+        //     nivel_desc: 10, parentId: cronologicKeyId,
+        //     microfase: opitionsMark?.microfase,
+        //     threeP: opitionsMark?.threeP
+        // }]);
     };
 
     const removeCronologicData = (index) => {
@@ -374,6 +374,10 @@ export default function ConsultationRecord(props) {
             microfase: opitionsMark?.microfase,
             threeP: opitionsMark?.threeP
         }]);
+
+        if (selectedConditions.includes('somatico')) {
+            setSomaticData([...somaticData, { nivel_sintoma: 10, parentId }]);
+        }
     };
 
     const addNewSomaticData = (parentId) => {
@@ -827,7 +831,7 @@ export default function ConsultationRecord(props) {
                                                 </Box>
 
                                                 {
-                                                    selectedConditions.includes('somatico') &&
+                                                    (selectedConditions.includes('somatico') || somaticData?.length > 0) &&
 
                                                     <Box sx={{
                                                         display: 'flex', gap: 1.8, justifyContent: 'flex-start', flexDirection: 'column', border: `1px solid #eaeaea`,
