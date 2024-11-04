@@ -156,7 +156,7 @@ export default function CalendarComponent() {
     const handleEvents = async () => {
         try {
             setLoading(true)
-            const response = await api.get(`/event/profissional/agenda/1`)
+            const response = await api.get(`/event/profissional/agenda/125`)
             const { data } = response
             if (data) {
                 const eventsMap = data?.map((event) => ({
@@ -219,7 +219,7 @@ export default function CalendarComponent() {
     const handleCreateEvent = async (event) => {
         setLoading(true)
         try {
-            const response = await api.post(`/event/create/1`, { events: event })
+            const response = await api.post(`/event/create/125`, { events: event })
             if (response.status === 201) {
                 alert.success('Evento criado!')
                 handleItems()
@@ -258,7 +258,7 @@ export default function CalendarComponent() {
     const handleCreateReservas = async () => {
         setLoading(true)
         try {
-            const response = await api.post(`/event/reservas/create/1`, { reservasAgenda })
+            const response = await api.post(`/event/reservas/create/125`, { reservasAgenda })
             const { data } = response
             if (data?.status === 201) {
                 alert.success('Rerervas criadas!')
@@ -502,7 +502,7 @@ export default function CalendarComponent() {
                             email_agendado: '',
                             nome_agendado: '',
                             disponivel: 0,
-                            usuario_id: 1,
+                            usuario_id: 125,
                             nome_usuario_agendado: ''
                         };
 
