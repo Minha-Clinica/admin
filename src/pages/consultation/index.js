@@ -132,7 +132,8 @@ export default function ListConsultions(props) {
         try {
             let query;
             if (user?.perfil?.includes('administrador')) {
-                query = `/consultation/profissional/${1}`;
+                query = `/consultation/profissional/${125
+            }`;
             } else if (user?.perfil?.includes('paciente')) {
                 query = `/consultation/pacient/${user?.id}`;
             } else if (isPartner) {
