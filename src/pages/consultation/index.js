@@ -132,7 +132,7 @@ export default function ListConsultions(props) {
         try {
             let query;
             if (user?.perfil?.includes('administrador')) {
-                query = `/consultation/profissional/${125}`;
+                query = `/consultation/profissional/${1}`;
             } else if (user?.perfil?.includes('paciente')) {
                 query = `/consultation/pacient/${user?.id}`;
             } else if (isPartner) {
@@ -555,39 +555,39 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
 
 
     const handleDelete = async (consultId) => {
-        setLoadingPayment({ active: true, success: false, error: false, message: 'Excluíndo Sessão...' });
+        setLoadingPayment({ active: true, success: false, error: false, message: 'Cancelando Sessão...' });
 
         try {
-            const response = await api.delete(`/consultation/delete/${consultId}`);
+            const response = await api.delete(`/consultation/cancel-by-profissional/${consultId}`);
 
             if (response.status === 200) {
                 setTimeout(() => {
                     setLoadingPayment({
                         active: true, success: true, error: false,
-                        message: `Sessão excluída com sucesso.`
+                        message: `Sessão cancelada com sucesso.`
                     });
                     setTimeout(async () => {
                         setLoadingPayment({
                             active: false, success: true, error: false,
-                            message: `Sessão excluída com sucesso.`
+                            message: `Sessão cancelada com sucesso.`
                         });
                         await callBack();
                     }, 2000);
-                    alert.success('Sessão excluída.');
+                    alert.success('Sessão cancelada.');
                 }, 2000);
             } else {
                 setTimeout(() => {
                     setLoadingPayment({
                         active: true, success: false, error: true,
-                        message: `Ocorreu um erro ao excluir. Tente novamente mais tarde.`
+                        message: `Ocorreu um erro ao cancelada. Tente novamente mais tarde.`
                     });
                     setTimeout(async () => {
                         setLoadingPayment({
                             active: false, success: false, error: true,
-                            message: `Ocorreu um erro ao excluir. Tente novamente mais tarde.`
+                            message: `Ocorreu um erro ao cancelada. Tente novamente mais tarde.`
                         });
                     }, 3500);
-                    alert.error(`Ocorreu um erro ao excluir sessão.`);
+                    alert.error(`Ocorreu um erro ao cancelada sessão.`);
                 }, 3500);
             }
         } catch (error) {
@@ -885,8 +885,8 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                                                                         event,
                                                                         acceptAction: handleDelete,
                                                                         propsData: item?.id_consulta,
-                                                                        title: 'Excluir Sessão',
-                                                                        message: 'Tem certeza que deseja excluir a Sessão selecionada?'
+                                                                        title: 'Cancelar Sessão',
+                                                                        message: 'Tem certeza que deseja cancelar a Sessão selecionada?'
                                                                     })}
                                                                 />
                                                             </Box>
