@@ -167,6 +167,17 @@ export const AppProvider = ({ children }) => {
             }
         }
     };
+
+
+    const verifyValidToken = (status) => {
+        if (!status) return false
+        if (status === 401) {
+            alert.info('Token expirado! Para garantirmos sua segurança, faça login novamente.')
+            return logout()
+        }
+        return true
+    }
+
     useEffect(() => {
         checkTokenExpiration();
 
@@ -318,7 +329,8 @@ export const AppProvider = ({ children }) => {
                 latestVersion,
                 menuItemsList,
                 menuItems,
-                mobile
+                mobile,
+                verifyValidToken
             }}
         >
             {children}

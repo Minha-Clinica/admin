@@ -1061,7 +1061,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                                 <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column', alignItems: 'start' }}>
                                     <Text bold large style={{ color: colorPalette.third }}>{showAgendas?.profissionalData?.nome}</Text>
                                 </Box>
-                                <Box sx={{
+                                {/* <Box sx={{
                                     padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center',
                                     width: '100%',
                                     transition: '.5s',
@@ -1075,7 +1075,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                                     }
                                 }} onClick={() => router.push(`/users/perfil?profissionalId=${showAgendas?.profissionalData?.id}`)}>
                                     <Text bold small style={{ color: '#fff' }}>VER PERFIL</Text>
-                                </Box>
+                                </Box> */}
                             </Box>
                             <Box sx={{ display: 'flex', height: '90px', width: '1px', backgroundColor: '#eaeaea' }} />
                             <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', alignItems: 'center' }}>

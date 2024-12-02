@@ -14,7 +14,7 @@ export default function AnamneseForms() {
     const [loadingData, setLoadingData] = useState(false);
     const [currentTable, setCurrentTable] = useState('anamnese_dados_pessoais');
     const [anamnese, setAnamnese] = useState({})
-    const { colorPalette, user, alert } = useAppContext()
+    const { colorPalette, user, alert, verifyValidToken } = useAppContext()
     const router = useRouter()
     const { id } = router.query;
 
@@ -67,6 +67,7 @@ export default function AnamneseForms() {
 
         } catch (error) {
             console.log(error)
+            verifyValidToken(error.response.status)
         } finally {
             setLoadingData(false)
         }
@@ -93,6 +94,7 @@ export default function AnamneseForms() {
             router.push('/')
         } catch (error) {
             console.log(error)
+            verifyValidToken(error.response.status)
         } finally {
             setLoadingData(false)
         }
@@ -106,6 +108,7 @@ export default function AnamneseForms() {
                 await api.patch(`/anamnese/paciente/update/${anamnese?.id}`, { table, field: name, value });
             } catch (error) {
                 console.log(error);
+                verifyValidToken(error.response.status)
             }
         }
     };
@@ -504,7 +507,7 @@ export default function AnamneseForms() {
                             valueRadio={anamnese?.pertence_contx_familiar}
                             group={[
                                 { label: 'Sim', value: 'Sim' },
-                                { label: 'Não', value: 'Não' } 
+                                { label: 'Não', value: 'Não' }
                             ]}
                             onSelect={(value) => handleBlurSelecAndRadio('pertence_contx_familiar', value)} />
                     </Box>
