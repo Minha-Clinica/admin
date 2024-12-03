@@ -787,16 +787,7 @@ export default function CalendarComponent() {
                                     });
                                 }} />
                             </Box>
-                            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                                <Box sx={{ display: "flex", flexDirection: "row", gap: .5 }}>
-                                    <Text bold>Inicio:</Text>
-                                    <Text>{horarios(eventData?.start)}</Text>
-                                </Box>
-                                <Box sx={{ display: "flex", flexDirection: "row", gap: .5 }}>
-                                    <Text bold>Fim:</Text>
-                                    <Text>{horarios(eventData?.end)}</Text>
-                                </Box>
-                            </Box>
+
 
                             {eventData?.evento_google_id && <Box
                                 sx={{
@@ -823,7 +814,32 @@ export default function CalendarComponent() {
                                 <Text small bold>Vínculado ao Google Agenda</Text>
                             </Box>}
                             <Divider />
-                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto', maxHeight: 600, paddingTop: 3 }}>
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, overflowY: 'auto', maxHeight: 600, paddingTop: 1 }}>
+
+                                <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column', border: `1px solid lightgray`, padding: 2 }}>
+                                    <Text bold large>Detalhes:</Text>
+
+                                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                                        <Box sx={{ display: "flex", flexDirection: "row", gap: .5 }}>
+                                            <Text bold>Inicio:</Text>
+                                            <Text>{horarios(eventData?.start)}</Text>
+                                        </Box>
+                                        <Box sx={{ display: "flex", flexDirection: "row", gap: .5 }}>
+                                            <Text bold>Fim:</Text>
+                                            <Text>{horarios(eventData?.end)}</Text>
+                                        </Box>
+                                        {/* {(new Date(eventData.start) > new Date() && eventData.usuario_agendado) ?
+                                            (
+                                                <Button
+                                                    disabled={!isPermissionEdit && true}
+                                                    small
+                                                    text="Re-agendar"
+                                                    style={{ height: 30, width: 120 }}
+                                                />
+                                            ) : (<></>)} */}
+                                    </Box>
+                                </Box>
+
                                 <TextInput
                                     disabled={!isPermissionEdit && true}
                                     name="title"
@@ -1124,6 +1140,8 @@ export default function CalendarComponent() {
         </ >
     );
 }
+
+
 
 const styles = {
     menuIcon: {

@@ -5,15 +5,17 @@ import {
 import { useEffect, useState } from "react";
 import { useAppContext } from "../../context/AppContext";
 import { formatCPF } from "../../helpers";
-import { CheckBoxComponent, RadioItem } from "../../organisms";
 import { api } from "../../api/api";
 import { CircularProgress, keyframes } from "@mui/material";
+import CheckboxGroup from "./components/CheckboxGroup";
+import RadioGroup from "./components/RadioGroup";
 
 export default function AnamneseForms() {
     const [page, setPage] = useState(1);
     const [loadingData, setLoadingData] = useState(false);
     const [currentTable, setCurrentTable] = useState('anamnese_dados_pessoais');
     const [anamnese, setAnamnese] = useState({})
+    const [localValues, setLocalValues] = useState({});
     const { colorPalette, user, alert, verifyValidToken } = useAppContext()
     const router = useRouter()
     const { id } = router.query;
@@ -31,9 +33,13 @@ export default function AnamneseForms() {
     ]
 
 
+    console.log(anamnese?.sentimento_ciume)
+
     useEffect(() => {
-        handleGetAnamnese()
-    }, [])
+        if (id) {
+            handleGetAnamnese()
+        }
+    }, [id])
 
     const handleGetAnamnese = async () => {
         try {
@@ -41,6 +47,7 @@ export default function AnamneseForms() {
             const response = await api.get(`/anamnese/paciente/${id}`)
             if (response?.data) {
                 setAnamnese(response?.data)
+                setLocalValues(response?.data)
             } else {
                 setAnamnese({
                     ...anamnese,
@@ -102,18 +109,22 @@ export default function AnamneseForms() {
 
     const handleBlur = async (event) => {
         const { name, value } = event.target;
-        const table = currentTable; // Nome da tabela
-        if (table) {
+        const table = currentTable;
+
+        if (table && localValues[name] !== value) { // Atualizar apenas se houver diferença.
+            setLocalValues((prev) => ({ ...prev, [name]: value })); // Atualizar o valor local.
             try {
                 await api.patch(`/anamnese/paciente/update/${anamnese?.id}`, { table, field: name, value });
             } catch (error) {
                 console.log(error);
-                verifyValidToken(error.response.status)
+                verifyValidToken(error.response.status);
             }
         }
     };
 
     const handleBlurSelecAndRadio = async (name, value) => {
+
+        if (anamnese[name] === value) return;
 
         setAnamnese((prevValues) => ({
             ...prevValues,
@@ -121,7 +132,8 @@ export default function AnamneseForms() {
         }))
 
         const table = currentTable; // Nome da tabela
-        if (table) {
+        if (table && localValues[name] !== value) { // Atualizar apenas se houver diferença.
+            setLocalValues((prev) => ({ ...prev, [name]: value })); // Atualizar o valor local.
             try {
                 await api.patch(`/anamnese/paciente/update/${anamnese?.id}`, { table, field: name, value });
             } catch (error) {
@@ -129,6 +141,10 @@ export default function AnamneseForms() {
             }
         }
     };
+
+    if (!anamnese || Object.keys(anamnese).length === 0) {
+        return <div>Carregando...</div>; // Mostre um loader enquanto os dados são carregados
+    }
 
 
     return (
@@ -144,7 +160,7 @@ export default function AnamneseForms() {
                 </Box>}
 
             <Box>
-                {pages.map((item, index) => {
+                {pages?.map((item, index) => {
                     if (item.page === page) {
                         return (
                             <Box key={index} sx={{
@@ -224,15 +240,15 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Estado Cívil *</Text>
-                        <RadioItem
-                            valueRadio={anamnese?.estado_civil}
-                            group={[
+                        <RadioGroup
+                            value={anamnese?.estado_civil}
+                            options={[
                                 { label: 'Casado(a)', value: 'Casado(a)' },
                                 { label: 'Solteiro(a)', value: 'Solteiro(a)' },
                                 { label: 'Viúvo(a)', value: 'Viúvo(a)' },
                                 { label: 'Divorciado(a)', value: 'Divorciado(a)' },
                             ]}
-                            onSelect={(value) => {
+                            onBlur={(value) => {
                                 handleBlurSelecAndRadio('estado_civil', value)
                             }}
                         />
@@ -241,13 +257,13 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Gênero *</Text>
-                        <RadioItem
-                            valueRadio={anamnese?.genero}
-                            group={[
+                        <RadioGroup
+                            value={anamnese?.genero}
+                            options={[
                                 { label: 'Masculino', value: 'Masculino' },
                                 { label: 'Feminino', value: 'Feminino' }
                             ]}
-                            onSelect={(value) => {
+                            onBlur={(value) => {
                                 handleBlurSelecAndRadio('genero', value)
                             }}
                         />
@@ -374,9 +390,9 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Escolaridade</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.escolaridade}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.escolaridade}
+                            options={[
                                 { label: 'Fundamental', value: 'Fundamental' },
                                 { label: 'Médio', value: 'Médio' },
                                 { label: 'Superior (Graduação)', value: 'Superior (Graduação)' },
@@ -385,7 +401,7 @@ export default function AnamneseForms() {
                                 { label: 'Doutorado', value: 'Doutorado' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('escolaridade', value)}
+                            onBlur={(value) => handleBlurSelecAndRadio('escolaridade', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -503,13 +519,13 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Você se sente pertencendo ao Contexto Familiar?</Text>
-                        <RadioItem
-                            valueRadio={anamnese?.pertence_contx_familiar}
-                            group={[
+                        <RadioGroup
+                            value={anamnese?.pertence_contx_familiar}
+                            options={[
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' }
                             ]}
-                            onSelect={(value) => handleBlurSelecAndRadio('pertence_contx_familiar', value)} />
+                            onBlur={(value) => handleBlurSelecAndRadio('pertence_contx_familiar', value)} />
                     </Box>
 
                     {anamnese?.pertence_contx_familiar !== '' &&
@@ -530,13 +546,13 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Você se sente pertencendo ao Contexto Social?</Text>
-                        <RadioItem
-                            valueRadio={anamnese?.pertence_contx_social}
-                            group={[
+                        <RadioGroup
+                            value={anamnese?.pertence_contx_social}
+                            options={[
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' }
                             ]}
-                            onSelect={(value) => handleBlurSelecAndRadio('pertence_contx_social', value)} />
+                            onBlur={(value) => handleBlurSelecAndRadio('pertence_contx_social', value)} />
                     </Box>
                     <Divider />
 
@@ -558,13 +574,13 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Você se sente pertencendo ao Contexto Religioso?</Text>
-                        <RadioItem
-                            valueRadio={anamnese?.sent_contx_religioso}
-                            group={[
+                        <RadioGroup
+                            value={anamnese?.sent_contx_religioso}
+                            options={[
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' }
                             ]}
-                            onSelect={(value) => handleBlurSelecAndRadio('sent_contx_religioso', value)} />
+                            onBlur={(value) => handleBlurSelecAndRadio('sent_contx_religioso', value)} />
                     </Box>
                     <Divider />
 
@@ -712,15 +728,15 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Como foi sua primeira relação sexual?</Text>
-                        <RadioItem
-                            valueRadio={anamnese?.primaira_rel_sex}
-                            group={[
+                        <RadioGroup
+                            value={anamnese?.primaira_rel_sex}
+                            options={[
                                 { label: 'Traumática', value: 'Traumática' },
                                 { label: 'Normal', value: 'Normal' },
                                 { label: 'Boa', value: 'Boa' },
                                 { label: 'Satisfátoria', value: 'Satisfátoria' }
                             ]}
-                            onSelect={(value) => handleBlurSelecAndRadio('primaira_rel_sex', value)} />
+                            onBlur={(value) => handleBlurSelecAndRadio('primaira_rel_sex', value)} />
                     </Box>
                     <Divider />
 
@@ -738,26 +754,26 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Atualmente sempre se realiza nas relações sexuais?</Text>
-                        <RadioItem
-                            valueRadio={anamnese?.realizado_rela_sex}
-                            group={[
+                        <RadioGroup
+                            value={anamnese?.realizado_rela_sex}
+                            options={[
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' }
                             ]}
-                            onSelect={(value) => handleBlurSelecAndRadio('realizado_rela_sex', value)} />
+                            onBlur={(value) => handleBlurSelecAndRadio('realizado_rela_sex', value)} />
                     </Box>
                     <Divider />
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>O sexo para você é algo:</Text>
-                        <RadioItem
-                            valueRadio={anamnese?.sexo_e_algo}
-                            group={[
+                        <RadioGroup
+                            value={anamnese?.sexo_e_algo}
+                            options={[
                                 { label: 'Sem importância', value: 'Sem importância' },
                                 { label: 'Importante', value: 'Importante' },
                                 { label: 'Muito importante', value: 'Muito importante' }
                             ]}
-                            onSelect={(value) => handleBlurSelecAndRadio('sexo_e_algo', value)} />
+                            onBlur={(value) => handleBlurSelecAndRadio('sexo_e_algo', value)} />
                     </Box>
                     <Divider />
                 </Box>}
@@ -769,13 +785,13 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Algum Trauma?</Text>
-                        <RadioItem
-                            valueRadio={anamnese?.trauma}
-                            group={[
+                        <RadioGroup
+                            value={anamnese?.trauma}
+                            options={[
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' }
                             ]}
-                            onSelect={(value) => handleBlurSelecAndRadio('trauma', value)} />
+                            onBlur={(value) => handleBlurSelecAndRadio('trauma', value)} />
                     </Box>
                     <Divider />
 
@@ -795,13 +811,13 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Algum fobia?</Text>
-                        <RadioItem
-                            valueRadio={anamnese?.fobia}
-                            group={[
+                        <RadioGroup
+                            value={anamnese?.fobia}
+                            options={[
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' }
                             ]}
-                            onSelect={(value) => handleBlurSelecAndRadio('fobia', value)} />
+                            onBlur={(value) => handleBlurSelecAndRadio('fobia', value)} />
                     </Box>
                     <Divider />
 
@@ -821,13 +837,13 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Tem medo de alguma coisa?</Text>
-                        <RadioItem
-                            valueRadio={anamnese?.medo}
-                            group={[
+                        <RadioGroup
+                            value={anamnese?.medo}
+                            options={[
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' }
                             ]}
-                            onSelect={(value) => handleBlurSelecAndRadio('medo', value)} />
+                            onBlur={(value) => handleBlurSelecAndRadio('medo', value)} />
                     </Box>
                     <Divider />
 
@@ -847,13 +863,13 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Usa drogas?</Text>
-                        <RadioItem
-                            valueRadio={anamnese?.drogas}
-                            group={[
+                        <RadioGroup
+                            value={anamnese?.drogas}
+                            options={[
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' }
                             ]}
-                            onSelect={(value) => handleBlurSelecAndRadio('drogas', value)} />
+                            onBlur={(value) => handleBlurSelecAndRadio('drogas', value)} />
                     </Box>
                     <Divider />
 
@@ -873,13 +889,13 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Dor de Cabeça?</Text>
-                        <RadioItem
-                            valueRadio={anamnese?.dor_cabeca}
-                            group={[
+                        <RadioGroup
+                            value={anamnese?.dor_cabeca}
+                            options={[
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' }
                             ]}
-                            onSelect={(value) => handleBlurSelecAndRadio('dor_cabeca', value)} />
+                            onBlur={(value) => handleBlurSelecAndRadio('dor_cabeca', value)} />
                     </Box>
                     <Divider />
 
@@ -900,13 +916,13 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Insônia?</Text>
-                        <RadioItem
-                            valueRadio={anamnese?.insonia}
-                            group={[
+                        <RadioGroup
+                            value={anamnese?.insonia}
+                            options={[
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' }
                             ]}
-                            onSelect={(value) => handleBlurSelecAndRadio('insonia', value)} />
+                            onBlur={(value) => handleBlurSelecAndRadio('insonia', value)} />
                     </Box>
                     <Divider />
 
@@ -927,13 +943,13 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Tem ideias suicidas?</Text>
-                        <RadioItem
-                            valueRadio={anamnese?.ideias_suicidas}
-                            group={[
+                        <RadioGroup
+                            value={anamnese?.ideias_suicidas}
+                            options={[
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' }
                             ]}
-                            onSelect={(value) => handleBlurSelecAndRadio('ideias_suicidas', value)} />
+                            onBlur={(value) => handleBlurSelecAndRadio('ideias_suicidas', value)} />
                     </Box>
                     <Divider />
 
@@ -954,13 +970,13 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Usa bebidas alcoólicas?</Text>
-                        <RadioItem
-                            valueRadio={anamnese?.bebidas_alcoolicas}
-                            group={[
+                        <RadioGroup
+                            value={anamnese?.bebidas_alcoolicas}
+                            options={[
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' }
                             ]}
-                            onSelect={(value) => handleBlurSelecAndRadio('bebidas_alcoolicas', value)} />
+                            onBlur={(value) => handleBlurSelecAndRadio('bebidas_alcoolicas', value)} />
                     </Box>
                     <Divider />
 
@@ -981,26 +997,26 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>É fumante?</Text>
-                        <RadioItem
-                            valueRadio={anamnese?.fumante}
-                            group={[
+                        <RadioGroup
+                            value={anamnese?.fumante}
+                            options={[
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' }
                             ]}
-                            onSelect={(value) => handleBlurSelecAndRadio('fumante', value)} />
+                            onBlur={(value) => handleBlurSelecAndRadio('fumante', value)} />
                     </Box>
                     <Divider />
                     {anamnese.genero === 'Feminino' &&
                         <>
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Está grávida?</Text>
-                                <RadioItem
-                                    valueRadio={anamnese?.gravida}
-                                    group={[
+                                <RadioGroup
+                                    value={anamnese?.gravida}
+                                    options={[
                                         { label: 'Sim', value: 'Sim' },
                                         { label: 'Não', value: 'Não' }
                                     ]}
-                                    onSelect={(value) => handleBlurSelecAndRadio('gravida', value)} />
+                                    onBlur={(value) => handleBlurSelecAndRadio('gravida', value)} />
                             </Box>
                             <Divider />
                         </>
@@ -1024,26 +1040,26 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Qual o seu nível de stress?</Text>
-                        <RadioItem
-                            valueRadio={anamnese?.nvl_estress}
-                            group={[
+                        <RadioGroup
+                            value={anamnese?.nvl_estress}
+                            options={[
                                 { label: 'Alto', value: 'Alto' },
                                 { label: 'Médio', value: 'Médio' },
                                 { label: 'Baixo', value: 'Baixo' },
                             ]}
-                            onSelect={(value) => handleBlurSelecAndRadio('nvl_estress', value)} />
+                            onBlur={(value) => handleBlurSelecAndRadio('nvl_estress', value)} />
                     </Box>
                     <Divider />
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Atualmente está tomando alguma medicação?</Text>
-                        <RadioItem
-                            valueRadio={anamnese?.tomando_medicacao}
-                            group={[
+                        <RadioGroup
+                            value={anamnese?.tomando_medicacao}
+                            options={[
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' }
                             ]}
-                            onSelect={(value) => handleBlurSelecAndRadio('tomando_medicacao', value)} />
+                            onBlur={(value) => handleBlurSelecAndRadio('tomando_medicacao', value)} />
                     </Box>
                     <Divider />
 
@@ -1067,13 +1083,13 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Já consultou algum tipo de psiquiatra ou psicólogo?</Text>
-                        <RadioItem
-                            valueRadio={anamnese?.consult_psicologo_psiq}
-                            group={[
+                        <RadioGroup
+                            value={anamnese?.consult_psicologo_psiq}
+                            options={[
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' }
                             ]}
-                            onSelect={(value) => handleBlurSelecAndRadio('consult_psicologo_psiq', value)} />
+                            onBlur={(value) => handleBlurSelecAndRadio('consult_psicologo_psiq', value)} />
                     </Box>
                     <Divider />
 
@@ -1131,13 +1147,13 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Você se considera feliz?</Text>
-                        <RadioItem
-                            valueRadio={anamnese?.considera_feliz}
-                            group={[
+                        <RadioGroup
+                            value={anamnese?.considera_feliz}
+                            options={[
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' }
                             ]}
-                            onSelect={(value) => handleBlurSelecAndRadio('considera_feliz', value)} />
+                            onBlur={(value) => handleBlurSelecAndRadio('considera_feliz', value)} />
                     </Box>
                     <Divider />
 
@@ -1192,14 +1208,14 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Quais são os tipos de pensamentos que você costuma alimentar em relação a si mesma(o), de uma maneira geral?</Text>
-                        <RadioItem
-                            valueRadio={anamnese?.tipo_pensamento}
-                            group={[
+                        <RadioGroup
+                            value={anamnese?.tipo_pensamento}
+                            options={[
                                 { label: 'Positivos', value: 'Positivos' },
                                 { label: 'Negativos', value: 'Negativos' },
                                 { label: 'Ambos', value: 'Ambos' },
                             ]}
-                            onSelect={(value) => handleBlurSelecAndRadio('tipo_pensamento', value)} />
+                            onBlur={(value) => handleBlurSelecAndRadio('tipo_pensamento', value)} />
                     </Box>
                     <Divider />
 
@@ -1218,14 +1234,14 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Em relação a sua aparência física?</Text>
-                        <RadioItem
-                            valueRadio={anamnese?.pensamento_aparencia}
-                            group={[
+                        <RadioGroup
+                            value={anamnese?.pensamento_aparencia}
+                            options={[
                                 { label: 'Positivos', value: 'Positivos' },
                                 { label: 'Negativos', value: 'Negativos' },
                                 { label: 'Ambos', value: 'Ambos' },
                             ]}
-                            onSelect={(value) => handleBlurSelecAndRadio('pensamento_aparencia', value)} />
+                            onBlur={(value) => handleBlurSelecAndRadio('pensamento_aparencia', value)} />
                     </Box>
                     <Divider />
 
@@ -1243,14 +1259,14 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Em relação a sua competência profissional?</Text>
-                        <RadioItem
-                            valueRadio={anamnese?.pensamento_compet_profis}
-                            group={[
+                        <RadioGroup
+                            value={anamnese?.pensamento_compet_profis}
+                            options={[
                                 { label: 'Positivos', value: 'Positivos' },
                                 { label: 'Negativos', value: 'Negativos' },
                                 { label: 'Ambos', value: 'Ambos' },
                             ]}
-                            onSelect={(value) => handleBlurSelecAndRadio('pensamento_compet_profis', value)} />
+                            onBlur={(value) => handleBlurSelecAndRadio('pensamento_compet_profis', value)} />
                     </Box>
                     <Divider />
 
@@ -1268,14 +1284,14 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Em relação a sua vida sexual?</Text>
-                        <RadioItem
-                            valueRadio={anamnese?.pensamento_vida_sex}
-                            group={[
+                        <RadioGroup
+                            value={anamnese?.pensamento_vida_sex}
+                            options={[
                                 { label: 'Positivos', value: 'Positivos' },
                                 { label: 'Negativos', value: 'Negativos' },
                                 { label: 'Ambos', value: 'Ambos' },
                             ]}
-                            onSelect={(value) => handleBlurSelecAndRadio('pensamento_vida_sex', value)} />
+                            onBlur={(value) => handleBlurSelecAndRadio('pensamento_vida_sex', value)} />
                     </Box>
                     <Divider />
 
@@ -1293,14 +1309,14 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Em relação ao seu passado?</Text>
-                        <RadioItem
-                            valueRadio={anamnese?.pensamento_passado}
-                            group={[
+                        <RadioGroup
+                            value={anamnese?.pensamento_passado}
+                            options={[
                                 { label: 'Positivos', value: 'Positivos' },
                                 { label: 'Negativos', value: 'Negativos' },
                                 { label: 'Ambos', value: 'Ambos' },
                             ]}
-                            onSelect={(value) => handleBlurSelecAndRadio('pensamento_passado', value)} />
+                            onBlur={(value) => handleBlurSelecAndRadio('pensamento_passado', value)} />
                     </Box>
                     <Divider />
 
@@ -1318,14 +1334,14 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Em relação ao seu futuro?</Text>
-                        <RadioItem
-                            valueRadio={anamnese?.pensamento_futuro}
-                            group={[
+                        <RadioGroup
+                            value={anamnese?.pensamento_futuro}
+                            options={[
                                 { label: 'Positivos', value: 'Positivos' },
                                 { label: 'Negativos', value: 'Negativos' },
                                 { label: 'Ambos', value: 'Ambos' },
                             ]}
-                            onSelect={(value) => handleBlurSelecAndRadio('pensamento_futuro', value)} />
+                            onBlur={(value) => handleBlurSelecAndRadio('pensamento_futuro', value)} />
                     </Box>
                     <Divider />
 
@@ -1362,13 +1378,13 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Você foi criado pelos pais?</Text>
-                        <RadioItem
-                            valueRadio={anamnese?.criado_pais}
-                            group={[
+                        <RadioGroup
+                            value={anamnese?.criado_pais}
+                            options={[
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' },
                             ]}
-                            onSelect={(value) => handleBlurSelecAndRadio('criado_pais', value)} />
+                            onBlur={(value) => handleBlurSelecAndRadio('criado_pais', value)} />
                     </Box>
                     <Divider />
 
@@ -1404,13 +1420,13 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Seus pais foram agressivos com você?</Text>
-                        <RadioItem
-                            valueRadio={anamnese?.pais_agressivos}
-                            group={[
+                        <RadioGroup
+                            value={anamnese?.pais_agressivos}
+                            options={[
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' },
                             ]}
-                            onSelect={(value) => handleBlurSelecAndRadio('pais_agressivos', value)} />
+                            onBlur={(value) => handleBlurSelecAndRadio('pais_agressivos', value)} />
                     </Box>
                     <Divider />
 
@@ -1430,14 +1446,14 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Qual deles era o mais bravo?</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.qual_pais_mais_bravo}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.qual_pais_mais_bravo}
+                            options={[
                                 { label: 'Pai', value: 'Pai' },
                                 { label: 'Mãe', value: 'Mãe' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('qual_pais_mais_bravo', value)} />
+                            onBlur={(value) => handleBlurSelecAndRadio('qual_pais_mais_bravo', value)} />
                     </Box>
                     <Divider />
 
@@ -1455,13 +1471,13 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Usavam bebidas ou drogas?</Text>
-                        <RadioItem
-                            valueRadio={anamnese?.pais_usavam_beb_drog}
-                            group={[
+                        <RadioGroup
+                            value={anamnese?.pais_usavam_beb_drog}
+                            options={[
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' },
                             ]}
-                            onSelect={(value) => handleBlurSelecAndRadio('pais_usavam_beb_drog', value)} />
+                            onBlur={(value) => handleBlurSelecAndRadio('pais_usavam_beb_drog', value)} />
                     </Box>
                     <Divider />
 
@@ -1479,9 +1495,9 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Como você descreveria o relacionamento entre seus pais?</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.descr_relac_pais}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.descr_relac_pais}
+                            options={[
                                 { label: 'Excelente', value: 'Excelente' },
                                 { label: 'Muito Bom', value: 'Muito Bom' },
                                 { label: 'Bom', value: 'Bom' },
@@ -1489,7 +1505,7 @@ export default function AnamneseForms() {
                                 { label: 'Péssimo', value: 'Péssimo' },
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('descr_relac_pais', value)} />
+                            onBlur={(value) => handleBlurSelecAndRadio('descr_relac_pais', value)} />
                     </Box>
                     <Divider />
 
@@ -1558,13 +1574,13 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Na infância, era obrigado(a) a fazer alguma coisa que lhe desagradava?</Text>
-                        <RadioItem
-                            valueRadio={anamnese?.algo_desegradavel_inf}
-                            group={[
+                        <RadioGroup
+                            value={anamnese?.algo_desegradavel_inf}
+                            options={[
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' },
                             ]}
-                            onSelect={(value) => handleBlurSelecAndRadio('algo_desegradavel_inf', value)} />
+                            onBlur={(value) => handleBlurSelecAndRadio('algo_desegradavel_inf', value)} />
                     </Box>
                     <Divider />
 
@@ -1587,13 +1603,13 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Lembra-se, de alguma coisa que o magoou muito na Infância?</Text>
-                        <RadioItem
-                            valueRadio={anamnese?.magoa_na_infancia}
-                            group={[
+                        <RadioGroup
+                            value={anamnese?.magoa_na_infancia}
+                            options={[
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' },
                             ]}
-                            onSelect={(value) => handleBlurSelecAndRadio('magoa_na_infancia', value)} />
+                            onBlur={(value) => handleBlurSelecAndRadio('magoa_na_infancia', value)} />
                     </Box>
                     <Divider />
 
@@ -1617,13 +1633,13 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Teve perdas familiares ou de amigos na Infância?</Text>
-                        <RadioItem
-                            valueRadio={anamnese?.perdas_famil_infancia}
-                            group={[
+                        <RadioGroup
+                            value={anamnese?.perdas_famil_infancia}
+                            options={[
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' },
                             ]}
-                            onSelect={(value) => handleBlurSelecAndRadio('perdas_famil_infancia', value)} />
+                            onBlur={(value) => handleBlurSelecAndRadio('perdas_famil_infancia', value)} />
                     </Box>
                     <Divider />
 
@@ -1682,9 +1698,9 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Como foi sua adolescência?</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.adolecencia}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.adolecencia}
+                            options={[
                                 { label: 'Excelente', value: 'Excelente' },
                                 { label: 'Muito Bom', value: 'Muito Bom' },
                                 { label: 'Bom', value: 'Bom' },
@@ -1692,7 +1708,7 @@ export default function AnamneseForms() {
                                 { label: 'Péssimo', value: 'Péssimo' },
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('adolecencia', value)} />
+                            onBlur={(value) => handleBlurSelecAndRadio('adolecencia', value)} />
                     </Box>
                     <Divider />
 
@@ -1700,14 +1716,14 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Com qual de seus pais você tinha mais dificuldade de relacionamento?</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.qual_pais_dificul_relac}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.qual_pais_dificul_relac}
+                            options={[
                                 { label: 'Pai', value: 'Pai' },
                                 { label: 'Mãe', value: 'Mãe' },
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('qual_pais_dificul_relac', value)} />
+                            onBlur={(value) => handleBlurSelecAndRadio('qual_pais_dificul_relac', value)} />
                     </Box>
                     <Divider />
 
@@ -1789,13 +1805,13 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Possui irmãos?</Text>
-                        <RadioItem
-                            valueRadio={anamnese?.tem_irmaos}
-                            group={[
+                        <RadioGroup
+                            value={anamnese?.tem_irmaos}
+                            options={[
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' },
                             ]}
-                            onSelect={(value) => handleBlurSelecAndRadio('tem_irmaos', value)} />
+                            onBlur={(value) => handleBlurSelecAndRadio('tem_irmaos', value)} />
                     </Box>
                     <Divider />
 
@@ -1925,14 +1941,14 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Se você avaliasse sua atuação na vida, qual papel que mais caberia a você hoje?</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.qual_seu_papel_hj}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.qual_seu_papel_hj}
+                            options={[
                                 { label: 'Vítima', value: 'Vítima' },
                                 { label: 'Responsável', value: 'Responsável' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('qual_seu_papel_hj', value)} />
+                            onBlur={(value) => handleBlurSelecAndRadio('qual_seu_papel_hj', value)} />
                     </Box>
                     <Divider />
 
@@ -1983,14 +1999,14 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Você se considera:</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.se_considera}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.se_considera}
+                            options={[
                                 { label: 'Vitorioso(a)', value: 'Vitorioso(a)' },
                                 { label: 'Derrotado(a)', value: 'Derrotado(a)' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('se_considera', value)}
+                            onBlur={(value) => handleBlurSelecAndRadio('se_considera', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -1998,14 +2014,14 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Nos relacionamentos e na vida, você prefere ser:</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.prefere_no_rel_da_vida}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.prefere_no_rel_da_vida}
+                            options={[
                                 { label: 'Dominante', value: 'Dominante' },
                                 { label: 'Submisso', value: 'Submisso' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('prefere_no_rel_da_vida', value)}
+                            onBlur={(value) => handleBlurSelecAndRadio('prefere_no_rel_da_vida', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2028,14 +2044,14 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Sente-se de alguma forma pressionado(a) na atualidade?</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.sente_pressionado}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.sente_pressionado}
+                            options={[
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('sente_pressionado', value)}
+                            onBlur={(value) => handleBlurSelecAndRadio('sente_pressionado', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2060,14 +2076,14 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Você se acha uma pessoa controladora?</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.controladora}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.controladora}
+                            options={[
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('controladora', value)}
+                            onBlur={(value) => handleBlurSelecAndRadio('controladora', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2075,14 +2091,14 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Sente-se de alguma forma inferior aos outros?</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.sente_inferior_a_outros}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.sente_inferior_a_outros}
+                            options={[
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('sente_inferior_a_outros', value)}
+                            onBlur={(value) => handleBlurSelecAndRadio('sente_inferior_a_outros', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2107,14 +2123,14 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Dúvida de sua própria capacidade?</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.duvida_propria_capac}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.duvida_propria_capac}
+                            options={[
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('duvida_propria_capac', value)}
+                            onBlur={(value) => handleBlurSelecAndRadio('duvida_propria_capac', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2123,14 +2139,14 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Você é audacioso(a), corre atrás de suas metas, ou é autoprotetor(a), preferindo se poupar dos eventuais riscos?</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.audacioso_ou_autoprotetor}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.audacioso_ou_autoprotetor}
+                            options={[
                                 { label: 'Audacioso(a)', value: 'Audacioso(a)' },
                                 { label: 'Autoprotetor(a)', value: 'Autoprotetor(a)' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('audacioso_ou_autoprotetor', value)}
+                            onBlur={(value) => handleBlurSelecAndRadio('audacioso_ou_autoprotetor', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2139,14 +2155,14 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Existe algo que o(a) faz sentir-se culpado(a)?</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.algo_q_sente_culpado}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.algo_q_sente_culpado}
+                            options={[
                                 { label: 'Sim', value: 'Sim' },
                                 { label: 'Não', value: 'Não' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('algo_q_sente_culpado', value)}
+                            onBlur={(value) => handleBlurSelecAndRadio('algo_q_sente_culpado', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2176,15 +2192,15 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Raiva</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.sentimento_raiva}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.sentimento_raiva}
+                            options={[
                                 { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                 { label: 'Média Intensidade', value: 'Média Intensidade' },
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_raiva', value)}
+                            onBlur={(value) => handleBlurSelecAndRadio('sentimento_raiva', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2192,15 +2208,15 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Medo de algo concreto</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.sentimento_medo_concreto}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.sentimento_medo_concreto}
+                            options={[
                                 { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                 { label: 'Média Intensidade', value: 'Média Intensidade' },
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_medo_concreto', value)}
+                            onBlur={(value) => handleBlurSelecAndRadio('sentimento_medo_concreto', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2209,15 +2225,15 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Medos vagos</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.sentimento_medos_vagos}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.sentimento_medos_vagos}
+                            options={[
                                 { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                 { label: 'Média Intensidade', value: 'Média Intensidade' },
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_medos_vagos', value)}
+                            onBlur={(value) => handleBlurSelecAndRadio('sentimento_medos_vagos', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2226,15 +2242,15 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Culpa</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.sentimento_culpa}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.sentimento_culpa}
+                            options={[
                                 { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                 { label: 'Média Intensidade', value: 'Média Intensidade' },
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_culpa', value)}
+                            onBlur={(value) => handleBlurSelecAndRadio('sentimento_culpa', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2243,15 +2259,15 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Revolta</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.sentimento_revolta}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.sentimento_revolta}
+                            options={[
                                 { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                 { label: 'Média Intensidade', value: 'Média Intensidade' },
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_revolta', value)}
+                            onBlur={(value) => handleBlurSelecAndRadio('sentimento_revolta', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2260,15 +2276,15 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Medo de perder o controle</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.sentimento_perder_controle}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.sentimento_perder_controle}
+                            options={[
                                 { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                 { label: 'Média Intensidade', value: 'Média Intensidade' },
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_perder_controle', value)}
+                            onBlur={(value) => handleBlurSelecAndRadio('sentimento_perder_controle', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2277,15 +2293,15 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Tristeza</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.sentimento_tristeza}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.sentimento_tristeza}
+                            options={[
                                 { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                 { label: 'Média Intensidade', value: 'Média Intensidade' },
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_tristeza', value)}
+                            onBlur={(value) => handleBlurSelecAndRadio('sentimento_tristeza', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2294,15 +2310,15 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Mágoa</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.sentimento_magoa}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.sentimento_magoa}
+                            options={[
                                 { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                 { label: 'Média Intensidade', value: 'Média Intensidade' },
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_magoa', value)}
+                            onBlur={(value) => handleBlurSelecAndRadio('sentimento_magoa', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2311,15 +2327,15 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Orgulho</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.sentimento_orgulho}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.sentimento_orgulho}
+                            options={[
                                 { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                 { label: 'Média Intensidade', value: 'Média Intensidade' },
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_orgulho', value)}
+                            onBlur={(value) => handleBlurSelecAndRadio('sentimento_orgulho', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2327,15 +2343,15 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Ódio</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.sentimento_odio}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.sentimento_odio}
+                            options={[
                                 { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                 { label: 'Média Intensidade', value: 'Média Intensidade' },
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_odio', value)}
+                            onBlur={(value) => handleBlurSelecAndRadio('sentimento_odio', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2343,15 +2359,15 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Egoísmo</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.sentimento_egoismo}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.sentimento_egoismo}
+                            options={[
                                 { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                 { label: 'Média Intensidade', value: 'Média Intensidade' },
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_egoismo', value)}
+                            onBlur={(value) => handleBlurSelecAndRadio('sentimento_egoismo', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2360,15 +2376,15 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Ansiedade</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.sentimento_ansiedade}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.sentimento_ansiedade}
+                            options={[
                                 { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                 { label: 'Média Intensidade', value: 'Média Intensidade' },
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_ansiedade', value)}
+                            onBlur={(value) => handleBlurSelecAndRadio('sentimento_ansiedade', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2377,15 +2393,15 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Intolerância</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.sentimento_intolerancia}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.sentimento_intolerancia}
+                            options={[
                                 { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                 { label: 'Média Intensidade', value: 'Média Intensidade' },
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_intolerancia', value)}
+                            onBlur={(value) => handleBlurSelecAndRadio('sentimento_intolerancia', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2395,15 +2411,15 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Subsmissao</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.sentimento_submissao}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.sentimento_submissao}
+                            options={[
                                 { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                 { label: 'Média Intensidade', value: 'Média Intensidade' },
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_submissao', value)}
+                            onBlur={(value) => handleBlurSelecAndRadio('sentimento_submissao', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2412,15 +2428,15 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Indecisão</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.sentimento_indecisao}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.sentimento_indecisao}
+                            options={[
                                 { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                 { label: 'Média Intensidade', value: 'Média Intensidade' },
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_indecisao', value)}
+                            onBlur={(value) => handleBlurSelecAndRadio('sentimento_indecisao', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2429,15 +2445,15 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Desespero</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.sentimento_desespero}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.sentimento_desespero}
+                            options={[
                                 { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                 { label: 'Média Intensidade', value: 'Média Intensidade' },
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_desespero', value)}
+                            onBlur={(value) => handleBlurSelecAndRadio('sentimento_desespero', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2446,15 +2462,15 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Desnânimo</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.sentimento_desanimo}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.sentimento_desanimo}
+                            options={[
                                 { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                 { label: 'Média Intensidade', value: 'Média Intensidade' },
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_desanimo', value)}
+                            onBlur={(value) => handleBlurSelecAndRadio('sentimento_desanimo', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2463,15 +2479,15 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Covardia</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.sentimento_covardia}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.sentimento_covardia}
+                            options={[
                                 { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                 { label: 'Média Intensidade', value: 'Média Intensidade' },
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_covardia', value)}
+                            onBlur={(value) => handleBlurSelecAndRadio('sentimento_covardia', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2480,15 +2496,15 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Egocentrismo</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.sentimento_egocentrismo}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.sentimento_egocentrismo}
+                            options={[
                                 { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                 { label: 'Média Intensidade', value: 'Média Intensidade' },
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_egocentrismo', value)}
+                            onBlur={(value) => handleBlurSelecAndRadio('sentimento_egocentrismo', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2497,15 +2513,15 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Cíume</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.sentimento_ciume}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.sentimento_ciume}
+                            options={[
                                 { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                 { label: 'Média Intensidade', value: 'Média Intensidade' },
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_ciume', value)}
+                            onBlur={(value) => handleBlurSelecAndRadio('sentimento_ciume', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2514,15 +2530,15 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Frustração</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.sentimento_frustracao}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.sentimento_frustracao}
+                            options={[
                                 { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                 { label: 'Média Intensidade', value: 'Média Intensidade' },
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_frustracao', value)}
+                            onBlur={(value) => handleBlurSelecAndRadio('sentimento_frustracao', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2531,15 +2547,15 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Nostalgia</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.sentimento_nostalgia}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.sentimento_nostalgia}
+                            options={[
                                 { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                 { label: 'Média Intensidade', value: 'Média Intensidade' },
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_nostalgia', value)}
+                            onBlur={(value) => handleBlurSelecAndRadio('sentimento_nostalgia', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2547,15 +2563,15 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Cansaço</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.sentimento_cansaco}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.sentimento_cansaco}
+                            options={[
                                 { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                 { label: 'Média Intensidade', value: 'Média Intensidade' },
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_cansaco', value)}
+                            onBlur={(value) => handleBlurSelecAndRadio('sentimento_cansaco', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2563,15 +2579,15 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Impaciência</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.sentimento_impaciencia}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.sentimento_impaciencia}
+                            options={[
                                 { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                 { label: 'Média Intensidade', value: 'Média Intensidade' },
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_impaciencia', value)}
+                            onBlur={(value) => handleBlurSelecAndRadio('sentimento_impaciencia', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2579,15 +2595,15 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Angústia</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.sentimento_angustia}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.sentimento_angustia}
+                            options={[
                                 { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                 { label: 'Média Intensidade', value: 'Média Intensidade' },
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_angustia', value)}
+                            onBlur={(value) => handleBlurSelecAndRadio('sentimento_angustia', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2595,15 +2611,15 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Timidez</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.sentimento_timidez}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.sentimento_timidez}
+                            options={[
                                 { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                 { label: 'Média Intensidade', value: 'Média Intensidade' },
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_timidez', value)}
+                            onBlur={(value) => handleBlurSelecAndRadio('sentimento_timidez', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2612,15 +2628,15 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Apatia</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.sentimento_apatia}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.sentimento_apatia}
+                            options={[
                                 { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                 { label: 'Média Intensidade', value: 'Média Intensidade' },
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_apatia', value)}
+                            onBlur={(value) => handleBlurSelecAndRadio('sentimento_apatia', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2629,15 +2645,15 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Ressentimento</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.sentimento_ressentimento}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.sentimento_ressentimento}
+                            options={[
                                 { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                 { label: 'Média Intensidade', value: 'Média Intensidade' },
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_ressentimento', value)}
+                            onBlur={(value) => handleBlurSelecAndRadio('sentimento_ressentimento', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2646,15 +2662,15 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Solidão</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.sentimento_solidao}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.sentimento_solidao}
+                            options={[
                                 { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                 { label: 'Média Intensidade', value: 'Média Intensidade' },
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_solidao', value)}
+                            onBlur={(value) => handleBlurSelecAndRadio('sentimento_solidao', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2663,15 +2679,15 @@ export default function AnamneseForms() {
 
                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                         <Text light>Autoritarismo</Text>
-                        <CheckBoxComponent
-                            valueChecked={anamnese?.sentimento_autoritarismo}
-                            boxGroup={[
+                        <CheckboxGroup
+                            value={anamnese?.sentimento_autoritarismo}
+                            options={[
                                 { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                 { label: 'Média Intensidade', value: 'Média Intensidade' },
                                 { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
                             ]}
                             horizontal={false}
-                            onSelect={(value) => handleBlurSelecAndRadio('sentimento_autoritarismo', value)}
+                            onBlur={(value) => handleBlurSelecAndRadio('sentimento_autoritarismo', value)}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -2693,20 +2709,22 @@ const Pagination = ({ setPage, page, pages, setCurrentTable }) => {
 
     const { colorPalette } = useAppContext()
 
+    const getPageData = (currPage) => pages?.find(pg => pg.page === currPage);
+
+    const handlePageChange = (newPage) => {
+        const pageData = getPageData(newPage);
+        if (pageData) {
+            setPage(newPage);
+            setCurrentTable(pageData.table);
+        }
+    };
 
     return (<Box sx={{ display: 'flex', gap: 2 }}>
         <Box sx={{
             ...styles.buttonArrow,
             opacity: page === 1 ? .4 : 1
         }} onClick={() => {
-            if (page !== 1) {
-                let currPage = page - 1
-                let currTable = pages.filter(pg => pg.page === currPage).map(pg => pg.table)[0]
-                console.log(currTable)
-                console.log(currPage)
-                setPage(currPage)
-                setCurrentTable(currTable)
-            }
+            if (page > 1) handlePageChange(page - 1);
         }}>
             <Box sx={{
                 ...styles.menuIcon,
@@ -2739,12 +2757,7 @@ const Pagination = ({ setPage, page, pages, setCurrentTable }) => {
             ...styles.buttonArrow,
             opacity: page >= (pages.length) ? .4 : 1
         }} onClick={() => {
-            if (page <= (pages.length - 1)) {
-                let currPage = page + 1
-                let currTable = pages.filter(pg => pg.page === currPage).map(pg => pg.table)[0]
-                setPage(currPage)
-                setCurrentTable(currTable)
-            }
+            if (page < pages.length) handlePageChange(page + 1);
         }}>
             <Box sx={{
                 ...styles.menuIcon,

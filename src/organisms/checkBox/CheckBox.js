@@ -1,9 +1,9 @@
 import { Checkbox, FormLabel, FormGroup, FormControlLabel, FormHelperText, FormControl } from "@mui/material";
 import { useAppContext } from "../../context/AppContext";
 import { Box, Text } from "../../atoms";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 
-export const CheckBoxComponent = (props) => {
+export const CheckBoxComponent = React.memo((props) => {
     const { title = '',
         style = {},
         onSelect = () => { },
@@ -79,7 +79,7 @@ export const CheckBoxComponent = (props) => {
             </FormGroup>
         </FormControl>
     )
-}
+})
 
 const styles = {
 }

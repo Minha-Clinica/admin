@@ -1,20 +1,16 @@
-import { Avatar, Backdrop, useMediaQuery, useTheme } from "@mui/material"
+import { Avatar } from "@mui/material"
 import Hamburger from "hamburger-react"
-import Link from "next/link"
 import { useRouter } from "next/router"
-import { useEffect, useRef, useState } from "react"
-import { Box, ContentContainer, Divider, Text } from "../../atoms"
+import { useRef, useState } from "react"
+import { Box, Divider, Text } from "../../atoms"
 import { Colors, icons } from "./Colors"
 import { useAppContext } from "../../context/AppContext"
-import { IconTheme } from "../iconTheme/IconTheme"
-import { getImageByScreen } from "../../validators/api-requests"
 import { DialogUserEdit } from "../userEdit/dialogEditUser"
-import { api } from "../../api/api"
 import { Notifications } from "../notification/notifications"
 
 export const LeftMenu = ({ }) => {
 
-   const { menuItems, user, colorPalette, theme, userPermissions, latestVersion, showVersion, setShowVersion } = useAppContext();
+   const { menuItems, user, colorPalette, theme, latestVersion, setShowVersion } = useAppContext();
    const name = user?.nome?.split(' ');
    const firstName = name[0];
    const lastName = name[name.length - 1];
@@ -22,38 +18,11 @@ export const LeftMenu = ({ }) => {
    let fotoPerfil = user?.getPhoto?.location || '';
    const router = useRouter();
    const pathname = router.pathname === '/' ? null : router.asPath
-   const [showUserOptions, setShowUserOptions] = useState(false)
-   const [imagesList, setImagesList] = useState('')
    const [showMenuMobile, setShowMenuMobile] = useState(false)
-   const [showNotification, setShowNotification] = useState(false)
    const [showDialogEditUser, setShowDialogEditUser] = useState(false)
    const [showEditUser, setShowEditUser] = useState(false)
    const [showMenuHelp, setShowMenuHelp] = useState(false)
    const [groupStates, setGroupStates] = useState(menuItems.map(() => false));
-   const handleImages = async () => {
-      try {
-         const response = await getImageByScreen('Menu Lateral')
-         if (response.status === 200) {
-            const { data } = response
-            const [urlImage] = data.map((item) => item.location)
-            setImagesList(urlImage)
-         }
-      } catch (error) {
-         return error
-      }
-   }
-
-
-   useEffect(() => {
-      handleImages()
-   }, [])
-
-
-   const handleGroupClick = (index) => {
-      const newGroupStates = [...groupStates];
-      newGroupStates[index] = !newGroupStates[index];
-      setGroupStates(newGroupStates);
-   };
 
    const handleGroupMouseEnter = (index) => {
       setGroupStates((prevGroupStates) => {
@@ -76,15 +45,6 @@ export const LeftMenu = ({ }) => {
          return prevGroupStates;
       });
    };
-
-   const handleAttMsgVersion = async () => {
-      try {
-         const response = await api.patch(`/user/notificationVersion/false/${user?.id}`)
-      } catch (error) {
-         console.log(error)
-         return error
-      }
-   }
 
    return (
       <>
@@ -311,7 +271,6 @@ const UserBadge = () => {
    const [showNotification, setShowNotification] = useState(false)
    const [showUserOptions, setShowUserOptions] = useState(false)
    const [showDialogEditUser, setShowDialogEditUser] = useState(false)
-
    const [showEditUser, setShowEditUser] = useState(false)
    const router = useRouter()
    const containerRef = useRef(null);

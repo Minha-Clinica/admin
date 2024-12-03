@@ -3,19 +3,13 @@ import { Box } from '../atoms'
 import { useAppContext } from '../context/AppContext'
 import { ProtectRoute } from '../context/ProtectRoute'
 import { Colors, LeftMenu, UserHeader } from '../organisms'
-// import { menuItems } from '../permissions'
 import '../styles/Home.module.css'
-import { useEffect, useState } from 'react'
-import { api } from '../api/api'
-import { Elements } from '@stripe/react-stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
 import { TabNavigator } from '../organisms/layout/Navigator'
 
 const PagesRoute = ({ Component, pageProps }) => {
 
     const { colorPalette } = useAppContext()
     const removePadding = Component.noPadding;
-    const stripePromise = loadStripe('pk_test_51OhxFfKKgBAGSCie1RiVGz6iupTDZy7I276AqK8g2T6MTf4yyaIxNuLrFkq47lM7uPtTjTwVoXJi6vJRJXDHzGcE00TruZBp9y');
 
     return (
         <>
@@ -35,9 +29,7 @@ const PagesRoute = ({ Component, pageProps }) => {
                         ...styles.contentContainer, backgroundColor: colorPalette.primary, transition: 'background-color 1s',
                         padding: removePadding ? '0px' : { xs: `30px 5px 85px 5px`, xm: `25px`, md: `120px 65px`, lg: `120px 65px` }
                     }}>
-                        <Elements stripe={stripePromise}>
-                            <Component {...pageProps} />
-                        </Elements>
+                        <Component {...pageProps} />
                     </Box>
                 </Box>
             </ProtectRoute>

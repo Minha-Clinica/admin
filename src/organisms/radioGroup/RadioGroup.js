@@ -1,8 +1,9 @@
 import { FormControl, FormControlLabel, FormLabel, Radio, RadioGroup } from "@mui/material";
 import { Box, Text } from "../../atoms";
 import { useAppContext } from "../../context/AppContext";
+import React from "react";
 
-export const RadioItem = (props) => {
+export const RadioItem = React.memo((props) => {
     const { title = '', style = {}, onSelect = (value) => { }, sx = {}, group = [], horizontal = false, valueRadio = '', disabled = false } = props;
     const { colorPalette, theme } = useAppContext()
 
@@ -51,7 +52,7 @@ export const RadioItem = (props) => {
             </RadioGroup>
         </FormControl>
     )
-}
+})
 
 const styles = {
 }
