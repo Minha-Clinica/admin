@@ -7,11 +7,13 @@ const CheckboxGroup = ({ name, options, value, onBlur }) => {
     const [selectedValues, setSelectedValues] = useState('');
 
     useEffect(() => {
-        setSelectedValues(value);
+        if(value !== null){    
+            setSelectedValues(value);
+        }
     }, [value]);
 
     const handleChange = (option) => {
-        const valuesArray = selectedValues ? selectedValues.split(', ').filter(v => v) : [];
+        const valuesArray = selectedValues ? selectedValues.split(', ')?.filter(v => v) : [];
         const alreadySelected = valuesArray.includes(option);
         const updatedValues = alreadySelected
             ? valuesArray.filter(v => v !== option)
