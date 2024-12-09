@@ -1,5 +1,5 @@
-import { Box, Divider, Text } from "../../../../atoms"
-import { useAppContext } from "../../../../context/AppContext"
+import { Box } from "../../atoms"
+import { useAppContext } from "../../context/AppContext"
 
 export const ModalOpitions = ({ children }) => {
     const { colorPalette } = useAppContext()

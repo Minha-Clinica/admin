@@ -1,5 +1,5 @@
-import { Box, Text } from "../../../../atoms"
-import { useAppContext } from "../../../../context/AppContext"
+import { Box, Text } from "../../atoms"
+import { useAppContext } from "../../context/AppContext"
 
 export const ModalItem = ({ text = '', icon = null, onClick = () => { } }) => {
     const { colorPalette } = useAppContext()

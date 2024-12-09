@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import { Box } from "../../../../atoms"
+import { Box } from "../../atoms"
 
 export const ModalButton = ({ children }) => {
     const [showActions, setShowActions] = useState(false)

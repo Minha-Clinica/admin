@@ -1,5 +1,4 @@
-import { Box, Divider, Text } from "../../../../atoms"
-import { useAppContext } from "../../../../context/AppContext"
+import { Box, Text, Divider } from "../../atoms"
 
 export const ModalHeader = ({ title }) => {
     return (

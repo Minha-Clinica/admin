@@ -18,7 +18,7 @@ import "moment/locale/pt-br";
 import { formatDate } from "../../helpers"
 import Calendar from "react-calendar"
 import 'react-calendar/dist/Calendar.css';
-import { ModalButton, ModalItem, ModalOpitions } from "./components/Modal"
+import { ModalButton, ModalItem, ModalOpitions } from "../../organisms/Modal"
 
 export default function ListConsultions(props) {
     const [consultionList, setConsultion] = useState([])
