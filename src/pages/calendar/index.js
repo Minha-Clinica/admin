@@ -833,7 +833,7 @@ export default function CalendarComponent() {
                                                 <Button
                                                     disabled={!isPermissionEdit && true}
                                                     small
-                                                    text="Re-agendar"
+                                                    text="Reagendar"
                                                     style={{ height: 30, width: 120 }}
                                                 />
                                             ) : (<></>)} */}
@@ -925,17 +925,6 @@ export default function CalendarComponent() {
                                 <Divider />
 
                                 <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1, alignItems: 'center', marginTop: 2 }}>
-                                    {eventData?.consulta_id &&
-                                        < Link href={`/consultation/${eventData?.consulta_id}`} target="_blank">
-                                            <Button
-                                                secondary
-                                                disabled={!isPermissionEdit && true}
-                                                small
-                                                text="Prontuário"
-                                                style={{ height: 30, width: 120 }}
-                                            />
-                                        </Link>
-                                    }
 
                                     <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, alignItems: 'center' }}>
                                         <Button

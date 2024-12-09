@@ -18,6 +18,7 @@ import "moment/locale/pt-br";
 import { formatDate } from "../../helpers"
 import Calendar from "react-calendar"
 import 'react-calendar/dist/Calendar.css';
+import { ModalButton, ModalItem, ModalOpitions } from "./components/Modal"
 
 export default function ListConsultions(props) {
     const [consultionList, setConsultion] = useState([])
@@ -133,7 +134,7 @@ export default function ListConsultions(props) {
             let query;
             if (user?.perfil?.includes('administrador')) {
                 query = `/consultation/profissional/${125
-            }`;
+                    }`;
             } else if (user?.perfil?.includes('paciente')) {
                 query = `/consultation/pacient/${user?.id}`;
             } else if (isPartner) {
@@ -682,6 +683,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
             { key: isProfissional ? 'paciente' : 'profissional', label: isProfissional ? 'Paciente ' : 'Profissional' },
             { key: 'modalidade', label: 'Tipo' },
             { key: 'status', label: 'Status' },
+            { key: 'payment', label: 'Pagamento' },
             { key: 'actions', label: 'Ações' },
         ];
     } else if (isPartner) {
@@ -869,15 +871,38 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                                                     <>
                                                         <TableCell sx={{ padding: '15px 0px', textAlign: 'center' }}>
                                                             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
-                                                                <Button secondary text="prontuário" small
-                                                                    onClick={() => handleRowClick(item?.id_consulta)}
-                                                                />
                                                                 <Box sx={{ display: 'flex', height: '30px', width: '2px', backgroundColor: colorPalette?.primary }} />
                                                                 <FormControlLabel small
                                                                     control={
                                                                         <Switch checked={pay} name="pago" sx={{ zIndex: 9 }} size="small" onChange={(e) => handleUpdateStatus(e, item?.id_consulta)} />
                                                                     }
                                                                     label="pago"
+                                                                />
+                                                            </Box>
+                                                        </TableCell>
+
+
+
+                                                        <TableCell sx={{ padding: '15px 0px', textAlign: 'center', display: 'flex', justifyContent: 'center' }}>
+
+                                                            <ModalButton>
+                                                                <ModalOpitions title="Opções">
+                                                                    <ModalItem text="Ver Prontuário" onClick={() => handleRowClick(item?.id_consulta)} />
+                                                                    {/* <ModalItem text="Remarcar" /> */}
+                                                                    <ModalItem text="Cancelar" onClick={(event) => setShowConfirmationDialog({
+                                                                        active: true,
+                                                                        event,
+                                                                        acceptAction: handleDelete,
+                                                                        propsData: item?.id_consulta,
+                                                                        title: 'Cancelar Sessão',
+                                                                        message: 'Tem certeza que deseja cancelar a Sessão selecionada?'
+                                                                    })} />
+                                                                </ModalOpitions>
+                                                            </ModalButton>
+                                                            {/* <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+
+                                                                <Button secondary text="prontuário" small
+                                                                    onClick={() => handleRowClick(item?.id_consulta)}
                                                                 />
 
                                                                 <Button delete text="Cancelar" small
@@ -890,7 +915,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                                                                         message: 'Tem certeza que deseja cancelar a Sessão selecionada?'
                                                                     })}
                                                                 />
-                                                            </Box>
+                                                            </Box> */}
                                                         </TableCell>
                                                     </>
                                                     :
