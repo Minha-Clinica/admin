@@ -1,8 +1,6 @@
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
 import { Box, Button, ContentContainer, Divider, Text, TextInput } from "../../atoms"
-import { PaginationTable, SearchBar, SectionHeader, Table_V1 } from "../../organisms"
-import { getConsultionPerfil } from "../../validators/api-requests"
 import { useAppContext } from "../../context/AppContext"
 import { SelectList } from "../../organisms/select/SelectList"
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -11,7 +9,6 @@ import { Backdrop, CircularProgress, FormControlLabel, Switch, TablePagination, 
 import { checkUserPermissions } from "../../validators/checkPermissionUser"
 import { Paper, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Tooltip, Avatar } from "@mui/material";
 import { api } from "../../api/api"
-import { icons } from "../../organisms/layout/Colors"
 import { formatTimeStamp } from "../../helpers"
 import moment from "moment";
 import "moment/locale/pt-br";
@@ -614,7 +611,8 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                     nome: user?.nome,
                     id: user?.id,
                     email: user?.email
-                }
+                },
+                requestingPerson: 'pacient'
             });
 
             if (response.status === 200) {

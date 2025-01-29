@@ -17,7 +17,7 @@ export { DialogUserEdit } from './userEdit/dialogEditUser'
 export { ContainDropzone } from './containDropzone/ContainDropzone'
 export { DeclarationPayment } from './contractStudent/declarationPayment'
 export { PaginationTable } from './pagination/Pagination'
-
+export {ModalContainer} from './modalContainer/ModalContainer'
 
 
 

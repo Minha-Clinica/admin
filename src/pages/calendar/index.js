@@ -4,18 +4,17 @@ import moment from "moment";
 import "moment/locale/pt-br";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { Box, Button, ContentContainer, Divider, Text, TextInput } from "../../atoms";
-import { SectionHeader, SelectList, Holidays, CheckBoxComponent, RadioItem } from "../../organisms";
+import { SectionHeader, SelectList, Holidays, RadioItem, ModalContainer } from "../../organisms";
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css"; // Estilo para o recurso de arrastar e soltar (se estiver usando)
 import "react-big-calendar/lib/addons/dragAndDrop"; // Recurso de arrastar e soltar (se estiver usando)
 import { useAppContext } from "../../context/AppContext";
-import { Backdrop, Checkbox, Grid, Input, Tooltip } from "@mui/material";
+import { Backdrop, Checkbox, Grid, Input, Tooltip, CircularProgress } from "@mui/material";
 import { icons } from "../../organisms/layout/Colors";
 import { api } from "../../api/api";
-import { useRouter } from "next/router";
-import { checkUserPermissions } from "../../validators/checkPermissionUser";
-import { CheckBox } from "@mui/icons-material";
-import { formatDate, formatTimeStamp } from "../../helpers";
-import Link from "next/link";
+import { formatDate } from "../../helpers";
+import { CalendarReserves } from "../../organisms/calendar/CalendarReserves";
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
 
 
 moment.locale("pt-br");
@@ -88,13 +87,14 @@ const listEvents = [
 ]
 
 export default function CalendarComponent() {
+    const professionalId = 125;
     const [events, setEvents] = useState([]);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [showEventForm, setShowEventForm] = useState(false);
     const [showAppointment, setShowAppointment] = useState(false);
     const [showReservas, setShowReservas] = useState(false);
     const [reservasAgenda, setReservasAgenda] = useState([])
-    const [defaultEvents, setDefaultEvents] = useState([])
+    const [showReeschedule, setShowReeschedule] = useState(false)
     const [selectedDays, setSelectedDays] = useState([]);
     const [availability, setAvailability] = useState({});
     const [filterReservas, setFilterReservas] = useState(false)
@@ -121,11 +121,21 @@ export default function CalendarComponent() {
         allDay: false,
         evento_google_id: null
     });
-    const router = useRouter()
+
+    const [loadingReservas, setLoadingReserva] = useState({ active: false, success: false, error: false, message: '' })
     const { setLoading, alert, colorPalette, matches, user, userPermissions, menuItemsList, mobile } = useAppContext()
     const [isPermissionEdit, setIsPermissionEdit] = useState(false)
     const isAdminstrator = user.perfil.includes('administrador')
     const isProfissional = user.perfil.includes('profissional')
+    const [dateSelected, setDateSelected] = useState({
+        day: '',
+        hour: '',
+        profissionalId: '',
+        reserva_id: '',
+        eventId: '',
+        consultId: '',
+        pacientData: {}
+    })
     const [users, setUsers] = useState([])
     const [duration, setDuration] = useState(60);
 
@@ -156,7 +166,7 @@ export default function CalendarComponent() {
     const handleEvents = async () => {
         try {
             setLoading(true)
-            const response = await api.get(`/event/profissional/agenda/125`)
+            const response = await api.get(`/event/profissional/agenda/${professionalId}`)
             const { data } = response
             if (data) {
                 const eventsMap = data?.map((event) => ({
@@ -171,7 +181,6 @@ export default function CalendarComponent() {
                     email_agendado: event?.email_agendado,
                     nome_agendado: event?.nome_agendado,
                     nome_usuario_agendado: event?.nome_usuario_agendado,
-                    usuario_agendado: event?.usuario_agendado,
                     disponivel: event?.disponivel,
                     usuario_id: event?.usuario_id,
                     allDay: false, // Ajuste isso com base no seu caso de uso
@@ -189,37 +198,10 @@ export default function CalendarComponent() {
         }
     }
 
-    // function handleFilter() {
-    //     setLoading(true);
-    //     setYear(yearSelect);
-    //     setSemester(semesterSelect);
-    //     setLoading(false);
-    // }
-
-    // useEffect(() => {
-    //     setDefaultRangeDate(defaultYear);
-    //     const filtered = defaultYear.filter(filter)
-    //     setFilteredEvents(filtered);
-    //     listEventsDefault();
-    // }, [semester, year]);
-
-    // const messages = {
-    //     today: "Hoje",
-    //     previous: "Anterior",
-    //     next: "Próximo",
-    //     month: "Mês",
-    //     week: "Semana",
-    //     day: "Dia",
-    //     agenda: "Agenda",
-    //     date: "Data",
-    //     time: "Hora",
-    //     event: "Evento",
-    // };
-
     const handleCreateEvent = async (event) => {
         setLoading(true)
         try {
-            const response = await api.post(`/event/create/125`, { events: event })
+            const response = await api.post(`/event/create/${professionalId}`, { events: event })
             if (response.status === 201) {
                 alert.success('Evento criado!')
                 handleItems()
@@ -258,7 +240,7 @@ export default function CalendarComponent() {
     const handleCreateReservas = async () => {
         setLoading(true)
         try {
-            const response = await api.post(`/event/reservas/create/125`, { reservasAgenda })
+            const response = await api.post(`/event/reservas/create/${professionalId}`, { reservasAgenda })
             const { data } = response
             if (data?.status === 201) {
                 alert.success('Rerervas criadas!')
@@ -271,18 +253,6 @@ export default function CalendarComponent() {
             setLoading(false)
         }
     };
-
-    async function listEventsDefault() {
-        try {
-            const groupEvents = listEvents.map(event => ({
-                label: event.title,
-                value: event?.id
-            }));
-
-            setDefaultEvents(groupEvents);
-        } catch (error) {
-        }
-    }
 
     const eventStyleGetter = (event, start, end, isSelected) => {
         const style = {
@@ -452,12 +422,6 @@ export default function CalendarComponent() {
         const currentDayOfMonth = startDate.date();
         const lastDayOfMonth = endDate.date();
 
-        console.log(filtersReservas.startDate)
-        console.log(filtersReservas.endDate)
-
-        console.log(currentDayOfMonth)
-        console.log(lastDayOfMonth)
-
         // const startDate = filtersReservas.startDate ? moment(filtersReservas.startDate) : moment().startOf("day");
         // const endDate = filtersReservas.endDate ? moment(filtersReservas.endDate) : moment().endOf("month");
 
@@ -502,7 +466,7 @@ export default function CalendarComponent() {
                             email_agendado: '',
                             nome_agendado: '',
                             disponivel: 0,
-                            usuario_id: 125,
+                            usuario_id: professionalId,
                             nome_usuario_agendado: ''
                         };
 
@@ -569,8 +533,135 @@ export default function CalendarComponent() {
     }
 
 
+    const handleRescheduleppointment = async () => {
+        setLoadingReserva({ active: true, success: false, error: false, message: 'Reagendando Sessões...' });
+
+        try {
+
+            const payload = {
+                reservaId: dateSelected?.reserva_id,
+                userPacientData: {
+                    nome: dateSelected?.pacientData?.nome,
+                    id: dateSelected?.pacientData?.id,
+                    email: dateSelected?.pacientData?.email
+                },
+                requestingPerson: 'profissional'
+            };
+
+            const response = await api.patch(`/consultation/agenda/reagenda/${dateSelected?.consultId}`, payload);
+
+            if (response.status === 200) {
+                setTimeout(() => {
+                    setLoadingReserva({
+                        active: true, success: true, error: false,
+                        icon: '/icons/remarcar_icon.png',
+                        message: `Sessão remarcada com sucesso.`
+                    });
+                    setTimeout(async () => {
+                        setLoadingReserva({
+                            active: false, success: true, error: false,
+                            icon: '/icons/remarcar_icon.png',
+                            message: `Sessão remarcada com sucesso.`
+                        });
+                        await handleItems();
+                    }, 2000);
+                    alert.success('Sessão remarcada.');
+                }, 2000);
+
+                setShowReeschedule(false);
+                setDateSelected({
+                    day: '',
+                    hour: '',
+                    profissionalId: '',
+                    reserva_id: '',
+                    eventId: '',
+                    consultId: '',
+                    pacientData: {}
+                });
+                setShowEventForm(false)
+                setEventData({
+                    title: "",
+                    description: "",
+                    location: "",
+                    color: "#808080",
+                    start: '',
+                    end: '',
+                    title: '',
+                    description: '',
+                    location: '',
+                    usuario_agendado: '',
+                    email_agendado: '',
+                    nome_agendado: '',
+                    nome_usuario_agendado: '',
+                    disponivel: 0,
+                    usuario_id: '',
+                    allDay: false,
+                    evento_google_id: null
+                });
+            } else {
+                setTimeout(() => {
+                    setLoadingReserva({
+                        active: true, success: false, error: true,
+                        message: `Ocorreu um erro ao remarcar sessão. Tente novamente mais tarde.`
+                    });
+                    setTimeout(async () => {
+                        setLoadingReserva({
+                            active: false, success: false, error: true,
+                            message: `Ocorreu um erro ao remarcar sessão. Tente novamente mais tarde.`
+                        });
+                    }, 3500);
+                    alert.error(`Ocorreu um erro ao remarcar sessão sessão.`);
+                }, 3500);
+            }
+        } catch (error) {
+            console.log(error);
+            return error;
+        } finally {
+            setTimeout(() => {
+                setLoadingReserva({ active: false, success: false, error: false, message: '' });
+            }, 3300)
+        }
+    };
+
+
     return (
         <>
+
+            <Backdrop open={loadingReservas?.active} sx={{ zIndex: 99999999999999 }}>
+                <ContentContainer>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center' }}>
+                        <>
+                            {loadingReservas?.success && (
+                                <>
+                                    <CheckCircleIcon style={{ color: 'green', fontSize: 30 }} />
+                                    <Text bold>{loadingReservas?.message}</Text>
+                                    {loadingReservas.icon && <Box sx={{
+                                        ...styles.menuIcon,
+                                        width: 32,
+                                        height: 32,
+                                        backgroundImage: `url(${loadingReservas.icon})`,
+                                        transition: '.3s',
+                                    }} />}
+                                </>
+                            )
+                            }
+                            {loadingReservas?.error && (
+                                <>
+                                    <CancelIcon style={{ color: 'red', fontSize: 30 }} />
+                                    <Text bold>{loadingReservas?.message}</Text>
+                                </>
+                            )}
+                            {(!loadingReservas.error && !loadingReservas.success) &&
+                                <>
+                                    <CircularProgress />
+                                    <Text bold>{loadingReservas?.message}</Text>
+                                </>
+                            }
+                        </>
+                    </Box>
+                </ContentContainer>
+            </Backdrop>
+
             <SectionHeader
                 icon={'/icons/agenda_icon.png'}
                 title={`${user?.nome}` || `Calendário de Agendas`} />
@@ -828,15 +919,28 @@ export default function CalendarComponent() {
                                             <Text bold>Fim:</Text>
                                             <Text>{horarios(eventData?.end)}</Text>
                                         </Box>
-                                        {/* {(new Date(eventData.start) > new Date() && eventData.usuario_agendado) ?
+                                        {(new Date(eventData.start) > new Date() && eventData.usuario_agendado) ?
                                             (
                                                 <Button
                                                     disabled={!isPermissionEdit && true}
+                                                    onClick={() => {
+                                                        setShowReeschedule(true)
+                                                        setDateSelected({
+                                                            ...dateSelected,
+                                                            eventId: eventData.id_evento_calendario,
+                                                            consultId: eventData.consulta_id,
+                                                            pacientData: {
+                                                                nome: eventData.nome_agendado,
+                                                                email: eventData.email_agendado,
+                                                                id: eventData.usuario_agendado
+                                                            }
+                                                        })
+                                                    }}
                                                     small
                                                     text="Reagendar"
                                                     style={{ height: 30, width: 120 }}
                                                 />
-                                            ) : (<></>)} */}
+                                            ) : (<></>)}
                                     </Box>
                                 </Box>
 
@@ -1126,7 +1230,13 @@ export default function CalendarComponent() {
                 </ContentContainer>
             </Backdrop>
 
-        </ >
+
+            <ModalContainer active={showReeschedule} setActive={setShowReeschedule} title="Datas disponíveis">
+                <CalendarReserves reserves={events?.filter(item => item.start >= new Date())}
+                    handleRescheduleppointment={handleRescheduleppointment}
+                    setDateSelected={setDateSelected} dateSelected={dateSelected} />
+            </ModalContainer>
+        </>
     );
 }
 
