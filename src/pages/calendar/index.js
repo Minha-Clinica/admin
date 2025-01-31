@@ -319,6 +319,28 @@ export default function CalendarComponent() {
         }
     };
 
+
+    const handleSynchronizeGoogleCalendar = async () => {
+
+        try {
+            setLoading(true)
+            const response = await api.post(`/consultation/sincronization-calendar-google-agenda`)
+            const { status } = response
+            if (status === 200) {
+                alert.success('Calendário sincronizado com Google Agenda.')
+                handleItems()
+                return
+            }
+            alert.error('Ocorreu um erro ao sincronizar agenda')
+        } catch (error) {
+            return error
+        } finally {
+            setLoading(false)
+        }
+    };
+
+
+
     const handleEventFormChange = (event) => {
         const { name, value } = event.target;
         setEventData((prevData) => ({
@@ -750,7 +772,9 @@ export default function CalendarComponent() {
                             boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
                             "&:hover": {
                                 opacity: 0.8,
-                                cursor: 'pointer'
+                                cursor: 'pointer',
+                                transform: 'scale(1.03, 1.03)',
+                                transition: '.4s',
                             }
                         }} onClick={() => setShowReservas(true)}>
                             <Box sx={{
@@ -765,7 +789,31 @@ export default function CalendarComponent() {
                             }} />
                             <Text bold>Lista de Reservas</Text>
                         </Box>
+
                     </Box>
+
+
+                    <Box sx={{
+                        display: 'flex', backgroundColor: colorPalette.secondary, padding: '10px 20px',
+                        borderRadius: 2,
+                        alignItems: 'center', gap: 2,
+                        boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
+                        "&:hover": {
+                            opacity: 0.8,
+                            cursor: 'pointer',
+                            transform: 'scale(1.03, 1.03)',
+                            transition: '.4s',
+                        }
+                    }} onClick={() => handleSynchronizeGoogleCalendar()}>
+                        <Box sx={{
+                            ...styles.menuIcon,
+                            backgroundImage: `url('/icons/search.png')`,
+                            transition: '.3s',
+                        }} />
+                        <Text bold>Sincronizar agenda com Google</Text>
+                    </Box>
+
+
                 </Box>
 
                 <Calendar
