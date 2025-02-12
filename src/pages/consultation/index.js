@@ -554,7 +554,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
     };
 
 
-    const handleDelete = async (consultId) => {
+    const handleCancel = async (consultId) => {
         setLoadingPayment({ active: true, success: false, error: false, message: 'Cancelando Sessão...' });
 
         try {
@@ -891,7 +891,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                                                                     <ModalItem text="Cancelar" onClick={(event) => setShowConfirmationDialog({
                                                                         active: true,
                                                                         event,
-                                                                        acceptAction: handleDelete,
+                                                                        acceptAction: handleCancel,
                                                                         propsData: item?.id_consulta,
                                                                         title: 'Cancelar Sessão',
                                                                         message: 'Tem certeza que deseja cancelar a Sessão selecionada?'
@@ -908,7 +908,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                                                                     onClick={(event) => setShowConfirmationDialog({
                                                                         active: true,
                                                                         event,
-                                                                        acceptAction: handleDelete,
+                                                                        acceptAction: handleCancel,
                                                                         propsData: item?.id_consulta,
                                                                         title: 'Cancelar Sessão',
                                                                         message: 'Tem certeza que deseja cancelar a Sessão selecionada?'

@@ -123,7 +123,7 @@ export default function CalendarComponent() {
     });
 
     const [loadingReservas, setLoadingReserva] = useState({ active: false, success: false, error: false, message: '' })
-    const { setLoading, alert, colorPalette, matches, user, userPermissions, menuItemsList, mobile } = useAppContext()
+    const { setLoading, alert, colorPalette, matches, user, userPermissions, setShowConfirmationDialog, mobile } = useAppContext()
     const [isPermissionEdit, setIsPermissionEdit] = useState(false)
     const isAdminstrator = user.perfil.includes('administrador')
     const isProfissional = user.perfil.includes('profissional')
@@ -647,6 +647,53 @@ export default function CalendarComponent() {
         }
     };
 
+    const handleCancel = async (sessionId) => {
+        setLoadingReserva({ active: true, success: false, error: false, message: 'Cancelando Sessão...' });
+
+        try {
+            const response = await api.patch(`/event/cancel-session/${sessionId}`);
+
+            if (response.status === 200) {
+                setTimeout(() => {
+                    setLoadingReserva({
+                        active: true, success: true, error: false,
+                        message: `Sessão cancelada com sucesso.`
+                    });
+                    setTimeout(async () => {
+                        setLoadingReserva({
+                            active: false, success: true, error: false,
+                            message: `Sessão cancelada com sucesso.`
+                        });
+                        await handleItems();
+                        setShowEventForm(false)
+                    }, 3500);
+                    alert.success('Sessão cancelada.');
+                }, 3500);
+            } else {
+                setTimeout(() => {
+                    setLoadingReserva({
+                        active: true, success: false, error: true,
+                        message: `Ocorreu um erro ao cancelada. Tente novamente mais tarde.`
+                    });
+                    setTimeout(async () => {
+                        setLoadingReserva({
+                            active: false, success: false, error: true,
+                            message: `Ocorreu um erro ao cancelada. Tente novamente mais tarde.`
+                        });
+                    }, 3500);
+                    alert.error(`Ocorreu um erro ao cancelada sessão.`);
+                }, 3500);
+            }
+        } catch (error) {
+            console.log(error);
+            return error;
+        } finally {
+            setTimeout(() => {
+                setLoadingReserva({ active: false, success: false, error: false, message: '' });
+            })
+        }
+    };
+
 
     return (
         <>
@@ -971,25 +1018,44 @@ export default function CalendarComponent() {
                                         </Box>
                                         {(new Date(eventData.start) > new Date() && eventData.usuario_agendado) ?
                                             (
-                                                <Button
-                                                    disabled={!isPermissionEdit && true}
-                                                    onClick={() => {
-                                                        setShowReeschedule(true)
-                                                        setDateSelected({
-                                                            ...dateSelected,
-                                                            eventId: eventData.id_evento_calendario,
-                                                            consultId: eventData.consulta_id,
-                                                            pacientData: {
-                                                                nome: eventData.nome_agendado,
-                                                                email: eventData.email_agendado,
-                                                                id: eventData.usuario_agendado
-                                                            }
-                                                        })
-                                                    }}
-                                                    small
-                                                    text="Reagendar"
-                                                    style={{ height: 30, width: 120 }}
-                                                />
+                                                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center',  }}>
+                                                    <Button
+                                                        disabled={!isPermissionEdit && true}
+                                                        onClick={() => {
+                                                            setShowReeschedule(true)
+                                                            setDateSelected({
+                                                                ...dateSelected,
+                                                                eventId: eventData.id_evento_calendario,
+                                                                consultId: eventData.consulta_id,
+                                                                pacientData: {
+                                                                    nome: eventData.nome_agendado,
+                                                                    email: eventData.email_agendado,
+                                                                    id: eventData.usuario_agendado
+                                                                }
+                                                            })
+                                                        }}
+                                                        small
+                                                        text="Reagendar"
+                                                        style={{ height: 30, width: 120 }}
+                                                    />
+
+
+                                                    <Button
+                                                        disabled={!isPermissionEdit && true}
+                                                        secondary
+                                                        onClick={(event) => setShowConfirmationDialog({
+                                                            active: true,
+                                                            event,
+                                                            acceptAction: handleCancel,
+                                                            propsData: eventData.id_evento_calendario,
+                                                            title: 'Cancelar Sessão',
+                                                            message: 'Tem certeza que deseja cancelar a Sessão do dia selecionado?'
+                                                        })}
+                                                        small
+                                                        text="Cancelar Sessão"
+                                                        style={{ height: 30, width: 120 }}
+                                                    />
+                                                </Box>
                                             ) : (<></>)}
                                     </Box>
                                 </Box>
