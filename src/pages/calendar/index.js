@@ -187,7 +187,9 @@ export default function CalendarComponent() {
                     consulta_id: event?.id_consulta,
                     evento_google_id: event?.evento_google_id
                 }));
-                setEvents([...eventsMap, ...Holidays]);
+
+                console.log(eventsMap.filter(item => item.usuario_agendado == 205))
+                setEvents(eventsMap);
                 return
             }
         } catch (error) {
