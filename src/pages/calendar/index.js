@@ -1018,7 +1018,7 @@ export default function CalendarComponent() {
                                         </Box>
                                         {(new Date(eventData.start) > new Date() && eventData.usuario_agendado) ?
                                             (
-                                                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center',  padding: '5px 12px'}}>
+                                                <Box sx={{ display: 'flex', gap: .5, alignItems: 'center', justifyContent: 'center',  padding: '5px 12px', flexDirection: 'column'}}>
                                                     <Button
                                                         disabled={!isPermissionEdit && true}
                                                         onClick={() => {
