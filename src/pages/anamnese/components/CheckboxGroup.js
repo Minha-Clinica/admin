@@ -7,7 +7,7 @@ const CheckboxGroup = ({ name, options, value, onBlur }) => {
     const [selectedValues, setSelectedValues] = useState('');
 
     useEffect(() => {
-        if(value !== null){    
+        if (value !== null) {
             setSelectedValues(value);
         }
     }, [value]);
@@ -21,14 +21,16 @@ const CheckboxGroup = ({ name, options, value, onBlur }) => {
 
         const updatedString = updatedValues.join(', ');
         setSelectedValues(updatedString);
-        onBlur(updatedString);
+        if (onBlur) {
+            onBlur(updatedString);
+        }
     };
 
     return (
         <div>
             {options.map((option) => (
                 <label key={option.value} style={{ display: 'block', marginBottom: '5px' }}>
-                    <Box sx={{display: 'flex', gap: 1, alignItems: `center`}}>
+                    <Box sx={{ display: 'flex', gap: 1, alignItems: `center` }}>
                         <input
                             type="checkbox"
                             value={option.value}
@@ -36,7 +38,11 @@ const CheckboxGroup = ({ name, options, value, onBlur }) => {
                                 .split(',')
                                 .map(v => v.trim())
                                 .includes(option.value)}
-                            onChange={() => handleChange(option.value)}
+                                onChange={() => {
+                                    if (onBlur) {
+                                        handleChange(option.value);
+                                    }
+                                }}
                         />
                         <Text light>
                             {option.label}

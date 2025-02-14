@@ -6,6 +6,8 @@ import { useAppContext } from "../../../context/AppContext";
 import { CheckBoxComponent, RadioItem } from "../../../organisms";
 import { api } from "../../../api/api";
 import { CircularProgress, keyframes } from "@mui/material";
+import RadioGroup from "../../anamnese/components/RadioGroup";
+import CheckboxGroup from "../../anamnese/components/CheckboxGroup";
 
 export default function AnamneseUser({ id }) {
     const [page, setPage] = useState(1);
@@ -50,7 +52,7 @@ export default function AnamneseUser({ id }) {
             {anamnese?.email ?
                 <Box sx={{ opacity: loadingData ? .6 : 1, display: 'flex', flexDirection: 'column', gap: 2, alignItems: 'center', width: '100%' }}>
                     <Box>
-                        <Text bold title>Formulário de Anamnese do Paciente</Text>
+                        <Text bold title>TERAPIA - Formulário de Anamnese</Text>
                     </Box>
 
                     {loadingData &&
@@ -60,7 +62,7 @@ export default function AnamneseUser({ id }) {
                         </Box>}
 
                     <Box>
-                        {pages.map((item, index) => {
+                        {pages?.map((item, index) => {
                             if (item.page === page) {
                                 return (
                                     <Box key={index} sx={{
@@ -89,6 +91,7 @@ export default function AnamneseUser({ id }) {
 
                                     placeholder='fulano@gmail.com'
                                     name='email'
+
                                     value={anamnese?.email || ''}
                                 />
                             </Box>
@@ -99,6 +102,7 @@ export default function AnamneseUser({ id }) {
 
                                     placeholder='Nome Completo'
                                     name='nome'
+
                                     value={anamnese?.nome || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -113,6 +117,7 @@ export default function AnamneseUser({ id }) {
 
                                     placeholder='CPF'
                                     name='cpf'
+
                                     value={anamnese?.cpf || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -127,6 +132,7 @@ export default function AnamneseUser({ id }) {
 
                                     type="date"
                                     name='nascimento'
+
                                     value={anamnese?.nascimento?.split('T')[0] || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -136,9 +142,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Estado Cívil *</Text>
-                                <RadioItem
-                                    valueRadio={anamnese?.estado_civil}
-                                    group={[
+                                <RadioGroup
+                                    value={anamnese?.estado_civil}
+                                    options={[
                                         { label: 'Casado(a)', value: 'Casado(a)' },
                                         { label: 'Solteiro(a)', value: 'Solteiro(a)' },
                                         { label: 'Viúvo(a)', value: 'Viúvo(a)' },
@@ -150,14 +156,14 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Gênero *</Text>
-                                <RadioItem
-                                    valueRadio={anamnese?.genero}
-                                    group={[
+                                <RadioGroup
+                                    value={anamnese?.genero}
+                                    options={[
                                         { label: 'Masculino', value: 'Masculino' },
                                         { label: 'Feminino', value: 'Feminino' }
                                     ]}
-
-                                />                    </Box>
+                                />
+                            </Box>
                             <Divider />
 
 
@@ -166,6 +172,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='endereco'
+
                                     value={anamnese?.endereco || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -178,6 +185,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='cep'
+
                                     value={anamnese?.cep || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -190,6 +198,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='bairro'
+
                                     value={anamnese?.bairro || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -202,6 +211,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='cidade'
+
                                     value={anamnese?.cidade || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -214,6 +224,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='uf'
+
                                     value={anamnese?.uf || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -226,6 +237,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='celular'
+
                                     value={anamnese?.celular || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -238,6 +250,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='nacionalidade'
+
                                     value={anamnese?.nacionalidade || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -250,6 +263,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='profissao'
+
                                     value={anamnese?.profissao || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -262,6 +276,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='religão'
+
                                     value={anamnese?.religão || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -271,9 +286,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Escolaridade</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.escolaridade}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.escolaridade}
+                                    options={[
                                         { label: 'Fundamental', value: 'Fundamental' },
                                         { label: 'Médio', value: 'Médio' },
                                         { label: 'Superior (Graduação)', value: 'Superior (Graduação)' },
@@ -299,6 +314,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='queixa_principal'
+
                                     value={anamnese?.queixa_principal || ''}
                                     sx={{ flex: 1, }}
                                     multiline
@@ -308,6 +324,7 @@ export default function AnamneseUser({ id }) {
                             </Box>
                         </Box>
                     }
+
                     {page === 3 &&
                         <Box sx={{
                             display: 'flex', gap: 2, padding: '15px', backgroundColor: colorPalette.secondary, borderRadius: 2,
@@ -320,6 +337,7 @@ export default function AnamneseUser({ id }) {
                                         <TextInput
 
                                             name='motivo_divorcio'
+
                                             value={anamnese?.motivo_divorcio || ''}
                                             sx={{ flex: 1, }}
                                         />
@@ -334,6 +352,7 @@ export default function AnamneseUser({ id }) {
 
                                     type="number"
                                     name='numero_filhos'
+
                                     value={anamnese?.numero_filhos || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -347,6 +366,7 @@ export default function AnamneseUser({ id }) {
                                         <TextInput
 
                                             name='relacionamento_c_filho'
+
                                             value={anamnese?.relacionamento_c_filho || ''}
                                             sx={{ flex: 1, }}
                                         />
@@ -361,6 +381,7 @@ export default function AnamneseUser({ id }) {
                                         <TextInput
 
                                             name='relacionamento_parceiro'
+
                                             value={anamnese?.relacionamento_parceiro || ''}
                                             sx={{ flex: 1, }}
                                         />
@@ -373,6 +394,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='sentimento_em_casa'
+
                                     value={anamnese?.sentimento_em_casa || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -384,6 +406,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='sentimento_trabalho'
+
                                     value={anamnese?.sentimento_trabalho || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -392,9 +415,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Você se sente pertencendo ao Contexto Familiar?</Text>
-                                <RadioItem
-                                    valueRadio={anamnese?.pertence_contx_familiar}
-                                    group={[
+                                <RadioGroup
+                                    value={anamnese?.pertence_contx_familiar}
+                                    options={[
                                         { label: 'Sim', value: 'Sim' },
                                         { label: 'Não', value: 'Não' }
                                     ]}
@@ -408,6 +431,7 @@ export default function AnamneseUser({ id }) {
                                         <TextInput
 
                                             name='just_contx_familiar'
+
                                             value={anamnese?.just_contx_familiar || ''}
                                             sx={{ flex: 1, }}
                                         />
@@ -418,9 +442,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Você se sente pertencendo ao Contexto Social?</Text>
-                                <RadioItem
-                                    valueRadio={anamnese?.pertence_contx_social}
-                                    group={[
+                                <RadioGroup
+                                    value={anamnese?.pertence_contx_social}
+                                    options={[
                                         { label: 'Sim', value: 'Sim' },
                                         { label: 'Não', value: 'Não' }
                                     ]}
@@ -434,8 +458,9 @@ export default function AnamneseUser({ id }) {
                                         <Text light>Por quê? (comente com base na resposta anterior)</Text>
                                         <TextInput
 
-                                            name='just_contx_familiar'
-                                            value={anamnese?.just_contx_familiar || ''}
+                                            name='just_contx_social'
+
+                                            value={anamnese?.just_contx_social || ''}
                                             sx={{ flex: 1, }}
                                         />
                                     </Box>
@@ -445,9 +470,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Você se sente pertencendo ao Contexto Religioso?</Text>
-                                <RadioItem
-                                    valueRadio={anamnese?.sent_contx_religioso}
-                                    group={[
+                                <RadioGroup
+                                    value={anamnese?.sent_contx_religioso}
+                                    options={[
                                         { label: 'Sim', value: 'Sim' },
                                         { label: 'Não', value: 'Não' }
                                     ]}
@@ -462,6 +487,7 @@ export default function AnamneseUser({ id }) {
                                         <TextInput
 
                                             name='just_contx_religioso'
+
                                             value={anamnese?.just_contx_religioso || ''}
                                             sx={{ flex: 1, }}
                                         />
@@ -481,6 +507,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='frustracao_pais'
+
                                     value={anamnese?.frustracao_pais || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -492,6 +519,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='frustracao_irmaos'
+
                                     value={anamnese?.frustracao_irmaos || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -505,6 +533,7 @@ export default function AnamneseUser({ id }) {
                                         <TextInput
 
                                             name='frustracao_filhos'
+
                                             value={anamnese?.frustracao_filhos || ''}
                                             sx={{ flex: 1, }}
                                         />
@@ -518,6 +547,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='frustracao_profissao'
+
                                     value={anamnese?.frustracao_profissao || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -529,6 +559,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='frustracao_colegio'
+
                                     value={anamnese?.frustracao_colegio || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -541,6 +572,7 @@ export default function AnamneseUser({ id }) {
                                     <TextInput
 
                                         name='frustracao_conguje'
+
                                         value={anamnese?.frustracao_conguje || ''}
                                         sx={{ flex: 1, }}
                                     />
@@ -553,6 +585,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='frustracao_vida_sex'
+
                                     value={anamnese?.frustracao_vida_sex || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -564,6 +597,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='frustracao_justificativa'
+
                                     value={anamnese?.frustracao_justificativa || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -581,6 +615,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='inicio_vida_sex'
+
                                     value={anamnese?.inicio_vida_sex || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -589,9 +624,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Como foi sua primeira relação sexual?</Text>
-                                <RadioItem
-                                    valueRadio={anamnese?.primaira_rel_sex}
-                                    group={[
+                                <RadioGroup
+                                    value={anamnese?.primaira_rel_sex}
+                                    options={[
                                         { label: 'Traumática', value: 'Traumática' },
                                         { label: 'Normal', value: 'Normal' },
                                         { label: 'Boa', value: 'Boa' },
@@ -606,6 +641,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='tem_probl_rela_sex'
+
                                     value={anamnese?.tem_probl_rela_sex || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -614,9 +650,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Atualmente sempre se realiza nas relações sexuais?</Text>
-                                <RadioItem
-                                    valueRadio={anamnese?.realizado_rela_sex}
-                                    group={[
+                                <RadioGroup
+                                    value={anamnese?.realizado_rela_sex}
+                                    options={[
                                         { label: 'Sim', value: 'Sim' },
                                         { label: 'Não', value: 'Não' }
                                     ]}
@@ -626,9 +662,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>O sexo para você é algo:</Text>
-                                <RadioItem
-                                    valueRadio={anamnese?.sexo_e_algo}
-                                    group={[
+                                <RadioGroup
+                                    value={anamnese?.sexo_e_algo}
+                                    options={[
                                         { label: 'Sem importância', value: 'Sem importância' },
                                         { label: 'Importante', value: 'Importante' },
                                         { label: 'Muito importante', value: 'Muito importante' }
@@ -645,9 +681,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Algum Trauma?</Text>
-                                <RadioItem
-                                    valueRadio={anamnese?.trauma}
-                                    group={[
+                                <RadioGroup
+                                    value={anamnese?.trauma}
+                                    options={[
                                         { label: 'Sim', value: 'Sim' },
                                         { label: 'Não', value: 'Não' }
                                     ]}
@@ -661,6 +697,7 @@ export default function AnamneseUser({ id }) {
                                     <TextInput
 
                                         name='qual_trauma'
+
                                         value={anamnese?.qual_trauma || ''}
                                         sx={{ flex: 1, }}
                                     />
@@ -670,9 +707,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Algum fobia?</Text>
-                                <RadioItem
-                                    valueRadio={anamnese?.fobia}
-                                    group={[
+                                <RadioGroup
+                                    value={anamnese?.fobia}
+                                    options={[
                                         { label: 'Sim', value: 'Sim' },
                                         { label: 'Não', value: 'Não' }
                                     ]}
@@ -686,6 +723,7 @@ export default function AnamneseUser({ id }) {
                                     <TextInput
 
                                         name='qual_trauma'
+
                                         value={anamnese?.qual_trauma || ''}
                                         sx={{ flex: 1, }}
                                     />
@@ -695,9 +733,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Tem medo de alguma coisa?</Text>
-                                <RadioItem
-                                    valueRadio={anamnese?.medo}
-                                    group={[
+                                <RadioGroup
+                                    value={anamnese?.medo}
+                                    options={[
                                         { label: 'Sim', value: 'Sim' },
                                         { label: 'Não', value: 'Não' }
                                     ]}
@@ -711,6 +749,7 @@ export default function AnamneseUser({ id }) {
                                     <TextInput
 
                                         name='qual_medo'
+
                                         value={anamnese?.qual_medo || ''}
                                         sx={{ flex: 1, }}
                                     />
@@ -720,9 +759,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Usa drogas?</Text>
-                                <RadioItem
-                                    valueRadio={anamnese?.drogas}
-                                    group={[
+                                <RadioGroup
+                                    value={anamnese?.drogas}
+                                    options={[
                                         { label: 'Sim', value: 'Sim' },
                                         { label: 'Não', value: 'Não' }
                                     ]}
@@ -736,6 +775,7 @@ export default function AnamneseUser({ id }) {
                                     <TextInput
 
                                         name='qual_medo'
+
                                         value={anamnese?.qual_medo || ''}
                                         sx={{ flex: 1, }}
                                     />
@@ -745,9 +785,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Dor de Cabeça?</Text>
-                                <RadioItem
-                                    valueRadio={anamnese?.dor_cabeca}
-                                    group={[
+                                <RadioGroup
+                                    value={anamnese?.dor_cabeca}
+                                    options={[
                                         { label: 'Sim', value: 'Sim' },
                                         { label: 'Não', value: 'Não' }
                                     ]}
@@ -761,6 +801,7 @@ export default function AnamneseUser({ id }) {
                                     <TextInput
 
                                         name='freq_dor_cabeca'
+
                                         value={anamnese?.freq_dor_cabeca || ''}
                                         sx={{ flex: 1, }}
                                     />
@@ -771,9 +812,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Insônia?</Text>
-                                <RadioItem
-                                    valueRadio={anamnese?.insonia}
-                                    group={[
+                                <RadioGroup
+                                    value={anamnese?.insonia}
+                                    options={[
                                         { label: 'Sim', value: 'Sim' },
                                         { label: 'Não', value: 'Não' }
                                     ]}
@@ -787,6 +828,7 @@ export default function AnamneseUser({ id }) {
                                     <TextInput
 
                                         name='freq_insonia'
+
                                         value={anamnese?.freq_insonia || ''}
                                         sx={{ flex: 1, }}
                                     />
@@ -797,9 +839,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Tem ideias suicidas?</Text>
-                                <RadioItem
-                                    valueRadio={anamnese?.ideias_suicidas}
-                                    group={[
+                                <RadioGroup
+                                    value={anamnese?.ideias_suicidas}
+                                    options={[
                                         { label: 'Sim', value: 'Sim' },
                                         { label: 'Não', value: 'Não' }
                                     ]}
@@ -813,6 +855,7 @@ export default function AnamneseUser({ id }) {
                                     <TextInput
 
                                         name='quais_ideias_suicidas'
+
                                         value={anamnese?.quais_ideias_suicidas || ''}
                                         sx={{ flex: 1, }}
                                     />
@@ -823,9 +866,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Usa bebidas alcoólicas?</Text>
-                                <RadioItem
-                                    valueRadio={anamnese?.bebidas_alcoolicas}
-                                    group={[
+                                <RadioGroup
+                                    value={anamnese?.bebidas_alcoolicas}
+                                    options={[
                                         { label: 'Sim', value: 'Sim' },
                                         { label: 'Não', value: 'Não' }
                                     ]}
@@ -839,6 +882,7 @@ export default function AnamneseUser({ id }) {
                                     <TextInput
 
                                         name='freq_bebidas_alcoolicas'
+
                                         value={anamnese?.freq_bebidas_alcoolicas || ''}
                                         sx={{ flex: 1, }}
                                     />
@@ -849,9 +893,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>É fumante?</Text>
-                                <RadioItem
-                                    valueRadio={anamnese?.fumante}
-                                    group={[
+                                <RadioGroup
+                                    value={anamnese?.fumante}
+                                    options={[
                                         { label: 'Sim', value: 'Sim' },
                                         { label: 'Não', value: 'Não' }
                                     ]}
@@ -862,9 +906,9 @@ export default function AnamneseUser({ id }) {
                                 <>
                                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                         <Text light>Está grávida?</Text>
-                                        <RadioItem
-                                            valueRadio={anamnese?.gravida}
-                                            group={[
+                                        <RadioGroup
+                                            value={anamnese?.gravida}
+                                            options={[
                                                 { label: 'Sim', value: 'Sim' },
                                                 { label: 'Não', value: 'Não' }
                                             ]}
@@ -881,6 +925,7 @@ export default function AnamneseUser({ id }) {
                                         <TextInput
 
                                             name='semanas_gravidez'
+
                                             value={anamnese?.semanas_gravidez || ''}
                                             sx={{ flex: 1, }}
                                         />
@@ -891,9 +936,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Qual o seu nível de stress?</Text>
-                                <RadioItem
-                                    valueRadio={anamnese?.nvl_estress}
-                                    group={[
+                                <RadioGroup
+                                    value={anamnese?.nvl_estress}
+                                    options={[
                                         { label: 'Alto', value: 'Alto' },
                                         { label: 'Médio', value: 'Médio' },
                                         { label: 'Baixo', value: 'Baixo' },
@@ -904,9 +949,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Atualmente está tomando alguma medicação?</Text>
-                                <RadioItem
-                                    valueRadio={anamnese?.tomando_medicacao}
-                                    group={[
+                                <RadioGroup
+                                    value={anamnese?.tomando_medicacao}
+                                    options={[
                                         { label: 'Sim', value: 'Sim' },
                                         { label: 'Não', value: 'Não' }
                                     ]}
@@ -921,6 +966,7 @@ export default function AnamneseUser({ id }) {
                                         <TextInput
 
                                             name='qual_medicacao'
+
                                             value={anamnese?.qual_medicacao || ''}
                                             sx={{ flex: 1, }}
                                         />
@@ -933,9 +979,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Já consultou algum tipo de psiquiatra ou psicólogo?</Text>
-                                <RadioItem
-                                    valueRadio={anamnese?.consult_psicologo_psiq}
-                                    group={[
+                                <RadioGroup
+                                    value={anamnese?.consult_psicologo_psiq}
+                                    options={[
                                         { label: 'Sim', value: 'Sim' },
                                         { label: 'Não', value: 'Não' }
                                     ]}
@@ -950,6 +996,7 @@ export default function AnamneseUser({ id }) {
                                         <TextInput
 
                                             name='diag_psiq_psicolog'
+
                                             value={anamnese?.diag_psiq_psicolog || ''}
                                             sx={{ flex: 1, }}
                                         />
@@ -963,6 +1010,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='qnt_amigos'
+
                                     value={anamnese?.qnt_amigos || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -974,6 +1022,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='qual_passatempo'
+
                                     value={anamnese?.qual_passatempo || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -985,6 +1034,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='crenca_rel_a_voce'
+
                                     value={anamnese?.crenca_rel_a_voce || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -993,9 +1043,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Você se considera feliz?</Text>
-                                <RadioItem
-                                    valueRadio={anamnese?.considera_feliz}
-                                    group={[
+                                <RadioGroup
+                                    value={anamnese?.considera_feliz}
+                                    options={[
                                         { label: 'Sim', value: 'Sim' },
                                         { label: 'Não', value: 'Não' }
                                     ]}
@@ -1010,6 +1060,7 @@ export default function AnamneseUser({ id }) {
                                         <TextInput
 
                                             name='pq_consid_feliz'
+
                                             value={anamnese?.pq_consid_feliz || ''}
                                             sx={{ flex: 1, }}
                                         />
@@ -1023,6 +1074,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='oq_mudaria_em_vc'
+
                                     value={anamnese?.oq_mudaria_em_vc || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -1035,6 +1087,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='oq_a_vida_e'
+
                                     value={anamnese?.oq_a_vida_e || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -1051,9 +1104,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Quais são os tipos de pensamentos que você costuma alimentar em relação a si mesma(o), de uma maneira geral?</Text>
-                                <RadioItem
-                                    valueRadio={anamnese?.tipo_pensamento}
-                                    group={[
+                                <RadioGroup
+                                    value={anamnese?.tipo_pensamento}
+                                    options={[
                                         { label: 'Positivos', value: 'Positivos' },
                                         { label: 'Negativos', value: 'Negativos' },
                                         { label: 'Ambos', value: 'Ambos' },
@@ -1067,6 +1120,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='quais_pensamentos'
+
                                     value={anamnese?.quais_pensamentos || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -1076,9 +1130,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Em relação a sua aparência física?</Text>
-                                <RadioItem
-                                    valueRadio={anamnese?.pensamento_aparencia}
-                                    group={[
+                                <RadioGroup
+                                    value={anamnese?.pensamento_aparencia}
+                                    options={[
                                         { label: 'Positivos', value: 'Positivos' },
                                         { label: 'Negativos', value: 'Negativos' },
                                         { label: 'Ambos', value: 'Ambos' },
@@ -1092,6 +1146,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='quais_pensamentos_aparencia'
+
                                     value={anamnese?.quais_pensamentos_aparencia || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -1100,9 +1155,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Em relação a sua competência profissional?</Text>
-                                <RadioItem
-                                    valueRadio={anamnese?.pensamento_compet_profis}
-                                    group={[
+                                <RadioGroup
+                                    value={anamnese?.pensamento_compet_profis}
+                                    options={[
                                         { label: 'Positivos', value: 'Positivos' },
                                         { label: 'Negativos', value: 'Negativos' },
                                         { label: 'Ambos', value: 'Ambos' },
@@ -1116,6 +1171,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='quais_pensamentos_profiss'
+
                                     value={anamnese?.quais_pensamentos_profiss || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -1124,9 +1180,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Em relação a sua vida sexual?</Text>
-                                <RadioItem
-                                    valueRadio={anamnese?.pensamento_vida_sex}
-                                    group={[
+                                <RadioGroup
+                                    value={anamnese?.pensamento_vida_sex}
+                                    options={[
                                         { label: 'Positivos', value: 'Positivos' },
                                         { label: 'Negativos', value: 'Negativos' },
                                         { label: 'Ambos', value: 'Ambos' },
@@ -1140,6 +1196,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='quais_pensamentos_vida_sex'
+
                                     value={anamnese?.quais_pensamentos_vida_sex || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -1148,9 +1205,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Em relação ao seu passado?</Text>
-                                <RadioItem
-                                    valueRadio={anamnese?.pensamento_passado}
-                                    group={[
+                                <RadioGroup
+                                    value={anamnese?.pensamento_passado}
+                                    options={[
                                         { label: 'Positivos', value: 'Positivos' },
                                         { label: 'Negativos', value: 'Negativos' },
                                         { label: 'Ambos', value: 'Ambos' },
@@ -1164,6 +1221,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='quais_pensamentos_passado'
+
                                     value={anamnese?.quais_pensamentos_passado || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -1172,9 +1230,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Em relação ao seu futuro?</Text>
-                                <RadioItem
-                                    valueRadio={anamnese?.pensamento_futuro}
-                                    group={[
+                                <RadioGroup
+                                    value={anamnese?.pensamento_futuro}
+                                    options={[
                                         { label: 'Positivos', value: 'Positivos' },
                                         { label: 'Negativos', value: 'Negativos' },
                                         { label: 'Ambos', value: 'Ambos' },
@@ -1188,6 +1246,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='quais_pensamentos_futuro'
+
                                     value={anamnese?.quais_pensamentos_futuro || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -1199,6 +1258,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='visao_sobre_voce'
+
                                     value={anamnese?.visao_sobre_voce || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -1214,9 +1274,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Você foi criado pelos pais?</Text>
-                                <RadioItem
-                                    valueRadio={anamnese?.criado_pais}
-                                    group={[
+                                <RadioGroup
+                                    value={anamnese?.criado_pais}
+                                    options={[
                                         { label: 'Sim', value: 'Sim' },
                                         { label: 'Não', value: 'Não' },
                                     ]}
@@ -1233,6 +1293,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='relacao_mae'
+
                                     value={anamnese?.relacao_mae || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -1245,6 +1306,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='relacao_pai'
+
                                     value={anamnese?.relacao_pai || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -1254,9 +1316,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Seus pais foram agressivos com você?</Text>
-                                <RadioItem
-                                    valueRadio={anamnese?.pais_agressivos}
-                                    group={[
+                                <RadioGroup
+                                    value={anamnese?.pais_agressivos}
+                                    options={[
                                         { label: 'Sim', value: 'Sim' },
                                         { label: 'Não', value: 'Não' },
                                     ]}
@@ -1267,12 +1329,12 @@ export default function AnamneseUser({ id }) {
                             {anamnese.pais_agressivos === 'Sim' && <>
                                 <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                     <Text light>Como?</Text>
-                                    <RadioItem
-                                        valueRadio={anamnese?._como_pais_agressivos}
-                                        group={[
-                                            { label: 'Sim', value: 'Sim' },
-                                            { label: 'Não', value: 'Não' },
-                                        ]}
+                                    <TextInput
+
+                                        name='como_pais_agressivos'
+
+                                        value={anamnese?.como_pais_agressivos || ''}
+                                        sx={{ flex: 1, }}
                                     />
                                 </Box>
                                 <Divider />
@@ -1280,9 +1342,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Qual deles era o mais bravo?</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.qual_pais_mais_bravo}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.qual_pais_mais_bravo}
+                                    options={[
                                         { label: 'Pai', value: 'Pai' },
                                         { label: 'Mãe', value: 'Mãe' }
                                     ]}
@@ -1296,6 +1358,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='como_pais_mais_bravo'
+
                                     value={anamnese?.como_pais_mais_bravo || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -1304,9 +1367,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Usavam bebidas ou drogas?</Text>
-                                <RadioItem
-                                    valueRadio={anamnese?.pais_usavam_beb_drog}
-                                    group={[
+                                <RadioGroup
+                                    value={anamnese?.pais_usavam_beb_drog}
+                                    options={[
                                         { label: 'Sim', value: 'Sim' },
                                         { label: 'Não', value: 'Não' },
                                     ]}
@@ -1319,6 +1382,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='pais_usavam_beb_drog_coment'
+
                                     value={anamnese?.pais_usavam_beb_drog_coment || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -1327,9 +1391,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Como você descreveria o relacionamento entre seus pais?</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.descr_relac_pais}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.descr_relac_pais}
+                                    options={[
                                         { label: 'Excelente', value: 'Excelente' },
                                         { label: 'Muito Bom', value: 'Muito Bom' },
                                         { label: 'Bom', value: 'Bom' },
@@ -1346,6 +1410,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='justific_relac_pais'
+
                                     value={anamnese?.justific_relac_pais || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -1357,6 +1422,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='aspect_rel_pais_repetem'
+
                                     value={anamnese?.aspect_rel_pais_repetem || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -1369,6 +1435,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='caracteris_rel_pais_repetem'
+
                                     value={anamnese?.caracteris_rel_pais_repetem || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -1380,6 +1447,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='just_caracteris_rel_pais_repetem'
+
                                     value={anamnese?.just_caracteris_rel_pais_repetem || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -1391,6 +1459,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='crenca_adq_rel_pais_repetem'
+
                                     value={anamnese?.crenca_adq_rel_pais_repetem || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -1401,9 +1470,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Na infância, era obrigado(a) a fazer alguma coisa que lhe desagradava?</Text>
-                                <RadioItem
-                                    valueRadio={anamnese?.algo_desegradavel_inf}
-                                    group={[
+                                <RadioGroup
+                                    value={anamnese?.algo_desegradavel_inf}
+                                    options={[
                                         { label: 'Sim', value: 'Sim' },
                                         { label: 'Não', value: 'Não' },
                                     ]}
@@ -1418,6 +1487,7 @@ export default function AnamneseUser({ id }) {
                                         <TextInput
 
                                             name='oq_fazia_algo_desegradavel_inf'
+
                                             value={anamnese?.fazia_algo_desegradavel_inf || ''}
                                             sx={{ flex: 1, }}
                                         />
@@ -1429,9 +1499,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Lembra-se, de alguma coisa que o magoou muito na Infância?</Text>
-                                <RadioItem
-                                    valueRadio={anamnese?.magoa_na_infancia}
-                                    group={[
+                                <RadioGroup
+                                    value={anamnese?.magoa_na_infancia}
+                                    options={[
                                         { label: 'Sim', value: 'Sim' },
                                         { label: 'Não', value: 'Não' },
                                     ]}
@@ -1446,6 +1516,7 @@ export default function AnamneseUser({ id }) {
                                         <TextInput
 
                                             name='oq_magoou_infancia'
+
                                             value={anamnese?.oq_magoou_infancia || ''}
                                             sx={{ flex: 1, }}
                                         />
@@ -1458,9 +1529,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Teve perdas familiares ou de amigos na Infância?</Text>
-                                <RadioItem
-                                    valueRadio={anamnese?.perdas_famil_infancia}
-                                    group={[
+                                <RadioGroup
+                                    value={anamnese?.perdas_famil_infancia}
+                                    options={[
                                         { label: 'Sim', value: 'Sim' },
                                         { label: 'Não', value: 'Não' },
                                     ]}
@@ -1475,6 +1546,7 @@ export default function AnamneseUser({ id }) {
                                         <TextInput
 
                                             name='quais_perdas_famil_infancia'
+
                                             value={anamnese?.quais_perdas_famil_infancia || ''}
                                             sx={{ flex: 1, }}
                                         />
@@ -1488,6 +1560,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='tristeza_passado'
+
                                     value={anamnese?.tristeza_passado || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -1499,6 +1572,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='do_q_tinha_medo_infancia'
+
                                     value={anamnese?.do_q_tinha_medo_infancia || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -1510,6 +1584,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='dormia_com_a_luz'
+
                                     value={anamnese?.dormia_com_a_luz || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -1519,9 +1594,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Como foi sua adolescência?</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.adolecencia}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.adolecencia}
+                                    options={[
                                         { label: 'Excelente', value: 'Excelente' },
                                         { label: 'Muito Bom', value: 'Muito Bom' },
                                         { label: 'Bom', value: 'Bom' },
@@ -1537,9 +1612,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Com qual de seus pais você tinha mais dificuldade de relacionamento?</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.qual_pais_dificul_relac}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.qual_pais_dificul_relac}
+                                    options={[
                                         { label: 'Pai', value: 'Pai' },
                                         { label: 'Mãe', value: 'Mãe' },
                                     ]}
@@ -1554,6 +1629,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='filos_familia_sucess_profissional'
+
                                     value={anamnese?.filos_familia_sucess_profissional || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -1565,6 +1641,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='filos_familia_relac_dinheiro'
+
                                     value={anamnese?.filos_familia_relac_dinheiro || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -1576,6 +1653,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='filos_familia_relac_amor'
+
                                     value={anamnese?.filos_familia_relac_amor || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -1587,6 +1665,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='filos_familia_relac_sex'
+
                                     value={anamnese?.filos_familia_relac_sex || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -1599,6 +1678,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='descr_bom_menino'
+
                                     value={anamnese?.descr_bom_menino || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -1611,6 +1691,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='como_agir_p_ser_amado'
+
                                     value={anamnese?.como_agir_p_ser_amado || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -1620,9 +1701,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Possui irmãos?</Text>
-                                <RadioItem
-                                    valueRadio={anamnese?.tem_irmaos}
-                                    group={[
+                                <RadioGroup
+                                    value={anamnese?.tem_irmaos}
+                                    options={[
                                         { label: 'Sim', value: 'Sim' },
                                         { label: 'Não', value: 'Não' },
                                     ]}
@@ -1637,6 +1718,7 @@ export default function AnamneseUser({ id }) {
                                         <TextInput
 
                                             name='qnt_irmaos'
+
                                             value={anamnese?.qnt_irmaos || ''}
                                             sx={{ flex: 1, }}
                                         />
@@ -1648,6 +1730,7 @@ export default function AnamneseUser({ id }) {
                                         <TextInput
 
                                             name='relac_c_irmaos'
+
                                             value={anamnese?.relac_c_irmaos || ''}
                                             sx={{ flex: 1, }}
                                         />
@@ -1660,6 +1743,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='introvertido_ou_extrovertido'
+
                                     value={anamnese?.introvertido_ou_extrovertido || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -1672,6 +1756,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='dificul_rel_colegas'
+
                                     value={anamnese?.dificul_rel_colegas || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -1684,6 +1769,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='maiores_medos_infanc'
+
                                     value={anamnese?.maiores_medos_infanc || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -1696,6 +1782,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='relato_fato_marcante_infanc'
+
                                     value={anamnese?.relato_fato_marcante_infanc || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -1716,6 +1803,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='maiores_medos_hoje'
+
                                     value={anamnese?.maiores_medos_hoje || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -1727,6 +1815,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='pensamento_ao_seu_respeito'
+
                                     value={anamnese?.pensamento_ao_seu_respeito || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -1739,6 +1828,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='primeiro_rel_amoroso'
+
                                     value={anamnese?.primeiro_rel_amoroso || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -1747,9 +1837,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Se você avaliasse sua atuação na vida, qual papel que mais caberia a você hoje?</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.qual_seu_papel_hj}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.qual_seu_papel_hj}
+                                    options={[
                                         { label: 'Vítima', value: 'Vítima' },
                                         { label: 'Responsável', value: 'Responsável' }
                                     ]}
@@ -1763,6 +1853,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='ganho_secund_c_papel'
+
                                     value={anamnese?.ganho_secund_c_papel || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -1776,6 +1867,7 @@ export default function AnamneseUser({ id }) {
                                         <TextInput
 
                                             name='primeiro_rel_amoroso'
+
                                             value={anamnese?.primeiro_rel_amoroso || ''}
                                             sx={{ flex: 1, }}
                                         />
@@ -1791,6 +1883,7 @@ export default function AnamneseUser({ id }) {
                                         <TextInput
 
                                             name='primeiro_rel_amoroso'
+
                                             value={anamnese?.primeiro_rel_amoroso || ''}
                                             sx={{ flex: 1, }}
                                         />
@@ -1802,9 +1895,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Você se considera:</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.se_considera}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.se_considera}
+                                    options={[
                                         { label: 'Vitorioso(a)', value: 'Vitorioso(a)' },
                                         { label: 'Derrotado(a)', value: 'Derrotado(a)' }
                                     ]}
@@ -1817,9 +1910,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Nos relacionamentos e na vida, você prefere ser:</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.prefere_no_rel_da_vida}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.prefere_no_rel_da_vida}
+                                    options={[
                                         { label: 'Dominante', value: 'Dominante' },
                                         { label: 'Submisso', value: 'Submisso' }
                                     ]}
@@ -1837,6 +1930,7 @@ export default function AnamneseUser({ id }) {
                                 <TextInput
 
                                     name='quem_e_culpado_punido'
+
                                     value={anamnese?.quem_e_culpado_punido || ''}
                                     sx={{ flex: 1, }}
                                 />
@@ -1846,9 +1940,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Sente-se de alguma forma pressionado(a) na atualidade?</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.sente_pressionado}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.sente_pressionado}
+                                    options={[
                                         { label: 'Sim', value: 'Sim' },
                                         { label: 'Não', value: 'Não' }
                                     ]}
@@ -1866,6 +1960,7 @@ export default function AnamneseUser({ id }) {
                                         <TextInput
 
                                             name='pressionado_de_q_forma'
+
                                             value={anamnese?.pressionado_de_q_forma || ''}
                                             sx={{ flex: 1, }}
                                         />
@@ -1877,9 +1972,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Você se acha uma pessoa controladora?</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.controladora}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.controladora}
+                                    options={[
                                         { label: 'Sim', value: 'Sim' },
                                         { label: 'Não', value: 'Não' }
                                     ]}
@@ -1892,9 +1987,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Sente-se de alguma forma inferior aos outros?</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.sente_inferior_a_outros}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.sente_inferior_a_outros}
+                                    options={[
                                         { label: 'Sim', value: 'Sim' },
                                         { label: 'Não', value: 'Não' }
                                     ]}
@@ -1912,6 +2007,7 @@ export default function AnamneseUser({ id }) {
                                         <TextInput
 
                                             name='porq_sente_inferior'
+
                                             value={anamnese?.porq_sente_inferior || ''}
                                             sx={{ flex: 1, }}
                                         />
@@ -1923,9 +2019,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Dúvida de sua própria capacidade?</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.duvida_propria_capac}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.duvida_propria_capac}
+                                    options={[
                                         { label: 'Sim', value: 'Sim' },
                                         { label: 'Não', value: 'Não' }
                                     ]}
@@ -1939,9 +2035,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Você é audacioso(a), corre atrás de suas metas, ou é autoprotetor(a), preferindo se poupar dos eventuais riscos?</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.audacioso_ou_autoprotetor}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.audacioso_ou_autoprotetor}
+                                    options={[
                                         { label: 'Audacioso(a)', value: 'Audacioso(a)' },
                                         { label: 'Autoprotetor(a)', value: 'Autoprotetor(a)' }
                                     ]}
@@ -1955,9 +2051,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Existe algo que o(a) faz sentir-se culpado(a)?</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.algo_q_sente_culpado}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.algo_q_sente_culpado}
+                                    options={[
                                         { label: 'Sim', value: 'Sim' },
                                         { label: 'Não', value: 'Não' }
                                     ]}
@@ -1976,6 +2072,7 @@ export default function AnamneseUser({ id }) {
                                         <TextInput
 
                                             name='oq_sente_culpado'
+
                                             value={anamnese?.oq_sente_culpado || ''}
                                             sx={{ flex: 1, }}
                                         />
@@ -1991,9 +2088,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Raiva</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.sentimento_raiva}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.sentimento_raiva}
+                                    options={[
                                         { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                         { label: 'Média Intensidade', value: 'Média Intensidade' },
                                         { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
@@ -2007,9 +2104,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Medo de algo concreto</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.sentimento_medo_concreto}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.sentimento_medo_concreto}
+                                    options={[
                                         { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                         { label: 'Média Intensidade', value: 'Média Intensidade' },
                                         { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
@@ -2024,9 +2121,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Medos vagos</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.sentimento_medos_vagos}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.sentimento_medos_vagos}
+                                    options={[
                                         { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                         { label: 'Média Intensidade', value: 'Média Intensidade' },
                                         { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
@@ -2041,9 +2138,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Culpa</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.sentimento_culpa}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.sentimento_culpa}
+                                    options={[
                                         { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                         { label: 'Média Intensidade', value: 'Média Intensidade' },
                                         { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
@@ -2058,9 +2155,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Revolta</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.sentimento_revolta}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.sentimento_revolta}
+                                    options={[
                                         { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                         { label: 'Média Intensidade', value: 'Média Intensidade' },
                                         { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
@@ -2075,9 +2172,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Medo de perder o controle</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.sentimento_perder_controle}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.sentimento_perder_controle}
+                                    options={[
                                         { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                         { label: 'Média Intensidade', value: 'Média Intensidade' },
                                         { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
@@ -2092,9 +2189,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Tristeza</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.sentimento_tristeza}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.sentimento_tristeza}
+                                    options={[
                                         { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                         { label: 'Média Intensidade', value: 'Média Intensidade' },
                                         { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
@@ -2109,9 +2206,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Mágoa</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.sentimento_magoa}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.sentimento_magoa}
+                                    options={[
                                         { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                         { label: 'Média Intensidade', value: 'Média Intensidade' },
                                         { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
@@ -2126,9 +2223,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Orgulho</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.sentimento_orgulho}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.sentimento_orgulho}
+                                    options={[
                                         { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                         { label: 'Média Intensidade', value: 'Média Intensidade' },
                                         { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
@@ -2142,9 +2239,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Ódio</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.sentimento_odio}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.sentimento_odio}
+                                    options={[
                                         { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                         { label: 'Média Intensidade', value: 'Média Intensidade' },
                                         { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
@@ -2158,9 +2255,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Egoísmo</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.sentimento_egoismo}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.sentimento_egoismo}
+                                    options={[
                                         { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                         { label: 'Média Intensidade', value: 'Média Intensidade' },
                                         { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
@@ -2175,9 +2272,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Ansiedade</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.sentimento_ansiedade}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.sentimento_ansiedade}
+                                    options={[
                                         { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                         { label: 'Média Intensidade', value: 'Média Intensidade' },
                                         { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
@@ -2192,9 +2289,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Intolerância</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.sentimento_intolerancia}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.sentimento_intolerancia}
+                                    options={[
                                         { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                         { label: 'Média Intensidade', value: 'Média Intensidade' },
                                         { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
@@ -2210,9 +2307,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Subsmissao</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.sentimento_submissao}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.sentimento_submissao}
+                                    options={[
                                         { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                         { label: 'Média Intensidade', value: 'Média Intensidade' },
                                         { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
@@ -2227,9 +2324,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Indecisão</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.sentimento_indecisao}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.sentimento_indecisao}
+                                    options={[
                                         { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                         { label: 'Média Intensidade', value: 'Média Intensidade' },
                                         { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
@@ -2244,9 +2341,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Desespero</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.sentimento_desespero}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.sentimento_desespero}
+                                    options={[
                                         { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                         { label: 'Média Intensidade', value: 'Média Intensidade' },
                                         { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
@@ -2261,9 +2358,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Desnânimo</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.sentimento_desanimo}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.sentimento_desanimo}
+                                    options={[
                                         { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                         { label: 'Média Intensidade', value: 'Média Intensidade' },
                                         { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
@@ -2278,9 +2375,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Covardia</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.sentimento_covardia}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.sentimento_covardia}
+                                    options={[
                                         { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                         { label: 'Média Intensidade', value: 'Média Intensidade' },
                                         { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
@@ -2295,9 +2392,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Egocentrismo</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.sentimento_egocentrismo}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.sentimento_egocentrismo}
+                                    options={[
                                         { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                         { label: 'Média Intensidade', value: 'Média Intensidade' },
                                         { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
@@ -2312,9 +2409,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Cíume</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.sentimento_ciume}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.sentimento_ciume}
+                                    options={[
                                         { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                         { label: 'Média Intensidade', value: 'Média Intensidade' },
                                         { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
@@ -2329,9 +2426,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Frustração</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.sentimento_frustracao}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.sentimento_frustracao}
+                                    options={[
                                         { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                         { label: 'Média Intensidade', value: 'Média Intensidade' },
                                         { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
@@ -2346,9 +2443,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Nostalgia</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.sentimento_nostalgia}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.sentimento_nostalgia}
+                                    options={[
                                         { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                         { label: 'Média Intensidade', value: 'Média Intensidade' },
                                         { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
@@ -2362,9 +2459,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Cansaço</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.sentimento_cansaco}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.sentimento_cansaco}
+                                    options={[
                                         { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                         { label: 'Média Intensidade', value: 'Média Intensidade' },
                                         { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
@@ -2378,9 +2475,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Impaciência</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.sentimento_impaciencia}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.sentimento_impaciencia}
+                                    options={[
                                         { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                         { label: 'Média Intensidade', value: 'Média Intensidade' },
                                         { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
@@ -2394,9 +2491,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Angústia</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.sentimento_angustia}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.sentimento_angustia}
+                                    options={[
                                         { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                         { label: 'Média Intensidade', value: 'Média Intensidade' },
                                         { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
@@ -2410,9 +2507,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Timidez</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.sentimento_timidez}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.sentimento_timidez}
+                                    options={[
                                         { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                         { label: 'Média Intensidade', value: 'Média Intensidade' },
                                         { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
@@ -2427,9 +2524,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Apatia</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.sentimento_apatia}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.sentimento_apatia}
+                                    options={[
                                         { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                         { label: 'Média Intensidade', value: 'Média Intensidade' },
                                         { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
@@ -2444,9 +2541,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Ressentimento</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.sentimento_ressentimento}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.sentimento_ressentimento}
+                                    options={[
                                         { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                         { label: 'Média Intensidade', value: 'Média Intensidade' },
                                         { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
@@ -2461,9 +2558,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Solidão</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.sentimento_solidao}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.sentimento_solidao}
+                                    options={[
                                         { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                         { label: 'Média Intensidade', value: 'Média Intensidade' },
                                         { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
@@ -2478,9 +2575,9 @@ export default function AnamneseUser({ id }) {
 
                             <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                 <Text light>Autoritarismo</Text>
-                                <CheckBoxComponent
-                                    valueChecked={anamnese?.sentimento_autoritarismo}
-                                    boxGroup={[
+                                <CheckboxGroup
+                                    value={anamnese?.sentimento_autoritarismo}
+                                    options={[
                                         { label: 'Muita Intensidade', value: 'Muita Intensidade' },
                                         { label: 'Média Intensidade', value: 'Média Intensidade' },
                                         { label: 'Pouca Intensidade', value: 'Pouca Intensidade' }
@@ -2490,10 +2587,11 @@ export default function AnamneseUser({ id }) {
                                     sx={{ flex: 1, }}
                                 />
                             </Box>
+
                         </Box>
                     }
 
-                    <Pagination setPage={setPage} page={page} pages={pages} />
+<Pagination setPage={setPage} page={page} pages={pages} />
                 </Box>
                 :
                 <Text light>Não encontramos anamnese preenchida.</Text>

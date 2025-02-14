@@ -15,7 +15,9 @@ const RadioGroup = ({ name, options, value, onBlur }) => {
         setSelectedValue(option);
 
         // Dispara a atualização somente no onBlur.
-        onBlur(option);
+        if (onBlur) {
+            onBlur(option);
+        }
     };
 
     return (
@@ -28,7 +30,13 @@ const RadioGroup = ({ name, options, value, onBlur }) => {
                             name={name}
                             value={option.value}
                             checked={selectedValue === option.value}
-                            onChange={() => handleChange(option.value)}
+                            onChange={(e) => {
+                                if (onBlur) {
+                                    handleChange(option.value)
+                                } else {
+                                    e.preventDefault()
+                                }
+                            }}
                         />
                         <Text light>{option.label}</Text>
                     </Box>
