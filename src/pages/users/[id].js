@@ -2,7 +2,7 @@ import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
 import { Avatar, Backdrop, useMediaQuery, useTheme } from "@mui/material"
 import { api } from "../../api/api"
-import { Box, ContentContainer, TextInput, Text, Button, Divider } from "../../atoms"
+import { Box, ContentContainer, TextInput, Text, Button, Divider, PhoneInputField } from "../../atoms"
 import { CheckBoxComponent, CustomDropzone, RadioItem, SectionHeader } from "../../organisms"
 import Dropzone from "react-dropzone"
 import { useAppContext } from "../../context/AppContext"
@@ -539,7 +539,13 @@ export default function EditUser() {
                             </Box>
                             <Box sx={{ ...styles.inputSection }}>
                                 <TextInput placeholder='E-mail' name='email' onChange={handleChange} value={userData?.email || ''} label='E-mail: *' sx={{ flex: 1, }} />
-                                <TextInput placeholder='Telefone' name='telefone' onChange={handleChange} value={userData?.telefone || ''} label='Telefone: *' sx={{ flex: 1, }} />
+                                <PhoneInputField
+                                    label='Telefone *'
+                                    name='telefone'
+                                    onChange={(phone) => setUserData((prevValues) => ({ ...prevValues, telefone: phone }))}
+                                    value={userData?.telefone}
+                                    sx={{ flex: 1, }}
+                                />
                             </Box>
                             <TextInput placeholder='Nascimento' name='nascimento' onChange={handleChange} type="date" value={(userData?.nascimento)?.split('T')[0] || ''} label='Nascimento *' sx={{ flex: 1, }} />
                             <SelectList fullWidth data={groupGender} valueSelection={userData?.genero || ''} onSelect={(value) => setUserData({ ...userData, genero: value })}
@@ -656,11 +662,11 @@ export default function EditUser() {
                                     )
                                 })}
                             </Box>
-                            ) : (
-                                <Box>
-                                    <Text light>O usuário não possúi arquivos armazenados.</Text>
-                                </Box>
-                            )
+                        ) : (
+                            <Box>
+                                <Text light>O usuário não possúi arquivos armazenados.</Text>
+                            </Box>
+                        )
                         }
                         <DropZoneSession callBack={() => getFileUser()} id={id} />
 
