@@ -295,6 +295,12 @@ export const AppProvider = ({ children }) => {
             permissions: ['parceiro', 'administrador', 'paciente'],
         },
         {
+            text: 'Relatório de Sessões',
+            icon: '/icons/google-forms.png',
+            to: '/reports',
+            permissions: ['administrador'],
+        },
+        {
             text: 'Ajuda',
             icon: '/icons/help.png',
             to: '/tasks/list',
