@@ -50,7 +50,7 @@
     "react-phone-input-2": "^2.15.1",
     "react-phone-number-input": "^3.3.0",
     "react-router-dom": "^6.8.2",
-    "react-to-print": "^2.14.13",
+    "react-to-print": "^2.15.1",
     "socket.io-client": "^4.7.5",
     "stripe": "^14.19.0",
     "swiper": "^10.0.4",

@@ -1,5 +1,5 @@
 import { useRouter } from "next/router"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Box, Button, ContentContainer, Divider, Text, TextInput } from "../../atoms"
 import { useAppContext } from "../../context/AppContext"
 import { SelectList } from "../../organisms/select/SelectList"
@@ -9,9 +9,9 @@ import { TableContainer, Table, TableHead, TableRow, TableCell, TableBody } from
 import { api } from "../../api/api"
 import 'react-calendar/dist/Calendar.css';
 import { icons } from "../../organisms/layout/Colors";
-import { formatTimeStamp } from "../../helpers"
-import { jsPDF } from "jspdf";
-import html2canvas from "html2canvas";
+import { formatReal, formatTimeStamp } from "../../helpers"
+import { useReactToPrint } from "react-to-print";
+import { ModalContainer } from "../../organisms"
 
 export default function ListConsultions(props) {
     const [reportData, setReportData] = useState([])
@@ -58,17 +58,6 @@ export default function ListConsultions(props) {
     };
 
 
-
-    const fetchPermissions = async () => {
-        try {
-            const actions = await checkUserPermissions(router, userPermissions, menuItemsList)
-            setIsPermissionEdit(actions)
-        } catch (error) {
-            console.log(error)
-            return error
-        }
-    }
-
     const getEmployees = async () => {
         setLoading(true)
         try {
@@ -94,7 +83,6 @@ export default function ListConsultions(props) {
     useEffect(() => {
         setLoading(true)
         fetchReport();
-        fetchPermissions()
         getEmployees()
         if (window.localStorage.getItem('list-consultion-filters')) {
             const admLocalStorage = JSON.parse(window.localStorage.getItem('list-consultion-filters') || null);
@@ -405,8 +393,14 @@ export default function ListConsultions(props) {
 
 const TableConsultion = ({ data = [], filters = [], onPress = () => { }, filtersField }) => {
     const { setLoading, colorPalette, mobile, user, alert, setShowConfirmationDialog } = useAppContext()
-    const isProfissional = user?.perfil?.includes('profissional')
-    const isAdministrator = user?.perfil?.includes('administrador')
+    const [openCobranca, setOpenCobranca] = useState(false)
+    const [sessionValue, setSessionValue] = useState(200)
+    const [paciente, setPaciente] = useState({
+        nome: '',
+        email: '',
+        sessoesConcluidas: 0,
+    })
+    const reciboRef = useRef(null)
 
     let columns = [
         { key: 'paciente', label: 'Paciente' },
@@ -419,202 +413,351 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, filters
         { key: 'actions', label: 'Ações' }
     ];
 
-
-    const generateReceipt = (item) => {
-        const doc = new jsPDF();
-
-
-        const nerisLightFont = 'L1VzZXJzL21hcmN1c3NpbHZhL0Rlc2t0b3AvUHJvamV0b3MvbWluaGFjbGluaWNhL2FkbS9wdWJsaWMvZm9udHMvbmVyaXMubGlnaHQudHRm';
-        const nerisBoldFont = 'L1VzZXJzL21hcmN1c3NpbHZhL0Rlc2t0b3AvUHJvamV0b3MvbWluaGFjbGluaWNhL2FkbS9wdWJsaWMvZm9udHMvbmVyaXMuYmxhY2sudHRm';
-
-        // Adiciona a fonte personalizada
-        doc.addFileToVFS("NerisLight.ttf", nerisLightFont);
-        doc.addFileToVFS("NerisBold.ttf", nerisBoldFont);
-        doc.addFont("NerisLight.ttf", "NerisLight", "normal");
-        doc.addFont("NerisBold.ttf", "NerisBold", "bold");
-
-        const empresa = {
-            nome: "Afectu Inteligência Emocional",
-            cnpj: "56.919.838/0001-38",
-            endereco: "Rua Anibal Curi, 255, Fag, Cascavel - PR, CEP: 85.806-097",
-            telefone: "+55 (11) 91654-4375",
-            contato: "contato@afectu.com"
-        };
-
-        const paciente = {
-            nome: item.paciente,
-            email: item.email_paciente || "Não informado",
-            sessoesConcluidas: item.concluidas,
-            valorPorSessao: 200, // Defina o valor por sessão
-        };
-
-        const valorTotal = paciente.sessoesConcluidas * paciente.valorPorSessao;
-        const havePeriod = filtersField.startDate !== '' && filtersField.endDate !== '';
-        let periodo = "Todo Período";
-        let heightBg = 60;
-
-
-
-        if (havePeriod) {
-            periodo = `Período: ${formatTimeStamp(filtersField.startDate)} á ${formatTimeStamp(filtersField.endDate)}`;
-            heightBg = 70;
-        }
-
-        // Adicionando o logo
-        const logo = new Image();
-        logo.src = "icons/afectu_icon_home.png";
-
-        logo.onload = () => {
-            // Centralizando o logo no topo
-            doc.addImage(logo, "PNG", 85, 10, 40, 40);
-
-            // Título do recibo
-            doc.setFont("NerisBold");
-            doc.setFontSize(18);
-            doc.text("RECIBO DE SESSÕES", 70, 60);
-
-            doc.setFontSize(12);
-            doc.setFont("Neris");
-            doc.text("________________________________________________________________________________", 20, 65); // Linha separadora
-
-            // Informações da empresa
-            doc.text(`Clínica: ${empresa.nome}`, 20, 75);
-            doc.text(`CNPJ: ${empresa.cnpj}`, 20, 82);
-            doc.text(`Endereço: ${empresa.endereco}`, 20, 89);
-            doc.text(`Telefone: ${empresa.telefone}`, 20, 96);
-            doc.text(`E-mail: ${empresa.contato}`, 20, 103);
-
-            doc.text("________________________________________________________________________________", 20, 110); // Linha separadora
-
-            // Dados do paciente com fundo cinza
-            doc.setFillColor(240, 240, 240);
-            
-            doc.rect(15, 115, 180, heightBg, "F"); // Retângulo de fundo
-
-            doc.setFont("NerisBold");
-            doc.text("Dados do Paciente:", 20, 123);
-            doc.setFont("Neris");
-            doc.text(`Nome: ${paciente.nome}`, 20, 131);
-            doc.text(`E-mail: ${paciente.email}`, 20, 139);
-            doc.text(`Sessões Concluídas: ${paciente.sessoesConcluidas}`, 20, 147);
-            doc.text(`Valor por Sessão: R$ ${paciente.valorPorSessao},00`, 20, 155);
-
-            // Valor total destacado
-            doc.setFontSize(14);
-            doc.setFont("NerisBold");
-            doc.setTextColor(200, 0, 0);
-            doc.text(`Total a Pagar: R$ ${valorTotal},00`, 20, 165);
-            doc.setTextColor(0, 0, 0); // Resetando cor do texto
-
-            // Período (se houver)
-            if (havePeriod) {
-                doc.setFontSize(12);
-                doc.setFont("Neris");
-                doc.text(periodo, 20, 175);
-            }
-
-            // Assinatura e data
-            doc.setFontSize(12);
-            doc.setFont("Neris");
-            doc.text(`Data: ${new Date().toLocaleDateString()}`, 20, 190);
-            doc.text("__________________________________", 20, 210);
-            doc.text("Assinatura do Responsável", 20, 220);
-
-            // Salvar PDF com nome personalizado
-            doc.save(`recibo_${paciente.nome.replace(/\s+/g, "_")}_${new Date().toLocaleDateString()}.pdf`);
-        };
+    const handleChangeValor = (e) => {
+        setSessionValue(Number(e.target.value));
     };
+
+    const empresa = {
+        nome: "Afectu Inteligência Emocional",
+        cnpj: "56.919.838/0001-38",
+        endereco: "Rua Anibal Curi, 255, Fag, Cascavel - PR, CEP: 85.806-097",
+        telefone: "+55 (11) 91654-4375",
+        contato: "contato@afectu.com"
+    };
+
+    // const generateReceipt = (item) => {
+    //     const doc = new jsPDF();
+
+
+    //     const nerisLightFont = 'L1VzZXJzL21hcmN1c3NpbHZhL0Rlc2t0b3AvUHJvamV0b3MvbWluaGFjbGluaWNhL2FkbS9wdWJsaWMvZm9udHMvbmVyaXMubGlnaHQudHRm';
+    //     const nerisBoldFont = 'L1VzZXJzL21hcmN1c3NpbHZhL0Rlc2t0b3AvUHJvamV0b3MvbWluaGFjbGluaWNhL2FkbS9wdWJsaWMvZm9udHMvbmVyaXMuYmxhY2sudHRm';
+
+    //     // Adiciona a fonte personalizada
+    //     doc.addFileToVFS("NerisLight.ttf", nerisLightFont);
+    //     doc.addFileToVFS("NerisBold.ttf", nerisBoldFont);
+    //     doc.addFont("NerisLight.ttf", "NerisLight", "normal");
+    //     doc.addFont("NerisBold.ttf", "NerisBold", "bold");
+
+    //     const paciente = {
+    //         nome: item.paciente,
+    //         email: item.email_paciente || "Não informado",
+    //         sessoesConcluidas: item.concluidas,
+    //         valorPorSessao: 200, // Defina o valor por sessão
+    //     };
+
+    //     const valorTotal = paciente.sessoesConcluidas * paciente.valorPorSessao;
+    //     const havePeriod = filtersField.startDate !== '' && filtersField.endDate !== '';
+    //     let periodo = "Todo Período";
+    //     let heightBg = 60;
+
+
+
+    //     if (havePeriod) {
+    //         periodo = `Período: ${formatTimeStamp(filtersField.startDate)} á ${formatTimeStamp(filtersField.endDate)}`;
+    //         heightBg = 70;
+    //     }
+
+    //     // Adicionando o logo
+    //     const logo = new Image();
+    //     logo.src = "icons/afectu_icon_home.png";
+
+    //     logo.onload = () => {
+    //         // Centralizando o logo no topo
+    //         doc.addImage(logo, "PNG", 85, 10, 40, 40);
+
+    //         // Título do recibo
+    //         doc.setFont("NerisBold");
+    //         doc.setFontSize(18);
+    //         doc.text("RECIBO DE SESSÕES", 70, 60);
+
+    //         doc.setFontSize(12);
+    //         doc.setFont("Neris");
+    //         doc.text("________________________________________________________________________________", 20, 65); // Linha separadora
+
+    //         // Informações da empresa
+    //         doc.text(`Clínica: ${empresa.nome}`, 20, 75);
+    //         doc.text(`CNPJ: ${empresa.cnpj}`, 20, 82);
+    //         doc.text(`Endereço: ${empresa.endereco}`, 20, 89);
+    //         doc.text(`Telefone: ${empresa.telefone}`, 20, 96);
+    //         doc.text(`E-mail: ${empresa.contato}`, 20, 103);
+
+    //         doc.text("________________________________________________________________________________", 20, 110); // Linha separadora
+
+    //         // Dados do paciente com fundo cinza
+    //         doc.setFillColor(240, 240, 240);
+
+    //         doc.rect(15, 115, 180, heightBg, "F"); // Retângulo de fundo
+
+    //         doc.setFont("NerisBold");
+    //         doc.text("Dados do Paciente:", 20, 123);
+    //         doc.setFont("Neris");
+    //         doc.text(`Nome: ${paciente.nome}`, 20, 131);
+    //         doc.text(`E-mail: ${paciente.email}`, 20, 139);
+    //         doc.text(`Sessões Concluídas: ${paciente.sessoesConcluidas}`, 20, 147);
+    //         doc.text(`Valor por Sessão: R$ ${paciente.valorPorSessao},00`, 20, 155);
+
+    //         // Valor total destacado
+    //         doc.setFontSize(14);
+    //         doc.setFont("NerisBold");
+    //         doc.setTextColor(200, 0, 0);
+    //         doc.text(`Total a Pagar: R$ ${valorTotal},00`, 20, 165);
+    //         doc.setTextColor(0, 0, 0); // Resetando cor do texto
+
+    //         // Período (se houver)
+    //         if (havePeriod) {
+    //             doc.setFontSize(12);
+    //             doc.setFont("Neris");
+    //             doc.text(periodo, 20, 175);
+    //         }
+
+    //         // Assinatura e data
+    //         doc.setFontSize(12);
+    //         doc.setFont("Neris");
+    //         doc.text(`Data: ${new Date().toLocaleDateString()}`, 20, 190);
+    //         doc.text("__________________________________", 20, 210);
+    //         doc.text("Assinatura do Responsável", 20, 220);
+
+    //         // Salvar PDF com nome personalizado
+    //         doc.save(`recibo_${paciente.nome.replace(/\s+/g, "_")}_${new Date().toLocaleDateString()}.pdf`);
+    //     };
+    // };
+
+
+
+    let periodo = "Todo Período";
+
+    if (filtersField.startDate !== '' && filtersField.endDate !== '') {
+        periodo = `Período: ${formatTimeStamp(filtersField.startDate)} á ${formatTimeStamp(filtersField.endDate)}`;
+    }
+
+    let titleDocument = paciente.nome ? `recibo_${paciente.nome.replace(/\s+/g, "_")}_${new Date().toLocaleDateString()}.pdf` : "recibo.pdf";
+
+    const handleGeneratePdf = useReactToPrint({
+        content: () => reciboRef.current,
+        documentTitle: `recibo_${paciente.nome.replace(/\s+/g, "_")}_${new Date().toLocaleDateString()}.pdf`,
+        onAfterPrint: () => alert.info('Comprovante exportado em PDF.')
+    })
 
 
     return (
-        <ContentContainer sx={{ display: 'flex', width: '100%', padding: 0, backgroundColor: colorPalette.primary, boxShadow: 'none', borderRadius: 2 }}>
-            <TableContainer sx={{ borderRadius: '8px', overflow: 'auto', }}>
-                <Table sx={{ borderCollapse: 'collapse', width: '100%', }}>
-                    <TableHead>
-                        <TableRow sx={{ borderBottom: `1px solid lightgray`, backgroundColor: colorPalette?.secondary }}>
-                            {columns.map((column, index) => (
-                                <TableCell key={index} sx={{ padding: '16px 10px', }}>
-                                    <Box sx={{
-                                        display: 'flex', gap: 1, alignItems: 'center', justifyContent: column.key !== "actions" ?
-                                            'flex-start' : 'center', justifyContent: 'center'
-                                    }}>
-                                        <Text bold style={{ textAlign: 'center' }}>{column.label}</Text>
-                                        {column.key !== "actions" &&
-                                            <Box sx={{
-                                                ...styles.menuIcon,
-                                                backgroundImage: `url(${icons.gray_arrow_down})`,
-                                                transform: filters?.filterName === column.key ? filters?.filterOrder === 'asc' ? 'rotate(-0deg)' : 'rotate(-180deg)' : 'rotate(-0deg)',
-                                                transition: '.3s',
-                                                width: 17,
-                                                height: 17,
+        <>
+            <ContentContainer sx={{ display: 'flex', width: '100%', padding: 0, backgroundColor: colorPalette.primary, boxShadow: 'none', borderRadius: 2 }}>
+                <TableContainer sx={{ borderRadius: '8px', overflow: 'auto', }}>
+                    <Table sx={{ borderCollapse: 'collapse', width: '100%', }}>
+                        <TableHead>
+                            <TableRow sx={{ borderBottom: `1px solid lightgray`, backgroundColor: colorPalette?.secondary }}>
+                                {columns.map((column, index) => (
+                                    <TableCell key={index} sx={{ padding: '16px 10px', }}>
+                                        <Box sx={{
+                                            display: 'flex', gap: 1, alignItems: 'center', justifyContent: column.key !== "actions" ?
+                                                'flex-start' : 'center', justifyContent: 'center'
+                                        }}>
+                                            <Text bold style={{ textAlign: 'center' }}>{column.label}</Text>
+                                            {column.key !== "actions" &&
+                                                <Box sx={{
+                                                    ...styles.menuIcon,
+                                                    backgroundImage: `url(${icons.gray_arrow_down})`,
+                                                    transform: filters?.filterName === column.key ? filters?.filterOrder === 'asc' ? 'rotate(-0deg)' : 'rotate(-180deg)' : 'rotate(-0deg)',
+                                                    transition: '.3s',
+                                                    width: 17,
+                                                    height: 17,
 
-                                                "&:hover": {
-                                                    opacity: 0.8,
-                                                    cursor: 'pointer'
-                                                },
-                                            }}
-                                                onClick={() => onPress({
-                                                    filterName: column.key,
-                                                    filterOrder: filters?.filterOrder === 'asc' ? 'desc' : 'asc'
-                                                })} />}
+                                                    "&:hover": {
+                                                        opacity: 0.8,
+                                                        cursor: 'pointer'
+                                                    },
+                                                }}
+                                                    onClick={() => onPress({
+                                                        filterName: column.key,
+                                                        filterOrder: filters?.filterOrder === 'asc' ? 'desc' : 'asc'
+                                                    })} />}
+                                        </Box>
+                                    </TableCell>
+                                ))}
+                            </TableRow>
+                        </TableHead>
+                        <TableBody sx={{ flex: 1, padding: 5, backgroundColor: colorPalette.secondary }}>
+                            {
+                                data?.sort((a, b) => new Date(b.data) - new Date(a.data))?.map((item, index) => {
+                                    return (
+                                        <TableRow key={`${item}-${index}`} sx={{
+                                            transition: '.3s',
+                                            "&:hover": {
+                                                backgroundColor: colorPalette.primary + '88',
+                                            },
+                                        }}>
+                                            <TableCell sx={{ padding: '15px 10px', textAlign: 'center' }}>
+                                                <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column', alignItems: 'center' }}>
+                                                    <Avatar
+                                                        isBordered
+                                                        radius="full"
+                                                        size="md"
+                                                        src={item?.url_foto_pac || ''}
+                                                    />
+                                                    <Text>{item.paciente}</Text>
+                                                </Box>
+                                            </TableCell>
+                                            <TableCell sx={{ padding: '15px 10px', textAlign: 'center' }}>
+                                                <Text>{item.email_paciente || 'Sem informação'}</Text>
+                                            </TableCell>
+                                            <TableCell sx={{ padding: '15px 10px', textAlign: 'center' }}>
+                                                <Text>{item.agendadas}</Text>
+                                            </TableCell>
+                                            <TableCell sx={{ padding: '15px 10px', textAlign: 'center' }}>
+                                                <Text>{item.remarcadas}</Text>
+                                            </TableCell>
+                                            <TableCell sx={{ padding: '15px 10px', textAlign: 'center' }}>
+                                                <Text>{item.concluidas}</Text>
+                                            </TableCell>
+                                            <TableCell sx={{ padding: '15px 10px', textAlign: 'center' }}>
+                                                <Text>{item.canceladas}</Text>
+                                            </TableCell>
+                                            <TableCell sx={{ padding: '15px 10px', textAlign: 'center' }}>
+                                                <Text>{item.total_sessoes}</Text>
+                                            </TableCell>
+                                            <TableCell sx={{ padding: '15px 10px', textAlign: 'center' }}>
+                                                <Button small text="Emitir Cobrança" style={{ width: `100%` }}
+                                                    onClick={() => {
+                                                        setOpenCobranca(true)
+                                                        setPaciente({
+                                                            nome: item.paciente,
+                                                            email: item.email_paciente,
+                                                            sessoesConcluidas: item.concluidas
+                                                        })
+                                                    }} />
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                })
+
+                            }
+                        </TableBody>
+
+                    </Table>
+                </TableContainer>
+            </ContentContainer >
+
+            <Backdrop open={openCobranca} sx={{ display: 'flex', justifyContent: 'flex-end', zIndex: 999 }}>
+                <Box sx={{ position: 'relative', display: 'flex', gap: 2, width: '6 00px', marginTop: 20, height: '100%', flexDirection: 'column', padding: '20px 25px', backgroundColor: colorPalette.secondary }}>
+                    <Box sx={{
+                        display: 'flex', flexDirection: 'row', gap: 2, alignItems: 'center', width: '100%', justifyContent: 'space-between',
+                        paddingTop: 2
+                    }}>
+                        <Text bold={true} large={true}>Emitir Cobrança</Text>
+                        <Box sx={{
+                            ...styles.menuIcon,
+                            width: 17,
+                            height: 17,
+                            aspectRatio: '1/1',
+                            backgroundImage: `url(${icons.gray_close})`,
+                            transition: '.3s',
+                            "&:hover": {
+                                opacity: 0.8,
+                                cursor: 'pointer'
+                            }
+                        }} onClick={() => setOpenCobranca(false)} />
+                    </Box>
+                    <Box>
+                        <div ref={reciboRef}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 2, padding: '10px 15px' }}>
+                                <img
+                                    src="icons/afectu_icon_home.png"
+                                    alt="Logo da Empresa"
+                                    style={{ width: 40, height: 40, marginRight: 10 }}
+                                />
+                                <Text bold title>Recibo das Sessões</Text>
+                            </Box>
+
+                            <Box sx={{
+                                display: 'flex', gap: 2, flexDirection: 'column', marginBottom: 2, padding: '15px 20px',
+                                backgroundColor: colorPalette.secondary
+                            }}>
+                                <Box sx={styles.containerData}>
+                                    <Text bold>Clínica: </Text>
+                                    <Text>{empresa.nome}</Text>
+                                </Box>
+
+                                <Box sx={styles.containerData}>
+                                    <Text bold>CNPJ: </Text>
+                                    <Text>{empresa.cnpj}</Text>
+                                </Box>
+
+                                <Box sx={styles.containerData}>
+                                    <Text bold>Endereço: </Text>
+                                    <Text>{empresa.endereco}</Text>
+                                </Box>
+
+                                <Box sx={styles.containerData}>
+                                    <Text bold>Telefone: </Text>
+                                    <Text>{empresa.telefone}</Text>
+                                </Box>
+                            </Box>
+
+                            <Divider />
+
+
+                            <Box sx={{
+                                display: 'flex', gap: 2, flexDirection: 'column', marginBottom: 2, padding: '15px 20px',
+                                backgroundColor: colorPalette.secondary
+                            }}>
+                                {/* Dados do paciente */}
+                                <Box sx={styles.containerData}>
+                                    <Text bold>Paciente: </Text>
+                                    <Text>{paciente.nome}</Text>
+                                </Box>
+
+                                <Box sx={styles.containerData}>
+                                    <Text bold>E-mail: </Text>
+                                    <Text>{paciente.email}</Text>
+                                </Box>
+
+                                <Box sx={styles.containerData}>
+                                    <Text bold>Sessões Concluídas: </Text>
+                                    <Text>{paciente.sessoesConcluidas}</Text>
+                                </Box>
+
+                                {sessionValue && <Box sx={styles.containerData}>
+                                    <Text bold>Valor por Sessão: </Text>
+                                    <Text>{formatReal(sessionValue)}</Text>
+                                </Box>}
+
+                                {sessionValue && <Box sx={styles.containerData}>
+                                    <Text bold>Valor Total: </Text>
+                                    <Text>{formatReal(sessionValue * paciente.sessoesConcluidas)}</Text>
+                                </Box>}
+
+                                {(filtersField.startDate && filtersField.endDate) &&
+                                    <Box sx={styles.containerData}>
+                                        <Text bold>Período Atendido: </Text>
+                                        <Text light>{formatTimeStamp(filtersField.startDate)} até {formatTimeStamp(filtersField.endDate)}</Text>
                                     </Box>
-                                </TableCell>
-                            ))}
-                        </TableRow>
-                    </TableHead>
-                    <TableBody sx={{ flex: 1, padding: 5, backgroundColor: colorPalette.secondary }}>
-                        {
-                            data?.sort((a, b) => new Date(b.data) - new Date(a.data))?.map((item, index) => {
-                                return (
-                                    <TableRow key={`${item}-${index}`} sx={{
-                                        transition: '.3s',
-                                        "&:hover": {
-                                            backgroundColor: colorPalette.primary + '88',
-                                        },
-                                    }}>
-                                        <TableCell sx={{ padding: '15px 10px', textAlign: 'center' }}>
-                                            <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column', alignItems: 'center' }}>
-                                                <Avatar
-                                                    isBordered
-                                                    radius="full"
-                                                    size="md"
-                                                    src={item?.url_foto_pac || ''}
-                                                />
-                                                <Text>{item.paciente}</Text>
-                                            </Box>
-                                        </TableCell>
-                                        <TableCell sx={{ padding: '15px 10px', textAlign: 'center' }}>
-                                            <Text>{item.email_paciente || 'Sem informação'}</Text>
-                                        </TableCell>
-                                        <TableCell sx={{ padding: '15px 10px', textAlign: 'center' }}>
-                                            <Text>{item.agendadas}</Text>
-                                        </TableCell>
-                                        <TableCell sx={{ padding: '15px 10px', textAlign: 'center' }}>
-                                            <Text>{item.remarcadas}</Text>
-                                        </TableCell>
-                                        <TableCell sx={{ padding: '15px 10px', textAlign: 'center' }}>
-                                            <Text>{item.concluidas}</Text>
-                                        </TableCell>
-                                        <TableCell sx={{ padding: '15px 10px', textAlign: 'center' }}>
-                                            <Text>{item.canceladas}</Text>
-                                        </TableCell>
-                                        <TableCell sx={{ padding: '15px 10px', textAlign: 'center' }}>
-                                            <Text>{item.total_sessoes}</Text>
-                                        </TableCell>
-                                        <TableCell sx={{ padding: '15px 10px', textAlign: 'center' }}>
-                                            <Button small text="Emitir Cobrança" style={{ width: `100%` }}
-                                                onClick={() => generateReceipt(item)} />
-                                        </TableCell>
-                                    </TableRow>
-                                );
-                            })
+                                }
+                            </Box>
 
-                        }
-                    </TableBody>
+                        </div>
+                        <Divider distance={2} />
 
-                </Table>
-            </TableContainer>
-        </ContentContainer >
+                        <Box sx={{ display: 'flex', gap: 1, paddingTop: 2, width: '100%' }}>
+                            <TextInput
+                                label="Valor da Sessão"
+                                placeholder="R$ 0,00"
+                                name='sessionValue'
+                                onChange={handleChangeValor}
+                                type="coin"
+                                value={sessionValue}
+                                sx={{ flex: 1, marginTop: 2 }}
+                            />
+
+                            <Box sx={{ display: 'flex', gap: 1, paddingTop: 2 }}>
+                                <Button text="Emitir Cobrança" onClick={() => handleGeneratePdf()} />
+                                <Button cancel text="Fechar" onClick={() => setOpenCobranca(false)} />
+                            </Box>
+                        </Box>
+                    </Box>
+                </Box>
+
+            </Backdrop >
+        </>
     )
 }
 
@@ -626,6 +769,13 @@ const styles = {
         justifyContent: 'space-between',
         gap: 1.5,
         padding: '40px'
+    },
+    containerData: {
+        display: 'flex',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        gap: 1.5,
+        padding: '0px 15px'
     },
     menuIcon: {
         backgroundSize: 'contain',
