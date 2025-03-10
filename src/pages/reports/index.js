@@ -10,6 +10,8 @@ import { api } from "../../api/api"
 import 'react-calendar/dist/Calendar.css';
 import { icons } from "../../organisms/layout/Colors";
 import { formatTimeStamp } from "../../helpers"
+import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas";
 
 export default function ListConsultions(props) {
     const [reportData, setReportData] = useState([])
@@ -366,7 +368,7 @@ export default function ListConsultions(props) {
                         setRowsPerPage={setRowsPerPage}
                         page={page}
                         rowsPerPage={rowsPerPage}
-                        filters={filters} onPress={(value) => setFilters(value)} />
+                        filters={filters} onPress={(value) => setFilters(value)} filtersField={filtersField} />
 
                     <Box sx={{
                         width: '100%', display: 'flex', gap: 2, backgroundColor: colorPalette?.secondary,
@@ -401,7 +403,7 @@ export default function ListConsultions(props) {
     )
 }
 
-const TableConsultion = ({ data = [], filters = [], onPress = () => { } }) => {
+const TableConsultion = ({ data = [], filters = [], onPress = () => { }, filtersField }) => {
     const { setLoading, colorPalette, mobile, user, alert, setShowConfirmationDialog } = useAppContext()
     const isProfissional = user?.perfil?.includes('profissional')
     const isAdministrator = user?.perfil?.includes('administrador')
@@ -416,6 +418,112 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { } }) => {
         { key: 'total_sessoes', label: 'Qnt Sessões (Período)' },
         { key: 'actions', label: 'Ações' }
     ];
+
+
+    const generateReceipt = (item) => {
+        const doc = new jsPDF();
+
+
+        const nerisLightFont = 'L1VzZXJzL21hcmN1c3NpbHZhL0Rlc2t0b3AvUHJvamV0b3MvbWluaGFjbGluaWNhL2FkbS9wdWJsaWMvZm9udHMvbmVyaXMubGlnaHQudHRm';
+        const nerisBoldFont = 'L1VzZXJzL21hcmN1c3NpbHZhL0Rlc2t0b3AvUHJvamV0b3MvbWluaGFjbGluaWNhL2FkbS9wdWJsaWMvZm9udHMvbmVyaXMuYmxhY2sudHRm';
+
+        // Adiciona a fonte personalizada
+        doc.addFileToVFS("NerisLight.ttf", nerisLightFont);
+        doc.addFileToVFS("NerisBold.ttf", nerisBoldFont);
+        doc.addFont("NerisLight.ttf", "NerisLight", "normal");
+        doc.addFont("NerisBold.ttf", "NerisBold", "bold");
+
+        const empresa = {
+            nome: "Afectu Inteligência Emocional",
+            cnpj: "56.919.838/0001-38",
+            endereco: "Rua Anibal Curi, 255, Fag, Cascavel - PR, CEP: 85.806-097",
+            telefone: "+55 (11) 91654-4375",
+            contato: "contato@afectu.com"
+        };
+
+        const paciente = {
+            nome: item.paciente,
+            email: item.email_paciente || "Não informado",
+            sessoesConcluidas: item.concluidas,
+            valorPorSessao: 200, // Defina o valor por sessão
+        };
+
+        const valorTotal = paciente.sessoesConcluidas * paciente.valorPorSessao;
+        const havePeriod = filtersField.startDate !== '' && filtersField.endDate !== '';
+        let periodo = "Todo Período";
+        let heightBg = 60;
+
+
+
+        if (havePeriod) {
+            periodo = `Período: ${formatTimeStamp(filtersField.startDate)} á ${formatTimeStamp(filtersField.endDate)}`;
+            heightBg = 70;
+        }
+
+        // Adicionando o logo
+        const logo = new Image();
+        logo.src = "icons/afectu_icon_home.png";
+
+        logo.onload = () => {
+            // Centralizando o logo no topo
+            doc.addImage(logo, "PNG", 85, 10, 40, 40);
+
+            // Título do recibo
+            doc.setFont("NerisBold");
+            doc.setFontSize(18);
+            doc.text("RECIBO DE SESSÕES", 70, 60);
+
+            doc.setFontSize(12);
+            doc.setFont("Neris");
+            doc.text("________________________________________________________________________________", 20, 65); // Linha separadora
+
+            // Informações da empresa
+            doc.text(`Clínica: ${empresa.nome}`, 20, 75);
+            doc.text(`CNPJ: ${empresa.cnpj}`, 20, 82);
+            doc.text(`Endereço: ${empresa.endereco}`, 20, 89);
+            doc.text(`Telefone: ${empresa.telefone}`, 20, 96);
+            doc.text(`E-mail: ${empresa.contato}`, 20, 103);
+
+            doc.text("________________________________________________________________________________", 20, 110); // Linha separadora
+
+            // Dados do paciente com fundo cinza
+            doc.setFillColor(240, 240, 240);
+            
+            doc.rect(15, 115, 180, heightBg, "F"); // Retângulo de fundo
+
+            doc.setFont("NerisBold");
+            doc.text("Dados do Paciente:", 20, 123);
+            doc.setFont("Neris");
+            doc.text(`Nome: ${paciente.nome}`, 20, 131);
+            doc.text(`E-mail: ${paciente.email}`, 20, 139);
+            doc.text(`Sessões Concluídas: ${paciente.sessoesConcluidas}`, 20, 147);
+            doc.text(`Valor por Sessão: R$ ${paciente.valorPorSessao},00`, 20, 155);
+
+            // Valor total destacado
+            doc.setFontSize(14);
+            doc.setFont("NerisBold");
+            doc.setTextColor(200, 0, 0);
+            doc.text(`Total a Pagar: R$ ${valorTotal},00`, 20, 165);
+            doc.setTextColor(0, 0, 0); // Resetando cor do texto
+
+            // Período (se houver)
+            if (havePeriod) {
+                doc.setFontSize(12);
+                doc.setFont("Neris");
+                doc.text(periodo, 20, 175);
+            }
+
+            // Assinatura e data
+            doc.setFontSize(12);
+            doc.setFont("Neris");
+            doc.text(`Data: ${new Date().toLocaleDateString()}`, 20, 190);
+            doc.text("__________________________________", 20, 210);
+            doc.text("Assinatura do Responsável", 20, 220);
+
+            // Salvar PDF com nome personalizado
+            doc.save(`recibo_${paciente.nome.replace(/\s+/g, "_")}_${new Date().toLocaleDateString()}.pdf`);
+        };
+    };
 
 
     return (
@@ -494,9 +602,8 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { } }) => {
                                             <Text>{item.total_sessoes}</Text>
                                         </TableCell>
                                         <TableCell sx={{ padding: '15px 10px', textAlign: 'center' }}>
-                                            <Button small text="Emitir Cobrança" style={{ width: `100%` }} onClick={() => {
-                                                console.log('emitindo..')
-                                            }} />
+                                            <Button small text="Emitir Cobrança" style={{ width: `100%` }}
+                                                onClick={() => generateReceipt(item)} />
                                         </TableCell>
                                     </TableRow>
                                 );
