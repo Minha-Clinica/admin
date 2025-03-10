@@ -735,9 +735,9 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, filters
                             </Box>
 
                         </div>
-                        <Divider distance={2} />
+                        <Divider distance={0} />
 
-                        <Box sx={{ display: 'flex', gap: 1, paddingTop: 2, width: '100%' }}>
+                        <Box sx={{ display: 'flex', gap: 1, paddingTop: 1, width: '100%' }}>
                             <TextInput
                                 label="Valor da Sessão"
                                 placeholder="R$ 0,00"
@@ -748,7 +748,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, filters
                                 sx={{ flex: 1, marginTop: 2 }}
                             />
 
-                            <Box sx={{ display: 'flex', gap: 1, paddingTop: 2 }}>
+                            <Box sx={{ display: 'flex', gap: 1 }}>
                                 <Button text="Emitir Cobrança" onClick={() => handleGeneratePdf()} />
                                 <Button cancel text="Fechar" onClick={() => setOpenCobranca(false)} />
                             </Box>
