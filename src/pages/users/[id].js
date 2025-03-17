@@ -13,6 +13,7 @@ import { SelectList } from "../../organisms/select/SelectList"
 import Link from "next/link"
 import { checkUserPermissions } from "../../validators/checkPermissionUser"
 import AnamneseUser from "./Components/anamnese"
+import UserCompanies from "./Components/companies"
 
 export default function EditUser() {
     const { setLoading, alert, colorPalette, user, matches, theme, setShowConfirmationDialog, menuItemsList, userPermissions } = useAppContext()
@@ -364,6 +365,7 @@ export default function EditUser() {
 
     const groupPerfil = [
         { label: 'Parceiro', value: 'parceiro' },
+        { label: 'Terapeuta', value: 'terapeuta' },
         { label: 'Paciente', value: 'paciente' },
         { label: 'Administrador', value: 'administrador' },
     ]
@@ -386,20 +388,24 @@ export default function EditUser() {
 
     const showMenu = [
         {
-            label: 'Dados do Usuário', value: 'userdata', showPerfil: ['administrador', 'paciente', 'parceiro'],
-            icon: 'personal-data.png', permission: ['administrador', 'paciente', 'parceiro']
+            label: 'Dados do Usuário', value: 'userdata', showPerfil: ['administrador', 'terapeura', 'paciente', 'parceiro'],
+            icon: 'personal-data.png', permission: ['administrador', 'paciente', 'parceiro', 'terapeura']
+        },
+        {
+            label: 'Empresas', value: 'companies', showPerfil: ['administrador', 'terapeura'],
+            icon: 'personal-data.png', permission: ['administrador', 'terapeura']
         },
         {
             label: 'Anamnese', value: 'anamnese', showPerfil: ['paciente'],
-            icon: 'patient.png', permission: ['administrador']
+            icon: 'patient.png', permission: ['administrador', 'terapeura']
         },
         {
             label: 'Sessões', value: 'sessoes', showPerfil: ['paciente'],
-            icon: 'chat.png', permission: ['administrador', 'paciente', 'parceiro']
+            icon: 'chat.png', permission: ['administrador', 'paciente', 'parceiro', 'terapeura']
         },
         {
             label: 'Documentos', value: 'documents', showPerfil: ['paciente'],
-            icon: 'chat.png', permission: ['administrador', 'paciente', 'parceiro']
+            icon: 'chat.png', permission: ['administrador', 'paciente', 'parceiro', 'terapeura']
         },
     ]
 
@@ -672,6 +678,13 @@ export default function EditUser() {
 
                     </ContentContainer>
                 </>
+            }
+
+            {menuSelected === 'companies' &&
+                <UserCompanies
+                    companies={companies}
+                    userId={userData?.id}
+                />
             }
         </>
     )
