@@ -221,4 +221,108 @@ input::placeholder {
    border: 1px solid #1976d2;
    box-shadow: 0 0 0 1px #1976d2;
 }
-  
+
+/* Estilizando o contêiner principal */
+.react-calendar {
+   max-width: 100%;
+   background: #fff;
+   border-radius: 10px;
+   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+   padding: 15px;
+   border: none;
+ }
+ 
+ /* Cabeçalho do calendário (mês e ano) */
+ .react-calendar__navigation {
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+   background: #f9604b;
+   color: white;
+   border-radius: 8px;
+   padding: 8px;
+ }
+ 
+ .react-calendar__navigation button {
+   color: white;
+   font-weight: bold;
+   background: transparent;
+   border: none;
+   cursor: pointer;
+ }
+ 
+ /* Botões desativados */
+ .react-calendar__navigation button:disabled {
+   opacity: 0.5;
+   cursor: not-allowed;
+ }
+ 
+ /* Estilizando os dias */
+ .react-calendar__tile {
+   border-radius: 6px;
+   padding: 10px;
+   transition: background 0.3s ease;
+ }
+ 
+ /* Dia selecionado */
+ .react-calendar__tile--active {
+   background: #f9604b;
+   color: white;
+   font-weight: bold;
+ }
+ 
+ /* Dia ao passar o mouse */
+ .react-calendar__tile:hover {
+   background: rgba(249, 96, 75, 0.2);
+ }
+ 
+ /* Removendo bordas quadradas */
+ .react-calendar__month-view__weekdays {
+   text-transform: uppercase;
+   font-weight: bold;
+   color: #666;
+ }
+ 
+ .react-calendar__month-view__days {
+   border-radius: 10px;
+ }
+
+ /* Deixando os dias normais brancos */
+.react-calendar__tile {
+   background: white !important;
+   color: black;
+   border-radius: 50%;
+   padding: 10px;
+   transition: background 0.3s ease, color 0.3s ease;
+ }
+ 
+ /* Alterando a cor dos dias que possuem eventos/agendamentos (antes amarelo) */
+ .react-calendar__tile--hasActive,
+ .react-calendar__tile--now {
+   background: #fda29b !important; /* Vermelho claro */
+   color: white !important;
+   font-weight: bold;
+   border-radius: 50%;
+ }
+ 
+ /* Alterando a cor do dia selecionado (antes azul) */
+ .react-calendar__tile--active {
+   background: #f9604b !important; /* Vermelho forte */
+   color: white !important;
+   font-weight: bold;
+   border-radius: 50%;
+ }
+ 
+ /* Efeito ao passar o mouse */
+ .react-calendar__tile:hover {
+   background: rgba(249, 96, 75, 0.3);
+ }
+ 
+ .react-calendar__tile--now {
+   background: #fda29b !important;
+ }
+ 
+ .react-calendar__tile--active {
+   background: #f9604b !important;
+   color: white;
+ }
