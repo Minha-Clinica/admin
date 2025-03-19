@@ -39,7 +39,8 @@ export default function ListConsultions(props) {
     const themeApp = useTheme()
     const mobile = useMediaQuery(themeApp.breakpoints.down('sm'))
     const isAdministrator = user?.perfil?.includes('profissional') || user?.perfil?.includes('administrador')
-    const profissionalId = 125;
+    const isProfissional = user?.perfil?.includes('terapeuta')
+    const profissionalId = isProfissional ? user.id : 125;
 
     const filter = (item) => {
         const normalizeString = (str) => {

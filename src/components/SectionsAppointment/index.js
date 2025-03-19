@@ -1,0 +1,1 @@
+export { MoreTerapeutas } from './MoreTerapeutas'

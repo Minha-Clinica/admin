@@ -40,12 +40,15 @@ export default function ListConsultions(props) {
     const [users, setUsers] = useState([])
     const [page, setPage] = useState(0);
     const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [employees, setEmployees] = useState([])
     const router = useRouter()
     const themeApp = useTheme()
     const mobile = useMediaQuery(themeApp.breakpoints.down('sm'))
     const isPartner = user?.perfil?.includes('parceiro')
     const isAdministrator = user?.perfil?.includes('administrador')
+    const isProfissional = user?.perfil?.includes('terapeuta')
     const isPacient = user?.perfil?.includes('paciente')
+    const [profissionalId, setProfissionalId] = useState(isProfissional ? user.id : null)
 
     const filter = (item) => {
         const normalizeString = (str) => {
@@ -54,7 +57,7 @@ export default function ListConsultions(props) {
 
         let perfil = null
 
-        if (isAdministrator || isPartner) {
+        if (isAdministrator || isPartner || isProfissional) {
             perfil = item?.paciente;
         }
 
@@ -82,6 +85,27 @@ export default function ListConsultions(props) {
         } catch (error) {
             console.log(error)
             return error
+        }
+    }
+
+    const getTerapeutas = async () => {
+        setLoading(true)
+        try {
+            const response = await api.get(`/users/employee`)
+            const { data = [] } = response;
+
+            if (data?.length > 0) {
+                const terapeutasMap = data.map((item) => ({
+                    label: item.nome,
+                    value: item.id
+                }))
+                setEmployees(terapeutasMap)
+            }
+        } catch (error) {
+            console.log(error)
+            return error
+        } finally {
+            setLoading(false)
         }
     }
 
@@ -115,6 +139,7 @@ export default function ListConsultions(props) {
         getConsultion();
         fetchPermissions()
         getEmployees()
+        getTerapeutas()
         if (window.localStorage.getItem('list-consultion-filters')) {
             const admLocalStorage = JSON.parse(window.localStorage.getItem('list-consultion-filters') || null);
             setFilters({
@@ -126,14 +151,17 @@ export default function ListConsultions(props) {
 
     }, []);
 
+    useEffect(() => {
+        getConsultion()
+    }, [profissionalId])
+
     const getConsultion = async (filtersData) => {
         setLoadingData(true);
         try {
             let query;
-            if (user?.perfil?.includes('administrador')) {
-                query = `/consultation/profissional/${125
-                    }`;
-            } else if (user?.perfil?.includes('paciente')) {
+            if (isAdministrator || isProfissional) {
+                query = `/consultation/profissional/${profissionalId}`;
+            } else if (isPacient) {
                 query = `/consultation/pacient/${user?.id}`;
             } else if (isPartner) {
                 query = `/consultation/company/pacient/${user?.empresa_id}`;
@@ -245,6 +273,19 @@ export default function ListConsultions(props) {
                 </Box>
             </Box>
 
+            <Box sx={{ display: 'flex', maxWidth: 300 }}>
+                <SelectList
+                    fullWidth
+                    data={employees}
+                    valueSelection={profissionalId}
+                    onSelect={(value) => setProfissionalId(value)}
+                    title="Selecione o Terapeuta:"
+                    filterOpition="value"
+                    sx={{ backgroundColor: colorPalette.secondary }}
+                    clean={false}
+                />
+            </Box>
+
             <Backdrop open={showFilters} sx={{ display: 'flex', justifyContent: 'flex-end', zIndex: 999 }}>
                 <Box sx={{ position: 'relative', display: 'flex', gap: 2, width: '400px', marginTop: 20, height: '100%', flexDirection: 'column', padding: '20px 25px', backgroundColor: colorPalette.secondary }}>
                     <Box sx={{
@@ -286,7 +327,7 @@ export default function ListConsultions(props) {
                             inputStyle={{ color: colorPalette.textColor, fontSize: '15px' }}
                         />
 
-                        {isAdministrator && <SelectList
+                        {(isAdministrator || isProfissional) && <SelectList
                             data={[
                                 { label: 'Pago', value: 'Pago' },
                                 { label: 'Não Pago', value: 'Não Pago' }
@@ -299,7 +340,7 @@ export default function ListConsultions(props) {
                         />}
 
 
-                        {(isAdministrator || isPartner) && <SelectList
+                        {(isAdministrator || isPartner || isProfissional) && <SelectList
                             fullWidth
                             autoComplete
                             data={users}
@@ -399,18 +440,13 @@ export default function ListConsultions(props) {
     )
 }
 
-const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setConsultion, callBack = () => { },
-    filter,
-    setPage,
-    setRowsPerPage,
-    page,
-    rowsPerPage,
+const TableConsultion = ({ data = [], filters = [], onPress = () => { }, callBack = () => { },
     setLoadingPayment,
     loadingPayment
 }) => {
     const { setLoading, colorPalette, mobile, user, alert, setShowConfirmationDialog } = useAppContext()
     const [dateSelected, setDateSelected] = useState({ day: '', hour: '', profissionalId: '', reserva_id: '', consultId: '' })
-    const isProfissional = user?.perfil?.includes('profissional')
+    const isProfissional = user?.perfil?.includes('terapeuta')
     const isPartner = user?.perfil?.includes('parceiro')
     const isAdministrator = user?.perfil?.includes('administrador')
 
@@ -445,9 +481,6 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
         }
     }
 
-
-    const startIndex = page * rowsPerPage;
-    const endIndex = startIndex + rowsPerPage;
 
     const handleUpdateStatus = async (event, id) => {
         setLoadingPayment({ active: true, success: false, error: false, message: 'Alterando status de pagamento...' });
@@ -823,7 +856,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, setCons
                                                                 textOverflow: 'ellipsis',
                                                                 whiteSpace: 'nowrap',
                                                                 overflow: 'hidden',
-                                                            }}>{isPartner ? item?.paciente : isProfissional ? item?.paciente : item?.profissional || '-'}</Text>
+                                                            }}>{isPartner || isProfissional || isAdministrator ? item?.paciente : item?.profissional || '-'}</Text>
                                                         </Box>
                                                     </TableCell>
                                                 </Tooltip>

@@ -306,7 +306,7 @@ export default function EditCompany(props) {
 
             <Box sx={{ display: !newCompany ? 'flex' : 'none', flexDirection: 'column', justifyContent: 'space-between', gap: 1.8, width: '100%' }}>
                 <Box sx={{ display: 'flex', gap: 1, flex: 1, justifyContent: 'space-between', alignItems: 'center', flexDirection: { xs: 'column', sm: 'column', md: 'row', lg: 'row' } }}>
-                    <Text veryLarge bold>Colaboradores ({employees?.length})</Text>
+                    <Text veryLarge bold>Usuários Vínculados ({employees?.length})</Text>
                     <Box sx={{ display: 'flex', justifyContent: 'start', gap: 2, alignItems: 'center', flexDirection: { xs: 'column', sm: 'column', md: 'row', lg: 'row' } }}>
                         <TextInput placeholder="Pesquisar por colaborador" name='filterData' type="search"
                             onChange={(event) => setFilterData(event.target.value)} value={filterData}

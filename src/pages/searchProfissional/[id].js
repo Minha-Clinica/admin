@@ -169,10 +169,12 @@ export default function ReserveConsultation() {
                 icon={'/icons/localized_icon.png'}
                 title={`Dados do Agendamento`}
             />
-            <Box sx={{ display: 'flex' }}>
+            <Box sx={{ display: 'flex', width: '100%', justifyContent: { xs: 'center', sm: 'center', md: 'flex-start', lg: 'flex-start' },
+        padding:{ xs: '15px', sm: '15px', md: '15px', lg: '15px' },}}>
                 <Box sx={{
                     display: 'flex', gap: 2, backgroundColor: colorPalette.secondary, padding: '20px 15px', borderRadius: 2,
-                    boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`, position: 'relative', flexDirection: 'column'
+                    boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`, position: 'relative', flexDirection: 'column',
+                    width: { xs: '100%', sm: '100%', md: '400px', lg: '500px' },
                 }}>
                     <Box sx={{ padding: '0px 20px' }}>
                         <Text title bold style={{ color: colorPalette.buttonColor }}>Terapeuta</Text>

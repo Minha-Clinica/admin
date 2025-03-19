@@ -18,6 +18,8 @@ import "react-big-calendar/lib/addons/dragAndDrop/styles.css"; // Estilo para o 
 import "react-big-calendar/lib/addons/dragAndDrop"; // Recurso de arrastar e soltar (se estiver usando)
 import "react-big-calendar/lib/css/react-big-calendar.css"
 import Link from 'next/link'
+import { MoreTerapeutas } from '../components/SectionsAppointment'
+import { ProfessionalAndCalendarMobile } from '../components/Professionals'
 
 
 function Home() {
@@ -57,7 +59,7 @@ function Home() {
       allDay: false,
       evento_google_id: null
    });
-   const profissionalId = 125;
+   const profissionalId = user?.id;
    moment.locale("pt-br");
    const localizer = momentLocalizer(moment);
    const themeApp = useTheme()
@@ -68,7 +70,7 @@ function Home() {
          id: '01', icon: '/icons/calendar-2.png',
          route: '/calendar',
          title: 'Minha Agenda',
-         permissions: ['administrador'],
+         permissions: ['administrador', 'terapeuta'],
          filter: true,
          text: 'Vizualize suas agendas confirmadas ou crie sua lista de reservas.'
       },
@@ -76,7 +78,7 @@ function Home() {
          id: '02', icon: '/icons/team.png',
          route: `/organization/${user.empresa_id}`,
          title: 'Minha Empresa',
-         permissions: ['parceiro',],
+         permissions: ['parceiro', 'terapeuta'],
          filter: true,
          text: 'Visualizar os dados de sua empresa. Cadastre e veja os colaboradores vínculados a sua sua empresa.'
       },
@@ -85,7 +87,7 @@ function Home() {
          id: '08', icon: '/icons/search.png',
          route: `/integrar-calendario-google`,
          title: 'Integrar Agenda com Google Agenda',
-         permissions: ['administrador'],
+         permissions: ['administrador', 'terapeuta'],
          filter: true,
          text: 'Vincule sua agenda do Sistema com sua agenda do Google.'
       },
@@ -109,7 +111,7 @@ function Home() {
          id: '02', icon: '/icons/technology.png',
          route: '/consultation',
          title: 'Minhas Sessões',
-         permissions: ['paciente', 'administrador'],
+         permissions: ['paciente', 'administrador', 'terapeuta'],
          filter: true,
          text: 'Visualize os prontuários de seus pacientes de sessões agendadas.'
       },
@@ -117,7 +119,7 @@ function Home() {
          id: '03', icon: '/icons/userdata.png',
          route: `/userData`,
          title: 'Meus Dados',
-         permissions: ['parceiro', 'paciente', 'administrador'],
+         permissions: ['parceiro', 'paciente', 'administrador', 'terapeuta'],
          filter: true,
          text: 'Editar e atualizar seus dados.'
       },
@@ -182,9 +184,9 @@ function Home() {
          const perfil = (user?.perfil?.includes('profissional') || user?.perfil?.includes('administrador')) ? 'profissional' : 'paciente'
          query += perfil
          if (perfil === 'profissional') {
-            query += `/agenda/125`
+            query += `/agenda/${profissionalId}`
          } else {
-            query += `/agenda/${user?.id}`
+            query += `/agenda/${profissionalId}`
          }
          const response = await api.get(query)
          const { data } = response
@@ -239,11 +241,16 @@ function Home() {
    const getSessionsCalendar = async () => {
       setLoading(true)
       try {
-         const response = await api.get(`/users/search/agendas`)
+         const response = await api.get(`/users/search/agendas?companyId=${user.empresa_id}`)
          const { data = [] } = response;
-         const agendas = await getAvailableDays(data)
+
+
+         console.log('agendas: ', data)
          setCalendarSessions(data)
-         setCalendarHours(agendas)
+         if (data.length == 1) {
+         const agendas = await getAvailableDays(data[0].agendas)
+            setCalendarHours(agendas[0].agendas)
+         }
       } catch (error) {
          console.log(error)
          return error
@@ -394,36 +401,36 @@ function Home() {
 
    const verifyNumberSessionToday = async () => {
       try {
-        const currentDate = new Date(); 
-        const selectedDate = new Date(`${dateSelected.day}T${dateSelected.hour}:00`);
-    
-        const offset = currentDate.getTimezoneOffset() * 60000; // Converte minutos para milissegundos
-        const currentDateInBrazil = new Date(currentDate.getTime() + offset - (3 * 60 * 60 * 1000)); // UTC-3
-        const selectedDateInBrazil = new Date(selectedDate.getTime() + offset - (3 * 60 * 60 * 1000)); // UTC-3
-    
-        // Verifica se as datas foram criadas corretamente
-        if (isNaN(currentDateInBrazil) || isNaN(selectedDateInBrazil)) {
-          console.error('Data inválida:', { currentDateInBrazil, selectedDateInBrazil });
-          return false;
-        }
-    
-        // Calcula a diferença entre as datas em milissegundos
-        const timeDifference = selectedDateInBrazil.getTime() - currentDateInBrazil.getTime();
-    
-        // Verifica se a diferença é menor que 24 horas (24 * 60 * 60 * 1000 milissegundos)
-        if (timeDifference <= 24 * 60 * 60 * 1000) {
-          alert.info('Para agendar uma sessão para menos de 24 horas, entre em contato pelo WhatsApp com o atendimento, para verificar um encaixe.');
-          setShowContactWpp(true);
-          return false;
-        }
-    
-        return true;
+         const currentDate = new Date();
+         const selectedDate = new Date(`${dateSelected.day}T${dateSelected.hour}:00`);
+
+         const offset = currentDate.getTimezoneOffset() * 60000; // Converte minutos para milissegundos
+         const currentDateInBrazil = new Date(currentDate.getTime() + offset - (3 * 60 * 60 * 1000)); // UTC-3
+         const selectedDateInBrazil = new Date(selectedDate.getTime() + offset - (3 * 60 * 60 * 1000)); // UTC-3
+
+         // Verifica se as datas foram criadas corretamente
+         if (isNaN(currentDateInBrazil) || isNaN(selectedDateInBrazil)) {
+            console.error('Data inválida:', { currentDateInBrazil, selectedDateInBrazil });
+            return false;
+         }
+
+         // Calcula a diferença entre as datas em milissegundos
+         const timeDifference = selectedDateInBrazil.getTime() - currentDateInBrazil.getTime();
+
+         // Verifica se a diferença é menor que 24 horas (24 * 60 * 60 * 1000 milissegundos)
+         if (timeDifference <= 24 * 60 * 60 * 1000) {
+            alert.info('Para agendar uma sessão para menos de 24 horas, entre em contato pelo WhatsApp com o atendimento, para verificar um encaixe.');
+            setShowContactWpp(true);
+            return false;
+         }
+
+         return true;
       } catch (error) {
-        console.log(error);
-        return false;
+         console.log(error);
+         return false;
       }
-    };
-    
+   };
+
 
    const handleReservationSession = async () => {
 
@@ -529,13 +536,18 @@ function Home() {
                               // boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
                               borderRadius: 2
                            }}>
-                              <Box sx={{ display: { xs: 'none', xm: 'none', md: 'block', lg: 'block' }, width: '100%', flexDirection: 'column', gap: 1 }}>
+                              {calendarSessions.length >= 2 && <MoreTerapeutas />}
+
+                              {calendarSessions.length < 2 && <Box sx={{ display: { xs: 'none', xm: 'none', md: 'block', lg: 'block' }, width: '100%', flexDirection: 'column', gap: 1 }}>
                                  {loadingDate ? <CircularProgress /> : <>
                                     <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
                                        <Text bold large style={{ color: colorPalette.buttonColor, textAlign: 'center' }}>AGENDA DÍSPONIVEL</Text>
                                     </Box>
                                     <Divider />
-                                    {calendarSessions?.length > 0 ?
+                                    {calendarSessions?.length == 0 &&
+                                       <Text light large style={{ textAlign: 'center' }}>Profissional sem agenda disponível</Text>
+                                    }
+                                    {calendarSessions.length == 1 &&
                                        <Box sx={{ display: 'flex', gap: 3, flexDirection: 'column' }}>
                                           <Box sx={{
                                              display: 'flex', gap: 2, justifyContent: 'space-between',
@@ -576,7 +588,7 @@ function Home() {
                                                          padding: '5px 12px',
                                                          flexDirection: 'column'
                                                       }}>
-                                                         {calendarSessions
+                                                         {calendarSessions[0].agendas
                                                             ?.filter(agend => moment(agend.inicio).format("YYYY-MM-DD") === dateSelected?.day && agend.disponivel === 0)
                                                             ?.sort((a, b) => moment(a.inicio).valueOf() - moment(b.inicio).valueOf()) // Ordenando em ordem crescente
                                                             ?.map((hour, index) => {
@@ -617,8 +629,6 @@ function Home() {
                                              }
                                           </Box>
                                        </Box>
-                                       :
-                                       <Text light large style={{ textAlign: 'center' }}>Profissional sem agenda disponível</Text>
                                     }
                                  </>
                                  }
@@ -641,7 +651,7 @@ function Home() {
                                        <Text bold style={{ color: '#fff' }}>Agendar</Text>
                                     </Box>
                                  </Box>
-                              </Box>
+                              </Box>}
 
                               <Box sx={{
                                  display: { xs: 'flex', xm: 'flex', md: 'none', lg: 'none' }, padding: '10px 8px', gap: 2, alignItems: 'center', flexDirection: 'column', borderRadius: 2, backgroundColor: colorPalette.secondary,
@@ -695,117 +705,18 @@ function Home() {
                                           opacity: 0.8,
                                           cursor: 'pointer'
                                        }
-                                    }} onClick={() => setShowReserveSession(false)} />
+                                    }} onClick={() => {
+                                       setShowReserveSession(false)
+                                       setDateSelected({ day: '', hour: '', profissionalId: '', reserva_id: '' })
+                                    }} />
                                  </Box>
                                  <Divider />
-                                 <Box sx={{ display: 'flex', width: '100%', flexDirection: 'column', gap: 1, overflowY: 'scroll', padding: '10px 20px', paddingBottom: 5 }}>
-                                    {loadingDate ? <CircularProgress /> : <>
-                                       <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-                                          <Text bold large style={{ color: colorPalette.buttonColor, textAlign: 'center' }}>Datas disponíveis</Text>
-                                       </Box>
-                                       {calendarSessions?.length > 0 ?
-                                          <Box sx={{ display: 'flex', gap: 3, flexDirection: 'column' }}>
-                                             <Box sx={{
-                                                display: 'flex', gap: 2, justifyContent: 'space-between',
-                                                flexDirection: { xs: 'column', xm: 'column', md: 'row', lg: 'row' },
-                                             }}>
-                                                <Box sx={{
-                                                   display: 'flex', gap: 2, width: '100%', justifyContent: 'center', marginTop: 1,
-                                                   alignItems: 'center'
-                                                }}>
-                                                   <Calendar
-                                                      defaultActiveStartDate={new Date()}
-                                                      onChange={(date) => handleSelectedDate(date, profissionalId)}
-                                                      style={{
-                                                         border: 'none'
-                                                      }}
-                                                      tileDisabled={({ date }) =>
-                                                         !calendarHours.includes(moment(date).format("YYYY-MM-DD")
-                                                         )
-                                                      }
-                                                   />
-                                                </Box>
-                                                <Box sx={{ display: 'flex', height: `100%`, width: '2px', backgroundColor: '#eaeaea' }} />
-                                                {(dateSelected?.day && dateSelected?.profissionalId === profissionalId) ?
-                                                   <Box sx={{
-                                                      display: 'flex', flexDirection: 'column', gap: 1, marginTop: 1,
-                                                      justifyContent: 'flex-start', width: '100%', minWidth: 200
-                                                   }}>
-                                                      <Box sx={{ display: 'flex', padding: '12px 10px', backgroundColor: colorPalette?.primary, justifyContent: 'center' }}>
-                                                         <Text bold style={{ color: colorPalette.buttonColor }}>Selecione um horário:</Text>
-                                                      </Box>
-                                                      <Box sx={{
-                                                         display: 'flex', gap: 2, width: '100%', justifyContent: 'flex-start', marginTop: 1,
-                                                      }}>
-                                                         <Box sx={{
-                                                            display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'flex-start', overflowY: 'auto',
-                                                            maxHeight: 200,
-                                                            width: '100%',
-                                                            padding: '5px 12px',
-                                                         }}>
-                                                            {calendarSessions?.filter(agend => (moment(agend.inicio).format("YYYY-MM-DD") === dateSelected?.day) &&
-                                                               (agend.disponivel === 0))?.map((hour, index) => {
-                                                                  const hourFormatted = horarios(hour.inicio)
-                                                                  const selected = dateSelected?.hour === hourFormatted;
-                                                                  return (
-                                                                     <Box key={index} sx={{
-                                                                        display: 'flex', gap: .5, padding: '8px 12px', borderRadius: 2,
-                                                                        width: '100%',
-                                                                        backgroundColor: colorPalette.primary,
-                                                                        border: selected && `1px solid ${colorPalette?.buttonColor}`,
-                                                                        justifyContent: 'space-between',
-                                                                        alignItems: 'center',
-                                                                        "&:hover": {
-                                                                           opacity: 0.8,
-                                                                           cursor: 'pointer'
-                                                                        }
-                                                                     }} onClick={() => {
-                                                                        if (selected) {
-                                                                           setDateSelected({ ...dateSelected, hour: '', reserva_id: '' })
-                                                                        } else {
-                                                                           if (isPartner) {
-                                                                              setShowEmployeeList(true)
-                                                                           }
-                                                                           setDateSelected({ ...dateSelected, hour: hourFormatted, reserva_id: hour?.id_evento_calendario, userId: !isPartner && user.id })
-                                                                        }
-                                                                     }}>
-                                                                        <Text large bold={selected ? true : false}>{hourFormatted}</Text>
-                                                                        {selected && <CheckCircleIcon style={{ color: 'green', fontSize: 17 }} />}
-                                                                     </Box>
-                                                                  )
-                                                               })}
-                                                         </Box>
-                                                      </Box>
-                                                   </Box>
-                                                   :
-                                                   <></>
-                                                }
-                                             </Box>
-                                          </Box>
-                                          :
-                                          <Text light large style={{ textAlign: 'center' }}>Profissional sem agenda disponível</Text>
-                                       }
-                                    </>
-                                    }
-                                    <Box sx={{ display: calendarSessions?.length > 0 ? 'flex' : 'none', width: '100%', justifyContent: 'center' }}>
-                                       <Box sx={{
-                                          padding: '5px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                          width: 150,
-                                          marginTop: 3,
-                                          transition: '.5s',
-                                          gap: 2,
-                                          backgroundColor: colorPalette.buttonColor,
-                                          borderRadius: 2,
-                                          opacity: (dateSelected?.reserva_id !== '' && dateSelected?.profissionalId === profissionalId && dateSelected?.userId !== '') ? 1 : 0.5,
-                                          "&:hover": {
-                                             opacity: (dateSelected?.reserva_id !== '' && dateSelected?.profissionalId === profissionalId && dateSelected?.userId !== '') ? 1 : 0.5,
-                                             cursor: 'pointer',
-                                             transform: (dateSelected?.reserva_id !== '' && dateSelected?.profissionalId === profissionalId && dateSelected?.userId !== '') ? 'scale(1.1, 1.1)' : 'none'
-                                          }
-                                       }} onClick={() => handleReservationSession()}>
-                                          <Text bold style={{ color: '#fff' }}>Agendar</Text>
-                                       </Box>
-                                    </Box>
+                                 <Box sx={{ display: 'flex', width: '100%', flexDirection: 'column', gap: 1, overflowY: 'scroll', padding: '10px 20px' }}>
+
+                                    <ProfessionalAndCalendarMobile setDateSelected={setDateSelected} dateSelected={dateSelected} profissionalId={profissionalId}
+                                       setLoadingDate={setLoadingDate}
+                                       loadingDate={loadingDate} />
+
                                  </Box>
                               </Box>
                            </Backdrop>

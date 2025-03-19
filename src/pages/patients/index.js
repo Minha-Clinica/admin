@@ -1,11 +1,11 @@
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
 import { Box, Button, ContentContainer, Text, TextInput } from "../../atoms"
-import { PaginationTable, SearchBar, SectionHeader, Table_V1 } from "../../organisms"
+import { SelectList } from "../../organisms"
 import { useAppContext } from "../../context/AppContext"
 import { TablePagination } from "@mui/material"
 import { checkUserPermissions } from "../../validators/checkPermissionUser"
-import { Paper, TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Tooltip, Avatar } from "@mui/material";
+import {  TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Tooltip, Avatar } from "@mui/material";
 import { api } from "../../api/api"
 import { icons } from "../../organisms/layout/Colors"
 import { formatTimeStamp } from "../../helpers"
@@ -15,6 +15,7 @@ export default function ListPatients(props) {
     const [patientsList, setPatients] = useState([])
     const [filterData, setFilterData] = useState('')
     const { setLoading, colorPalette, menuItemsList, userPermissions, user } = useAppContext()
+    const isTerapeuta = user?.perfil?.includes('terapeuta');
     const [firstRender, setFirstRender] = useState(true)
     const [filters, setFilters] = useState({
         filterName: 'nome',
@@ -29,7 +30,8 @@ export default function ListPatients(props) {
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const router = useRouter()
     const [isPermissionEdit, setIsPermissionEdit] = useState(false)
-
+    const [employees, setEmployees] = useState([])
+    const [profissionalId, setProfissionalId] = useState(isTerapeuta ? user?.id : null)
 
     const filter = (item) => {
         const normalizeString = (str) => {
@@ -59,6 +61,7 @@ export default function ListPatients(props) {
 
     useEffect(() => {
         getPatients();
+        getTerapeutas()
         fetchPermissions()
         if (window.localStorage.getItem('list-consultion-filters')) {
             const admLocalStorage = JSON.parse(window.localStorage.getItem('list-consultion-filters') || null);
@@ -69,10 +72,14 @@ export default function ListPatients(props) {
         }
     }, []);
 
+    useEffect(() => {
+        getPatients();
+    }, [profissionalId]);
+
     const getPatients = async () => {
         setLoading(true)
         try {
-            const response = await api.get(`/consultation/patients/profissional/125`)
+            const response = await api.get(`/consultation/patients/profissional/${profissionalId}`)
             const { data = [] } = response;
             setPatients(data)
         } catch (error) {
@@ -83,6 +90,26 @@ export default function ListPatients(props) {
         }
     }
 
+    const getTerapeutas = async () => {
+        setLoading(true)
+        try {
+            const response = await api.get(`/users/employee`)
+            const { data = [] } = response;
+
+            if (data?.length > 0) {
+                const terapeutasMap = data.map((item) => ({
+                    label: item.nome,
+                    value: item.id
+                }))
+                setEmployees(terapeutasMap)
+            }
+        } catch (error) {
+            console.log(error)
+            return error
+        } finally {
+            setLoading(false)
+        }
+    }
 
 
 
@@ -202,6 +229,20 @@ export default function ListPatients(props) {
                     </Box>
                 </Box>
             </Box>
+
+            <Box sx={{ display: 'flex', maxWidth: 300 }}>
+                <SelectList
+                    fullWidth
+                    data={employees}
+                    valueSelection={profissionalId}
+                    onSelect={(value) => setProfissionalId(value)}
+                    title="Selecione o Terapeuta:"
+                    filterOpition="value"
+                    sx={{ backgroundColor: colorPalette.secondary }}
+                    clean={false}
+                />
+            </Box>
+
             <Box sx={{ display: 'flex', flexDirection: 'column', backgroundColor: colorPalette.secondary }}>
                 <TableConsultion data={patientsList?.filter(filter)?.slice(startIndex, endIndex)}
                     filter={filter}
@@ -354,7 +395,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { },
                                         <TableCell sx={{ padding: '15px 10px', textAlign: 'center' }}>
                                             <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
                                                 <Link href={`/users/${item?.paciente_id}`} target="_blank">
-                                                <Button secondary text="prontuário" small />
+                                                    <Button secondary text="prontuário" small />
                                                 </Link>
                                             </Box>
                                         </TableCell>
