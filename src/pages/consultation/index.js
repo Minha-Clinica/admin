@@ -78,15 +78,15 @@ export default function ListConsultions(props) {
 
 
 
-    const fetchPermissions = async () => {
-        try {
-            const actions = await checkUserPermissions(router, userPermissions, menuItemsList)
-            setIsPermissionEdit(actions)
-        } catch (error) {
-            console.log(error)
-            return error
-        }
-    }
+    // const fetchPermissions = async () => {
+    //     try {
+    //         const actions = await checkUserPermissions(router, userPermissions, menuItemsList)
+    //         setIsPermissionEdit(actions)
+    //     } catch (error) {
+    //         console.log(error)
+    //         return error
+    //     }
+    // }
 
     const getTerapeutas = async () => {
         setLoading(true)
@@ -137,7 +137,7 @@ export default function ListConsultions(props) {
     useEffect(() => {
         setLoading(true)
         getConsultion();
-        fetchPermissions()
+        // fetchPermissions()
         getEmployees()
         getTerapeutas()
         if (window.localStorage.getItem('list-consultion-filters')) {
@@ -182,7 +182,6 @@ export default function ListConsultions(props) {
             });
             const { data = [] } = response;
 
-            console.log(data)
             if (Array.isArray(data) && data.length > 0) {
                 setConsultion(data);
             } else {

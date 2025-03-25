@@ -181,7 +181,7 @@ function Home() {
       try {
          setLoading(true)
          let query = `/event/`
-         const perfil = (user?.perfil?.includes('profissional') || user?.perfil?.includes('administrador')) ? 'profissional' : 'paciente'
+         const perfil = (user?.perfil?.includes('terapeuta') || user?.perfil?.includes('administrador')) ? 'profissional' : 'paciente'
          query += perfil
          if (perfil === 'profissional') {
             query += `/agenda/${profissionalId}`
@@ -190,7 +190,9 @@ function Home() {
          }
          const response = await api.get(query)
          const { data } = response
-         if (data) {
+
+         console.log('data: ', data)
+         if (data.length > 0) {
             const eventsMap = data?.map((event) => ({
                id_evento_calendario: event.id_evento_calendario,
                start: new Date(event.inicio), // Adicione o início e o fim do evento como propriedades start e end
@@ -210,7 +212,9 @@ function Home() {
                consulta_id: event?.id_consulta,
                evento_google_id: event?.evento_google_id
             }));
-            setMyEvents([...eventsMap, ...Holidays]);
+            setMyEvents(eventsMap);
+
+            console.log('eventsMap: ', eventsMap)
             return
          }
       } catch (error) {
