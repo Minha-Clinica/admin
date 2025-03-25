@@ -18,7 +18,7 @@ import "react-big-calendar/lib/addons/dragAndDrop/styles.css"; // Estilo para o 
 import "react-big-calendar/lib/addons/dragAndDrop"; // Recurso de arrastar e soltar (se estiver usando)
 import "react-big-calendar/lib/css/react-big-calendar.css"
 import Link from 'next/link'
-import { MoreTerapeutas } from '../components/SectionsAppointment'
+import { CalendarSessions, MoreTerapeutas } from '../components/SectionsAppointment'
 import { ProfessionalAndCalendarMobile } from '../components/Professionals'
 
 
@@ -248,7 +248,7 @@ function Home() {
          console.log('agendas: ', data)
          setCalendarSessions(data)
          if (data.length == 1) {
-         const agendas = await getAvailableDays(data[0].agendas)
+            const agendas = await getAvailableDays(data[0].agendas)
             setCalendarHours(agendas[0].agendas)
          }
       } catch (error) {
@@ -536,190 +536,22 @@ function Home() {
                               // boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
                               borderRadius: 2
                            }}>
-                              {calendarSessions.length >= 2 && <MoreTerapeutas />}
-
-                              {calendarSessions.length < 2 && <Box sx={{ display: { xs: 'none', xm: 'none', md: 'block', lg: 'block' }, width: '100%', flexDirection: 'column', gap: 1 }}>
-                                 {loadingDate ? <CircularProgress /> : <>
-                                    <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
-                                       <Text bold large style={{ color: colorPalette.buttonColor, textAlign: 'center' }}>AGENDA DÍSPONIVEL</Text>
-                                    </Box>
-                                    <Divider />
-                                    {calendarSessions?.length == 0 &&
-                                       <Text light large style={{ textAlign: 'center' }}>Profissional sem agenda disponível</Text>
-                                    }
-                                    {calendarSessions.length == 1 &&
-                                       <Box sx={{ display: 'flex', gap: 3, flexDirection: 'column' }}>
-                                          <Box sx={{
-                                             display: 'flex', gap: 2, justifyContent: 'space-between',
-                                             flexDirection: { xs: 'column', xm: 'column', md: 'row', lg: 'row' }
-                                          }}>
-                                             <Box sx={{
-                                                display: 'flex', gap: 2, width: '100%', justifyContent: 'center', marginTop: 1,
-                                                alignItems: 'center'
-                                             }}>
-                                                <Calendar
-                                                   defaultActiveStartDate={new Date()}
-                                                   onChange={(date) => handleSelectedDate(date, profissionalId)}
-                                                   style={{
-                                                      border: 'none'
-                                                   }}
-                                                   tileDisabled={({ date }) =>
-                                                      !calendarHours.includes(moment(date).format("YYYY-MM-DD")
-                                                      )
-                                                   }
-                                                />
-                                             </Box>
-                                             <Box sx={{ display: 'flex', height: `100%`, width: '2px', backgroundColor: '#eaeaea' }} />
-                                             {(dateSelected?.day && dateSelected?.profissionalId === profissionalId) ?
-                                                <Box sx={{
-                                                   display: 'flex', flexDirection: 'column', gap: 1, marginTop: 1,
-                                                   justifyContent: 'flex-start', width: '100%', minWidth: 200
-                                                }}>
-                                                   <Box sx={{ display: 'flex', padding: '12px 10px', backgroundColor: colorPalette?.primary, justifyContent: 'center' }}>
-                                                      <Text bold style={{ color: colorPalette.buttonColor }}>Selecione um horário:</Text>
-                                                   </Box>
-                                                   <Box sx={{
-                                                      display: 'flex', gap: 2, width: '100%', justifyContent: 'flex-start', marginTop: 1,
-                                                   }}>
-                                                      <Box sx={{
-                                                         display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'flex-start', overflowX: 'auto',
-                                                         maxHeight: 200,
-                                                         width: '100%',
-                                                         padding: '5px 12px',
-                                                         flexDirection: 'column'
-                                                      }}>
-                                                         {calendarSessions[0].agendas
-                                                            ?.filter(agend => moment(agend.inicio).format("YYYY-MM-DD") === dateSelected?.day && agend.disponivel === 0)
-                                                            ?.sort((a, b) => moment(a.inicio).valueOf() - moment(b.inicio).valueOf()) // Ordenando em ordem crescente
-                                                            ?.map((hour, index) => {
-                                                               const hourFormatted = horarios(hour.inicio)
-                                                               const selected = dateSelected?.hour === hourFormatted;
-                                                               return (
-                                                                  <Box key={index} sx={{
-                                                                     display: 'flex', gap: .5, padding: '8px 12px', borderRadius: 2,
-                                                                     width: '100%',
-                                                                     backgroundColor: colorPalette.primary,
-                                                                     border: selected && `1px solid ${colorPalette?.buttonColor}`,
-                                                                     justifyContent: 'space-between',
-                                                                     alignItems: 'center',
-                                                                     "&:hover": {
-                                                                        opacity: 0.8,
-                                                                        cursor: 'pointer'
-                                                                     }
-                                                                  }} onClick={() => {
-                                                                     if (selected) {
-                                                                        setDateSelected({ ...dateSelected, hour: '', reserva_id: '' })
-                                                                     } else {
-                                                                        if (isPartner) {
-                                                                           setShowEmployeeList(true)
-                                                                        }
-                                                                        setDateSelected({ ...dateSelected, hour: hourFormatted, reserva_id: hour?.id_evento_calendario, userId: !isPartner && user.id })
-                                                                     }
-                                                                  }}>
-                                                                     <Text large bold={selected ? true : false}>{hourFormatted}</Text>
-                                                                     {selected && <CheckCircleIcon style={{ color: 'green', fontSize: 17 }} />}
-                                                                  </Box>
-                                                               )
-                                                            })}
-                                                      </Box>
-                                                   </Box>
-                                                </Box>
-                                                :
-                                                <></>
-                                             }
-                                          </Box>
-                                       </Box>
-                                    }
-                                 </>
-                                 }
-                                 <Box sx={{ display: calendarSessions?.length > 0 ? 'flex' : 'none', width: '100%', justifyContent: 'center' }}>
-                                    <Box sx={{
-                                       padding: '5px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                       width: 150,
-                                       marginTop: 3,
-                                       transition: '.5s',
-                                       gap: 2,
-                                       backgroundColor: colorPalette.buttonColor,
-                                       borderRadius: 2,
-                                       opacity: (dateSelected?.reserva_id !== '' && dateSelected?.profissionalId === profissionalId && dateSelected?.userId !== '') ? 1 : 0.5,
-                                       "&:hover": {
-                                          opacity: (dateSelected?.reserva_id !== '' && dateSelected?.profissionalId === profissionalId && dateSelected?.userId !== '') ? 1 : 0.5,
-                                          cursor: 'pointer',
-                                          transform: (dateSelected?.reserva_id !== '' && dateSelected?.profissionalId === profissionalId && dateSelected?.userId !== '') ? 'scale(1.1, 1.1)' : 'none'
-                                       }
-                                    }} onClick={() => handleReservationSession()}>
-                                       <Text bold style={{ color: '#fff' }}>Agendar</Text>
-                                    </Box>
-                                 </Box>
-                              </Box>}
-
                               <Box sx={{
-                                 display: { xs: 'flex', xm: 'flex', md: 'none', lg: 'none' }, padding: '10px 8px', gap: 2, alignItems: 'center', flexDirection: 'column', borderRadius: 2, backgroundColor: colorPalette.secondary,
+                                 display: 'flex', justifyContent: 'flex-start', padding: '10px 8px', gap: 2, alignItems: 'center', flexDirection: 'column', borderRadius: 2, backgroundColor: colorPalette.secondary,
                               }}>
-                                 <Text large light>Deseja marcar uma sessão? Verifique a dísponibilidade, e reserve agora mesmo!</Text>
-                                 <Box sx={styles.noResultsImage} />
-                                 <Box sx={{
-                                    display: 'flex',
-                                    gap: 2,
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    padding: '10px 12px',
-                                    borderRadius: 2,
-                                    backgroundColor: colorPalette.buttonColor,
-                                    "&:hover": {
-                                       opacity: 0.8,
-                                       cursor: 'pointer'
-                                    }
-                                 }} onClick={() => setShowReserveSession(true)} >
-                                    <Text light large style={{ color: '#fff' }}>Agendar Sessão</Text>
-                                    <Box sx={{
-                                       ...styles.menuIcon,
-                                       marginTop: '2px',
-                                       width: 17, height: 18,
-                                       aspectRatio: '1/1',
-                                       backgroundImage: `url('/icons/next_arrow.png')`,
-                                       transition: '.3s',
-                                    }} />
-                                 </Box>
+                                 <Text bold large>Terapeutas Disponíveis:</Text>
 
+                                 <CalendarSessions
+                                    showReserveSession={showReserveSession}
+                                    setShowReserveSession={setShowReserveSession}
+                                    dateSelected={dateSelected}
+                                    setDateSelected={setDateSelected}
+                                    profissionalId={profissionalId}
+                                    setLoadingDate={setLoadingDate}
+                                    loadingDate={loadingDate}
+                                 />
                               </Box>
                            </Box>
-
-                           <Backdrop open={showReserveSession} sx={{ display: 'flex', alignItems: 'end', zIndex: 99999999999999 }}>
-                              <Box sx={{
-                                 display: 'flex', gap: 2, transition: '.3s', height: showReserveSession ? '80%' : '0%', width: '100%', backgroundColor: colorPalette.secondary, flexDirection: 'column',
-                                 borderTopLeftRadius: 20, // Bordas arredondadas
-                                 borderTopRightRadius: 20,
-                              }}>
-                                 <Box sx={{
-                                    display: 'flex', justifyContent: 'space-between', gap: 4, alignItems: 'center', padding: '20px 20px 0px 20px',
-                                 }}>
-                                    <Text bold large>Agendar Sessão</Text>
-                                    <Box sx={{
-                                       ...styles.menuIcon,
-                                       width: 15, height: 15,
-                                       backgroundImage: `url(${icons.gray_close})`,
-                                       transition: '.3s',
-                                       zIndex: 999999999,
-                                       "&:hover": {
-                                          opacity: 0.8,
-                                          cursor: 'pointer'
-                                       }
-                                    }} onClick={() => {
-                                       setShowReserveSession(false)
-                                       setDateSelected({ day: '', hour: '', profissionalId: '', reserva_id: '' })
-                                    }} />
-                                 </Box>
-                                 <Divider />
-                                 <Box sx={{ display: 'flex', width: '100%', flexDirection: 'column', gap: 1, overflowY: 'scroll', padding: '10px 20px' }}>
-
-                                    <ProfessionalAndCalendarMobile setDateSelected={setDateSelected} dateSelected={dateSelected} profissionalId={profissionalId}
-                                       setLoadingDate={setLoadingDate}
-                                       loadingDate={loadingDate} />
-
-                                 </Box>
-                              </Box>
-                           </Backdrop>
 
                            <Backdrop open={showEmployeeList}>
                               <ContentContainer>

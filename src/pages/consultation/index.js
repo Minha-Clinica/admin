@@ -46,9 +46,9 @@ export default function ListConsultions(props) {
     const mobile = useMediaQuery(themeApp.breakpoints.down('sm'))
     const isPartner = user?.perfil?.includes('parceiro')
     const isAdministrator = user?.perfil?.includes('administrador')
-    const isProfissional = user?.perfil?.includes('terapeuta')
+    const isTerapeuta = user?.perfil?.includes('terapeuta')
     const isPacient = user?.perfil?.includes('paciente')
-    const [profissionalId, setProfissionalId] = useState(isProfissional ? user.id : null)
+    const [profissionalId, setProfissionalId] = useState(isTerapeuta ? user.id : null)
 
     const filter = (item) => {
         const normalizeString = (str) => {
@@ -57,7 +57,7 @@ export default function ListConsultions(props) {
 
         let perfil = null
 
-        if (isAdministrator || isPartner || isProfissional) {
+        if (isAdministrator || isPartner || isTerapeuta) {
             perfil = item?.paciente;
         }
 
@@ -159,7 +159,7 @@ export default function ListConsultions(props) {
         setLoadingData(true);
         try {
             let query;
-            if (isAdministrator || isProfissional) {
+            if (isAdministrator || isTerapeuta) {
                 query = `/consultation/profissional/${profissionalId}`;
             } else if (isPacient) {
                 query = `/consultation/pacient/${user?.id}`;
@@ -273,7 +273,7 @@ export default function ListConsultions(props) {
                 </Box>
             </Box>
 
-            <Box sx={{ display: 'flex', maxWidth: 300 }}>
+            {isAdministrator && <Box sx={{ display: 'flex', maxWidth: 300 }}>
                 <SelectList
                     fullWidth
                     data={employees}
@@ -284,7 +284,7 @@ export default function ListConsultions(props) {
                     sx={{ backgroundColor: colorPalette.secondary }}
                     clean={false}
                 />
-            </Box>
+            </Box>}
 
             <Backdrop open={showFilters} sx={{ display: 'flex', justifyContent: 'flex-end', zIndex: 999 }}>
                 <Box sx={{ position: 'relative', display: 'flex', gap: 2, width: '400px', marginTop: 20, height: '100%', flexDirection: 'column', padding: '20px 25px', backgroundColor: colorPalette.secondary }}>
@@ -327,7 +327,7 @@ export default function ListConsultions(props) {
                             inputStyle={{ color: colorPalette.textColor, fontSize: '15px' }}
                         />
 
-                        {(isAdministrator || isProfissional) && <SelectList
+                        {(isAdministrator || isTerapeuta) && <SelectList
                             data={[
                                 { label: 'Pago', value: 'Pago' },
                                 { label: 'Não Pago', value: 'Não Pago' }
@@ -340,7 +340,7 @@ export default function ListConsultions(props) {
                         />}
 
 
-                        {(isAdministrator || isPartner || isProfissional) && <SelectList
+                        {(isAdministrator || isPartner || isTerapeuta) && <SelectList
                             fullWidth
                             autoComplete
                             data={users}
@@ -446,7 +446,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, callBac
 }) => {
     const { setLoading, colorPalette, mobile, user, alert, setShowConfirmationDialog } = useAppContext()
     const [dateSelected, setDateSelected] = useState({ day: '', hour: '', profissionalId: '', reserva_id: '', consultId: '' })
-    const isProfissional = user?.perfil?.includes('terapeuta')
+    const isTerapeuta = user?.perfil?.includes('terapeuta')
     const isPartner = user?.perfil?.includes('parceiro')
     const isAdministrator = user?.perfil?.includes('administrador')
 
@@ -709,10 +709,10 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, callBac
 
     let columns = []
 
-    if (isProfissional) {
+    if (isTerapeuta) {
         columns = [
             { key: 'data', label: 'Data' },
-            { key: isProfissional ? 'paciente' : 'profissional', label: isProfissional ? 'Paciente ' : 'Profissional' },
+            { key: isTerapeuta ? 'paciente' : 'profissional', label: isTerapeuta ? 'Paciente ' : 'Profissional' },
             { key: 'modalidade', label: 'Tipo' },
             { key: 'status', label: 'Status' },
             { key: 'payment', label: 'Pagamento' },
@@ -731,7 +731,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, callBac
     else {
         columns = [
             { key: 'data', label: 'Data' },
-            { key: isProfissional ? 'paciente' : 'profissional', label: isProfissional ? 'Paciente ' : 'Profissional' },
+            { key: isTerapeuta ? 'paciente' : 'profissional', label: isTerapeuta ? 'Paciente ' : 'Profissional' },
             { key: 'modalidade', label: 'Tipo' },
             { key: 'status', label: 'Status' },
             { key: 'actions', label: 'Ações' },
@@ -782,7 +782,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, callBac
                 <CardConsultion
                     isAdministrator={isAdministrator}
                     data={data}
-                    isProfissional={isProfissional}
+                    isTerapeuta={isTerapeuta}
                     isPartner={isPartner}
                     handleRowClick={handleRowClick}
                     handleUpdateStatus={handleUpdateStatus}
@@ -842,12 +842,12 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, callBac
                                                 <TableCell sx={{ padding: '8px 25px', justifyContent: 'flex-start' }}>
                                                     <Text>{formatTimeStamp(item?.data, true) || '-'}</Text>
                                                 </TableCell>
-                                                <Tooltip title={isPartner ? item?.paciente : isProfissional ? item?.paciente : item?.profissional}>
+                                                <Tooltip title={isPartner ? item?.paciente : isTerapeuta ? item?.paciente : item?.profissional}>
                                                     <TableCell sx={{
                                                         padding: '15px 10px', textAlign: 'center',
                                                     }}>
                                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'flex-start' }}>
-                                                            <Avatar src={(isPartner || isAdministrator || isProfissional) ? item?.url_foto_pac : item?.url_foto_prof || ''} sx={{
+                                                            <Avatar src={(isPartner || isAdministrator || isTerapeuta) ? item?.url_foto_pac : item?.url_foto_prof || ''} sx={{
                                                                 height: { xs: '100%', sm: 30, md: 30, lg: 30 },
                                                                 width: { xs: '100%', sm: 30, md: 30, lg: 30 },
                                                             }} variant="rounded"
@@ -856,7 +856,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, callBac
                                                                 textOverflow: 'ellipsis',
                                                                 whiteSpace: 'nowrap',
                                                                 overflow: 'hidden',
-                                                            }}>{isPartner || isProfissional || isAdministrator ? item?.paciente : item?.profissional || '-'}</Text>
+                                                            }}>{isPartner || isTerapeuta || isAdministrator ? item?.paciente : item?.profissional || '-'}</Text>
                                                         </Box>
                                                     </TableCell>
                                                 </Tooltip>
@@ -899,7 +899,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, callBac
                                                         <Text small bold>{item?.status}</Text>
                                                     </Box>
                                                 </TableCell>
-                                                {isProfissional ?
+                                                {isTerapeuta ?
                                                     <>
                                                         <TableCell sx={{ padding: '15px 0px', textAlign: 'center' }}>
                                                             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
@@ -1261,7 +1261,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, callBac
     )
 }
 
-const CardConsultion = ({ data, isProfissional, isPartner, handleRowClick, handleUpdateStatus, isAdministrator, isWithin24Hours, handleCancelAppointment }) => {
+const CardConsultion = ({ data, isTerapeuta, isPartner, handleRowClick, handleUpdateStatus, isAdministrator, isWithin24Hours, handleCancelAppointment }) => {
     const { colorPalette, alert } = useAppContext()
 
     const statusColor = (data) => ((data === 'Agendado' && 'yellow') ||
@@ -1290,13 +1290,13 @@ const CardConsultion = ({ data, isProfissional, isPartner, handleRowClick, handl
                                     <Text bold>Data: </Text>
                                     <Text>{formatTimeStamp(item?.data, true) || '-'}</Text>
                                 </Box>
-                                <Tooltip title={isPartner ? item?.paciente : isProfissional ? item?.paciente : item?.profissional}>
+                                <Tooltip title={isPartner ? item?.paciente : isTerapeuta ? item?.paciente : item?.profissional}>
                                     <Box sx={{
                                         padding: '15px 10px', textAlign: 'center', justifyContent: 'flex-start', display: 'flex',
                                         alignItems: 'start', gap: 2
                                     }}>
                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, justifyContent: 'flex-start' }}>
-                                            <Avatar src={(isPartner || isAdministrator || isProfissional) ? item?.url_foto_pac : item?.url_foto_prof || ''} sx={{
+                                            <Avatar src={(isPartner || isAdministrator || isTerapeuta) ? item?.url_foto_pac : item?.url_foto_prof || ''} sx={{
                                                 height: { xs: 60, sm: 30, md: 30, lg: 30 },
                                                 width: { xs: 60, sm: 30, md: 30, lg: 30 },
                                             }} variant="rounded"
@@ -1305,13 +1305,13 @@ const CardConsultion = ({ data, isProfissional, isPartner, handleRowClick, handl
                                                 display: 'flex', alignItems: 'start', gap: 1, justifyContent: 'flex-start',
                                                 flexDirection: 'column',
                                             }}>
-                                                {isProfissional ? <Text bold>Paciente: </Text> : <Text bold>Profissional: </Text>}
+                                                {isTerapeuta ? <Text bold>Paciente: </Text> : <Text bold>Profissional: </Text>}
 
                                                 <Text style={{
                                                     textOverflow: 'ellipsis',
                                                     whiteSpace: 'nowrap',
                                                     overflow: 'hidden',
-                                                }}>{isPartner ? item?.paciente : isProfissional ? item?.paciente : item?.profissional || '-'}</Text>
+                                                }}>{isPartner ? item?.paciente : isTerapeuta ? item?.paciente : item?.profissional || '-'}</Text>
                                             </Box>
                                         </Box>
                                     </Box>
@@ -1357,7 +1357,7 @@ const CardConsultion = ({ data, isProfissional, isPartner, handleRowClick, handl
                                         <Text small bold>{item?.status}</Text>
                                     </Box>
                                 </Box>
-                                {isProfissional ?
+                                {isTerapeuta ?
                                     <>
                                         <Box sx={{ padding: '15px 0px', textAlign: 'center', zIndex: 99 }}>
                                             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>

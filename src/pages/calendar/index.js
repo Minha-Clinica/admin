@@ -125,7 +125,7 @@ export default function CalendarComponent() {
     const [loadingReservas, setLoadingReserva] = useState({ active: false, success: false, error: false, message: '' })
     const [isPermissionEdit, setIsPermissionEdit] = useState(false)
     const isAdminstrator = user.perfil.includes('administrador')
-    const isProfissional = user.perfil.includes('profissional')
+    const isTerapeuta = user.perfil.includes('terapeuta')
     const [dateSelected, setDateSelected] = useState({
         day: '',
         hour: '',
@@ -137,7 +137,7 @@ export default function CalendarComponent() {
     })
     const [users, setUsers] = useState([])
     const [employees, setEmployees] = useState([])
-    const [professionalId, setProfissionalId] = useState(isProfissional ? user.id : null)
+    const [professionalId, setProfissionalId] = useState(isTerapeuta ? user.id : null)
     const [duration, setDuration] = useState(60);
 
     const filter = (item) => {
@@ -146,7 +146,7 @@ export default function CalendarComponent() {
 
 
     const fetchPermissions = () => {
-        if (isAdminstrator || isProfissional) {
+        if (isAdminstrator || isTerapeuta) {
             setIsPermissionEdit(true)
         }
     }
@@ -766,7 +766,7 @@ export default function CalendarComponent() {
 
             <Box sx={{ display: 'flex', gap: 3, flexDirection: 'column' }}>
 
-                <Box sx={{ display: 'flex', maxWidth: 300 }}>
+                {isAdminstrator && <Box sx={{ display: 'flex', maxWidth: 300 }}>
                     <SelectList
                         fullWidth
                         data={employees}
@@ -777,7 +777,7 @@ export default function CalendarComponent() {
                         sx={{ backgroundColor: colorPalette.secondary }}
                         clean={false}
                     />
-                </Box>
+                </Box>}
 
                 <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', xm: 'column', md: 'row', lg: 'row' } }}>
 

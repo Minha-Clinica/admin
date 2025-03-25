@@ -5,7 +5,7 @@ import { SelectList } from "../../organisms"
 import { useAppContext } from "../../context/AppContext"
 import { TablePagination } from "@mui/material"
 import { checkUserPermissions } from "../../validators/checkPermissionUser"
-import {  TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Tooltip, Avatar } from "@mui/material";
+import { TableContainer, Table, TableHead, TableRow, TableCell, TableBody, Tooltip, Avatar } from "@mui/material";
 import { api } from "../../api/api"
 import { icons } from "../../organisms/layout/Colors"
 import { formatTimeStamp } from "../../helpers"
@@ -16,6 +16,7 @@ export default function ListPatients(props) {
     const [filterData, setFilterData] = useState('')
     const { setLoading, colorPalette, menuItemsList, userPermissions, user } = useAppContext()
     const isTerapeuta = user?.perfil?.includes('terapeuta');
+    const isAdministrator = user?.perfil?.includes('administrador');
     const [firstRender, setFirstRender] = useState(true)
     const [filters, setFilters] = useState({
         filterName: 'nome',
@@ -230,7 +231,7 @@ export default function ListPatients(props) {
                 </Box>
             </Box>
 
-            <Box sx={{ display: 'flex', maxWidth: 300 }}>
+            {isAdministrator && <Box sx={{ display: 'flex', maxWidth: 300 }}>
                 <SelectList
                     fullWidth
                     data={employees}
@@ -241,7 +242,7 @@ export default function ListPatients(props) {
                     sx={{ backgroundColor: colorPalette.secondary }}
                     clean={false}
                 />
-            </Box>
+            </Box>}
 
             <Box sx={{ display: 'flex', flexDirection: 'column', backgroundColor: colorPalette.secondary }}>
                 <TableConsultion data={patientsList?.filter(filter)?.slice(startIndex, endIndex)}
