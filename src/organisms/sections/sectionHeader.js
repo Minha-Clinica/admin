@@ -70,7 +70,7 @@ export const SectionHeader = (props) => {
                right: { xs: 0, sm: 20, md: 40, lg: 60, xl: 60 },
                maxWidth: '350px',
                // margin: { xs: 'auto' },
-               zIndex: 9999,
+               zIndex: 99,
                padding: { xs: 2, sm: 0, md: 0, lg: 0 },
                // backgroundColor: colorPalette.primary,
                gap: 1,

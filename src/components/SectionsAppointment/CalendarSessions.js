@@ -16,8 +16,10 @@ export const CalendarSessions = (props) => {
             display: 'flex', gap: 2, transition: '.3s', backgroundColor: colorPalette.secondary, flexDirection: 'column',
             borderTopLeftRadius: 20, // Bordas arredondadas
             borderTopRightRadius: 20,
+            padding: '0px 15px',
+            width: '100%',
         }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1,}}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, width: '100%',}}>
 
                 <ProfessionalAndCalendarMobile setDateSelected={setDateSelected} dateSelected={dateSelected} profissionalId={profissionalId}
                     setLoadingDate={setLoadingDate}

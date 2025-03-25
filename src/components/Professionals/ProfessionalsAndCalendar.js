@@ -109,7 +109,7 @@ export const ProfessionalAndCalendarMobile = ({
         try {
 
             if (dateSelected?.day === date) {
-                setDateSelected({ day: '', hour: '', profissionalId: '', reserva_id: '' })
+                setDateSelected({ ...dateSelected, day: '', hour: '', reserva_id: '' })
             } else {
                 setDateSelected({ day: date, hour: '', profissionalId: id, reserva_id: '' })
             }
@@ -145,15 +145,16 @@ export const ProfessionalAndCalendarMobile = ({
     return (
         <Box>
             <Box sx={{
-                display: 'flex', gap: 3, padding: '10px', borderRadius: 2,
-                flexDirection: { xs: 'column', sm: 'column', md: 'row', lg: 'row' }
+                display: 'flex', gap: 3, borderRadius: 2,
+                flexDirection: { xs: 'column', sm: 'column', md: 'row', lg: 'row' },
+                width: '100%',
             }}>
                 <Box sx={{
                     display: 'flex', width: '100%', flexDirection: 'column', gap: 1,
-                    alignItems: data.length === 1 ? 'start' : 'center',
+                    alignItems: 'start',
                     justifyContent: 'center'
                 }}>
-                    <Box sx={{ display: 'flex', width: '100%', gap: 1, justifyContent: 'center' }}>
+                    <Box sx={{ display: 'flex', width: '70%', gap: 1, justifyContent: 'center' }}>
                         {data?.map((item, index) => {
                             const name = item?.nome?.split(' ');
                             const firstName = name[0];
@@ -193,30 +194,29 @@ export const ProfessionalAndCalendarMobile = ({
                     </Box>
 
                     {loadingDate ? <CircularProgress /> : !dateSelected.profissionalId ?
-                        (<></>)
+                        (<Text>Selecione um profissional.</Text>)
                         :
                         availableDays?.length == 0 ?
                             (<Text light style={{ textAlign: 'center' }}>Profissional sem agenda disponível</Text>)
                             :
                             (
-                                <Box sx={{ display: 'flex', gap: 3, flexDirection: 'column' }}>
+                                <Box sx={{ display: 'flex', gap: 3, flexDirection: 'column', width: '100%', }}>
 
                                     <Box sx={{
                                         display: 'flex', gap: 2, justifyContent: 'space-between',
-                                        flexDirection: { xs: 'column', sm: 'column', md: 'row', lg: 'row' }
+                                        flexDirection: { xs: 'column', sm: 'column', md: 'row', lg: 'row' }, width: '100%'
                                     }}>
                                         <Box sx={{
                                             display: 'flex', gap: 2, width: '100%', justifyContent: 'center', marginTop: 1,
-                                            alignItems: 'center'
+                                            alignItems: 'center',
                                         }}>
                                             <Calendar
+                                                className="custom-calendar"
                                                 defaultActiveStartDate={new Date()}
                                                 onChange={(date) => handleSelectedDate(date, dateSelected.profissionalId)}
-                                                style={{
-                                                    border: 'none'
-                                                }}
                                                 tileDisabled={({ date }) => !availableDays.includes(moment(date).format("YYYY-MM-DD"))}
                                             />
+                                            
                                         </Box>
                                         {/* <Box sx={{ display: 'flex', height: `100%`, width: '2px', backgroundColor: '#eaeaea' }} /> */}
                                         {(dateSelected.profissionalId && dateSelected.day) ?
@@ -277,9 +277,9 @@ export const ProfessionalAndCalendarMobile = ({
 
                     <Box sx={{ display: availableDays?.length > 0 ? 'flex' : 'none', width: '100%', justifyContent: 'center' }}>
                         <Box sx={{
-                            padding: '5px 10px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            width: 150,
+                            padding: '10px 15px', display: 'flex', alignItems: 'center', justifyContent: 'center',
                             marginTop: 3,
+                            width: '100%',
                             transition: '.5s',
                             gap: 2,
                             backgroundColor: colorPalette.buttonColor,
@@ -299,7 +299,7 @@ export const ProfessionalAndCalendarMobile = ({
                                 }
                             }
                         }}>
-                            <Text bold style={{ color: '#fff' }}>Agendar</Text>
+                            <Text bold large style={{ color: '#fff' }}>Confirmar Agendamento</Text>
                         </Box>
                     </Box>
                 </Box>

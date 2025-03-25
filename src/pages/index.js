@@ -525,106 +525,13 @@ function Home() {
                      <Box sx={{
                         display: 'flex', gap: 2, padding: '10px',
                         marginTop: 5,
-                        backgroundColor: colorPalette?.secondary,
-
-                        boxShadow: `rgba(149, 157, 165, 0.6) 0px 6px 24px`,
-                        borderRadius: 2
                      }}>
                         <Box sx={{
                            display: 'flex', gap: 2, width: '100%',
                            flexDirection: { xs: 'column', xm: 'column', md: 'row', lg: 'row' }
                         }}>
-                           <Box sx={{
-                              display: 'flex', gap: 2,
-                              backgroundColor: '#fff',
-                              // boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
-                              borderRadius: 2
-                           }}>
-                              <Box sx={{
-                                 display: 'flex', justifyContent: 'flex-start', padding: '10px 8px', gap: 2, alignItems: 'center', flexDirection: 'column', borderRadius: 2, backgroundColor: colorPalette.secondary,
-                              }}>
-                                 <Text bold large>Terapeutas Disponíveis:</Text>
 
-                                 <CalendarSessions
-                                    showReserveSession={showReserveSession}
-                                    setShowReserveSession={setShowReserveSession}
-                                    dateSelected={dateSelected}
-                                    setDateSelected={setDateSelected}
-                                    profissionalId={profissionalId}
-                                    setLoadingDate={setLoadingDate}
-                                    loadingDate={loadingDate}
-                                 />
-                              </Box>
-                           </Box>
 
-                           <Backdrop open={showEmployeeList}>
-                              <ContentContainer>
-                                 <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 4, alignItems: 'center' }}>
-                                    <Text bold large>Selecione o Colaborador</Text>
-                                    <Box sx={{
-                                       ...styles.menuIcon,
-                                       width: 15, height: 15,
-                                       backgroundImage: `url(${icons.gray_close})`,
-                                       transition: '.3s',
-                                       zIndex: 999999999,
-                                       "&:hover": {
-                                          opacity: 0.8,
-                                          cursor: 'pointer'
-                                       }
-                                    }} onClick={() => setShowEmployeeList(false)} />
-                                 </Box>
-                                 <Box>
-                                    <SelectList
-                                       fullWidth
-                                       data={employees}
-                                       valueSelection={dateSelected.userId}
-                                       onSelect={(value) => setDateSelected({ ...dateSelected, userId: value })}
-                                       title="Selecione um colaborador:"
-                                       filterOpition="value"
-                                       inputStyle={{ color: colorPalette.textColor, fontSize: '15px' }}
-                                       clean={false}
-                                    />
-                                 </Box>
-                                 <Button text="Confirmar" onClick={() => setShowEmployeeList(false)} />
-                              </ContentContainer>
-                           </Backdrop>
-
-                           <Backdrop open={showContactWpp}>
-                              <ContentContainer>
-                                 <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 4, alignItems: 'center' }}>
-                                    <Text bold large>Entre em contato conosco pelo WhatsApp</Text>
-                                    <Box sx={{
-                                       ...styles.menuIcon,
-                                       width: 15, height: 15,
-                                       backgroundImage: `url(${icons.gray_close})`,
-                                       transition: '.3s',
-                                       zIndex: 999999999,
-                                       "&:hover": {
-                                          opacity: 0.8,
-                                          cursor: 'pointer'
-                                       }
-                                    }} onClick={() => setShowContactWpp(false)} />
-                                 </Box>
-                                 <Divider />
-                                 <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column' }}>
-                                    <Text>Deseja marcar uma agenda para hoje? Para agendar uma sessão 24 horas antes, entre em contato conosco no link abaixo, e tente um encaixe!</Text>
-                                    <Link href={'https://wa.me/5511916544375'} target='_blank'>
-                                       <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', padding: '5px 12px', borderRadius: 2, backgroundColor: colorPalette.primary, width: 200 }}>
-                                          <Box sx={{
-                                             ...styles.menuIcon,
-                                             width: 15, height: 15,
-                                             backgroundImage: `url('/icons/whatsapp.png')`,
-                                             transition: '.3s',
-                                          }} />
-                                          <Text bold>+55 (11)91654-4375</Text>
-                                       </Box>
-                                    </Link>
-                                    <Box sx={styles.noResultsImage} />
-                                 </Box>
-                              </ContentContainer>
-                           </Backdrop>
-
-                           <Box sx={{ display: 'flex', marginLeft: 2, height: '100%', width: '1px', backgroundColor: 'lightgray' }} />
                            <Box sx={{ display: { xs: 'none', xm: 'none', md: 'block', lg: 'block' }, width: '100%' }}>
                               <Box sx={{
                                  display: 'flex', flexDirection: 'column', gap: 5, padding: '0px 20px',
@@ -697,10 +604,39 @@ function Home() {
                                  </Box>
                               </Box>
                            </Box>
+
+
+                           <Box sx={{
+                              display: 'flex', gap: 2,
+                              backgroundColor: '#fff',
+                              boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
+                              borderRadius: 2,
+                              width: '100%'
+                           }}>
+                              <Box sx={{
+                                 display: 'flex', justifyContent: 'flex-start', padding: '20px 15px', gap: 2, alignItems: 'center', flexDirection: 'column', borderRadius: 2, backgroundColor: colorPalette.secondary,
+                                 width: '100%'
+                              }}>
+                                 <Text bold large>Terapeutas Disponíveis:</Text>
+
+                                 <CalendarSessions
+                                    showReserveSession={showReserveSession}
+                                    setShowReserveSession={setShowReserveSession}
+                                    dateSelected={dateSelected}
+                                    setDateSelected={setDateSelected}
+                                    profissionalId={profissionalId}
+                                    setLoadingDate={setLoadingDate}
+                                    loadingDate={loadingDate}
+                                 />
+                              </Box>
+                           </Box>
                         </Box>
                      </Box>
 
-                     <Box sx={{ display: { xs: 'block', xm: 'block', md: 'none', lg: 'none' }, width: '100%' }}>
+                     <Box sx={{
+                        display: { xs: 'block', xm: 'block', md: 'none', lg: 'none' },
+                        width: { xs: '100%', xm: '100%', md: '40%', lg: '40%' },
+                     }}>
                         <Box sx={{
                            display: 'flex', flexDirection: 'column', gap: 5,
                            width: '100%'
@@ -930,6 +866,73 @@ function Home() {
                      </Box>
                   </Box>
                </Box>
+
+               <Backdrop open={showEmployeeList}>
+                  <ContentContainer>
+                     <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 4, alignItems: 'center' }}>
+                        <Text bold large>Selecione o Colaborador</Text>
+                        <Box sx={{
+                           ...styles.menuIcon,
+                           width: 15, height: 15,
+                           backgroundImage: `url(${icons.gray_close})`,
+                           transition: '.3s',
+                           zIndex: 999999999,
+                           "&:hover": {
+                              opacity: 0.8,
+                              cursor: 'pointer'
+                           }
+                        }} onClick={() => setShowEmployeeList(false)} />
+                     </Box>
+                     <Box>
+                        <SelectList
+                           fullWidth
+                           data={employees}
+                           valueSelection={dateSelected.userId}
+                           onSelect={(value) => setDateSelected({ ...dateSelected, userId: value })}
+                           title="Selecione um colaborador:"
+                           filterOpition="value"
+                           inputStyle={{ color: colorPalette.textColor, fontSize: '15px' }}
+                           clean={false}
+                        />
+                     </Box>
+                     <Button text="Confirmar" onClick={() => setShowEmployeeList(false)} />
+                  </ContentContainer>
+               </Backdrop>
+
+               <Backdrop open={showContactWpp}>
+                  <ContentContainer>
+                     <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 4, alignItems: 'center' }}>
+                        <Text bold large>Entre em contato conosco pelo WhatsApp</Text>
+                        <Box sx={{
+                           ...styles.menuIcon,
+                           width: 15, height: 15,
+                           backgroundImage: `url(${icons.gray_close})`,
+                           transition: '.3s',
+                           zIndex: 999999999,
+                           "&:hover": {
+                              opacity: 0.8,
+                              cursor: 'pointer'
+                           }
+                        }} onClick={() => setShowContactWpp(false)} />
+                     </Box>
+                     <Divider />
+                     <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column' }}>
+                        <Text>Deseja marcar uma agenda para hoje? Para agendar uma sessão 24 horas antes, entre em contato conosco no link abaixo, e tente um encaixe!</Text>
+                        <Link href={'https://wa.me/5511916544375'} target='_blank'>
+                           <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', padding: '5px 12px', borderRadius: 2, backgroundColor: colorPalette.primary, width: 200 }}>
+                              <Box sx={{
+                                 ...styles.menuIcon,
+                                 width: 15, height: 15,
+                                 backgroundImage: `url('/icons/whatsapp.png')`,
+                                 transition: '.3s',
+                              }} />
+                              <Text bold>+55 (11)91654-4375</Text>
+                           </Box>
+                        </Link>
+                        <Box sx={styles.noResultsImage} />
+                     </Box>
+                  </ContentContainer>
+               </Backdrop>
 
                {
                   showEventForm && (

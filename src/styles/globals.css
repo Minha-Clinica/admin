@@ -99,7 +99,8 @@ input::placeholder {
 
 @font-face {
    font-family: 'Neris';
-   src: url('../../assets/fonts/neris.thin.otf') format('opentype'); /* Atualize o caminho se necessário */
+   src: url('../../assets/fonts/neris.thin.otf') format('opentype');
+   /* Atualize o caminho se necessário */
    font-weight: 400;
    font-style: normal;
 }
@@ -229,11 +230,11 @@ input::placeholder {
    border-radius: 10px;
    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
    padding: 15px;
-   border: none;
- }
- 
- /* Cabeçalho do calendário (mês e ano) */
- .react-calendar__navigation {
+   border: none ! important;
+}
+
+/* Cabeçalho do calendário (mês e ano) */
+.react-calendar__navigation {
    display: flex;
    justify-content: space-between;
    align-items: center;
@@ -241,88 +242,99 @@ input::placeholder {
    color: white;
    border-radius: 8px;
    padding: 8px;
- }
- 
- .react-calendar__navigation button {
+}
+
+.react-calendar__navigation button {
    color: white;
    font-weight: bold;
    background: transparent;
    border: none;
    cursor: pointer;
- }
- 
- /* Botões desativados */
- .react-calendar__navigation button:disabled {
+}
+
+/* Botões desativados */
+.react-calendar__navigation button:disabled {
    opacity: 0.5;
    cursor: not-allowed;
- }
- 
- /* Estilizando os dias */
- .react-calendar__tile {
+}
+
+/* Estilizando os dias */
+.react-calendar__tile {
    border-radius: 6px;
    padding: 10px;
    transition: background 0.3s ease;
- }
- 
- /* Dia selecionado */
- .react-calendar__tile--active {
+}
+
+/* Dia selecionado */
+.react-calendar__tile--active {
    background: #f9604b;
    color: white;
    font-weight: bold;
- }
- 
- /* Dia ao passar o mouse */
- .react-calendar__tile:hover {
+}
+
+/* Dia ao passar o mouse */
+.react-calendar__tile:hover {
    background: rgba(249, 96, 75, 0.2);
- }
- 
- /* Removendo bordas quadradas */
- .react-calendar__month-view__weekdays {
+}
+
+/* Removendo bordas quadradas */
+.react-calendar__month-view__weekdays {
    text-transform: uppercase;
    font-weight: bold;
    color: #666;
- }
- 
- .react-calendar__month-view__days {
-   border-radius: 10px;
- }
+}
 
- /* Deixando os dias normais brancos */
+.react-calendar__month-view__days {
+   border-radius: 10px;
+}
+
+/* Deixando os dias normais brancos */
 .react-calendar__tile {
    background: white !important;
    color: black;
    border-radius: 50%;
    padding: 10px;
    transition: background 0.3s ease, color 0.3s ease;
- }
- 
- /* Alterando a cor dos dias que possuem eventos/agendamentos (antes amarelo) */
- .react-calendar__tile--hasActive,
- .react-calendar__tile--now {
-   background: #fda29b !important; /* Vermelho claro */
-   color: white !important;
-   font-weight: bold;
-   border-radius: 50%;
- }
- 
- /* Alterando a cor do dia selecionado (antes azul) */
- .react-calendar__tile--active {
-   background: #f9604b !important; /* Vermelho forte */
-   color: white !important;
-   font-weight: bold;
-   border-radius: 50%;
- }
- 
- /* Efeito ao passar o mouse */
- .react-calendar__tile:hover {
-   background: rgba(249, 96, 75, 0.3);
- }
- 
- .react-calendar__tile--now {
+}
+
+/* Alterando a cor dos dias que possuem eventos/agendamentos (antes amarelo) */
+.react-calendar__tile--hasActive,
+.react-calendar__tile--now {
    background: #fda29b !important;
- }
- 
- .react-calendar__tile--active {
+   /* Vermelho claro */
+   color: white !important;
+   font-weight: bold;
+   border-radius: 50%;
+}
+
+/* Alterando a cor do dia selecionado (antes azul) */
+.react-calendar__tile--active {
+   background: #f9604b !important;
+   /* Vermelho forte */
+   color: white !important;
+   font-weight: bold;
+   border-radius: 50%;
+}
+
+/* Efeito ao passar o mouse */
+.react-calendar__tile:hover {
+   background: rgba(249, 96, 75, 0.3);
+}
+
+.react-calendar__tile--now {
+   background: #fda29b !important;
+}
+
+.react-calendar__tile--active {
    background: #f9604b !important;
    color: white;
- }
+}
+
+.custom-calendar {
+   width: 450px !important;
+   height: 420px !important;
+}
+
+.custom-calendar .react-calendar__tile {
+   min-height: 58px;
+}

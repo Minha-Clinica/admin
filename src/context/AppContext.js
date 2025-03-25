@@ -266,7 +266,7 @@ export const AppProvider = ({ children }) => {
         },
         {
             text: 'Empresas',
-            icon: '/icons/settings.png',
+            icon: '/icons/building.png',
             to: '/organization/list',
             permissions: ['administrador'],
         },
@@ -278,13 +278,13 @@ export const AppProvider = ({ children }) => {
         },
         {
             text: 'Sessões',
-            icon: '/icons/email.png',
+            icon: '/icons/conversation.png',
             to: '/consultation',
             permissions: ['parceiro', 'administrador', 'paciente', 'terapeuta'],
         },
         {
             text: 'Meus Pacientes',
-            icon: '/icons/app.png',
+            icon: '/icons/patients.png',
             to: '/patients',
             permissions: ['administrador', 'terapeuta'],
         },

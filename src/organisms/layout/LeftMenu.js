@@ -64,7 +64,7 @@ export const LeftMenu = ({ }) => {
                left: 0,
                backgroundImage: `url('/icons/afectu_dark.png')`,
                backgroundSize: 'cover',
-               position: 'absolute',
+               position: 'fixed',
                width: '180px',
                height: '65px',
                "&:hover": {
