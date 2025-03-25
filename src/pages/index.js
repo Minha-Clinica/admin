@@ -472,15 +472,19 @@ function Home() {
                         <Text light large>Minhas próximas Sessões.</Text>
                         <Box sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', xm: 'column', md: 'row', lg: 'row' } }}>
 
-                           {myEvents?.filter(item => item.disponivel === 1 && (new Date(item?.start) >= new Date()))?.length > 0 ?
-                              <Box sx={{ display: 'flex', flexDirection: 'row', gap: .5, width: '100%', overflowX: 'auto' }}>
-                                 {myEvents?.filter(item => item.disponivel === 1 && (new Date(item?.start) >= new Date()))?.map((item, index) => {
+                      {myEvents?.filter(item => item.disponivel === 1)?.length > 0 ?
+                              <Box sx={{
+                                 display: 'flex', flexDirection: 'row', gap: .5, width: '100%', overflowY: 'auto',
+                                 scrollbarWidth: 'none', // Esconde a barra de rolagem no Firefox
+                                 '&::-webkit-scrollbar': { display: 'none' } // Esconde no Chrome/Safari
+                              }}>
+                                 {myEvents?.filter(item => item.disponivel === 1)?.map((item, index) => {
                                     return (
                                        <Box sx={{
                                           display: 'flex', gap: 1, flexDirection: 'row',
                                           transition: '.2s',
                                           border: '1px solid lightgray', borderRadius: 2, height: 90, backgroundColor: colorPalette?.secondary,
-                                          width: '350px'
+                                          minWidth: '300px',
                                        }} key={index}>
                                           <Box sx={{
                                              height: '100%', width: '4px', backgroundColor: colorPalette?.buttonColor,
