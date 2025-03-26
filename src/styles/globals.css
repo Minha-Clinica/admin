@@ -331,10 +331,10 @@ input::placeholder {
 }
 
 .custom-calendar {
-   width: 450px !important;
-   height: 420px !important;
+   width: 455px !important;
+   height: 455px !important;
 }
 
 .custom-calendar .react-calendar__tile {
-   min-height: 58px;
+   min-height: 55px;
 }

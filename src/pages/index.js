@@ -508,7 +508,7 @@ function Home() {
                                              </Box>
                                              <Box sx={{ display: 'flex', gap: .3, flexDirection: 'column', padding: '0px 8px' }}>
                                                 <Text small bold>{item?.title}</Text>
-                                                <Text small light>{item?.nome_agendado}</Text>
+                                                <Text small light>{item?.nome_usuario_agendado}</Text>
                                              </Box>
                                              <Text bold large>{formatterHours(item?.start)}</Text>
                                           </Box>
