@@ -13,6 +13,7 @@ import { SelectList } from "../../organisms/select/SelectList"
 import Link from "next/link"
 import { checkUserPermissions } from "../../validators/checkPermissionUser"
 import AnamneseUser from "./Components/anamnese"
+import UserCompanies from "./Components/companies"
 
 export default function EditUser() {
     const { setLoading, alert, colorPalette, user, matches, theme, setShowConfirmationDialog, menuItemsList, userPermissions } = useAppContext()
@@ -68,6 +69,7 @@ export default function EditUser() {
     const [isPermissionEdit, setIsPermissionEdit] = useState(false)
     const [menuSelected, setMenuSelected] = useState('userdata')
     const isAdministrador = user?.perfil?.includes('administrador');
+    const isTerapeuta = user?.perfil?.includes(`terapeuta`)
     const isPartner = user?.perfil?.includes(`parceiro`)
 
     const fetchPermissions = async () => {
@@ -364,6 +366,7 @@ export default function EditUser() {
 
     const groupPerfil = [
         { label: 'Parceiro', value: 'parceiro' },
+        { label: 'Terapeuta', value: 'terapeuta' },
         { label: 'Paciente', value: 'paciente' },
         { label: 'Administrador', value: 'administrador' },
     ]
@@ -386,20 +389,24 @@ export default function EditUser() {
 
     const showMenu = [
         {
-            label: 'Dados do Usuário', value: 'userdata', showPerfil: ['administrador', 'paciente', 'parceiro'],
-            icon: 'personal-data.png', permission: ['administrador', 'paciente', 'parceiro']
+            label: 'Dados do Usuário', value: 'userdata', showPerfil: ['administrador', 'terapeuta', 'paciente', 'parceiro'],
+            icon: 'personal-data.png', permission: ['administrador', 'paciente', 'parceiro', 'terapeuta']
+        },
+        {
+            label: 'Empresas', value: 'companies', showPerfil: ['administrador', 'terapeuta'],
+            icon: 'personal-data.png', permission: ['administrador', 'terapeuta']
         },
         {
             label: 'Anamnese', value: 'anamnese', showPerfil: ['paciente'],
-            icon: 'patient.png', permission: ['administrador']
+            icon: 'patient.png', permission: ['administrador', 'terapeuta']
         },
         {
             label: 'Sessões', value: 'sessoes', showPerfil: ['paciente'],
-            icon: 'chat.png', permission: ['administrador', 'paciente', 'parceiro']
+            icon: 'chat.png', permission: ['administrador', 'paciente', 'parceiro', 'terapeuta']
         },
         {
             label: 'Documentos', value: 'documents', showPerfil: ['paciente'],
-            icon: 'chat.png', permission: ['administrador', 'paciente', 'parceiro']
+            icon: 'chat.png', permission: ['administrador', 'paciente', 'parceiro', 'terapeuta']
         },
     ]
 
@@ -527,7 +534,7 @@ export default function EditUser() {
                                     inputStyle={{ color: colorPalette.textColor, fontSize: '15px' }}
                                     clean={false}
                                 />}
-                                {(isAdministrador || isPartner) && <TextInput
+                                {(isAdministrador || isPartner || isTerapeuta) && <TextInput
                                     placeholder='Escolha o número máximo de sesões permitidas por mês:'
                                     name='n_max_sessoes'
                                     type="number"
@@ -672,6 +679,13 @@ export default function EditUser() {
 
                     </ContentContainer>
                 </>
+            }
+
+            {menuSelected === 'companies' &&
+                <UserCompanies
+                    companies={companies}
+                    userId={userData?.id}
+                />
             }
         </>
     )

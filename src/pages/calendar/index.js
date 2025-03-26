@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import "moment/locale/pt-br";
@@ -87,7 +87,7 @@ const listEvents = [
 ]
 
 export default function CalendarComponent() {
-    const professionalId = 125;
+    const { setLoading, alert, colorPalette, matches, user, userPermissions, setShowConfirmationDialog, mobile } = useAppContext()
     const [events, setEvents] = useState([]);
     const [selectedEvent, setSelectedEvent] = useState(null);
     const [showEventForm, setShowEventForm] = useState(false);
@@ -123,10 +123,9 @@ export default function CalendarComponent() {
     });
 
     const [loadingReservas, setLoadingReserva] = useState({ active: false, success: false, error: false, message: '' })
-    const { setLoading, alert, colorPalette, matches, user, userPermissions, setShowConfirmationDialog, mobile } = useAppContext()
     const [isPermissionEdit, setIsPermissionEdit] = useState(false)
     const isAdminstrator = user.perfil.includes('administrador')
-    const isProfissional = user.perfil.includes('profissional')
+    const isTerapeuta = user.perfil.includes('terapeuta')
     const [dateSelected, setDateSelected] = useState({
         day: '',
         hour: '',
@@ -137,6 +136,8 @@ export default function CalendarComponent() {
         pacientData: {}
     })
     const [users, setUsers] = useState([])
+    const [employees, setEmployees] = useState([])
+    const [professionalId, setProfissionalId] = useState(isTerapeuta ? user.id : null)
     const [duration, setDuration] = useState(60);
 
     const filter = (item) => {
@@ -145,7 +146,7 @@ export default function CalendarComponent() {
 
 
     const fetchPermissions = () => {
-        if (isAdminstrator || isProfissional) {
+        if (isAdminstrator || isTerapeuta) {
             setIsPermissionEdit(true)
         }
     }
@@ -156,14 +157,40 @@ export default function CalendarComponent() {
         fetchPermissions()
     }, [])
 
+    useEffect(() => {
+        handleEvents(professionalId)
+    }, [professionalId])
+
     const handleItems = async () => {
         setLoading(true);
-        await handleEvents()
+        await handleEvents(professionalId)
         await getEmployees()
+        await getTerapeutas()
         setLoading(false);
     }
 
-    const handleEvents = async () => {
+    const getTerapeutas = async () => {
+        setLoading(true)
+        try {
+            const response = await api.get(`/users/employee`)
+            const { data = [] } = response;
+
+            if (data?.length > 0) {
+                const terapeutasMap = data.map((item) => ({
+                    label: item.nome,
+                    value: item.id
+                }))
+                setEmployees(terapeutasMap)
+            }
+        } catch (error) {
+            console.log(error)
+            return error
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleEvents = async (professionalId) => {
         try {
             setLoading(true)
             const response = await api.get(`/event/profissional/agenda/${professionalId}`)
@@ -326,7 +353,7 @@ export default function CalendarComponent() {
 
         try {
             setLoading(true)
-            const response = await api.post(`/consultation/sincronization-calendar-google-agenda`)
+            const response = await api.post(`/consultation/sincronization-calendar-google-agenda?profissionalId=${professionalId}`)
             const { status } = response
             if (status === 200) {
                 alert.success('Calendário sincronizado com Google Agenda.')
@@ -739,6 +766,19 @@ export default function CalendarComponent() {
 
             <Box sx={{ display: 'flex', gap: 3, flexDirection: 'column' }}>
 
+                {isAdminstrator && <Box sx={{ display: 'flex', maxWidth: 300 }}>
+                    <SelectList
+                        fullWidth
+                        data={employees}
+                        valueSelection={professionalId}
+                        onSelect={(value) => setProfissionalId(value)}
+                        title="Selecione o Terapeuta:"
+                        filterOpition="value"
+                        sx={{ backgroundColor: colorPalette.secondary }}
+                        clean={false}
+                    />
+                </Box>}
+
                 <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', xm: 'column', md: 'row', lg: 'row' } }}>
 
                     <Box sx={{ display: 'flex', gap: .2 }}>
@@ -1018,7 +1058,7 @@ export default function CalendarComponent() {
                                         </Box>
                                         {(new Date(eventData.start) > new Date() && eventData.usuario_agendado) ?
                                             (
-                                                <Box sx={{ display: 'flex', gap: .5, alignItems: 'center', justifyContent: 'center',  padding: '5px 12px', flexDirection: 'column'}}>
+                                                <Box sx={{ display: 'flex', gap: .5, alignItems: 'center', justifyContent: 'center', padding: '5px 12px', flexDirection: 'column' }}>
                                                     <Button
                                                         disabled={!isPermissionEdit && true}
                                                         onClick={() => {

@@ -1,19 +1,22 @@
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react"
-import { Avatar, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Tooltip, useMediaQuery, useTheme } from "@mui/material"
+import { Avatar, Backdrop, Table, TableBody, TableCell, TableContainer, TableHead, TablePagination, TableRow, Tooltip, useMediaQuery, useTheme } from "@mui/material"
 import { api } from "../../api/api"
-import { Box, ContentContainer, TextInput, Text, Button } from "../../atoms"
-import { PaginationTable, RadioItem, SectionHeader, Sectioner, Table_V1 } from "../../organisms"
+import { Box, ContentContainer, TextInput, Text, Button, Divider } from "../../atoms"
+import { PaginationTable, RadioItem, SectionHeader, Sectioner, SelectList, Table_V1 } from "../../organisms"
 import { useAppContext } from "../../context/AppContext"
 import { formatCEP, formatCNPJ, formatTimeStamp } from "../../helpers"
 import { checkUserPermissions } from "../../validators/checkPermissionUser"
 import axios from "axios"
 import { CopyAll } from '@mui/icons-material';
+import { icons } from "../../organisms/layout/Colors"
 
 export default function EditCompany(props) {
     const { setLoading, alert, colorPalette, user, setShowConfirmationDialog, userPermissions, menuItemsList } = useAppContext()
     let userId = user?.id;
-    const isPartner = user?.perfil?.includes('parceiro')
+    const isPartner = user?.perfil?.includes('parceiro');
+    const isAdministrator = user?.perfil?.includes('administrador');
+    const isTerapeuta = user?.perfil?.includes('terapeuta');
     const router = useRouter()
     const { id } = router.query;
     const newCompany = id === 'new';
@@ -32,6 +35,15 @@ export default function EditCompany(props) {
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [filterData, setFilterData] = useState('')
     const [consultionList, setConsultionList] = useState([])
+    const [filtersField, setFiltersField] = useState({
+        startDate: '',
+        endDate: '',
+        status_pagamento: '',
+        status: '',
+        paciente_id: '',
+    })
+    const [showFilters, setShowFilters] = useState(false)
+
 
 
     const fetchPermissions = async () => {
@@ -89,10 +101,20 @@ export default function EditCompany(props) {
         fetchPermissions()
     }, [])
 
-    const getConsultion = async () => {
+    const getConsultion = async (filtersData) => {
         setLoading(true);
         try {
-            const response = await api.get(`/consultation/company/pacient/${id}`);
+            const response = await api.get(`/consultation/company/pacient/${id}`, {
+                params: {
+                    date: {
+                        startDate: filtersData ? filtersData.startDate : filtersField.startDate,
+                        endDate: filtersData ? filtersData.endDate : filtersField.endDate
+                    },
+                    status_pagamento: filtersData ? filtersData.status_pagamento : filtersField.status_pagamento,
+                    status: filtersData ? filtersData.status : filtersField.status,
+                    paciente_id: filtersData ? filtersData.paciente_id : filtersField.paciente_id
+                }
+            });
             const { data = [] } = response;
 
             if (Array.isArray(data) && data.length > 0) {
@@ -306,7 +328,7 @@ export default function EditCompany(props) {
 
             <Box sx={{ display: !newCompany ? 'flex' : 'none', flexDirection: 'column', justifyContent: 'space-between', gap: 1.8, width: '100%' }}>
                 <Box sx={{ display: 'flex', gap: 1, flex: 1, justifyContent: 'space-between', alignItems: 'center', flexDirection: { xs: 'column', sm: 'column', md: 'row', lg: 'row' } }}>
-                    <Text veryLarge bold>Colaboradores ({employees?.length})</Text>
+                    <Text veryLarge bold>Usuários Vínculados ({employees?.length})</Text>
                     <Box sx={{ display: 'flex', justifyContent: 'start', gap: 2, alignItems: 'center', flexDirection: { xs: 'column', sm: 'column', md: 'row', lg: 'row' } }}>
                         <TextInput placeholder="Pesquisar por colaborador" name='filterData' type="search"
                             onChange={(event) => setFilterData(event.target.value)} value={filterData}
@@ -362,13 +384,113 @@ export default function EditCompany(props) {
                         </Box>
                 }
 
-                <ConsultionsTable consultionList={consultionList} />
+                <ConsultionsTable consultionList={consultionList}
+                    showFilters={showFilters} setShowFilters={setShowFilters} getConsultion={getConsultion} />
             </Box>
+
+
+            <Backdrop open={showFilters} sx={{ display: 'flex', justifyContent: 'flex-end', zIndex: 999 }}>
+                <Box sx={{ position: 'relative', display: 'flex', gap: 2, width: '400px', marginTop: 20, height: '100%', flexDirection: 'column', padding: '20px 25px', backgroundColor: colorPalette.secondary }}>
+                    <Box sx={{
+                        display: 'flex', flexDirection: 'row', gap: 2, alignItems: 'center', width: '100%', justifyContent: 'space-between',
+                        paddingTop: 2
+                    }}>
+                        <Text bold={true} large={true}>Filtros</Text>
+                        <Box sx={{
+                            ...styles.menuIcon,
+                            width: 17,
+                            height: 17,
+                            aspectRatio: '1/1',
+                            backgroundImage: `url(${icons.gray_close})`,
+                            transition: '.3s',
+                            "&:hover": {
+                                opacity: 0.8,
+                                cursor: 'pointer'
+                            }
+                        }} onClick={() => setShowFilters(false)} />
+                    </Box>
+
+                    <Box sx={{ display: 'flex', gap: 3, flexDirection: 'column', marginTop: 5 }}>
+                        <Box sx={{ display: 'flex', gap: 1 }}>
+                            <TextInput label="De:" name='startDate' onChange={(e) => setFiltersField({ ...filtersField, startDate: e.target.value })} type="date" value={(filtersField?.startDate)?.split('T')[0] || ''} sx={{ flex: 1, }} />
+                            <TextInput label="Até:" name='endDate' onChange={(e) => setFiltersField({ ...filtersField, endDate: e.target.value })} type="date" value={(filtersField?.endDate)?.split('T')[0] || ''} sx={{ flex: 1, }} />
+                        </Box>
+
+                        <SelectList
+                            data={[
+                                { label: 'Agendado', value: 'Agendado' },
+                                { label: 'Concluído', value: 'Concluído' },
+                                { label: 'Remarcado', value: 'Remarcado' },
+                                { label: 'Cancelado', value: 'Cancelada' }
+                            ]}
+                            valueSelection={filtersField?.status}
+                            onSelect={(value) => setFiltersField({ ...filtersField, status: value })}
+                            title="Status: "
+                            filterOpition="value"
+                            inputStyle={{ color: colorPalette.textColor, fontSize: '15px' }}
+                        />
+
+                        {(isAdministrator || isTerapeuta) && <SelectList
+                            data={[
+                                { label: 'Pago', value: 'Pago' },
+                                { label: 'Não Pago', value: 'Não Pago' }
+                            ]}
+                            valueSelection={filtersField?.status_pagamento}
+                            onSelect={(value) => setFiltersField({ ...filtersField, status_pagamento: value })}
+                            title="Status de Pagamento: "
+                            filterOpition="value"
+                            inputStyle={{ color: colorPalette.textColor, fontSize: '15px' }}
+                        />}
+
+
+                        {(isAdministrator || isPartner || isTerapeuta) && <SelectList
+                            fullWidth
+                            autoComplete
+                            data={employees}
+                            valueSelection={filtersField.paciente_id}
+                            onSelect={(value) => {
+                                setFiltersField({
+                                    ...filtersField, paciente_id: value,
+                                })
+                            }}
+                            title="Selecione um paciente:"
+                            filterOpition="value"
+                            inputStyle={{ color: colorPalette.textColor, fontSize: '15px' }}
+                        />}
+
+                    </Box>
+
+                    <Divider />
+                    <Box sx={{ display: 'flex', width: '350px', borderTop: `1px solid ${colorPalette.primary}`, position: 'fixed', bottom: 0, padding: '15px', gap: 2, justifyContent: 'space-between' }}>
+                        <Button secondary text="Limpar" style={{ width: `100%` }} onClick={() => {
+                            setFiltersField({
+                                startDate: '',
+                                endDate: '',
+                                status_pagamento: '',
+                                status: '',
+                                paciente_id: '',
+                            })
+                            getConsultion({
+                                startDate: '',
+                                endDate: '',
+                                status_pagamento: '',
+                                status: '',
+                                paciente_id: '',
+                            })
+                            setShowFilters(false)
+                        }} />
+                        <Button text="Filtrar" style={{ width: `100%` }} onClick={() => {
+                            getConsultion()
+                            setShowFilters(false)
+                        }} />
+                    </Box>
+                </Box>
+            </Backdrop>
         </>
     )
 }
 
-const ConsultionsTable = ({ consultionList }) => {
+const ConsultionsTable = ({ consultionList, showFilters, setShowFilters, getConsultion }) => {
 
     const [filterConsultion, setFilterConsultion] = useState('')
     const [page, setPage] = useState(0);
@@ -389,15 +511,23 @@ const ConsultionsTable = ({ consultionList }) => {
         );
     };
 
+    const handleChangePage = (event, newPage) => {
+        setPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (event) => {
+        setRowsPerPage(parseInt(event.target.value, 10));
+        setPage(0);
+    };
 
 
     const startIndex = page * rowsPerPage;
     const endIndex = startIndex + rowsPerPage;
 
     const statusColor = (data) => ((data === 'Agendado' && 'yellow') ||
-    (data === 'Cancelada' && 'red') ||
-    (data === 'Concluído' && 'green') ||
-    (data === 'Remarcada' && 'blue'))
+        (data === 'Cancelada' && 'red') ||
+        (data === 'Concluído' && 'green') ||
+        (data === 'Remarcada' && 'blue'))
 
     const columns = [
         { key: 'data', label: 'Data' },
@@ -433,29 +563,12 @@ const ConsultionsTable = ({ consultionList }) => {
                             opacity: 0.8,
                             cursor: 'pointer'
                         }
-                    }}>
+                    }} onClick={() => setShowFilters(!showFilters)}>
                         <Box sx={{
                             ...styles.menuIcon,
                             width: 20,
                             height: 20,
                             backgroundImage: `url('/icons/row.png')`,
-                        }} />
-                    </Box>
-
-                    <Box sx={{
-                        display: { xs: 'none', sm: 'none', md: 'none', lg: 'flex' }, padding: '12px', borderRadius: 3, backgroundColor: colorPalette?.secondary,
-                        transition: '.3s', boxShadow: `rgba(149, 157, 165, 0.6) 0px 6px 24px`,
-                        "&:hover": {
-                            opacity: 0.8,
-                            cursor: 'pointer'
-                        }
-                    }}>
-                        <Box sx={{
-                            ...styles.menuIcon,
-                            width: 20,
-                            height: 20,
-                            backgroundImage: `url('/icons/menu-3.png')`,
-                            transition: '.3s',
                         }} />
                     </Box>
                 </Box>
@@ -481,73 +594,74 @@ const ConsultionsTable = ({ consultionList }) => {
                             </TableHead>
                             <TableBody sx={{ flex: 1, padding: 5, backgroundColor: colorPalette.secondary }}>
                                 {
-                                    consultionList?.filter(filter)?.sort((a, b) => new Date(b.data) - new Date(a.data))?.map((item, index) => {
-                                        return (
-                                            <TableRow key={`${item}-${index}`} sx={{
-                                                transition: '.3s',
-                                                "&:hover": {
-                                                    backgroundColor: colorPalette.primary + '88',
-                                                },
-                                            }}>
-                                                <TableCell sx={{ padding: '8px 25px', justifyContent: 'flex-start' }}>
-                                                    <Text>{formatTimeStamp(item?.data, true) || '-'}</Text>
-                                                </TableCell>
-                                                <Tooltip title={item?.paciente}>
-                                                    <TableCell sx={{
-                                                        padding: '15px 10px', textAlign: 'center',
-                                                    }}>
-                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'flex-start' }}>
-                                                            <Avatar src={item?.url_foto_pac || ''} sx={{
-                                                                height: { xs: '100%', sm: 30, md: 30, lg: 30 },
-                                                                width: { xs: '100%', sm: 30, md: 30, lg: 30 },
-                                                            }} variant="rounded"
-                                                            />
-                                                            <Text style={{
-                                                                textOverflow: 'ellipsis',
-                                                                whiteSpace: 'nowrap',
-                                                                overflow: 'hidden',
-                                                            }}>{item?.paciente || '-'}</Text>
+                                    consultionList?.filter(filter)?.sort((a, b) => new Date(b.data) - new Date(a.data))
+                                        .slice(startIndex, endIndex)?.map((item, index) => {
+                                            return (
+                                                <TableRow key={`${item}-${index}`} sx={{
+                                                    transition: '.3s',
+                                                    "&:hover": {
+                                                        backgroundColor: colorPalette.primary + '88',
+                                                    },
+                                                }}>
+                                                    <TableCell sx={{ padding: '8px 25px', justifyContent: 'flex-start' }}>
+                                                        <Text>{formatTimeStamp(item?.data, true) || '-'}</Text>
+                                                    </TableCell>
+                                                    <Tooltip title={item?.paciente}>
+                                                        <TableCell sx={{
+                                                            padding: '15px 10px', textAlign: 'center',
+                                                        }}>
+                                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'flex-start' }}>
+                                                                <Avatar src={item?.url_foto_pac || ''} sx={{
+                                                                    height: { xs: '100%', sm: 30, md: 30, lg: 30 },
+                                                                    width: { xs: '100%', sm: 30, md: 30, lg: 30 },
+                                                                }} variant="rounded"
+                                                                />
+                                                                <Text style={{
+                                                                    textOverflow: 'ellipsis',
+                                                                    whiteSpace: 'nowrap',
+                                                                    overflow: 'hidden',
+                                                                }}>{item?.paciente || '-'}</Text>
+                                                            </Box>
+                                                        </TableCell>
+                                                    </Tooltip>
+                                                    <Tooltip title={item?.profissional}>
+                                                        <TableCell sx={{
+                                                            padding: '15px 10px', textAlign: 'center',
+                                                        }}>
+                                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'flex-start' }}>
+                                                                <Avatar src={item?.url_foto_prof || ''} sx={{
+                                                                    height: { xs: '100%', sm: 30, md: 30, lg: 30 },
+                                                                    width: { xs: '100%', sm: 30, md: 30, lg: 30 },
+                                                                }} variant="rounded"
+                                                                />
+                                                                <Text style={{
+                                                                    textOverflow: 'ellipsis',
+                                                                    whiteSpace: 'nowrap',
+                                                                    overflow: 'hidden',
+                                                                }}>{item?.profissional || '-'}</Text>
+                                                            </Box>
+                                                        </TableCell>
+                                                    </Tooltip>
+                                                    <TableCell sx={{ padding: '15px 10px', justifyContent: 'flex-start' }}>
+                                                        <Box
+                                                            sx={{
+                                                                display: 'flex',
+                                                                backgroundColor: colorPalette.primary,
+                                                                height: 30,
+                                                                gap: 2,
+                                                                alignItems: 'center',
+                                                                // width: 100,
+                                                                borderRadius: 2,
+                                                                justifyContent: 'flex-start'
+                                                            }}
+                                                        >
+                                                            <Box sx={{ display: 'flex', backgroundColor: statusColor(item?.status), padding: '0px 5px', height: '100%', borderRadius: '8px 0px 0px 8px' }} />
+                                                            <Text small bold>{item?.status}</Text>
                                                         </Box>
                                                     </TableCell>
-                                                </Tooltip>
-                                                <Tooltip title={item?.profissional}>
-                                                    <TableCell sx={{
-                                                        padding: '15px 10px', textAlign: 'center',
-                                                    }}>
-                                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'flex-start' }}>
-                                                            <Avatar src={item?.url_foto_prof || ''} sx={{
-                                                                height: { xs: '100%', sm: 30, md: 30, lg: 30 },
-                                                                width: { xs: '100%', sm: 30, md: 30, lg: 30 },
-                                                            }} variant="rounded"
-                                                            />
-                                                            <Text style={{
-                                                                textOverflow: 'ellipsis',
-                                                                whiteSpace: 'nowrap',
-                                                                overflow: 'hidden',
-                                                            }}>{item?.profissional || '-'}</Text>
-                                                        </Box>
-                                                    </TableCell>
-                                                </Tooltip>
-                                                <TableCell sx={{ padding: '15px 10px', justifyContent: 'flex-start' }}>
-                                                    <Box
-                                                        sx={{
-                                                            display: 'flex',
-                                                            backgroundColor: colorPalette.primary,
-                                                            height: 30,
-                                                            gap: 2,
-                                                            alignItems: 'center',
-                                                            // width: 100,
-                                                            borderRadius: 2,
-                                                            justifyContent: 'flex-start'
-                                                        }}
-                                                    >
-                                                        <Box sx={{ display: 'flex', backgroundColor: statusColor(item?.status), padding: '0px 5px', height: '100%', borderRadius: '8px 0px 0px 8px' }} />
-                                                        <Text small bold>{item?.status}</Text>
-                                                    </Box>
-                                                </TableCell>
-                                            </TableRow>
-                                        );
-                                    })
+                                                </TableRow>
+                                            );
+                                        })
 
                                 }
                             </TableBody>
@@ -564,6 +678,18 @@ const ConsultionsTable = ({ consultionList }) => {
                                 <Text bold light>{consultionList?.length || 0}</Text>
                                 <Text light>sessões</Text>
                             </Box>
+
+                            <TablePagination
+                                component="div"
+                                count={consultionList?.length}
+                                page={page}
+                                onPageChange={handleChangePage}
+                                rowsPerPage={rowsPerPage}
+                                onRowsPerPageChange={handleChangeRowsPerPage}
+                                style={{ color: colorPalette.textColor }} // Define a cor do texto
+                                backIconButtonProps={{ style: { color: colorPalette.textColor } }} // Define a cor do ícone de voltar
+                                nextIconButtonProps={{ style: { color: colorPalette.textColor } }} // Define a cor do ícone de avançar
+                            />
                             {/* <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', padding: '15px 12px', width: '100%', justifyContent: 'space-between' }}>
                                 <PaginationTable data={consultionList?.filter(filter)}
                                     page={page} setPage={setPage} rowsPerPage={rowsPerPage} setRowsPerPage={setRowsPerPage}
