@@ -828,7 +828,7 @@ export default function AnamneseForms() {
                                 onBlur={handleBlur}
                                 name='qual_trauma'
                                 onChange={handleChange}
-                                value={anamnese?.qual_trauma || ''}
+                                value={anamnese?.qual_fobia || ''}
                                 sx={{ flex: 1, }}
                             />
                         </Box>
