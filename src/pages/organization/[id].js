@@ -235,7 +235,7 @@ export default function EditCompany(props) {
         setCompanyData({ ...companyData, cod_key: result })
         let linkAcessRegister;
         if (companyData?.razao_social) {
-            linkAcessRegister = `https://www.afectu.com/company??cod_key=${result}`
+            linkAcessRegister = `https://app.afectu.com/company??cod_key=${result}`
         }
         setLinkRegisterUser(linkAcessRegister)
     };
