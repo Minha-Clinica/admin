@@ -638,8 +638,22 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, filters
                 </TableContainer>
             </ContentContainer >
 
-            <Backdrop open={openCobranca} sx={{ display: 'flex', justifyContent: 'flex-end', zIndex: 999 }}>
-                <Box sx={{ position: 'relative', display: 'flex', gap: 2, width: '6 00px', marginTop: 20, height: '100%', flexDirection: 'column', padding: '20px 25px', backgroundColor: colorPalette.secondary }}>
+            <Backdrop open={openCobranca} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999 }}>
+                <Box sx={{
+                    position: 'relative',
+                    display: 'flex',
+                    gap: 2,
+                    marginTop: 8,
+                    height: '80%',
+                    maxHeight: '80vh', // Limita altura para evitar corte em telas menores
+                    overflowY: 'auto', // Adiciona rolagem se necessário
+                    flexDirection: 'column',
+                    padding: '20px 25px',
+                    backgroundColor: colorPalette.secondary,
+                    width: '90%', // Ajusta a largura para telas menores
+                    maxWidth: '500px' // Define um limite máximo para não ficar grande demais
+                }}>
+                    {/* Cabeçalho */}
                     <Box sx={{
                         display: 'flex', flexDirection: 'row', gap: 2, alignItems: 'center', width: '100%', justifyContent: 'space-between',
                         paddingTop: 2
@@ -658,87 +672,84 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, filters
                             }
                         }} onClick={() => setOpenCobranca(false)} />
                     </Box>
+
+                    {/* Conteúdo do recibo */}
                     <Box>
                         <div ref={reciboRef}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 2, padding: '10px 15px' }}>
-                                <img
-                                    src="icons/afectu_icon_home.png"
-                                    alt="Logo da Empresa"
-                                    style={{ width: 40, height: 40, marginRight: 10 }}
-                                />
-                                <Text bold title>Recibo das Sessões</Text>
-                            </Box>
-
-                            <Box sx={{
-                                display: 'flex', gap: 2, flexDirection: 'column', marginBottom: 2, padding: '15px 20px',
-                                backgroundColor: colorPalette.secondary
-                            }}>
-                                <Box sx={styles.containerData}>
-                                    <Text bold>Clínica: </Text>
-                                    <Text>{empresa.nome}</Text>
+                            <Box sx={{ overflow: 'auto' }}>
+                                {/* Logo e título */}
+                                <Box sx={{ display: 'flex', alignItems: 'center', marginBottom: 2, padding: '10px 15px' }}>
+                                    <img
+                                        src="icons/afectu_icon_home.png"
+                                        alt="Logo da Empresa"
+                                        style={{ width: 40, height: 40, marginRight: 10 }}
+                                    />
+                                    <Text bold title>Recibo das Sessões</Text>
                                 </Box>
 
-                                <Box sx={styles.containerData}>
-                                    <Text bold>CNPJ: </Text>
-                                    <Text>{empresa.cnpj}</Text>
-                                </Box>
-
-                                <Box sx={styles.containerData}>
-                                    <Text bold>Endereço: </Text>
-                                    <Text>{empresa.endereco}</Text>
-                                </Box>
-
-                                <Box sx={styles.containerData}>
-                                    <Text bold>Telefone: </Text>
-                                    <Text>{empresa.telefone}</Text>
-                                </Box>
-                            </Box>
-
-                            <Divider />
-
-
-                            <Box sx={{
-                                display: 'flex', gap: 2, flexDirection: 'column', marginBottom: 2, padding: '15px 20px',
-                                backgroundColor: colorPalette.secondary
-                            }}>
-                                {/* Dados do paciente */}
-                                <Box sx={styles.containerData}>
-                                    <Text bold>Paciente: </Text>
-                                    <Text>{paciente.nome}</Text>
-                                </Box>
-
-                                <Box sx={styles.containerData}>
-                                    <Text bold>E-mail: </Text>
-                                    <Text>{paciente.email}</Text>
-                                </Box>
-
-                                <Box sx={styles.containerData}>
-                                    <Text bold>Sessões Concluídas: </Text>
-                                    <Text>{paciente.sessoesConcluidas}</Text>
-                                </Box>
-
-                                {sessionValue && <Box sx={styles.containerData}>
-                                    <Text bold>Valor por Sessão: </Text>
-                                    <Text>{formatReal(sessionValue)}</Text>
-                                </Box>}
-
-                                {sessionValue && <Box sx={styles.containerData}>
-                                    <Text bold>Valor Total: </Text>
-                                    <Text>{formatReal(sessionValue * paciente.sessoesConcluidas)}</Text>
-                                </Box>}
-
-                                {(filtersField.startDate && filtersField.endDate) &&
+                                {/* Informações da clínica */}
+                                <Box sx={{
+                                    display: 'flex', gap: 2, flexDirection: 'column', marginBottom: 2, padding: '15px 20px',
+                                    backgroundColor: colorPalette.secondary
+                                }}>
                                     <Box sx={styles.containerData}>
-                                        <Text bold>Período Atendido: </Text>
-                                        <Text light>{formatTimeStamp(filtersField.startDate)} até {formatTimeStamp(filtersField.endDate)}</Text>
+                                        <Text bold>Clínica: </Text>
+                                        <Text>{empresa.nome}</Text>
                                     </Box>
-                                }
-                            </Box>
+                                    <Box sx={styles.containerData}>
+                                        <Text bold>CNPJ: </Text>
+                                        <Text>{empresa.cnpj}</Text>
+                                    </Box>
+                                    <Box sx={styles.containerData}>
+                                        <Text bold>Endereço: </Text>
+                                        <Text>{empresa.endereco}</Text>
+                                    </Box>
+                                    <Box sx={styles.containerData}>
+                                        <Text bold>Telefone: </Text>
+                                        <Text>{empresa.telefone}</Text>
+                                    </Box>
+                                </Box>
 
+                                <Divider />
+
+                                {/* Informações do paciente */}
+                                <Box sx={{
+                                    display: 'flex', gap: 2, flexDirection: 'column', marginBottom: 2, padding: '15px 20px',
+                                    backgroundColor: colorPalette.secondary
+                                }}>
+                                    <Box sx={styles.containerData}>
+                                        <Text bold>Paciente: </Text>
+                                        <Text>{paciente.nome}</Text>
+                                    </Box>
+                                    <Box sx={styles.containerData}>
+                                        <Text bold>E-mail: </Text>
+                                        <Text>{paciente.email}</Text>
+                                    </Box>
+                                    <Box sx={styles.containerData}>
+                                        <Text bold>Sessões Concluídas: </Text>
+                                        <Text>{paciente.sessoesConcluidas}</Text>
+                                    </Box>
+                                    {sessionValue && <Box sx={styles.containerData}>
+                                        <Text bold>Valor por Sessão: </Text>
+                                        <Text>{formatReal(sessionValue)}</Text>
+                                    </Box>}
+                                    {sessionValue && <Box sx={styles.containerData}>
+                                        <Text bold>Valor Total: </Text>
+                                        <Text>{formatReal(sessionValue * paciente.sessoesConcluidas)}</Text>
+                                    </Box>}
+                                    {(filtersField.startDate && filtersField.endDate) &&
+                                        <Box sx={styles.containerData}>
+                                            <Text bold>Período Atendido: </Text>
+                                            <Text light>{formatTimeStamp(filtersField.startDate)} até {formatTimeStamp(filtersField.endDate)}</Text>
+                                        </Box>
+                                    }
+                                </Box>
+                            </Box>
                         </div>
                         <Divider distance={0} />
 
-                        <Box sx={{ display: 'flex', gap: 1, paddingTop: 1, width: '100%' }}>
+                        {/* Input de valor e botões */}
+                        <Box sx={{ display: 'flex', gap: 2, paddingTop: 2, width: '100%' }}>
                             <TextInput
                                 label="Valor da Sessão"
                                 placeholder="R$ 0,00"
@@ -746,18 +757,23 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, filters
                                 onChange={handleChangeValor}
                                 type="coin"
                                 value={sessionValue}
-                                sx={{ flex: 1, marginTop: 2 }}
+                                sx={{ width: '100%' }} // Garante que o input se ajusta em telas menores
                             />
 
-                            <Box sx={{ display: 'flex', gap: 1 }}>
+                            <Box sx={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                justifyContent: 'center',
+                                width: '100%',
+                                gap: 1
+                            }}>
                                 <Button text="Emitir Cobrança" onClick={() => handleGeneratePdf()} />
                                 <Button cancel text="Fechar" onClick={() => setOpenCobranca(false)} />
                             </Box>
                         </Box>
                     </Box>
                 </Box>
-
-            </Backdrop >
+            </Backdrop>
         </>
     )
 }
