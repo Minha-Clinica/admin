@@ -448,6 +448,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, callBac
     const isTerapeuta = user?.perfil?.includes('terapeuta')
     const isPartner = user?.perfil?.includes('parceiro')
     const isAdministrator = user?.perfil?.includes('administrador')
+    const vizualizedProfissional = isTerapeuta || isAdministrator;
 
     const [showAgendas, setShowAgendas] = useState({ active: false, profissionalId: null, profissionalData: {}, consultionDate: '' })
 
@@ -708,10 +709,10 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, callBac
 
     let columns = []
 
-    if (isTerapeuta) {
+    if (vizualizedProfissional) {
         columns = [
             { key: 'data', label: 'Data' },
-            { key: isTerapeuta ? 'paciente' : 'profissional', label: isTerapeuta ? 'Paciente ' : 'Profissional' },
+            { key: vizualizedProfissional ? 'paciente' : 'profissional', label: vizualizedProfissional ? 'Paciente ' : 'Profissional' },
             { key: 'modalidade', label: 'Tipo' },
             { key: 'status', label: 'Status' },
             { key: 'payment', label: 'Pagamento' },
@@ -730,7 +731,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, callBac
     else {
         columns = [
             { key: 'data', label: 'Data' },
-            { key: isTerapeuta ? 'paciente' : 'profissional', label: isTerapeuta ? 'Paciente ' : 'Profissional' },
+            { key: vizualizedProfissional ? 'paciente' : 'profissional', label: vizualizedProfissional ? 'Paciente ' : 'Profissional' },
             { key: 'modalidade', label: 'Tipo' },
             { key: 'status', label: 'Status' },
             { key: 'actions', label: 'Ações' },
@@ -781,7 +782,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, callBac
                 <CardConsultion
                     isAdministrator={isAdministrator}
                     data={data}
-                    isTerapeuta={isTerapeuta}
+                    isTerapeuta={vizualizedProfissional}
                     isPartner={isPartner}
                     handleRowClick={handleRowClick}
                     handleUpdateStatus={handleUpdateStatus}
@@ -841,12 +842,12 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, callBac
                                                 <TableCell sx={{ padding: '8px 25px', justifyContent: 'flex-start' }}>
                                                     <Text>{formatTimeStamp(item?.data, true) || '-'}</Text>
                                                 </TableCell>
-                                                <Tooltip title={isPartner ? item?.paciente : isTerapeuta ? item?.paciente : item?.profissional}>
+                                                <Tooltip title={isPartner ? item?.paciente : vizualizedProfissional ? item?.paciente : item?.profissional}>
                                                     <TableCell sx={{
                                                         padding: '15px 10px', textAlign: 'center',
                                                     }}>
                                                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, justifyContent: 'flex-start' }}>
-                                                            <Avatar src={(isPartner || isAdministrator || isTerapeuta) ? item?.url_foto_pac : item?.url_foto_prof || ''} sx={{
+                                                            <Avatar src={(isPartner || vizualizedProfissional) ? item?.url_foto_pac : item?.url_foto_prof || ''} sx={{
                                                                 height: { xs: '100%', sm: 30, md: 30, lg: 30 },
                                                                 width: { xs: '100%', sm: 30, md: 30, lg: 30 },
                                                             }} variant="rounded"
@@ -855,7 +856,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, callBac
                                                                 textOverflow: 'ellipsis',
                                                                 whiteSpace: 'nowrap',
                                                                 overflow: 'hidden',
-                                                            }}>{isPartner || isTerapeuta || isAdministrator ? item?.paciente : item?.profissional || '-'}</Text>
+                                                            }}>{isPartner || vizualizedProfissional ? item?.paciente : item?.profissional || '-'}</Text>
                                                         </Box>
                                                     </TableCell>
                                                 </Tooltip>
@@ -898,7 +899,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, callBac
                                                         <Text small bold>{item?.status}</Text>
                                                     </Box>
                                                 </TableCell>
-                                                {isTerapeuta ?
+                                                {vizualizedProfissional ?
                                                     <>
                                                         <TableCell sx={{ padding: '15px 0px', textAlign: 'center' }}>
                                                             <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
@@ -930,23 +931,6 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, callBac
                                                                     })} />
                                                                 </ModalOpitions>
                                                             </ModalButton>
-                                                            {/* <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
-
-                                                                <Button secondary text="prontuário" small
-                                                                    onClick={() => handleRowClick(item?.id_consulta)}
-                                                                />
-
-                                                                <Button delete text="Cancelar" small
-                                                                    onClick={(event) => setShowConfirmationDialog({
-                                                                        active: true,
-                                                                        event,
-                                                                        acceptAction: handleCancel,
-                                                                        propsData: item?.id_consulta,
-                                                                        title: 'Cancelar Sessão',
-                                                                        message: 'Tem certeza que deseja cancelar a Sessão selecionada?'
-                                                                    })}
-                                                                />
-                                                            </Box> */}
                                                         </TableCell>
                                                     </>
                                                     :
