@@ -10,6 +10,7 @@ import { icons } from "../../organisms/layout/Colors"
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import Dropzone from "react-dropzone"
 import Link from "next/link"
+import { CronologicCard, FutureCard, PotencializationCard, SomaticCard, TematicCard } from "../../organisms"
 
 export default function ConsultationRecord(props) {
     const { setLoading, alert, colorPalette, user } = useAppContext()
@@ -466,6 +467,12 @@ export default function ConsultationRecord(props) {
                         </Box>
                     </Box>
                 </Box>
+
+                <CronologicCard />
+                <SomaticCard />
+                <TematicCard />
+                <FutureCard />
+                <PotencializationCard />
 
 
                 <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
