@@ -9,9 +9,9 @@ export const horarios = (obj) => {
 }
 
 export const statusColor = (data) => ((data === 'Agendado' && 'yellow') ||
-(data === 'Cancelada' && 'red') ||
-(data === 'Concluído' && 'green') ||
-(data === 'Remarcada' && 'blue'))
+   (data === 'Cancelada' && 'red') ||
+   (data === 'Concluído' && 'green') ||
+   (data === 'Remarcada' && 'blue'))
 
 export const formatterHours = (date) => {
    const data = new Date(date);
@@ -271,5 +271,4 @@ export const calculationAgeUser = (age) => {
 
    return idade;
 }
-
 

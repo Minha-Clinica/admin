@@ -23,6 +23,7 @@ export { FutureCard } from './consultation/Steps/FutureCard'
 export { PotencializationCard } from './consultation/Steps/PotencializationCard'
 export { SomaticCard } from './consultation/Steps/SomaticCard'
 export { TematicCard } from './consultation/Steps/TematicCard'
+export { Marks } from './consultation/Marks'
 
 
 

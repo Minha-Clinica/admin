@@ -2,11 +2,30 @@ import { useState } from "react";
 import { Box, Text, TextInput } from "../../../atoms"
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { useAppContext } from "../../../context/AppContext";
+import { Marks } from "../Marks";
 
 
-export const PotencializationCard = () => {
-    const [initialTeme, setInitialTeme] = useState("Rejeição");
+export const PotencializationCard = ({ arrayPotencialization, setArrayPotencialization }) => {
+    const [currentTemeName, setCurrentTemeName] = useState("Rejeição");
+    const [potencializationData, setPotencializationData] = useState({
+        valor_inicial: 0,
+        comentario: '',
+        microfase: false,
+        threeP: false
+    });
+    const [opitionsMark, setOpitionsMark] = useState({
+        threeP: false,
+        microfase: false
+    });
     const { colorPalette } = useAppContext()
+
+    const handleAddTeme = () => {
+        setArrayPotencialization({
+            ...arrayPotencialization,
+            tema: currentTemeName
+        })
+        setCurrentTemeName('')
+    }
 
     return (
         <Box sx={{ display: 'flex', padding: '15px', backgroundColor: '#fff', flexDirection: 'column', gap: 2 }}>
@@ -19,21 +38,23 @@ export const PotencializationCard = () => {
                 <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                     <TextInput
                         placeholder='0'
-                        value={initialTeme}
-                        onChange={({ target }) => setInitialTeme(target.value)}
+                        value={currentTemeName}
+                        onChange={({ target }) => setCurrentTemeName(target.value)}
                         InputProps={{ style: { height: 30 } }}
                     />
 
-                    <AddCircleIcon sx={{ color: colorPalette?.buttonColor, cursor: 'pointer', maringLeft: 2 }} />
+                    <AddCircleIcon onClick={() => handleAddTeme()} sx={{ color: colorPalette?.buttonColor, cursor: 'pointer', maringLeft: 2 }} />
 
                 </Box>
 
+                <Marks setOpitionsMark={setOpitionsMark} opitionsMark={opitionsMark} />
+
                 <Box sx={{ display: 'flex', gap: 1, alignItems: 'start', flexDirection: 'column' }}>
-                    <Text large bold>ICE</Text>
+                    <Text large bold>P</Text>
                     <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                         <TextInput
                             placeholder='0'
-                            value={initialTeme}
+                            value={potencializationData.valor_inicial}
                             InputProps={{ style: { width: 50, height: 30 } }}
                         />
                         <AddCircleIcon sx={{ color: colorPalette?.buttonColor, cursor: 'pointer', maringLeft: 2 }} />

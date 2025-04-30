@@ -1,17 +1,24 @@
 import { useRouter } from "next/router"
-import { useEffect, useRef, useState } from "react"
+import { lazy, useEffect, useMemo, useRef, useState } from "react"
 import { Box, Button, ContentContainer, Divider, Text, TextInput } from "../../atoms"
 import { useAppContext } from "../../context/AppContext"
 import { SelectList } from "../../organisms/select/SelectList"
 import { Avatar, Backdrop, CircularProgress, TablePagination, useMediaQuery, useTheme } from "@mui/material"
-import { checkUserPermissions } from "../../validators/checkPermissionUser"
 import { TableContainer, Table, TableHead, TableRow, TableCell, TableBody } from "@mui/material";
 import { api } from "../../api/api"
 import 'react-calendar/dist/Calendar.css';
 import { icons } from "../../organisms/layout/Colors";
-import { formatReal, formatTimeStamp } from "../../helpers"
+import { formatReal, formatTimeStamp, gerarQRCodePix } from "../../helpers"
 import { useReactToPrint } from "react-to-print";
-import { ModalContainer } from "../../organisms"
+import dynamic from 'next/dynamic';
+import { PixQRCode } from 'pix-qrcode';
+
+const QrCodePix = dynamic(() => import('../../organisms/QrCode/QrCode'), {
+    ssr: false,
+    loading: () => <p>Carregando QR Code...</p>,
+});
+
+
 
 export default function ListConsultions(props) {
     const [reportData, setReportData] = useState([])
@@ -39,8 +46,10 @@ export default function ListConsultions(props) {
     const themeApp = useTheme()
     const mobile = useMediaQuery(themeApp.breakpoints.down('sm'))
     const isAdministrator = user?.perfil?.includes('profissional') || user?.perfil?.includes('administrador')
-    const isProfissional = user?.perfil?.includes('terapeuta')
-    const profissionalId = isProfissional ? user.id : 125;
+    const isTerapeuta = user?.perfil?.includes('terapeuta')
+    const [profissionalId, setProfissionalId] = useState(isTerapeuta ? user.id : null)
+    const [employees, setEmployees] = useState([])
+
 
     const filter = (item) => {
         const normalizeString = (str) => {
@@ -84,6 +93,7 @@ export default function ListConsultions(props) {
     useEffect(() => {
         setLoading(true)
         fetchReport();
+        getTerapeutas()
         getEmployees()
         if (window.localStorage.getItem('list-consultion-filters')) {
             const admLocalStorage = JSON.parse(window.localStorage.getItem('list-consultion-filters') || null);
@@ -95,6 +105,31 @@ export default function ListConsultions(props) {
         setLoading(false)
 
     }, []);
+
+    useEffect(() => {
+        fetchReport();
+    }, [profissionalId])
+
+    const getTerapeutas = async () => {
+        setLoading(true)
+        try {
+            const response = await api.get(`/users/employee`)
+            const { data = [] } = response;
+
+            if (data?.length > 0) {
+                const terapeutasMap = data.map((item) => ({
+                    label: item.nome,
+                    value: item.id
+                }))
+                setEmployees(terapeutasMap)
+            }
+        } catch (error) {
+            console.log(error)
+            return error
+        } finally {
+            setLoading(false)
+        }
+    }
 
     const fetchReport = async (filtersData) => {
         setLoadingData(true);
@@ -199,6 +234,19 @@ export default function ListConsultions(props) {
                     </Box>
                 </Box>
             </Box>
+
+            {isAdministrator && <Box sx={{ display: 'flex', maxWidth: 300 }}>
+                <SelectList
+                    fullWidth
+                    data={employees}
+                    valueSelection={profissionalId}
+                    onSelect={(value) => setProfissionalId(value)}
+                    title="Selecione o Terapeuta:"
+                    filterOpition="value"
+                    sx={{ backgroundColor: colorPalette.secondary }}
+                    clean={false}
+                />
+            </Box>}
 
             <Backdrop open={showFilters} sx={{ display: 'flex', justifyContent: 'flex-end', zIndex: 999 }}>
                 <Box sx={{ position: 'relative', display: 'flex', gap: 2, width: '400px', marginTop: 20, height: '100%', flexDirection: 'column', padding: '20px 25px', backgroundColor: colorPalette.secondary }}>
@@ -393,15 +441,25 @@ export default function ListConsultions(props) {
 }
 
 const TableConsultion = ({ data = [], filters = [], onPress = () => { }, filtersField }) => {
+
     const { setLoading, colorPalette, mobile, user, alert, setShowConfirmationDialog } = useAppContext()
     const [openCobranca, setOpenCobranca] = useState(false)
+    const [isClient, setIsClient] = useState(false);
+    const [loadingQrcode, setLoadingQrcode] = useState(false);
     const [sessionValue, setSessionValue] = useState(200)
+    const [qrcode, setQrcode] = useState('')
     const [paciente, setPaciente] = useState({
         nome: '',
         email: '',
         sessoesConcluidas: 0,
     })
     const reciboRef = useRef(null)
+    const pix_key = 'terapia.jean@gmail.com';
+    const pix_name = 'Jean Paulo Trindade Santos';
+
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
 
     let columns = [
         { key: 'paciente', label: 'Paciente' },
@@ -531,7 +589,44 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, filters
         periodo = `Período: ${formatTimeStamp(filtersField.startDate)} á ${formatTimeStamp(filtersField.endDate)}`;
     }
 
-    let titleDocument = paciente.nome ? `recibo_${paciente.nome.replace(/\s+/g, "_")}_${new Date().toLocaleDateString()}.pdf` : "recibo.pdf";
+    const sanitize = (str) =>
+        str.normalize('NFD').replace(/[\u0300-\u036f]/g, '') // remove acentos
+            .replace(/\s+/g, '')                              // remove espaços
+            .replace(/[^a-zA-Z0-9]/g, '');                    // remove símbolos especiais
+
+    const generateTxid = (item) => {
+        const prefix = 'TX';
+        const pacienteId = item.paciente_id;
+        const firstName = sanitize(item.paciente.split(' ')[0]);
+        const timestamp = Date.now().toString();
+
+        // Junta os dados e corta para no máximo 25 caracteres
+        const baseTxid = `${prefix}${pacienteId}${firstName.toUpperCase()}${timestamp}`;
+        return baseTxid.substring(0, 20);
+    };
+
+    const handleGeneratePixQrcode = async (item) => {
+        try {
+            setLoadingQrcode(true);
+            const txId = generateTxid(item);
+
+            const payload = await api.post('/user/generate-qrcode', {
+                chave: pix_key,
+                valor: sessionValue * item.concluidas,
+                nome: pix_name,
+                txId
+            });
+            const { qrcode } = payload.data
+            setQrcode(qrcode);
+        } catch (error) {
+            console.log('Erro ao gerar QRCode: ', error)
+            return error
+        } finally {
+            setTimeout(() => {
+                setLoadingQrcode(false);
+            }, 1500);
+        }
+    }
 
     const handleGeneratePdf = useReactToPrint({
         content: () => reciboRef.current,
@@ -620,6 +715,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, filters
                                                 <Button small text="Emitir Cobrança" style={{ width: `100%` }}
                                                     onClick={() => {
                                                         setOpenCobranca(true)
+                                                        handleGeneratePixQrcode(item)
                                                         setPaciente({
                                                             nome: item.paciente,
                                                             email: item.email_paciente,
@@ -744,6 +840,10 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, filters
                                         </Box>
                                     }
                                 </Box>
+
+                                {qrcode && isClient && (
+                                    <QrCodePix value={qrcode} pixKey={pix_key} loading={loadingQrcode} />
+                                )}
                             </Box>
                         </div>
                         <Divider distance={0} />
@@ -755,6 +855,11 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, filters
                                 placeholder="R$ 0,00"
                                 name='sessionValue'
                                 onChange={handleChangeValor}
+                                onBlur={() => handleGeneratePixQrcode({
+                                    paciente: paciente.nome,
+                                    email_paciente: paciente.email,
+                                    concluidas: paciente.sessoesConcluidas
+                                })}
                                 type="coin"
                                 value={sessionValue}
                                 sx={{ width: '100%' }} // Garante que o input se ajusta em telas menores

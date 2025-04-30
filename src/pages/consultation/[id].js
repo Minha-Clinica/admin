@@ -19,7 +19,6 @@ export default function ConsultationRecord(props) {
     const { id } = router.query;
     const newConsultRecord = id === 'new';
     const [discomfortLevel, setDiscomfortLevel] = useState([]);
-    const [arrayTematic, setArrayTematic] = useState([])
     const [tematicName, setTematicName] = useState({ tema: '' })
     const [showTematic, setShowTematic] = useState(false)
     const [showUploadFile, setUploadFile] = useState(false)
@@ -31,6 +30,14 @@ export default function ConsultationRecord(props) {
     })
     const [sessions, setSessions] = useState([])
     const [selectedConditions, setSelectedConditions] = useState([])
+    const [arrayPotencialization, setArrayPotencialization] = useState({
+        tema: '',
+        potencializacao: []
+    });
+    const [arraySomatic, setArraySomatic] = useState([]);
+    const [arrayCronologic, setArrayCronologic] = useState([]);
+    const [arrayFuture, setArrayFuture] = useState([]);
+    const [arrayTematic, setArrayTematic] = useState([]);
 
     const getConsult = async () => {
         setLoading(true)
@@ -472,7 +479,10 @@ export default function ConsultationRecord(props) {
                 <SomaticCard />
                 <TematicCard />
                 <FutureCard />
-                <PotencializationCard />
+                <PotencializationCard
+                    arrayPotencialization={arrayPotencialization}
+                    setArrayPotencialization={setArrayPotencialization}
+                />
 
 
                 <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
@@ -481,7 +491,6 @@ export default function ConsultationRecord(props) {
                         <TextInput
                             multiline={true}
                             rows={3}
-                            // maxRows={8}
                             value={consultRecordData?.anotacoes || ''}
                             onChange={(e) => setConsultRecordData({ ...consultRecordData, anotacoes: e.target.value })}
                             onBlur={(e) => handleUpdateNotes(e)}
