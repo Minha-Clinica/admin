@@ -1,5 +1,5 @@
 import { useRouter } from "next/router"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Avatar, Backdrop } from "@mui/material"
 import { api } from "../../api/api"
 import { Box, ContentContainer, TextInput, Text, Button, Divider } from "../../atoms"
@@ -38,6 +38,24 @@ export default function ConsultationRecord(props) {
     const [arrayCronologic, setArrayCronologic] = useState([]);
     const [arrayFuture, setArrayFuture] = useState([]);
     const [arrayTematic, setArrayTematic] = useState([]);
+    const boxRef = useRef(null);
+    const [isSticky, setIsSticky] = useState(false);
+
+
+    useEffect(() => {
+        console.log('boxRef: ', boxRef.current)
+        const handleScroll = () => {
+            if (!boxRef.current) return;
+
+            const offsetTop = boxRef.current.getBoundingClientRect().top;
+
+            // Quando atingir o topo, fixa
+            setIsSticky(offsetTop <= 0);
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     const getConsult = async () => {
         setLoading(true)
@@ -332,79 +350,97 @@ export default function ConsultationRecord(props) {
                 </Box>
 
             </Box>
-            <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', width: '100%' }}>
 
+            <Box
+                sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    backgroundColor: colorPalette.secondary,
+                    padding: '20px',
+                    borderRadius: 2,
+                    overflowX: 'auto', // Permite o scroll horizontal
+                    whiteSpace: 'nowrap', // Mantém o conteúdo em linha única
+                    scrollbarWidth: 'thin', // Para navegadores que suportam, diminui a largura da barra de rolagem
+                    '&::-webkit-scrollbar': {
+                        height: '8px', // Altura da barra de rolagem no Chrome/Safari
+                    },
+                    '&::-webkit-scrollbar-thumb': {
+                        backgroundColor: '#ccc', // Cor da barra de rolagem
+                        borderRadius: '10px', // Borda arredondada para estilo
+                    },
+                }}
+            >
+                {sessions?.map((item, index) => {
+                    const currentSession = item.id_consulta == id;
+                    let formattedDate = item?.data;
+                    let formattedHour = item?.data;
+
+                    const currentDate = new Date(item?.data);
+                    const options = {
+                        day: 'numeric',
+                        month: 'numeric',
+                    };
+
+                    formattedDate = currentDate
+                        ? new Intl.DateTimeFormat('pt-BR', options).format(currentDate)
+                        : 'none';
+                    const horaMoment = moment(item?.data);
+                    formattedHour = horaMoment.format('HH:mm');
+
+                    return (
+                        <Box key={index} sx={{ display: 'flex', alignItems: 'center', position: 'relative', gap: 1 }}>
+
+                            <Box sx={{
+                                display: 'flex', flexDirection: 'column', alignItems: 'center',
+                                backgroundColor: currentSession ? colorPalette.third : colorPalette.primary,
+                                padding: '8px 10px', borderRadius: 2,
+                                '&:hover': {
+                                    cursor: !currentSession && 'pointer',
+                                    transform: !currentSession && 'scale(1.05, 1.05)',
+                                    transition: '.3s'
+                                }
+                            }} onClick={() => {
+                                if (!currentSession) {
+                                    router.push(`/consultation/${item.id_consulta}`)
+                                }
+                            }}>
+                                <Text bold large style={{ color: currentSession && 'white' }}>{formattedDate}</Text>
+                                <Text light small style={{ color: currentSession && 'white' }}>{formattedHour}</Text>
+                            </Box>
+
+                            {(index < sessions.length - 1) && <Box sx={{
+                                ...styles.menuIcon,
+                                width: 30,
+                                height: 30,
+                                backgroundImage: `url('/icons/afectu_arrow_gray.png')`,
+                            }} />
+                            }
+                        </Box>
+                    );
+                })}
+            </Box>
+
+            <div ref={boxRef}>
                 <Box
                     sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1,
-                        backgroundColor: colorPalette.secondary,
-                        padding: '20px',
-                        borderRadius: 2,
-                        overflowX: 'auto', // Permite o scroll horizontal
-                        whiteSpace: 'nowrap', // Mantém o conteúdo em linha única
-                        scrollbarWidth: 'thin', // Para navegadores que suportam, diminui a largura da barra de rolagem
-                        '&::-webkit-scrollbar': {
-                            height: '8px', // Altura da barra de rolagem no Chrome/Safari
-                        },
-                        '&::-webkit-scrollbar-thumb': {
-                            backgroundColor: '#ccc', // Cor da barra de rolagem
-                            borderRadius: '10px', // Borda arredondada para estilo
-                        },
+                        position: isSticky && 'fixed',
+                        transition: '.2s',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        zIndex: 10,
+                        backgroundColor: colorPalette.background || '#fff',
+                        paddingTop: 1,
+                        display: 'flex', gap: 2, width: '100%',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                        ...(isSticky && {
+                            width: '90%',
+                            marginLeft: '7%',
+                            overflowY: 'auto',
+                        })
                     }}
                 >
-                    {sessions?.map((item, index) => {
-                        const currentSession = item.id_consulta == id;
-                        let formattedDate = item?.data;
-                        let formattedHour = item?.data;
-
-                        const currentDate = new Date(item?.data);
-                        const options = {
-                            day: 'numeric',
-                            month: 'numeric',
-                        };
-
-                        formattedDate = currentDate
-                            ? new Intl.DateTimeFormat('pt-BR', options).format(currentDate)
-                            : 'none';
-                        const horaMoment = moment(item?.data);
-                        formattedHour = horaMoment.format('HH:mm');
-
-                        return (
-                            <Box key={index} sx={{ display: 'flex', alignItems: 'center', position: 'relative', gap: 1 }}>
-
-                                <Box sx={{
-                                    display: 'flex', flexDirection: 'column', alignItems: 'center',
-                                    backgroundColor: currentSession ? colorPalette.third : colorPalette.primary,
-                                    padding: '8px 10px', borderRadius: 2,
-                                    '&:hover': {
-                                        cursor: !currentSession && 'pointer',
-                                        transform: !currentSession && 'scale(1.05, 1.05)',
-                                        transition: '.3s'
-                                    }
-                                }} onClick={() => {
-                                    if (!currentSession) {
-                                        router.push(`/consultation/${item.id_consulta}`)
-                                    }
-                                }}>
-                                    <Text bold large style={{ color: currentSession && 'white' }}>{formattedDate}</Text>
-                                    <Text light small style={{ color: currentSession && 'white' }}>{formattedHour}</Text>
-                                </Box>
-
-                                {(index < sessions.length - 1) && <Box sx={{
-                                    ...styles.menuIcon,
-                                    width: 30,
-                                    height: 30,
-                                    backgroundImage: `url('/icons/afectu_arrow_gray.png')`,
-                                }} />
-                                }
-                            </Box>
-                        );
-                    })}
-                </Box>
-
-                <Box sx={{ display: 'flex', gap: 2, width: '100%' }}>
                     <Box sx={{ display: 'flex', gap: .5, backgroundColor: colorPalette.secondary, padding: '10px 12px', borderRadius: 2 }}>
                         {groupCondition?.map((item, index) => {
                             const selected = selectedConditions?.includes(item.value);
@@ -449,7 +485,7 @@ export default function ConsultationRecord(props) {
                             display: 'flex', gap: 1.8, justifyContent: 'justify-between', border: `.5px solid ${colorPalette?.third}`,
                             width: '100%', height: '100%', alignItems: 'end', padding: '5px', borderRadius: 2
                         }}>
-                            <Box sx={{ width: '100%', height: '100%', display: 'flex', flexWrap: `wrap`, gap: 1.8, }}>
+                            <Box sx={{ width: '100%', height: '100%', display: 'flex', flexWrap: `wrap`, gap: 1.8, minWidth: 0, }}>
                                 {arrayTematic?.map((item, tematicIndex) => (
                                     <Box key={tematicIndex} sx={{
                                         display: 'flex', gap: 2, alignItems: 'center', justifyContent: 'center',
@@ -474,109 +510,108 @@ export default function ConsultationRecord(props) {
                         </Box>
                     </Box>
                 </Box>
+            </div>
 
-                <CronologicCard />
-                <SomaticCard />
-                <TematicCard />
-                <FutureCard />
-                <PotencializationCard
-                    arrayPotencialization={arrayPotencialization}
-                    setArrayPotencialization={setArrayPotencialization}
-                />
+            <CronologicCard />
+            <SomaticCard />
+            <TematicCard />
+            <FutureCard />
+            <PotencializationCard
+                arrayPotencialization={arrayPotencialization}
+                setArrayPotencialization={setArrayPotencialization}
+            />
 
 
-                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
-                    <ContentContainer fullWidth>
-                        <Text bold large>Anotações do Paciente</Text>
-                        <TextInput
-                            multiline={true}
-                            rows={3}
-                            value={consultRecordData?.anotacoes || ''}
-                            onChange={(e) => setConsultRecordData({ ...consultRecordData, anotacoes: e.target.value })}
-                            onBlur={(e) => handleUpdateNotes(e)}
-                            InputProps={{ style: { backgroundColor: colorPalette?.secondary } }}
-                        />
-                    </ContentContainer>
-                    <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column', alignItems: 'center' }}>
-                        <Button text="Upload de Arquivo" style={{ width: 150 }} onClick={() => setUploadFile(true)} />
-                        <Button secondary text="Finalizar Sessão" style={{ width: 150, backgroundColor: colorPalette?.third }} />
-                    </Box>
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                <ContentContainer fullWidth>
+                    <Text bold large>Anotações do Paciente</Text>
+                    <TextInput
+                        multiline={true}
+                        rows={3}
+                        value={consultRecordData?.anotacoes || ''}
+                        onChange={(e) => setConsultRecordData({ ...consultRecordData, anotacoes: e.target.value })}
+                        onBlur={(e) => handleUpdateNotes(e)}
+                        InputProps={{ style: { backgroundColor: colorPalette?.secondary } }}
+                    />
+                </ContentContainer>
+                <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column', alignItems: 'center' }}>
+                    <Button text="Upload de Arquivo" style={{ width: 150 }} onClick={() => setUploadFile(true)} />
+                    <Button secondary text="Finalizar Sessão" style={{ width: 150, backgroundColor: colorPalette?.third }} />
                 </Box>
-
-
-                <Backdrop open={showUploadFile}>
-                    <Box sx={{
-                        display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 1.8, backgroundColor: colorPalette.secondary,
-                        padding: '30px', gap: 2
-                    }}>
-
-                        <Box sx={{ display: 'flex', gap: 3, justifyContent: 'space-between', alignItems: 'center' }}>
-                            <Text bold large>Adicionar Tema</Text>
-                            <Box sx={{
-                                ...styles.menuIcon,
-                                backgroundImage: `url(${icons.gray_close})`,
-                                transition: '.3s',
-                                width: 15,
-                                height: 15,
-                                "&:hover": {
-                                    opacity: 0.8,
-                                    cursor: 'pointer'
-                                },
-                            }}
-                                onClick={() => setUploadFile(false)} />
-                        </Box>
-                        <Divider />
-
-                        <Text bold title>Arquivos</Text>
-                        <DropZoneSession callBack={() => handleGetFiles()} filesDrop={filesDrop} id={id} />
-                        {filesDrop?.length > 0 &&
-                            <Box sx={{ display: 'flex', gap: 2 }}>
-                                {filesDrop?.map((item, index) => {
-                                    const typePdf = item?.name?.includes('pdf') || null;
-                                    return (
-                                        <Box key={index} sx={{ display: 'flex', gap: 1, backgroundColor: colorPalette.primary, padding: '5px 12px', borderRadius: 2, alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }} >
-                                            <Box sx={{ display: 'flex', gap: 1, padding: '0px 12px', borderRadius: 2, alignItems: 'center', justifyContent: 'space-between' }} >
-                                                <Text small style={{
-                                                    whiteSpace: 'nowrap',
-                                                    overflow: 'hidden',
-                                                    textOverflow: 'ellipsis',
-                                                    maxWidth: '150px'
-                                                }}>
-                                                    {encodeURIComponent(item?.name_file)}
-                                                </Text>
-                                                <Box sx={{
-                                                    ...styles.menuIcon,
-                                                    width: 12,
-                                                    height: 12,
-                                                    aspectRatio: '1:1',
-                                                    backgroundImage: `url(${icons.gray_close})`,
-                                                    transition: '.3s',
-                                                    zIndex: 9999,
-                                                    "&:hover": {
-                                                        opacity: 0.8,
-                                                        cursor: 'pointer'
-                                                    }
-                                                }} onClick={() => handleRemoveFile(item?.id_arq_sessao, item?.key_file)} />
-                                            </Box>
-                                            <Link href={item?.location || ''} target="_blank">
-                                                <Box
-                                                    sx={{
-                                                        backgroundImage: `url('${typePdf ? '/icons/pdf_icon.png' : item?.location}')`,
-                                                        backgroundSize: 'cover',
-                                                        backgroundRepeat: 'no-repeat',
-                                                        backgroundPosition: 'center center',
-                                                        width: { xs: '100%', sm: 100, md: 100, lg: 150, xl: 150 },
-                                                        aspectRatio: '1/1',
-                                                    }} />
-                                            </Link>
-                                        </Box>
-                                    )
-                                })}
-                            </Box>}
-                    </Box>
-                </Backdrop>
-
             </Box>
+
+
+            <Backdrop open={showUploadFile}>
+                <Box sx={{
+                    display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 1.8, backgroundColor: colorPalette.secondary,
+                    padding: '30px', gap: 2
+                }}>
+
+                    <Box sx={{ display: 'flex', gap: 3, justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Text bold large>Adicionar Tema</Text>
+                        <Box sx={{
+                            ...styles.menuIcon,
+                            backgroundImage: `url(${icons.gray_close})`,
+                            transition: '.3s',
+                            width: 15,
+                            height: 15,
+                            "&:hover": {
+                                opacity: 0.8,
+                                cursor: 'pointer'
+                            },
+                        }}
+                            onClick={() => setUploadFile(false)} />
+                    </Box>
+                    <Divider />
+
+                    <Text bold title>Arquivos</Text>
+                    <DropZoneSession callBack={() => handleGetFiles()} filesDrop={filesDrop} id={id} />
+                    {filesDrop?.length > 0 &&
+                        <Box sx={{ display: 'flex', gap: 2 }}>
+                            {filesDrop?.map((item, index) => {
+                                const typePdf = item?.name?.includes('pdf') || null;
+                                return (
+                                    <Box key={index} sx={{ display: 'flex', gap: 1, backgroundColor: colorPalette.primary, padding: '5px 12px', borderRadius: 2, alignItems: 'center', justifyContent: 'center', flexDirection: 'column' }} >
+                                        <Box sx={{ display: 'flex', gap: 1, padding: '0px 12px', borderRadius: 2, alignItems: 'center', justifyContent: 'space-between' }} >
+                                            <Text small style={{
+                                                whiteSpace: 'nowrap',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis',
+                                                maxWidth: '150px'
+                                            }}>
+                                                {encodeURIComponent(item?.name_file)}
+                                            </Text>
+                                            <Box sx={{
+                                                ...styles.menuIcon,
+                                                width: 12,
+                                                height: 12,
+                                                aspectRatio: '1:1',
+                                                backgroundImage: `url(${icons.gray_close})`,
+                                                transition: '.3s',
+                                                zIndex: 9999,
+                                                "&:hover": {
+                                                    opacity: 0.8,
+                                                    cursor: 'pointer'
+                                                }
+                                            }} onClick={() => handleRemoveFile(item?.id_arq_sessao, item?.key_file)} />
+                                        </Box>
+                                        <Link href={item?.location || ''} target="_blank">
+                                            <Box
+                                                sx={{
+                                                    backgroundImage: `url('${typePdf ? '/icons/pdf_icon.png' : item?.location}')`,
+                                                    backgroundSize: 'cover',
+                                                    backgroundRepeat: 'no-repeat',
+                                                    backgroundPosition: 'center center',
+                                                    width: { xs: '100%', sm: 100, md: 100, lg: 150, xl: 150 },
+                                                    aspectRatio: '1/1',
+                                                }} />
+                                        </Link>
+                                    </Box>
+                                )
+                            })}
+                        </Box>}
+                </Box>
+            </Backdrop>
 
             <Backdrop open={showTematic}>
                 <ContentContainer>

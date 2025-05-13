@@ -5,11 +5,19 @@ import { ProtectRoute } from '../context/ProtectRoute'
 import { Colors, LeftMenu, UserHeader } from '../organisms'
 import '../styles/Home.module.css'
 import { TabNavigator } from '../organisms/layout/Navigator'
+import { useRouter } from 'next/router'
 
 const PagesRoute = ({ Component, pageProps }) => {
 
     const { colorPalette } = useAppContext()
     const removePadding = Component.noPadding;
+    const router = useRouter()
+    const { asPath } = router
+    const parts = asPath.split('/');
+    const lastPart = parts[parts.length - 1];
+    const lastPart2 = parts[parts.length - 2];
+    const noShowHeaderMenu = lastPart2 == 'consultation' && lastPart != 'list';
+
 
     return (
         <>
@@ -24,7 +32,7 @@ const PagesRoute = ({ Component, pageProps }) => {
                 <Box sx={{ ...styles.bodyContainer, backgroundColor: colorPalette.primary }}>
                     <LeftMenu />
                     <TabNavigator />
-                    <UserHeader />
+                    {!noShowHeaderMenu && <UserHeader />}
                     <Box sx={{
                         ...styles.contentContainer, backgroundColor: colorPalette.primary, transition: 'background-color 1s',
                         padding: removePadding ? '0px' : { xs: `30px 5px 85px 5px`, xm: `25px`, md: `120px 65px`, lg: `120px 65px` }
