@@ -316,6 +316,13 @@ input::placeholder {
    border-radius: 50%;
 }
 
+.available-day {
+  background: lightgray !important;
+  font-weight: bold;
+  color: black !important;
+  border-radius: 50%;
+}
+
 /* Efeito ao passar o mouse */
 .react-calendar__tile:hover {
    background: rgba(249, 96, 75, 0.3);
