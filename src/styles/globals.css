@@ -316,7 +316,21 @@ input::placeholder {
    border-radius: 50%;
 }
 
-.available-day {
+.custom-calendar .available-day {
+  background: lightgray !important;
+  font-weight: bold;
+  color: black !important;
+  border-radius: 50%;
+}
+
+.react-calendar .available-day {
+  background: lightgray !important;
+  font-weight: bold;
+  color: black !important;
+  border-radius: 50%;
+}
+
+.react-calendar__available-day {
   background: lightgray !important;
   font-weight: bold;
   color: black !important;
