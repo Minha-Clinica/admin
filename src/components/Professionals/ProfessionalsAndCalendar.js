@@ -215,6 +215,13 @@ export const ProfessionalAndCalendarMobile = ({
                                                 defaultActiveStartDate={new Date()}
                                                 onChange={(date) => handleSelectedDate(date, dateSelected.profissionalId)}
                                                 tileDisabled={({ date }) => !availableDays.includes(moment(date).format("YYYY-MM-DD"))}
+ tileClassName={({ date }) => {
+    const formattedDate = moment(date).format("YYYY-MM-DD");
+    if (availableDays.includes(formattedDate)) {
+      return "available-day";
+    }
+    return null;
+  }}
                                             />
                                             
                                         </Box>
