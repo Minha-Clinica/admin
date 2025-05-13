@@ -300,11 +300,12 @@ input::placeholder {
 /* Alterando a cor dos dias que possuem eventos/agendamentos (antes amarelo) */
 .react-calendar__tile--hasActive,
 .react-calendar__tile--now {
-   background: #fda29b !important;
+   background: #fff!important;
    /* Vermelho claro */
-   color: white !important;
+   color:#f9604b !important;
    font-weight: bold;
    border-radius: 50%;
+   border: 1px solid lightgray!important;
 }
 
 /* Alterando a cor do dia selecionado (antes azul) */
@@ -317,10 +318,8 @@ input::placeholder {
 }
 
 /* Sobrescreve apenas os dias disponíveis (habilitados) */
-.custom-calendar .available-day:not(.react-calendar__tile--disabled) {
-  background: lightgray !important;
+.custom-calendar .available-day:not(.react-calendar__tile--disabled) { 
   font-weight: bold;
-  color: black !important;
 }
 /* Efeito ao passar o mouse */
 .react-calendar__tile:hover {
