@@ -394,7 +394,7 @@ export default function EditUser() {
         },
         {
             label: 'Empresas', value: 'companies', showPerfil: ['administrador', 'terapeuta'],
-            icon: 'personal-data.png', permission: ['administrador', 'terapeuta']
+            icon: 'personal-data.png', permission: ['administrador']
         },
         {
             label: 'Anamnese', value: 'anamnese', showPerfil: ['paciente'],
