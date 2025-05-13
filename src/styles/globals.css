@@ -326,10 +326,6 @@ input::placeholder {
    background: rgba(249, 96, 75, 0.3);
 }
 
-.react-calendar__tile--now {
-   background: #fda29b !important;
-}
-
 .react-calendar__tile--active {
    background: #f9604b !important;
    color: white;
