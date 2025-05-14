@@ -934,49 +934,11 @@ export default function CalendarComponent() {
                         border: `.5px solid lightgray`,
                         padding: 10,
                         height: mobile ? 500 : 600,
-                        width: mobile ? '100%' : '80%'
+                        width: '100%'
                     }}
                 />
             </Box>
-            <Box sx={{
-                display: { xs: 'none', xm: 'none', md: 'none', lg: 'flex' }, height: '100%', position: 'fixed', border: '1px solid lightgray',
-                backgroundColor: '#fff', right: 0, top: 51.5, flexDirection: 'column',
-                padding: '12px 12px', gap: 2, zIndex: 99999
-            }}>
-                <Text bold large style={{ textAlign: 'center' }}>Minhas próximas agendas</Text>
 
-                {events?.filter(item => item.disponivel === 1 && (new Date(item?.start) >= new Date()))?.length > 0 ?
-                    <Box sx={{ display: 'flex', flexDirection: 'column', maxHeight: 600, overflowY: 'auto', gap: .5, maxWidth: 280 }}>
-                        {events?.filter(item => item.disponivel === 1 && (new Date(item?.start) >= new Date()))?.map((item, index) => {
-
-                            return (
-                                <Box sx={{
-                                    display: 'flex', gap: 1, flexDirection: 'row',
-                                    border: '1px solid lightgray', borderRadius: 2, height: 90
-                                }} key={index}>
-                                    <Box sx={{
-                                        height: '100%', width: '4px', backgroundColor: colorPalette?.buttonColor,
-                                        borderRadius: '8px 0px 0px 8px'
-                                    }} />
-                                    <Box sx={{ display: 'flex', gap: 2, padding: '8px 8px', alignItems: 'center' }}>
-                                        <Box sx={{ display: 'flex', gap: .2, flexDirection: 'column' }}>
-                                            <Text large>{horarios(item?.start)}</Text>
-                                            <Text small style={{ color: 'gray' }}>1 hora</Text>
-                                        </Box>
-                                        <Box sx={{ display: 'flex', gap: .3, flexDirection: 'column', padding: '0px 8px' }}>
-                                            <Text small bold>{item?.title}</Text>
-                                            <Text small light>{item?.nome_agendado}</Text>
-                                        </Box>
-                                        <Text bold large>{formatterHours(item?.start)}</Text>
-                                    </Box>
-                                </Box>
-                            )
-                        })}
-                    </Box>
-                    :
-                    <Text>Você não possúi agendamentos futuros.</Text>
-                }
-            </Box>
             {
                 showEventForm && (
                     <Backdrop open={showEventForm} sx={{ zIndex: 999, paddingTop: 10 }}>
