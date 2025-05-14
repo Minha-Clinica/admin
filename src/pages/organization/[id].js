@@ -64,7 +64,7 @@ export default function EditCompany(props) {
         try {
             const response = await api.get(`/company/${id}`)
             const { data } = response
-            let linkAcessRegister = `https://www.afectu.com/company?cod_key=${data?.cod_key}`
+            let linkAcessRegister = `https://app.afectu.com/company?cod_key=${data?.cod_key}`
             setLinkRegisterUser(linkAcessRegister)
             setCompanyData(data)
         } catch (error) {

@@ -12,6 +12,7 @@ import { Notifications } from "../notification/notifications";
 import Link from "next/link";
 import { keyframes } from '@emotion/react';
 import { DialogUserEdit } from "../userEdit/dialogEditUser";
+import { SessionRotator } from "./sectionRotator";
 
 const blinkingText = keyframes`
   0% {
@@ -30,7 +31,7 @@ export const UserHeader = (props) => {
         title = '',
     } = props;
 
-    const { colorPalette, theme, logout, notificationUser, setNotificationUser, user } = useAppContext()
+    const { colorPalette, theme, logout, notificationUser, sessionData, user } = useAppContext()
     let fotoPerfil = user?.getPhoto?.location || '';
     const name = user?.nome?.split(' ');
     const firstName = name[0];
@@ -80,22 +81,8 @@ export const UserHeader = (props) => {
         <>
             <Box sx={{ ...styles.header, backgroundColor: colorPalette.secondary, gap: 2 }}>
                 <Box sx={{ gap: 2, display: 'flex', alignItems: 'center', marginLeft: 15 }}>
-                    <Box sx={{ width: 400, display: 'flex', marginLeft: 10 }}>
-                        <TextInput placeholder="Buscar pelo paciente" type="search"
-                            InputProps={{
-                                style: {
-                                    height: 45,
-                                    fontSize: '13px',
-                                    width: 400,
-                                    borderRadius: 32,
-                                    borderColor: 'transparent', // Define a cor da borda como transparente
-                                    borderWidth: 1, // Ajusta a largura da borda se necessário
-                                    borderStyle: 'solid'
-                                }
-                            }} />
-                    </Box>
+                    {<SessionRotator sessionData={sessionData} />}
                 </Box>
-                {/* <IconTheme flex /> */}
 
                 <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'flex-end', position: 'relative', }}>
                     <Box sx={{

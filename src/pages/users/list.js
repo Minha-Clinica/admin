@@ -90,7 +90,7 @@ export default function ListUsers(props) {
         try {
             const response = await api.get(`/users`)
             const { data = [] } = response;
-            setUsers(data)
+            setUsers(data.filter(u => u.ativo == 1))
         } catch (error) {
             console.log(error)
             return error

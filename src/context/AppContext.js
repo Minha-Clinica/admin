@@ -48,6 +48,7 @@ export const AppProvider = ({ children }) => {
         message: ''
     })
     const [showTerm, setShowTerm] = useState(false)
+    const [sessionData, setSessionData] = useState(null)
     const router = useRouter()
     const alert = new ShowAlert(setAlertData)
     const themeApp = useTheme()
@@ -336,7 +337,8 @@ export const AppProvider = ({ children }) => {
                 menuItemsList,
                 menuItems,
                 mobile,
-                verifyValidToken
+                verifyValidToken,
+                sessionData
             }}
         >
             {children}
