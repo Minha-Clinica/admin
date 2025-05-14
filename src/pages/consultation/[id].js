@@ -1,6 +1,6 @@
 import { useRouter } from "next/router"
 import { useEffect, useRef, useState } from "react"
-import { Avatar, Backdrop } from "@mui/material"
+import { Avatar, Backdrop, Tooltip } from "@mui/material"
 import { api } from "../../api/api"
 import { Box, ContentContainer, TextInput, Text, Button, Divider } from "../../atoms"
 import moment from "moment";
@@ -38,6 +38,7 @@ export default function ConsultationRecord(props) {
     const [arrayCronologic, setArrayCronologic] = useState([]);
     const [arrayFuture, setArrayFuture] = useState([]);
     const [arrayTematic, setArrayTematic] = useState([]);
+    const [selectedTemes, setSelectedTemes] = useState([]);
     const boxRef = useRef(null);
     const [isSticky, setIsSticky] = useState(false);
 
@@ -450,24 +451,14 @@ export default function ConsultationRecord(props) {
                                     alignItems: 'center', justifyContent: 'center',
                                     transition: '.3s',
                                     flexDirection: 'column',
-                                    backgroundColor: selected ? colorPalette?.buttonColor : 'transparent',
+                                    backgroundColor: selected ? (colorPalette?.buttonColor + '66') : 'transparent',
                                     "&:hover": {
                                         opacity: 0.8,
                                         cursor: 'pointer',
                                         transform: 'scale(1.03, 1.03)'
                                     },
                                 }} onClick={() => toggleCondition(item?.value)}>
-                                    <Box sx={{
-                                        ...styles.menuIcon,
-                                        backgroundImage: `url('/icons/${item?.icon}_afectu.png')`,
-                                        transition: '.3s',
-                                        width: 60, height: 50,
-                                        aspectRatio: '1/1',
-                                        "&:hover": {
-                                            opacity: 0.8,
-                                            cursor: 'pointer'
-                                        }
-                                    }} />
+                                    <Box sx={{ ...styles.iconCondition, backgroundImage: `url('/icons/${item?.icon}_afectu.png')` }} />
                                     <Text>{item?.label}</Text>
                                 </Box>
                             )
@@ -487,39 +478,50 @@ export default function ConsultationRecord(props) {
                         }}>
                             <Box sx={{ width: '100%', height: '100%', display: 'flex', flexWrap: `wrap`, gap: 1.8, minWidth: 0, }}>
                                 {arrayTematic?.map((item, tematicIndex) => (
-                                    <Box key={tematicIndex} sx={{
-                                        display: 'flex', gap: 2, alignItems: 'center', justifyContent: 'center',
-                                        backgroundColor: colorPalette?.primary, padding: '12px 15px', height: '35px', borderRadius: 2
-                                    }}>
-                                        <Text bold>{item?.nome_tema}</Text>
-                                        <Box sx={{
-                                            ...styles.menuIcon,
-                                            backgroundImage: `url('/icons/remove_icon.png')`,
-                                            width: 13,
-                                            height: 13,
-                                            "&:hover": {
-                                                opacity: 0.8,
-                                                cursor: 'pointer',
-                                                transform: 'scale(1.1, 1.1)'
-                                            },
-                                        }} onClick={() => handleDeleteTheme(item.id_tema_sessao)} text="Remover" />
-                                    </Box>
+                                    <Tooltip key={tematicIndex} title={selectedTemes?.includes(item?.nome_tema) && 'Tema em uso'} placement="top" arrow sx={{ maxWidth: 200, wordWrap: 'break-word' }}>
+                                        <div >
+                                            <Box sx={{
+                                                display: 'flex', gap: 2, alignItems: 'center', justifyContent: 'center',
+                                                backgroundColor: selectedTemes?.includes(item?.nome_tema) ? colorPalette?.buttonColor + '66' : colorPalette?.primary, padding: '12px 15px', height: '35px', borderRadius: 2,
+                                                ...(selectedConditions.length > 0 && {
+                                                    cursor: 'pointer',
+                                                    transition: '.3s',
+                                                    '&:hover': {
+                                                        opacity: .8,
+                                                        transform: 'scale(1.01, 1.01)'
+                                                    }
+                                                })
+                                            }} onClick={() => setSelectedTemes((prev) => [...prev, item.nome_tema])}>
+                                                <Text bold>{item?.nome_tema}</Text>
+                                                <Box sx={styles.iconRemove} onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    e.preventDefault();
+                                                    handleDeleteTheme(item.id_tema_sessao)
+                                                }} text="Remover" />
+                                            </Box>
+                                        </div>
+                                    </Tooltip>
                                 ))}
                             </Box>
                             <AddCircleIcon onClick={() => setShowTematic(true)} sx={{ color: colorPalette?.buttonColor, cursor: 'pointer' }} />
                         </Box>
                     </Box>
                 </Box>
-            </div>
+            </div >
 
-            <CronologicCard />
-            <SomaticCard />
-            <TematicCard />
-            <FutureCard />
-            <PotencializationCard
-                arrayPotencialization={arrayPotencialization}
-                setArrayPotencialization={setArrayPotencialization}
-            />
+            {selectedConditions.includes('cronologico') && <CronologicCard selectedConditions={selectedConditions} />}
+            {selectedConditions == 'somatico' && <SomaticCard />}
+            {selectedConditions.includes('tematico') && <TematicCard selectedConditions={selectedConditions}
+                selectedTemes={selectedTemes} />}
+            {selectedConditions.includes('futuro') && <FutureCard selectedConditions={selectedConditions}
+                selectedTemes={selectedTemes} />}
+            {
+                selectedConditions.includes('potencializacao') && <PotencializationCard
+                    arrayPotencialization={arrayPotencialization}
+                    setArrayPotencialization={setArrayPotencialization}
+                    selectedTemes={selectedTemes}
+                />
+            }
 
 
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
@@ -549,17 +551,7 @@ export default function ConsultationRecord(props) {
 
                     <Box sx={{ display: 'flex', gap: 3, justifyContent: 'space-between', alignItems: 'center' }}>
                         <Text bold large>Adicionar Tema</Text>
-                        <Box sx={{
-                            ...styles.menuIcon,
-                            backgroundImage: `url(${icons.gray_close})`,
-                            transition: '.3s',
-                            width: 15,
-                            height: 15,
-                            "&:hover": {
-                                opacity: 0.8,
-                                cursor: 'pointer'
-                            },
-                        }}
+                        <Box sx={styles.iconClose}
                             onClick={() => setUploadFile(false)} />
                     </Box>
                     <Divider />
@@ -793,6 +785,44 @@ const styles = {
         backgroundPosition: 'center',
         width: 20,
         height: 20,
+    },
+    iconCondition: {
+        backgroundSize: 'cover',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center',
+        transition: '.3s',
+        width: 60, height: 50,
+        aspectRatio: '1/1',
+        "&:hover": {
+            opacity: 0.8,
+            cursor: 'pointer'
+        }
+    },
+    iconRemove: {
+        backgroundSize: 'cover',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center',
+        backgroundImage: `url('/icons/remove_icon.png')`,
+        width: 13,
+        height: 13,
+        "&:hover": {
+            opacity: 0.8,
+            cursor: 'pointer',
+            transform: 'scale(1.1, 1.1)'
+        }
+    },
+    iconClose: {
+        backgroundSize: 'cover',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center',
+        backgroundImage: `url(${icons.gray_close})`,
+        transition: '.3s',
+        width: 15,
+        height: 15,
+        "&:hover": {
+            opacity: 0.8,
+            cursor: 'pointer'
+        }
     },
     inputSection: {
         flex: 1,

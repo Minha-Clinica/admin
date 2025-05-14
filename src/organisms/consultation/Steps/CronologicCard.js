@@ -4,7 +4,8 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { useAppContext } from "../../../context/AppContext";
 
 
-export const CronologicCard = () => {
+export const CronologicCard = (props) => {
+    const { selectedConditions } = props
     const [ageGroup, setAgeGroup] = useState({
         idade_inicial: 0,
         idade_final: 5
@@ -53,7 +54,7 @@ export const CronologicCard = () => {
                     </Box>
                 </Box>
 
-                <Box sx={{ display: 'flex', gap: 1, alignItems: 'start', flexDirection: 'column' }}>
+                {selectedConditions.includes('somatico') && <Box sx={{ display: 'flex', gap: 1, alignItems: 'start', flexDirection: 'column' }}>
                     <Text large bold>IDF</Text>
                     <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                         <TextInput
@@ -64,7 +65,7 @@ export const CronologicCard = () => {
                         />
                         <AddCircleIcon sx={{ color: colorPalette?.buttonColor, cursor: 'pointer', maringLeft: 2 }} />
                     </Box>
-                </Box>
+                </Box>}
             </Box>
         </Box>
     )

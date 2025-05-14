@@ -5,7 +5,7 @@ import { useAppContext } from "../../../context/AppContext";
 import { Marks } from "../Marks";
 
 
-export const PotencializationCard = ({ arrayPotencialization, setArrayPotencialization }) => {
+export const PotencializationCard = ({ arrayPotencialization, setArrayPotencialization, selectedTemes }) => {
     const [currentTemeName, setCurrentTemeName] = useState("Rejeição");
     const [potencializationData, setPotencializationData] = useState({
         valor_inicial: 0,
@@ -35,18 +35,27 @@ export const PotencializationCard = ({ arrayPotencialization, setArrayPotenciali
             </Box>
 
             <Box sx={{ display: 'flex', gap: 3, padding: '0px 10px', flexDirection: 'column' }}>
-                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-                    <TextInput
-                        placeholder='0'
-                        value={currentTemeName}
-                        onChange={({ target }) => setCurrentTemeName(target.value)}
-                        InputProps={{ style: { height: 30 } }}
-                    />
 
-                    <AddCircleIcon onClick={() => handleAddTeme()} sx={{ color: colorPalette?.buttonColor, cursor: 'pointer', maringLeft: 2 }} />
-
-                </Box>
-
+                {selectedTemes.length > 0 ? (
+                    <Box sx={{ display: 'flex' }}>
+                        <Box sx={{
+                            display: 'flex', gap: 2, alignItems: 'center', justifyContent: 'center',
+                            backgroundColor: colorPalette?.primary, padding: '12px 15px', height: '35px', borderRadius: 2
+                        }}>
+                            <Text bold>{selectedTemes[0]}</Text>
+                        </Box>
+                    </Box>
+                ) : (
+                    <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                        <TextInput
+                            placeholder='0'
+                            value={currentTemeName}
+                            onChange={({ target }) => setCurrentTemeName(target.value)}
+                            InputProps={{ style: { height: 30 } }}
+                        />
+                        <AddCircleIcon onClick={() => handleAddTeme()} sx={{ color: colorPalette?.buttonColor, cursor: 'pointer', maringLeft: 2 }} />
+                    </Box>
+                )}
                 <Marks setOpitionsMark={setOpitionsMark} opitionsMark={opitionsMark} />
 
                 <Box sx={{ display: 'flex', gap: 1, alignItems: 'start', flexDirection: 'column' }}>
