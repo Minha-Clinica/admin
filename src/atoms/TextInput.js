@@ -5,13 +5,14 @@ import InputAdornment from '@mui/material/InputAdornment';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import IconButton from '@mui/material/IconButton';
+import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
 import { Box } from "./Box";
 import { Text } from "./Text";
 import { useState } from "react";
 
 
 export const TextInput = (props) => {
-   const { InputProps = {}, label = '', bold = false, InputLabelProps = {}, small = false } = props;
+   const { InputProps = {}, label = '', bold = false, InputLabelProps = {}, small = false, onActive = () => { } } = props;
    const { colorPalette } = useAppContext();
    const [showPassword, setShowPassword] = useState(false);
 
@@ -61,7 +62,21 @@ export const TextInput = (props) => {
                      {showPassword ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
                </InputAdornment>
+            ) : (props.type === 'comment' || props.type === 'comment-active') ? (
+               <InputAdornment position="end">
+                  <IconButton
+                     onClick={onActive}
+                     edge="end"
+                  >
+                     <ChatOutlinedIcon sx={{ fontSize: '11px', color: props.type === 'comment-active' ? 'green' : 'gray' }} />
+                  </IconButton>
+               </InputAdornment>
             ) : null,
+            inputProps: {
+               style: {
+                  color: colorPalette.textColor
+               }
+            },
 
             startAdornment: props.type === "coin"
                ? (

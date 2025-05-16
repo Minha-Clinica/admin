@@ -11,8 +11,10 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import Dropzone from "react-dropzone"
 import Link from "next/link"
 import { CronologicCard, FutureCard, PotencializationCard, SomaticCard, TematicCard } from "../../organisms"
+import { v4 as uuidv4 } from 'uuid';
 
-export default function ConsultationRecord(props) {
+
+function ConsultationRecord() {
     const { setLoading, alert, colorPalette, user } = useAppContext()
     let userId = user?.id;
     const router = useRouter()
@@ -30,14 +32,32 @@ export default function ConsultationRecord(props) {
     })
     const [sessions, setSessions] = useState([])
     const [selectedConditions, setSelectedConditions] = useState([])
-    const [arrayPotencialization, setArrayPotencialization] = useState({
-        tema: '',
+    const [arrayPotencialization, setArrayPotencialization] = useState([]);
+    const [potencializationData, setPotencializationData] = useState({
+        stepKey: '',
         potencializacao: []
     });
+
     const [arraySomatic, setArraySomatic] = useState([]);
+    const [somaticData, setSomaticData] = useState({
+        stepKey: '',
+        faixaIdade: [],
+    });
     const [arrayCronologic, setArrayCronologic] = useState([]);
+    const [cronologicData, setCronologicData] = useState({
+        stepKey: '',
+        faixaIdade: [],
+    });
     const [arrayFuture, setArrayFuture] = useState([]);
+    const [futureData, setFutureData] = useState({
+        stepKey: '',
+        temas: [],
+    })
     const [arrayTematic, setArrayTematic] = useState([]);
+    const [tematicData, setTematicData] = useState({
+        stepKey: '',
+        temas: [],
+    })
     const [selectedTemes, setSelectedTemes] = useState([]);
     const boxRef = useRef(null);
     const [isSticky, setIsSticky] = useState(false);
@@ -229,13 +249,13 @@ export default function ConsultationRecord(props) {
         }
     }
 
-    const toggleCondition = (value) => {
-        if (selectedConditions.includes(value)) {
-            setSelectedConditions(selectedConditions.filter((condition) => condition !== value));
-        } else {
-            setSelectedConditions([...selectedConditions, value]);
-        }
-    };
+    // const toggleCondition = (value) => {
+    //     if (selectedConditions.includes(value)) {
+    //         setSelectedConditions(selectedConditions.filter((condition) => condition !== value));
+    //     } else {
+    //         setSelectedConditions([...selectedConditions, value]);
+    //     }
+    // };
 
     const handleAddComment = () => {
         const newData = [...discomfortLevel];
@@ -309,13 +329,78 @@ export default function ConsultationRecord(props) {
     // };
 
 
+    const toggleCondition = (value) => {
+        setSelectedConditions(prev => {
+            const isSelected = prev.includes(value);
+            if (isSelected) {
+                // Deselecionando: mover dados para o array correspondente
+                switch (value) {
+                    case 'cronologico':
+                        if (cronologicData.faixaIdade.length > 0) {
+                            setArrayCronologic(prevArray => [...prevArray, cronologicData]);
+                        }
+
+                        setCronologicData({ stepKey: '', faixaIdade: [] });
+                        break;
+                    case 'somatico':
+                        if (somaticData.faixaIdade.length > 0) {
+                            setArraySomatic(prevArray => [...prevArray, somaticData]);
+                        }
+                        setSomaticData({ stepKey: '', faixaIdade: [] });
+                        break;
+                    case 'tematico':
+                        if (tematicData.temas.length > 0) {
+                            setArrayTematic(prevArray => [...prevArray, tematicData]);
+                        }
+                        setTematicData({ stepKey: '', temas: [] });
+                        break;
+                    case 'futuro':
+                        if (futureData.temas.length > 0) {
+                            setArrayFuture(prevArray => [...prevArray, futureData]);
+                        }
+                        setFutureData({ stepKey: '', temas: [] });
+                        break;
+                    case 'potencializacao':
+                        if (potencializationData.potencializacao.length > 0) {
+                            setArrayPotencialization(prevArray => [...prevArray, potencializationData]);
+                        }
+                        setPotencializationData({ stepKey: '', potencializacao: [] });
+                        break;
+                }
+                return prev.filter(item => item !== value);
+            } else {
+                // Selecionando: iniciar novo stepKey e resetar os dados temporários
+                const newStepKey = `${uuidv4()}`; // ← usando UUID aqui
+                switch (value) {
+                    case 'cronologico':
+                        setCronologicData({ stepKey: newStepKey, faixaIdade: [] });
+                        break;
+                    case 'somatico':
+                        setSomaticData({ stepKey: newStepKey, faixaIdade: [] });
+                        break;
+                    case 'tematico':
+                        setTematicData({ stepKey: newStepKey, temas: [] });
+                        break;
+                    case 'futuro':
+                        setFutureData({ stepKey: newStepKey, temas: [] });
+                        break;
+                    case 'potencializacao':
+                        setPotencializationData({ stepKey: newStepKey, potencializacao: [] });
+                        break;
+                }
+                return [...prev, value];
+            }
+        });
+    };
+
+
+
     const groupCondition = [
         { label: 'Cronológico', value: 'cronologico', icon: 'red_icon' },
         { label: 'Somático', value: 'somatico', icon: 'yellow_icon' },
         { label: 'Temático', value: 'tematico', icon: 'blue_icon' },
         { label: 'Futuro', value: 'futuro', icon: 'pink_icon' },
         { label: 'Potencialização', value: 'potencializacao', icon: 'orange_icon' },
-
     ]
 
 
@@ -509,7 +594,16 @@ export default function ConsultationRecord(props) {
                 </Box>
             </div >
 
-            {selectedConditions.includes('cronologico') && <CronologicCard selectedConditions={selectedConditions} />}
+            {arrayCronologic?.map((item, idx) => (
+                <pre key={idx}>{JSON.stringify(item, null, 2)}</pre>
+            ))}
+
+            {selectedConditions.includes('cronologico') &&
+                <CronologicCard
+                    selectedConditions={selectedConditions}
+                    cronologicData={cronologicData}
+                    setCronologicData={setCronologicData}
+                />}
             {selectedConditions == 'somatico' && <SomaticCard />}
             {selectedConditions.includes('tematico') && <TematicCard selectedConditions={selectedConditions}
                 selectedTemes={selectedTemes} />}
@@ -684,7 +778,6 @@ export default function ConsultationRecord(props) {
     )
 }
 
-
 const DropZoneSession = ({ callBack = () => { }, setFilesDrop, id }) => {
 
     const { setLoading, alert, theme } = useAppContext()
@@ -832,3 +925,6 @@ const styles = {
         flexDirection: { xs: 'column', sm: 'column', md: 'row', lg: 'row' }
     }
 }
+
+
+export default ConsultationRecord
