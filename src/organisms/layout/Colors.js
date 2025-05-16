@@ -10,7 +10,7 @@ export const Colors = {
    green: '#6a9744',
    red: '#cc3e12',
    yellow: '#ffd200',
-   
+   yellowLight: '#FFB91D',
    darkPrimary: '#111827' + `88`,
    darkSecondary: '#111827',
    darkThird: '#1F2044',
@@ -24,6 +24,7 @@ export const Colors = {
    clearButton: '#F9604B',
    clearText: '#1C2126',
    clearInput: '#F2F4F8',
+   
 }
 
 export const icons = {

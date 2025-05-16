@@ -6,12 +6,16 @@ import { Box, ContentContainer, TextInput, Text, Button, Divider } from "../../a
 import moment from "moment";
 import { useAppContext } from "../../context/AppContext"
 import { calculationAgeUser, getRandomInt } from "../../helpers"
-import { icons } from "../../organisms/layout/Colors"
+import { Colors, icons } from "../../organisms/layout/Colors"
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import Dropzone from "react-dropzone"
 import Link from "next/link"
 import { CronologicCard, FutureCard, PotencializationCard, SomaticCard, TematicCard } from "../../organisms"
 import { v4 as uuidv4 } from 'uuid';
+import { ViewCronologicCard } from "../../organisms/consultation/Steps/View/ViewCronologicCard"
+import { ViewTematicCard } from "../../organisms/consultation/Steps/View/ViewTematicCard"
+import { ViewFutureCard } from "../../organisms/consultation/Steps/View/ViewFutureCard"
+import { ViewPotencializationCard } from "../../organisms/consultation/Steps/View/ViewPotencializationCard"
 
 
 function ConsultationRecord() {
@@ -32,12 +36,6 @@ function ConsultationRecord() {
     })
     const [sessions, setSessions] = useState([])
     const [selectedConditions, setSelectedConditions] = useState([])
-    const [arrayPotencialization, setArrayPotencialization] = useState([]);
-    const [potencializationData, setPotencializationData] = useState({
-        stepKey: '',
-        potencializacao: []
-    });
-
     const [arraySomatic, setArraySomatic] = useState([]);
     const [somaticData, setSomaticData] = useState({
         stepKey: '',
@@ -58,6 +56,11 @@ function ConsultationRecord() {
         stepKey: '',
         temas: [],
     })
+    const [arrayPotencialization, setArrayPotencialization] = useState([]);
+    const [potencializationData, setPotencializationData] = useState({
+        stepKey: '',
+        temas: []
+    });
     const [arrayThemes, setArrayThemes] = useState([]);
     const [selectedTemes, setSelectedTemes] = useState([]);
     const boxRef = useRef(null);
@@ -361,13 +364,13 @@ function ConsultationRecord() {
                         setFutureData({ stepKey: '', temas: [] });
                         break;
                     case 'potencializacao':
-                        if (potencializationData.potencializacao.length > 0) {
+                        if (potencializationData.temas.length > 0) {
                             setArrayPotencialization(prevArray => [...prevArray, potencializationData]);
                         }
-                        setPotencializationData({ stepKey: '', potencializacao: [] });
+                        setPotencializationData({ stepKey: '', temas: [] });
                         break;
                 }
-                return prev.filter(item => item !== value);
+                return [];
             } else {
                 // Selecionando: iniciar novo stepKey e resetar os dados temporários
                 const newStepKey = `${uuidv4()}`; // ← usando UUID aqui
@@ -385,7 +388,7 @@ function ConsultationRecord() {
                         setFutureData({ stepKey: newStepKey, temas: [] });
                         break;
                     case 'potencializacao':
-                        setPotencializationData({ stepKey: newStepKey, potencializacao: [] });
+                        setPotencializationData({ stepKey: newStepKey, temas: [] });
                         break;
                 }
                 return [...prev, value];
@@ -402,6 +405,15 @@ function ConsultationRecord() {
         { label: 'Futuro', value: 'futuro', icon: 'pink_icon' },
         { label: 'Potencialização', value: 'potencializacao', icon: 'orange_icon' },
     ]
+
+    const showHistoric = () => {
+        if (arrayCronologic.length > 0) return true
+        if (arraySomatic.length > 0) return true
+        if (arrayTematic.length > 0) return true
+        if (arrayFuture.length > 0) return true
+        if (arrayPotencialization.length > 0) return true
+        return false
+    }
 
 
 
@@ -481,7 +493,7 @@ function ConsultationRecord() {
 
                             <Box sx={{
                                 display: 'flex', flexDirection: 'column', alignItems: 'center',
-                                backgroundColor: currentSession ? colorPalette.third : date > currentDate ? '#d4f5d4' : colorPalette.primary,
+                                backgroundColor: currentSession ? colorPalette.third : date > currentDate ? '#d4f5d4' : Colors.yellowLight + '66',
                                 padding: '8px 10px', borderRadius: 2,
                                 '&:hover': {
                                     cursor: !currentSession && 'pointer',
@@ -596,13 +608,33 @@ function ConsultationRecord() {
                 </Box>
             </div >
 
+            <Box sx={{ display: showHistoric() ? 'flex' : 'none', gap: 1, alignItems: 'center', justifyContent: 'center', margin: '15px 0px' }}>
+                <Box sx={{ height: '1px', width: '100%', backgroundColor: 'darkgray' }} />
+                <Text small bold style={{ color: 'darkgray' }}>Registrado</Text>
+                <Box sx={{ height: '1px', width: '100%', backgroundColor: 'darkgray' }} />
+            </Box>
+
             {arrayCronologic?.map((item, idx) => (
-                <pre key={idx}>{JSON.stringify(item, null, 2)}</pre>
+                <ViewCronologicCard arrayCronologic={item} key={idx} />
             ))}
 
             {arrayTematic?.map((item, idx) => (
-                <pre key={idx}>{JSON.stringify(item, null, 2)}</pre>
+                <ViewTematicCard arrayTematic={item} key={idx} />
             ))}
+
+            {arrayFuture?.map((item, idx) => (
+                <ViewFutureCard arrayFuture={item} key={idx} />
+            ))}
+
+            {arrayPotencialization?.map((item, idx) => (
+                <ViewPotencializationCard arrayPotencialization={item} key={idx} />
+            ))}
+
+            <Box sx={{ display: showHistoric() ? 'flex' : 'none', gap: 1, alignItems: 'center', justifyContent: 'center', margin: '15px 0px' }}>
+                <Box sx={{ height: '1px', width: '100%', backgroundColor: 'darkgray' }} />
+                <Text small bold style={{ color: 'darkgray' }}>Registrado</Text>
+                <Box sx={{ height: '1px', width: '100%', backgroundColor: 'darkgray' }} />
+            </Box>
 
             {selectedConditions.includes('cronologico') &&
                 <CronologicCard
@@ -610,20 +642,30 @@ function ConsultationRecord() {
                     cronologicData={cronologicData}
                     setCronologicData={setCronologicData}
                 />}
-            {selectedConditions == 'somatico' && <SomaticCard />}
-            {selectedConditions.includes('tematico') && <TematicCard
-                selectedConditions={selectedConditions}
-                selectedTemes={selectedTemes}
-                tematicData={tematicData}
-                setTematicData={setTematicData}
-            />}
-            {selectedConditions.includes('futuro') && <FutureCard selectedConditions={selectedConditions}
-                selectedTemes={selectedTemes} />}
+            {selectedConditions == 'somatico' &&
+                <SomaticCard />}
+            {selectedConditions.includes('tematico') &&
+                <TematicCard
+                    selectedConditions={selectedConditions}
+                    selectedTemes={selectedTemes}
+                    tematicData={tematicData}
+                    setTematicData={setTematicData}
+                />}
+            {selectedConditions.includes('futuro') &&
+                <FutureCard
+                    selectedConditions={selectedConditions}
+                    selectedTemes={selectedTemes}
+                    setFutureData={setFutureData}
+                    futureData={futureData}
+                />}
             {
-                selectedConditions.includes('potencializacao') && <PotencializationCard
+                selectedConditions.includes('potencializacao') &&
+                <PotencializationCard
                     arrayPotencialization={arrayPotencialization}
                     setArrayPotencialization={setArrayPotencialization}
                     selectedTemes={selectedTemes}
+                    potencializationData={potencializationData}
+                    setPotencializationData={setPotencializationData}
                 />
             }
 

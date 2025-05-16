@@ -27,12 +27,15 @@ export const CronologicCard = (props) => {
         microfase: false
     }
 
-    const ageGroup = {
-        idade_inicial: 0,
-        idade_final: 5
-    }
+
 
     function handleAddToggleAge() {
+
+        const ageGroup = {
+            idade_inicial: 0,
+            idade_final: 5,
+            dt_criacao: new Date()
+        }
 
         const novaIDE = {
             valor_inicial: 0,

@@ -7,7 +7,6 @@ import { v4 as uuidv4 } from 'uuid';
 
 export const TematicCard = (props) => {
     const { selectedConditions, selectedTemes, setTematicData, tematicData } = props
-    const [initialTeme, setInitialTeme] = useState("Rejeição");
     const { colorPalette } = useAppContext()
     const [activeModal, setActiveModal] = useState({
         active: false,
@@ -54,6 +53,7 @@ export const TematicCard = (props) => {
         const novoTema = {
             tema: {
                 nome_tema: '',
+                dt_criacao: new Date(),
                 ide: [novaIDE],
                 idf: [novaIDF]
             },
@@ -64,8 +64,6 @@ export const TematicCard = (props) => {
             temas: [...prev.temas, novoTema]
         }));
     }
-
-    console.log('tematicData: ', tematicData)
 
     function handleAddToggleIde() {
         setTematicData((prev) => {
@@ -122,7 +120,6 @@ export const TematicCard = (props) => {
             };
         });
     }
-
 
     async function handleSaveComment() {
         setTematicData(prev => {
@@ -207,9 +204,6 @@ export const TematicCard = (props) => {
     }
 
     const handleChangeTheme = ({ value, index, field }) => {
-
-        console.log('valores', value, index, field)
-
         setTematicData((prevTematicData) => {
             const novoTema = prevTematicData?.temas?.map((item, indexFaixa) => {
                 console.log('entrou em tema', item)
