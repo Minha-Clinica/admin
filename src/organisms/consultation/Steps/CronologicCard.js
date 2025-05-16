@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Box, Button, Text, TextInput } from "../../../atoms"
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { useAppContext } from "../../../context/AppContext";
-import { Marks } from "../Marks";
 import { CommentModal } from "../Comments";
 import { v4 as uuidv4 } from 'uuid';
 
@@ -17,44 +16,37 @@ export const CronologicCard = (props) => {
         comentario: '',
         key: ''
     })
-    const [ageGroup, setAgeGroup] = useState({
-        idade_inicial: 0,
-        idade_final: 5
-    });
-    const [indiceDesconfortoEmocional, setIndiceDesconfortoEmocional] = useState({
-        valor_inicial: 0,
-        comentario: '',
-        microfase: false
-    })
-    const [indiceFisico, setIndiceFisico] = useState({
-        valor_inicial: 0,
-        comentario: '',
-        microfase: false
-    })
-    const [opitionsMark, setOpitionsMark] = useState({
-        threeP: false,
-        microfase: false
-    });
 
     useEffect(() => {
         handleAddToggleAge();
     }, [])
+
+    const indices = {
+        valor_inicial: 0,
+        comentario: '',
+        microfase: false
+    }
+
+    const ageGroup = {
+        idade_inicial: 0,
+        idade_final: 5
+    }
 
     function handleAddToggleAge() {
 
         const novaIDE = {
             valor_inicial: 0,
             comentario: '',
-            tresP: opitionsMark.threeP,
-            microfase: opitionsMark.microfase,
+            tresP: false,
+            microfase: false,
             key: uuidv4()
         };
 
         const novaIDF = {
             valor_inicial: 0,
             comentario: '',
-            tresP: opitionsMark.threeP,
-            microfase: opitionsMark.microfase,
+            tresP: false,
+            microfase: false,
             key: uuidv4()
         };
 
@@ -75,9 +67,9 @@ export const CronologicCard = (props) => {
     function handleAddToggleIde() {
         setCronologicData((prev) => {
             const novaIDE = {
-                ...indiceDesconfortoEmocional,
-                tresP: opitionsMark.threeP,
-                microfase: opitionsMark.microfase,
+                ...indices,
+                tresP: false,
+                microfase: false,
                 key: uuidv4()
             };
 
@@ -103,9 +95,9 @@ export const CronologicCard = (props) => {
     function handleAddToggleIdf() {
         setCronologicData((prev) => {
             const novaIDF = {
-                ...indiceFisico,
-                tresP: opitionsMark.threeP,
-                microfase: opitionsMark.microfase,
+                ...indices,
+                tresP: false,
+                microfase: false,
                 key: uuidv4()
             };
 
@@ -243,9 +235,6 @@ export const CronologicCard = (props) => {
                             if (ide.key === keyId) {
                                 ide[field] = !ide[field]
                             }
-
-                            console.log('ide', ide)
-
                             return ide
                         })
                         break;

@@ -5,7 +5,7 @@ import { api } from "../../api/api"
 import { Box, ContentContainer, TextInput, Text, Button, Divider } from "../../atoms"
 import moment from "moment";
 import { useAppContext } from "../../context/AppContext"
-import { getRandomInt } from "../../helpers"
+import { calculationAgeUser, getRandomInt } from "../../helpers"
 import { icons } from "../../organisms/layout/Colors"
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import Dropzone from "react-dropzone"
@@ -58,13 +58,13 @@ function ConsultationRecord() {
         stepKey: '',
         temas: [],
     })
+    const [arrayThemes, setArrayThemes] = useState([]);
     const [selectedTemes, setSelectedTemes] = useState([]);
     const boxRef = useRef(null);
     const [isSticky, setIsSticky] = useState(false);
 
 
     useEffect(() => {
-        console.log('boxRef: ', boxRef.current)
         const handleScroll = () => {
             if (!boxRef.current) return;
 
@@ -154,9 +154,9 @@ function ConsultationRecord() {
             const response = await api.get(`/session/theme/${id}`)
             const { data } = response
             if (data.length > 0) {
-                setArrayTematic(data)
+                setArrayThemes(data)
             } else {
-                setArrayTematic([])
+                setArrayThemes([])
             }
         } catch (error) {
             console.log(error)
@@ -404,6 +404,7 @@ function ConsultationRecord() {
     ]
 
 
+
     return (
         <>
 
@@ -422,7 +423,7 @@ function ConsultationRecord() {
                         borderRadius: 40, width: 40, height: 40,
                         justifyContent: 'center',
                     }}>
-                        <Text bold large style={{ color: '#fff' }}>25</Text>
+                        <Text bold large style={{ color: '#fff' }}>{calculationAgeUser(consultRecordData?.nascimento)}</Text>
                     </Box>
 
                     <Box sx={{
@@ -431,7 +432,7 @@ function ConsultationRecord() {
                         borderRadius: 40, width: 40, height: 40,
                         justifyContent: 'center',
                     }}>
-                        <Text bold large style={{ color: '#fff' }}>30ª</Text>
+                        <Text bold large style={{ color: '#fff' }}>{currentSessionNumber || 1}ª</Text>
                     </Box>
                 </Box>
 
@@ -462,6 +463,7 @@ function ConsultationRecord() {
                     let formattedDate = item?.data;
                     let formattedHour = item?.data;
 
+                    const date = new Date();
                     const currentDate = new Date(item?.data);
                     const options = {
                         day: 'numeric',
@@ -479,7 +481,7 @@ function ConsultationRecord() {
 
                             <Box sx={{
                                 display: 'flex', flexDirection: 'column', alignItems: 'center',
-                                backgroundColor: currentSession ? colorPalette.third : colorPalette.primary,
+                                backgroundColor: currentSession ? colorPalette.third : date > currentDate ? '#d4f5d4' : colorPalette.primary,
                                 padding: '8px 10px', borderRadius: 2,
                                 '&:hover': {
                                     cursor: !currentSession && 'pointer',
@@ -562,7 +564,7 @@ function ConsultationRecord() {
                             width: '100%', height: '100%', alignItems: 'end', padding: '5px', borderRadius: 2
                         }}>
                             <Box sx={{ width: '100%', height: '100%', display: 'flex', flexWrap: `wrap`, gap: 1.8, minWidth: 0, }}>
-                                {arrayTematic?.map((item, tematicIndex) => (
+                                {arrayThemes?.map((item, tematicIndex) => (
                                     <Tooltip key={tematicIndex} title={selectedTemes?.includes(item?.nome_tema) && 'Tema em uso'} placement="top" arrow sx={{ maxWidth: 200, wordWrap: 'break-word' }}>
                                         <div >
                                             <Box sx={{
@@ -598,6 +600,10 @@ function ConsultationRecord() {
                 <pre key={idx}>{JSON.stringify(item, null, 2)}</pre>
             ))}
 
+            {arrayTematic?.map((item, idx) => (
+                <pre key={idx}>{JSON.stringify(item, null, 2)}</pre>
+            ))}
+
             {selectedConditions.includes('cronologico') &&
                 <CronologicCard
                     selectedConditions={selectedConditions}
@@ -605,8 +611,12 @@ function ConsultationRecord() {
                     setCronologicData={setCronologicData}
                 />}
             {selectedConditions == 'somatico' && <SomaticCard />}
-            {selectedConditions.includes('tematico') && <TematicCard selectedConditions={selectedConditions}
-                selectedTemes={selectedTemes} />}
+            {selectedConditions.includes('tematico') && <TematicCard
+                selectedConditions={selectedConditions}
+                selectedTemes={selectedTemes}
+                tematicData={tematicData}
+                setTematicData={setTematicData}
+            />}
             {selectedConditions.includes('futuro') && <FutureCard selectedConditions={selectedConditions}
                 selectedTemes={selectedTemes} />}
             {
