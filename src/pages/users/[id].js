@@ -35,7 +35,8 @@ export default function EditUser() {
         login: null,
         nascimento: null,
         foto_perfil_id: bgPhoto?.location || fileCallback?.filePreview || null,
-        nome_social: null
+        nome_social: null,
+        pro_bono: 0
     })
     const [contract, setContract] = useState({
         funcao: null,
@@ -597,6 +598,19 @@ export default function EditUser() {
                                     </Box>
                                     </>
                                 }
+
+                                <RadioItem
+                                    valueRadio={userData?.pro_bono}
+                                    group={groupAdmin}
+                                    title="Pró-bono *"
+                                    horizontal={mobile ? false : true}
+                                    onSelect={(value) =>
+                                        setUserData({
+                                            ...userData,
+                                            pro_bono: parseInt(value)
+                                        })
+                                    }
+                                />
                             </Box>
                         </Box>
                     </Box>

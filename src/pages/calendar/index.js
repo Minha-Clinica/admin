@@ -138,7 +138,7 @@ export default function CalendarComponent() {
     const [users, setUsers] = useState([])
     const [employees, setEmployees] = useState([])
     const [professionalId, setProfissionalId] = useState(isTerapeuta ? user.id : null)
-    const [duration, setDuration] = useState(60);
+    const [duration, setDuration] = useState(70);
 
     const filter = (item) => {
         return filterReservas ? (parseInt(item.disponivel) === 1) : (item);

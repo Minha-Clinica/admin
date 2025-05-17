@@ -683,7 +683,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, filters
                                             },
                                         }}>
                                             <TableCell sx={{ padding: '15px 10px', textAlign: 'center' }}>
-                                                <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column', alignItems: 'center' }}>
+                                                <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column', alignItems: 'center', position: 'relative' }}>
                                                     <Avatar
                                                         isBordered
                                                         radius="full"
@@ -691,6 +691,12 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, filters
                                                         src={item?.url_foto_pac || ''}
                                                     />
                                                     <Text>{item.paciente}</Text>
+                                                    {item.pro_bono ? (<Box sx={{
+                                                        display: 'flex', position: 'absolute', top: -10, left: 0, alignItems: 'center', justifyContent: 'center',
+                                                        padding: '3px 5px', borderRadius: 1, backgroundColor: colorPalette?.third
+                                                    }}>
+                                                        <Text xsmall style={{ color: '#fff' }}>pró-bono</Text>
+                                                    </Box>) : <></>}
                                                 </Box>
                                             </TableCell>
                                             <TableCell sx={{ padding: '15px 10px', textAlign: 'center' }}>
