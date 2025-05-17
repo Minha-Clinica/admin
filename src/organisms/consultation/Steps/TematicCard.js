@@ -39,7 +39,8 @@ export const TematicCard = (props) => {
             comentario: '',
             tresP: false,
             microfase: false,
-            key: uuidv4()
+            key: uuidv4(),
+            tipo_indice: 'ide'
         };
 
         const novaIDF = {
@@ -47,7 +48,8 @@ export const TematicCard = (props) => {
             comentario: '',
             tresP: false,
             microfase: false,
-            key: uuidv4()
+            key: uuidv4(),
+            tipo_indice: 'idf'
         };
 
         const novoTema = {
@@ -71,7 +73,8 @@ export const TematicCard = (props) => {
                 ...indices,
                 tresP: false,
                 microfase: false,
-                key: uuidv4()
+                key: uuidv4(),
+                tipo_indice: 'ide'
             };
 
             const novoTema = [...prev.temas];
@@ -99,7 +102,8 @@ export const TematicCard = (props) => {
                 ...indices,
                 tresP: false,
                 microfase: false,
-                key: uuidv4()
+                key: uuidv4(),
+                tipo_indice: 'idf'
             };
 
             const novoTema = [...prev.temas];

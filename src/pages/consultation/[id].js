@@ -1,6 +1,6 @@
 import { useRouter } from "next/router"
 import { useEffect, useRef, useState } from "react"
-import { Avatar, Backdrop, Tooltip } from "@mui/material"
+import { Avatar, Backdrop, CircularProgress, Tooltip } from "@mui/material"
 import { api } from "../../api/api"
 import { Box, ContentContainer, TextInput, Text, Button, Divider } from "../../atoms"
 import moment from "moment";
@@ -27,6 +27,7 @@ function ConsultationRecord() {
     const [discomfortLevel, setDiscomfortLevel] = useState([]);
     const [tematicName, setTematicName] = useState({ tema: '' })
     const [showTematic, setShowTematic] = useState(false)
+    const [loadingData, setLoadingData] = useState(false)
     const [showUploadFile, setUploadFile] = useState(false)
     const [showComment, setShowComment] = useState({ active: false, index: 0, text: '', new: true })
     const [currentSessionNumber, setCurrentSessionNumber] = useState(1)
@@ -34,31 +35,33 @@ function ConsultationRecord() {
     const [consultRecordData, setConsultRecordData] = useState({
         anotacoes: ''
     })
+    const [arraySessions, setArraySessions] = useState([])
     const [sessions, setSessions] = useState([])
     const [selectedConditions, setSelectedConditions] = useState([])
-    const [arraySomatic, setArraySomatic] = useState([]);
     const [somaticData, setSomaticData] = useState({
         stepKey: '',
+        etapa: 'somatico',
         faixaIdade: [],
     });
-    const [arrayCronologic, setArrayCronologic] = useState([]);
     const [cronologicData, setCronologicData] = useState({
         stepKey: '',
+        etapa: 'cronologico',
         faixaIdade: [],
     });
-    const [arrayFuture, setArrayFuture] = useState([]);
     const [futureData, setFutureData] = useState({
         stepKey: '',
+        etapa: 'futuro',
         temas: [],
     })
-    const [arrayTematic, setArrayTematic] = useState([]);
     const [tematicData, setTematicData] = useState({
         stepKey: '',
+        etapa: 'tematico',
         temas: [],
     })
     const [arrayPotencialization, setArrayPotencialization] = useState([]);
     const [potencializationData, setPotencializationData] = useState({
         stepKey: '',
+        etapa: 'potencializacao',
         temas: []
     });
     const [arrayThemes, setArrayThemes] = useState([]);
@@ -134,6 +137,17 @@ function ConsultationRecord() {
         }
     };
 
+    const getSessionStepData = async () => {
+        try {
+            const response = await api.get(`/session/steps/${id}`)
+            const { data } = response
+            setArraySessions(data)
+        } catch (error) {
+            console.log(error)
+            return error
+        }
+    }
+
 
 
     const handleGetFiles = async () => {
@@ -198,6 +212,7 @@ function ConsultationRecord() {
             const consult = await getConsult()
             if (consult) {
                 await getThemes()
+                await getSessionStepData()
                 await getSessions(consult.paciente_id, id)
                 await handleGetFiles()
             }
@@ -252,14 +267,6 @@ function ConsultationRecord() {
         }
     }
 
-    // const toggleCondition = (value) => {
-    //     if (selectedConditions.includes(value)) {
-    //         setSelectedConditions(selectedConditions.filter((condition) => condition !== value));
-    //     } else {
-    //         setSelectedConditions([...selectedConditions, value]);
-    //     }
-    // };
-
     const handleAddComment = () => {
         const newData = [...discomfortLevel];
         newData[showComment.index] = { ...newData[showComment.index], comment: showComment.text };
@@ -273,15 +280,6 @@ function ConsultationRecord() {
         setDiscomfortLevel(newData);
         setShowComment({ active: false, index: null, text: '', new: true });
     };
-
-
-
-
-    // const handleInputSomaticChange = (cronoIndex, somaticIndex, key, value, type) => {
-    //     const newData = [...somaticData];
-    //     newData[somaticIndex][key] = value;
-    //     setSomaticData(newData);
-    // };
 
     const handleRemoveFile = async (fileId, key_file) => {
         setLoading(true)
@@ -303,36 +301,47 @@ function ConsultationRecord() {
         }
     };
 
-    // const addNewCronologicData = () => {
-    //     setCronologicData([...cronologicData, { idade_inicial: 0, idade_final: 5 }]);
-    // };
+    const handleAddSessionStep = async (prevArraySessions) => {
+        try {
+            setLoadingData(true)
+            console.log(arraySessions)
+            const response = await api.post(`/session/steps/create/${id}`, { arrayStep: prevArraySessions })
+            if (response.status === 201) {
+                alert.success('Etapa adicionada.')
+                await getSessionStepData()
+            } else {
+                alert.error('Ocorreu um erro ao adicionar etapa.')
+            }
+        } catch (error) {
+            console.log(error)
+            alert.error('Ocorreu um erro ao adicionar etapa.')
+            return error
+        } finally {
+            setLoadingData(false)
+        }
+    }
 
-    // const removeCronologicData = (index) => {
-    //     const newData = [...cronologicData];
-    //     newData.splice(index, 1);
-    //     setCronologicData(newData);
-    // };
+    const handleRemoveStep = async (stepId) => {
+        try {
+            setLoadingData(true)
+            const response = await api.delete(`/session/steps/delete/${stepId}`)
+            if (response.status === 200) {
+                alert.success('Etapa removida.')
+                await getSessionStepData()
+            } else {
+                alert.error('Ocorreu um erro ao deletar etapa.')
+            }
+        } catch (error) {
+            console.log(error)
+            alert.error('Ocorreu um erro ao deletar etapa.')
+            return error
+        } finally {
+            setLoadingData(false)
+        }
+    }
 
-
-
-    // const handleInputSomaticChange = (index, key, value) => {
-    //     const newData = [...somaticData];
-    //     newData[index][key] = value;
-    //     setSomaticData(newData);
-    // };
-
-    // const addNewSomaticData = () => {
-    //     setSomaticData([...somaticData, { nivel_sintoma: 10 }]);
-    // };
-
-    // const removeSomaticData = (index) => {
-    //     const newData = [...somaticData];
-    //     newData.splice(index, 1);
-    //     setSomaticData(newData);
-    // };
-
-
-    const toggleCondition = (value) => {
+    const toggleCondition = async (value) => {
+        let prevArraySessions = [...arraySessions];
         setSelectedConditions(prev => {
             const isSelected = prev.includes(value);
             if (isSelected) {
@@ -340,32 +349,37 @@ function ConsultationRecord() {
                 switch (value) {
                     case 'cronologico':
                         if (cronologicData.faixaIdade.length > 0) {
-                            setArrayCronologic(prevArray => [...prevArray, cronologicData]);
+                            setArraySessions(prevArray => [...prevArray, cronologicData]);
+                            prevArraySessions.push(cronologicData);
                         }
 
                         setCronologicData({ stepKey: '', faixaIdade: [] });
                         break;
                     case 'somatico':
                         if (somaticData.faixaIdade.length > 0) {
-                            setArraySomatic(prevArray => [...prevArray, somaticData]);
+                            setArraySessions(prevArray => [...prevArray, somaticData]);
+                            prevArraySessions.push(somaticData);
                         }
                         setSomaticData({ stepKey: '', faixaIdade: [] });
                         break;
                     case 'tematico':
                         if (tematicData.temas.length > 0) {
-                            setArrayTematic(prevArray => [...prevArray, tematicData]);
+                            setArraySessions(prevArray => [...prevArray, tematicData]);
+                            prevArraySessions.push(tematicData);
                         }
                         setTematicData({ stepKey: '', temas: [] });
                         break;
                     case 'futuro':
                         if (futureData.temas.length > 0) {
-                            setArrayFuture(prevArray => [...prevArray, futureData]);
+                            setArraySessions(prevArray => [...prevArray, futureData]);
+                            prevArraySessions.push(futureData);
                         }
                         setFutureData({ stepKey: '', temas: [] });
                         break;
                     case 'potencializacao':
                         if (potencializationData.temas.length > 0) {
-                            setArrayPotencialization(prevArray => [...prevArray, potencializationData]);
+                            setArraySessions(prevArray => [...prevArray, potencializationData]);
+                            prevArraySessions.push(potencializationData);
                         }
                         setPotencializationData({ stepKey: '', temas: [] });
                         break;
@@ -376,26 +390,29 @@ function ConsultationRecord() {
                 const newStepKey = `${uuidv4()}`; // ← usando UUID aqui
                 switch (value) {
                     case 'cronologico':
-                        setCronologicData({ stepKey: newStepKey, faixaIdade: [] });
+                        setCronologicData({ stepKey: newStepKey, etapa: 'cronologico', faixaIdade: [] });
                         break;
                     case 'somatico':
-                        setSomaticData({ stepKey: newStepKey, faixaIdade: [] });
+                        setSomaticData({ stepKey: newStepKey, etapa: 'somatico', faixaIdade: [] });
                         break;
                     case 'tematico':
-                        setTematicData({ stepKey: newStepKey, temas: [] });
+                        setTematicData({ stepKey: newStepKey, etapa: 'tematico', temas: [] });
                         break;
                     case 'futuro':
-                        setFutureData({ stepKey: newStepKey, temas: [] });
+                        setFutureData({ stepKey: newStepKey, etapa: 'futuro', temas: [] });
                         break;
                     case 'potencializacao':
-                        setPotencializationData({ stepKey: newStepKey, temas: [] });
+                        setPotencializationData({ stepKey: newStepKey, etapa: 'potencializacao', temas: [] });
                         break;
                 }
                 return [...prev, value];
             }
         });
-    };
 
+        if (selectedConditions.includes(value)) {
+            await handleAddSessionStep(prevArraySessions)
+        }
+    };
 
 
     const groupCondition = [
@@ -407,11 +424,7 @@ function ConsultationRecord() {
     ]
 
     const showHistoric = () => {
-        if (arrayCronologic.length > 0) return true
-        if (arraySomatic.length > 0) return true
-        if (arrayTematic.length > 0) return true
-        if (arrayFuture.length > 0) return true
-        if (arrayPotencialization.length > 0) return true
+        if (arraySessions.length > 0) return true
         return false
     }
 
@@ -614,20 +627,13 @@ function ConsultationRecord() {
                 <Box sx={{ height: '1px', width: '100%', backgroundColor: 'darkgray' }} />
             </Box>
 
-            {arrayCronologic?.map((item, idx) => (
-                <ViewCronologicCard arrayCronologic={item} key={idx} />
-            ))}
-
-            {arrayTematic?.map((item, idx) => (
-                <ViewTematicCard arrayTematic={item} key={idx} />
-            ))}
-
-            {arrayFuture?.map((item, idx) => (
-                <ViewFutureCard arrayFuture={item} key={idx} />
-            ))}
-
-            {arrayPotencialization?.map((item, idx) => (
-                <ViewPotencializationCard arrayPotencialization={item} key={idx} />
+            {arraySessions?.map((item, idx) => (
+                <pre key={idx}>
+                    {item.etapa === 'cronologico' && <ViewCronologicCard arrayCronologic={item} key={idx} handleRemoveStep={handleRemoveStep} />}
+                    {item.etapa === 'tematico' && <ViewTematicCard arrayTematic={item} key={idx} handleRemoveStep={handleRemoveStep} />}
+                    {item.etapa === 'futuro' && <ViewFutureCard arrayFuture={item} key={idx} handleRemoveStep={handleRemoveStep} />}
+                    {item.etapa === 'potencializacao' && <ViewPotencializationCard arrayPotencialization={item} key={idx} handleRemoveStep={handleRemoveStep} />}
+                </pre>
             ))}
 
             <Box sx={{ display: showHistoric() ? 'flex' : 'none', gap: 1, alignItems: 'center', justifyContent: 'center', margin: '15px 0px' }}>
@@ -684,9 +690,20 @@ function ConsultationRecord() {
                 </ContentContainer>
                 <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column', alignItems: 'center' }}>
                     <Button text="Upload de Arquivo" style={{ width: 150 }} onClick={() => setUploadFile(true)} />
-                    <Button secondary text="Finalizar Sessão" style={{ width: 150, backgroundColor: colorPalette?.third }} />
+                    <Button onClick={async () => {
+                        await handleAddSessionStep(arraySessions)
+                        alert.success('Sessão finalizada.')
+                        router.push('/consultation')
+                    }} secondary text="Finalizar Sessão" style={{ width: 150, backgroundColor: colorPalette?.third }} />
                 </Box>
             </Box>
+
+            <Backdrop open={loadingData}>
+                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexDirection: 'column', justifyContent: 'center' }}>
+                    <CircularProgress />
+                    <Text>Registrando dados...</Text>
+                </Box>
+            </Backdrop>
 
 
             <Backdrop open={showUploadFile}>
@@ -784,7 +801,6 @@ function ConsultationRecord() {
                     </Box>
                 </ContentContainer>
             </Backdrop>
-
 
             <Backdrop open={showComment.active}>
                 <ContentContainer>

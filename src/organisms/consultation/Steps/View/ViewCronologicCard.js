@@ -5,10 +5,11 @@ import { CommentModal } from "../../Comments";
 import IconButton from '@mui/material/IconButton';
 import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
 import { Colors } from "../../../layout/Colors";
+import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 
 
 export const ViewCronologicCard = (props) => {
-    const { arrayCronologic } = props
+    const { arrayCronologic, handleRemoveStep } = props
     const { colorPalette } = useAppContext()
     const [activeModal, setActiveModal] = useState({
         active: false,
@@ -18,10 +19,18 @@ export const ViewCronologicCard = (props) => {
     })
 
     return (
-        <Box sx={{ display: 'flex', padding: '15px', backgroundColor: '#fff', opacity: .6, flexDirection: 'column', gap: 2 }}>
+        <Box sx={{ position: 'relative', display: 'flex', padding: '15px', backgroundColor: '#fff', opacity: .6, flexDirection: 'column', gap: 2 }}>
             <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                 <Box sx={styles.menuIcon} />
                 <Text title bold>Cronológico</Text>
+            </Box>
+
+            <Box sx={{ display: 'flex', position: 'absolute', right: '10px', top: '15px' }}>
+                <IconButton
+                    onClick={() => handleRemoveStep(arrayCronologic.id_etapa)}
+                >
+                    <RemoveCircleIcon sx={{ fontSize: '20px', color: 'red' }} />
+                </IconButton>
             </Box>
 
             <Box sx={{ display: 'flex', gap: 3, padding: '0px 10px', flexDirection: 'column' }}>

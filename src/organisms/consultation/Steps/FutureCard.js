@@ -40,7 +40,8 @@ export const FutureCard = (props) => {
             comentario: '',
             tresP: false,
             microfase: false,
-            key: uuidv4()
+            key: uuidv4(),
+            tipo_indice: 'ide'
         };
 
         const novaIDF = {
@@ -48,7 +49,8 @@ export const FutureCard = (props) => {
             comentario: '',
             tresP: false,
             microfase: false,
-            key: uuidv4()
+            key: uuidv4(),
+            tipo_indice: 'idf'
         };
 
         const novoTema = {
@@ -56,7 +58,7 @@ export const FutureCard = (props) => {
                 nome_tema: '',
                 dt_criacao: new Date(),
                 ide: [novaIDE],
-                idf: [novaIDF]
+                idf: [novaIDF],
             },
         };
 

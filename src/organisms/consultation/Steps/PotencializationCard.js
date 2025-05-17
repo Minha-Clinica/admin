@@ -40,7 +40,8 @@ export const PotencializationCard = (props) => {
             comentario: '',
             tresP: false,
             microfase: false,
-            key: uuidv4()
+            key: uuidv4(),
+            tipo_indice: 'p'
         };
 
         const novoTema = {
@@ -51,9 +52,6 @@ export const PotencializationCard = (props) => {
             },
         };
 
-        console.log('novoTema', novoTema)
-        console.log('potencializationData', potencializationData)
-
         setPotencializationData((prev) => ({
             ...prev,
             temas: [...prev.temas, novoTema]
@@ -63,13 +61,16 @@ export const PotencializationCard = (props) => {
     }
 
 
+    console.log('potencializationData', potencializationData)
+
     function handleAddTogglePotencialization() {
         setPotencializationData((prev) => {
             const novoPotencialization = {
                 ...indices,
                 tresP: false,
                 microfase: false,
-                key: uuidv4()
+                key: uuidv4(),
+                tipo_indice: 'p'
             };
 
             const novoTema = [...prev.temas];

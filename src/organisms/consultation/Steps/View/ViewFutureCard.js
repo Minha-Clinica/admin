@@ -5,10 +5,11 @@ import { CommentModal } from "../../Comments";
 import { Colors } from "../../../layout/Colors";
 import IconButton from '@mui/material/IconButton';
 import ChatOutlinedIcon from '@mui/icons-material/ChatOutlined';
+import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 
 
 export const ViewFutureCard = (props) => {
-    const { arrayFuture } = props
+    const { arrayFuture, handleRemoveStep } = props
     const { colorPalette } = useAppContext()
     const [activeModal, setActiveModal] = useState({
         active: false,
@@ -18,10 +19,18 @@ export const ViewFutureCard = (props) => {
     })
 
     return (
-        <Box sx={{ display: 'flex', padding: '15px', backgroundColor: '#fff',opacity: .6,  flexDirection: 'column', gap: 2 }}>
+        <Box sx={{ position: 'relative', display: 'flex', padding: '15px', backgroundColor: '#fff',opacity: .6,  flexDirection: 'column', gap: 2 }}>
             <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                 <Box sx={styles.menuIcon} />
                 <Text title bold>Futuro</Text>
+            </Box>
+
+            <Box sx={{ display: 'flex', position: 'absolute', right: '10px', top: '15px' }}>
+                <IconButton
+                    onClick={() => handleRemoveStep(arrayFuture.id_etapa)}
+                >
+                    <RemoveCircleIcon sx={{ fontSize: '20px', color: 'red' }} />
+                </IconButton>
             </Box>
 
             <Box sx={{ display: 'flex', gap: 3, padding: '0px 10px', flexDirection: 'column' }}>

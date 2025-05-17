@@ -42,7 +42,9 @@ export const CronologicCard = (props) => {
             comentario: '',
             tresP: false,
             microfase: false,
-            key: uuidv4()
+            key: uuidv4(),
+            tipo_indice: 'ide'
+
         };
 
         const novaIDF = {
@@ -50,7 +52,8 @@ export const CronologicCard = (props) => {
             comentario: '',
             tresP: false,
             microfase: false,
-            key: uuidv4()
+            key: uuidv4(),
+            tipo_indice: 'idf'
         };
 
         const novaFaixa = {
@@ -73,7 +76,8 @@ export const CronologicCard = (props) => {
                 ...indices,
                 tresP: false,
                 microfase: false,
-                key: uuidv4()
+                key: uuidv4(),
+                tipo_indice: 'ide'
             };
 
             const novaFaixaIdade = [...prev.faixaIdade];
@@ -101,7 +105,8 @@ export const CronologicCard = (props) => {
                 ...indices,
                 tresP: false,
                 microfase: false,
-                key: uuidv4()
+                key: uuidv4(),
+                tipo_indice: 'idf'
             };
 
             const novaFaixaIdade = [...prev.faixaIdade];
