@@ -139,10 +139,12 @@ export default function ListUsers(props) {
 
     const column = [
         { key: 'id', label: 'ID' },
-        { key: 'nome', avatar: true, label: 'Nome', avatarUrl: 'location', matricula: true },
+        { key: 'nome', avatar: true, label: 'Nome', avatarUrl: 'location' },
         { key: 'email', label: 'E-mail' },
         { key: 'perfil', label: 'Permissão' },
         { key: 'razao_social', label: 'Empresa' },
+        { key: 'terapeuta_nome', avatar: true, label: 'Terapeuta', avatarUrl: 'terapeuta_foto' },
+
     ];
 
 
