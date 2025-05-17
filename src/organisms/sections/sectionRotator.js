@@ -1,10 +1,34 @@
 import { useEffect, useState } from "react";
 import { Box, Text } from "../../atoms";
 import Skeleton from '@mui/material/Skeleton';
+import { useAppContext } from "../../context/AppContext";
 
 
-export function SessionRotator({ sessionData }) {
+const profileMessages = {
+    paciente: [
+        "🧘‍♂️ Não esqueça de marcar sua próxima sessão.",
+        "💬 Fale com seu terapeuta se precisar reagendar.",
+    ],
+    profissional: [
+        "📋 Verifique suas sessões agendadas para hoje.",
+        "⏰ Agora temos a ferramenta para emissão de recibos dos atedimentos. Acesse > Relatório de Sessões.",
+    ],
+    parceiro: [
+        "📊 Acompanhe os atendimentos realizados nesta semana.",
+        "📅 Confira o agendamento dos seus colaboradores.",
+    ],
+    administrador: [
+        "⚙️ Verifique as métricas da plataforma pelo > Dashboard.",
+        "🔒 Lembre-se de revisar os acessos dos usuários.",
+        "📊 Acompanhe os atendimentos realizados nesta semana.",
+        "⚙️ Caso precise de ajuda, entre em contato com o suporte.",
+    ]
+};
+
+export function SessionRotator() {
     const [index, setIndex] = useState(0);
+    const { user } = useAppContext();
+    const userProfile = user?.perfil;
 
     const today = new Date().toLocaleDateString('pt-BR', {
         weekday: 'long',
@@ -13,71 +37,26 @@ export function SessionRotator({ sessionData }) {
         year: 'numeric'
     });
 
-    const fallbackData = {
-        dataAtual: `${today.charAt(0).toUpperCase() + today.slice(1)}`, // capitaliza a primeira letra
-        sessões: 0,
-        concluidas: [],
-        canceladas: [],
-        remarcadas: [],
-        reagendadas: [],
-    };
-
-    const getRotatingViews = (data) => [
-        {
-            label: `📅 Hoje é ${data?.dataAtual}`,
-            items: [`🗓️ Sessões: ${data?.sessões}`, `✅ Concluídas: ${data?.concluidas.length}`, `❌ Canceladas: ${data?.canceladas.length}`]
-        },
-        {
-            label: "✅ Sessões concluídas",
-            items: data?.concluidas?.map(s => `${s?.horario} - ${s?.paciente}`) || 0
-        },
-        {
-            label: "🔁 Sessões remarcadas",
-            items: data?.remarcadas.map(s => `${s?.horario} - ${s?.paciente} → ${s.novoHorario}`) || 0
-        },
-        {
-            label: "❌ Sessões canceladas",
-            items: data?.canceladas.map(s => `${s?.horario} - ${s?.paciente}`) || 0
-        },
-        {
-            label: "📆 Sessões reagendadas",
-            items: data?.reagendadas.map(s => `${s?.horario} - ${s?.paciente} → ${s?.novoDia} às ${s?.novoHorario}`) || 0
-        }
-    ]
-
-    if (!sessionData && !fallbackData) {
-        return (
-            <Box sx={{ display: 'flex', flexDirection: 'column', marginLeft: 10 }}>
-                <Skeleton variant="text" width={250} height={30} />
-                <Box sx={{ display: 'flex', gap: 2 }}>
-                    <Skeleton variant="text" width={120} />
-                    <Skeleton variant="text" width={120} />
-                    <Skeleton variant="text" width={120} />
-                </Box>
-            </Box>
-        );
-    }
-
-
-    const views = getRotatingViews(sessionData || fallbackData);
+    const capitalizedDate = today.charAt(0).toUpperCase() + today.slice(1);
+    // Divide perfis e junta mensagens únicas
+    const userProfiles = userProfile?.split(',').map(p => p.trim().toLowerCase()) || [];
+    const messages = userProfiles.flatMap(p => profileMessages[p] || []);
 
     useEffect(() => {
         const interval = setInterval(() => {
-            setIndex(prev => (prev + 1) % views?.length);
-        }, 6000);
+            setIndex((prev) => (prev + 1) % messages.length);
+        }, 10000);
         return () => clearInterval(interval);
-    }, [views?.length]);
-
-    const current = views[index];
+    }, [messages.length]);
 
     return (
-        <Box sx={{ display: 'flex', flexDirection: 'column', marginLeft: 10, gap: .5, transition: 'opacity 0.5s ease' }}>
-            <Text bold>{current?.label}</Text>
+        <Box sx={{ display: 'flex', flexDirection: 'column', marginLeft: 20, gap: 0.5 }}>
+            <Text bold>{`📅 Hoje é ${capitalizedDate}`}</Text>
             <Box sx={{ display: 'flex', gap: 2 }}>
-                {current?.items > 0 ? current?.items.map((item, idx) => (
-                    <Text key={idx}>{item}</Text>
-                )) : (
-                    <Skeleton variant="text" width={120} />
+                {messages.length > 0 ? (
+                    <Text>{messages[index]}</Text>
+                ) : (
+                    <Skeleton variant="text" width={250} />
                 )}
             </Box>
         </Box>
