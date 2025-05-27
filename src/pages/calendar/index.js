@@ -11,10 +11,11 @@ import { useAppContext } from "../../context/AppContext";
 import { Backdrop, Checkbox, Grid, Input, Tooltip, CircularProgress } from "@mui/material";
 import { icons } from "../../organisms/layout/Colors";
 import { api } from "../../api/api";
-import { formatDate } from "../../helpers";
+import { formatDate, messagesCalendar } from "../../helpers";
 import { CalendarReserves } from "../../organisms/calendar/CalendarReserves";
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
+import { CustomEvent } from "../../organisms/calendar/CustomEvent ";
 
 
 moment.locale("pt-br");
@@ -212,7 +213,8 @@ export default function CalendarComponent() {
                     usuario_id: event?.usuario_id,
                     allDay: false, // Ajuste isso com base no seu caso de uso
                     consulta_id: event?.id_consulta,
-                    evento_google_id: event?.evento_google_id
+                    evento_google_id: event?.evento_google_id,
+                    foto_perfil_usuario_agendado: event?.foto_perfil_usuario_agendado
                 }));
 
                 console.log(eventsMap.filter(item => item.usuario_agendado == 205))
@@ -285,12 +287,14 @@ export default function CalendarComponent() {
 
     const eventStyleGetter = (event, start, end, isSelected) => {
         const style = {
-            backgroundColor: event.color,
+            backgroundColor: event.color + '44',
+            color: '#000',
             borderRadius: "5px",
             display: "block",
             padding: "10px",
             opacity: !isSelected && 0.6,
-            fontSize: '12px'
+            fontSize: '12px',
+            border: `1px solid ${event.color}`,
         };
         return {
             style,
@@ -908,6 +912,7 @@ export default function CalendarComponent() {
                 <Calendar
                     localizer={localizer}
                     // defaultDate={month?.start}
+                    messages={messagesCalendar} // 👈 Aqui
                     culture="pt-br"
                     events={events?.filter(filter)}
                     startAccessor="start"
@@ -925,6 +930,9 @@ export default function CalendarComponent() {
                     onSelectEvent={handleSelectEvent}
                     eventPropGetter={eventStyleGetter}
                     // messages={messages}
+                    components={{
+                        event: CustomEvent, // Aqui está a mágica
+                    }}
                     style={{
                         fontFamily: 'MetropolisBold',
                         color: colorPalette.textColor,
@@ -933,7 +941,7 @@ export default function CalendarComponent() {
                         boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`,
                         border: `.5px solid lightgray`,
                         padding: 10,
-                        height: mobile ? 500 : 600,
+                        height: mobile ? 500 : 750,
                         width: '100%'
                     }}
                 />

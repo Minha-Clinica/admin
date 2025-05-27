@@ -272,3 +272,19 @@ export const calculationAgeUser = (age) => {
    return idade;
 }
 
+export const messagesCalendar = {
+  allDay: 'Dia inteiro',
+  previous: 'Anterior',
+  next: 'Próximo',
+  today: 'Hoje',
+  month: 'Mês',
+  week: 'Semana',
+  day: 'Dia',
+  agenda: 'Agenda',
+  date: 'Data',
+  time: 'Hora',
+  event: 'Evento',
+  noEventsInRange: 'Não há eventos neste período.',
+  showMore: (total) => `+ ver mais (${total})`,
+};
+
