@@ -721,10 +721,8 @@ export default function AnamneseUser({ id }) {
                                 <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                     <Text light>Qual? (responda com base na pergunta anterior)</Text>
                                     <TextInput
-
-                                        name='qual_trauma'
-
-                                        value={anamnese?.qual_trauma || ''}
+                                        name='qual_fobia'
+                                        value={anamnese?.qual_fobia || ''}
                                         sx={{ flex: 1, }}
                                     />
                                 </Box>
@@ -1858,17 +1856,15 @@ export default function AnamneseUser({ id }) {
                                     sx={{ flex: 1, }}
                                 />
                             </Box>
-                            <Divider />
+                            <Divider /> 
 
                             {anamnese?.qual_seu_papel_hj === 'Vítima' &&
                                 <>
                                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                         <Text light>Em quais situações você desempenha o papel de vítima?</Text>
                                         <TextInput
-
-                                            name='primeiro_rel_amoroso'
-
-                                            value={anamnese?.primeiro_rel_amoroso || ''}
+                                            name='situacoes_responsavel'
+                                            value={anamnese?.situacoes_responsavel || ''}
                                             sx={{ flex: 1, }}
                                         />
                                     </Box>
@@ -1881,10 +1877,8 @@ export default function AnamneseUser({ id }) {
                                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                         <Text light>Em quais situações você desempenha o papel de responsável?</Text>
                                         <TextInput
-
-                                            name='primeiro_rel_amoroso'
-
-                                            value={anamnese?.primeiro_rel_amoroso || ''}
+                                            name='situacoes_responsavel'
+                                            value={anamnese?.situacoes_responsavel || ''}
                                             sx={{ flex: 1, }}
                                         />
                                     </Box>

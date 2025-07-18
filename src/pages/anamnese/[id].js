@@ -33,7 +33,7 @@ export default function AnamneseForms() {
     ]
 
 
-    console.log(anamnese?.sentimento_ciume)
+    console.log(anamnese)
 
     useEffect(() => {
         if (id) {
@@ -826,7 +826,7 @@ export default function AnamneseForms() {
                             <Text light>Qual? (responda com base na pergunta anterior)</Text>
                             <TextInput
                                 onBlur={handleBlur}
-                                name='qual_trauma'
+                                name='qual_fobia'
                                 onChange={handleChange}
                                 value={anamnese?.qual_fobia || ''}
                                 sx={{ flex: 1, }}
@@ -1970,9 +1970,9 @@ export default function AnamneseForms() {
                                 <Text light>Em quais situações você desempenha o papel de vítima?</Text>
                                 <TextInput
                                     onBlur={handleBlur}
-                                    name='primeiro_rel_amoroso'
+                                    name='situacoes_vitima'
                                     onChange={handleChange}
-                                    value={anamnese?.primeiro_rel_amoroso || ''}
+                                    value={anamnese?.situacoes_vitima || ''}
                                     sx={{ flex: 1, }}
                                 />
                             </Box>
@@ -1986,9 +1986,9 @@ export default function AnamneseForms() {
                                 <Text light>Em quais situações você desempenha o papel de responsável?</Text>
                                 <TextInput
                                     onBlur={handleBlur}
-                                    name='primeiro_rel_amoroso'
+                                    name='situacoes_responsavel'
                                     onChange={handleChange}
-                                    value={anamnese?.primeiro_rel_amoroso || ''}
+                                    value={anamnese?.situacoes_responsavel || ''}
                                     sx={{ flex: 1, }}
                                 />
                             </Box>
