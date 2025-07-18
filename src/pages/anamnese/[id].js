@@ -32,9 +32,6 @@ export default function AnamneseForms() {
         { page: 9, title: 'Fase 04 – Emocional', table: 'anamnese_fase_04_emocional' },
     ]
 
-
-    console.log(anamnese)
-
     useEffect(() => {
         if (id) {
             handleGetAnamnese()
@@ -304,7 +301,7 @@ export default function AnamneseForms() {
                             name='bairro'
                             onChange={handleChange}
                             value={anamnese?.bairro || ''}
-                            sx={{ flex: 1, }}
+                            sx={{ flex: 1, }} 
                         />
                     </Box>
 
@@ -2747,7 +2744,6 @@ const Pagination = ({ setPage, page, pages, setCurrentTable }) => {
                     onClick={() => {
                         setPage(item.page)
                         setCurrentTable(item.table)
-                        console.log(item.table)
                     }}>
                     <Text small style={{ color: 'inherit' }}>{item.page}</Text>
                 </Box>
