@@ -99,6 +99,12 @@ export default function ReserveConsultation() {
                 }
             })
             const { status, data } = response
+
+            if (status === 200 && data?.msg) {
+                alert.error(data?.msg)
+                return
+            }
+
             if (status === 201 && data?.consultation) {
                 alert.success('Consulta agendada com o profissional.')
                 router.push('/')
@@ -169,8 +175,10 @@ export default function ReserveConsultation() {
                 icon={'/icons/localized_icon.png'}
                 title={`Dados do Agendamento`}
             />
-            <Box sx={{ display: 'flex', width: '100%', justifyContent: { xs: 'center', sm: 'center', md: 'flex-start', lg: 'flex-start' },
-        padding:{ xs: '15px', sm: '15px', md: '15px', lg: '15px' },}}>
+            <Box sx={{
+                display: 'flex', width: '100%', justifyContent: { xs: 'center', sm: 'center', md: 'flex-start', lg: 'flex-start' },
+                padding: { xs: '15px', sm: '15px', md: '15px', lg: '15px' },
+            }}>
                 <Box sx={{
                     display: 'flex', gap: 2, backgroundColor: colorPalette.secondary, padding: '20px 15px', borderRadius: 2,
                     boxShadow: `rgba(149, 157, 165, 0.17) 0px 6px 24px`, position: 'relative', flexDirection: 'column',
