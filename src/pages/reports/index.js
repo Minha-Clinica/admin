@@ -728,7 +728,7 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, filters
                                                             sessoesConcluidas: item.concluidas
                                                         })
                                                     }} />
-                                            </TableCell>
+                                            </TableCell> 
                                         </TableRow>
                                     );
                                 })
