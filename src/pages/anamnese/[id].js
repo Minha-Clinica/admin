@@ -875,9 +875,9 @@ export default function AnamneseForms() {
                             <Text light>Quais? (responda com base na pergunta anterior)</Text>
                             <TextInput
                                 onBlur={handleBlur}
-                                name='qual_medo'
+                                name='qual_drogas'
                                 onChange={handleChange}
-                                value={anamnese?.qual_medo || ''}
+                                value={anamnese?.qual_drogas || ''}
                                 sx={{ flex: 1, }}
                             />
                         </Box>
@@ -1393,9 +1393,9 @@ export default function AnamneseForms() {
                         <Text light>Pai</Text>
                         <TextInput
                             onBlur={handleBlur}
-                            name='relacao_mae'
+                            name='relacao_pai'
                             onChange={handleChange}
-                            value={anamnese?.relacao_mae || ''}
+                            value={anamnese?.relacao_pai || ''}
                             sx={{ flex: 1, }}
                         />
                     </Box>
@@ -1406,9 +1406,9 @@ export default function AnamneseForms() {
                         <Text light>Mãe</Text>
                         <TextInput
                             onBlur={handleBlur}
-                            name='relacao_pai'
+                            name='relacao_mae'
                             onChange={handleChange}
-                            value={anamnese?.relacao_pai || ''}
+                            value={anamnese?.relacao_mae || ''}
                             sx={{ flex: 1, }}
                         />
                     </Box>

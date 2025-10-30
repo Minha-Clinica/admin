@@ -771,10 +771,8 @@ export default function AnamneseUser({ id }) {
                                 <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                     <Text light>Quais? (responda com base na pergunta anterior)</Text>
                                     <TextInput
-
-                                        name='qual_medo'
-
-                                        value={anamnese?.qual_medo || ''}
+                                        name='qual_drogas'
+                                        value={anamnese?.qual_drogas || ''}
                                         sx={{ flex: 1, }}
                                     />
                                 </Box>
@@ -1290,9 +1288,9 @@ export default function AnamneseUser({ id }) {
                                 <Text light>Pai</Text>
                                 <TextInput
 
-                                    name='relacao_mae'
+                                    name='relacao_pai'
 
-                                    value={anamnese?.relacao_mae || ''}
+                                    value={anamnese?.relacao_pai || ''}
                                     sx={{ flex: 1, }}
                                 />
                             </Box>
@@ -1303,9 +1301,9 @@ export default function AnamneseUser({ id }) {
                                 <Text light>Mãe</Text>
                                 <TextInput
 
-                                    name='relacao_pai'
+                                    name='relacao_mae'
 
-                                    value={anamnese?.relacao_pai || ''}
+                                    value={anamnese?.relacao_mae || ''}
                                     sx={{ flex: 1, }}
                                 />
                             </Box>
@@ -1863,8 +1861,8 @@ export default function AnamneseUser({ id }) {
                                     <Box sx={{ display: 'flex', gap: .5, flexDirection: 'column' }}>
                                         <Text light>Em quais situações você desempenha o papel de vítima?</Text>
                                         <TextInput
-                                            name='situacoes_responsavel'
-                                            value={anamnese?.situacoes_responsavel || ''}
+                                            name='situacoes_vitima'
+                                            value={anamnese?.situacoes_vitima || ''}
                                             sx={{ flex: 1, }}
                                         />
                                     </Box>
