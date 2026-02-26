@@ -501,7 +501,7 @@ function Home() {
                         <Box sx={{ p: '12px 20px', backgroundColor: sessoesValidas >= companyStats.limite_sessoes_mensal ? '#fdecea' : colorPalette.secondary, border: `1px solid ${sessoesValidas >= companyStats.limite_sessoes_mensal ? 'red' : 'lightgray'}`, borderRadius: 2, display: 'flex', gap: 2, alignItems: 'center', mt: 2 }}>
                            <Text bold style={{ color: sessoesValidas >= companyStats.limite_sessoes_mensal ? 'red' : 'inherit' }}>
                               ⚠️ Atenção: Sua empresa tem {sessoesValidas} agendamentos de {companyStats.limite_sessoes_mensal} sessões contratadas neste mês.
-                              {sessoesValidas >= companyStats.limite_sessoes_mensal && " O limite foi atingido. Consultas adicionais serão cobradas como excedentes."}
+                              {sessoesValidas >= companyStats.limite_sessoes_mensal && " O limite foi atingido. Sessões adicionais serão cobradas como excedentes."}
                            </Text>
                         </Box>
                      )}
