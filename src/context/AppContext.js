@@ -260,6 +260,12 @@ export const AppProvider = ({ children }) => {
             permissions: ['administrador'],
         },
         {
+            text: 'Logs do Sistema',
+            icon: '/icons/settings.png',
+            to: '/logs',
+            permissions: ['administrador'],
+        },
+        {
             text: 'Minha Empresa',
             icon: '/icons/user_mult.png',
             to: `/organization/${user?.empresa_id}`,

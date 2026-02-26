@@ -26,8 +26,10 @@ export default function EditCompany(props) {
         responsavel: '',
         ativo: 1,
         endereco: '',
-        complemento: ''
+        complemento: '',
+        limite_sessoes_mensal: null
     })
+    const [stats, setStats] = useState({ sessoes_realizadas_mes: 0, valor_total_mes: 0 })
     const [isPermissionEdit, setIsPermissionEdit] = useState(false)
     const [linkRegisterUser, setLinkRegisterUser] = useState('')
     const [employees, setEmployees] = useState([])
@@ -67,6 +69,11 @@ export default function EditCompany(props) {
             let linkAcessRegister = `https://app.afectu.com/company?cod_key=${data?.cod_key}`
             setLinkRegisterUser(linkAcessRegister)
             setCompanyData(data)
+
+            if (!newCompany) {
+                const statsResp = await api.get(`/company/${id}/dashboard-stats`)
+                setStats(statsResp?.data || { sessoes_realizadas_mes: 0, valor_total_mes: 0 })
+            }
         } catch (error) {
             console.log(error)
             return error
@@ -279,6 +286,9 @@ export default function EditCompany(props) {
     ];
 
 
+    const sessoesValidas = Number(stats?.agendadas || 0) + Number(stats?.concluidas || 0);
+    const excedentes = (companyData?.limite_sessoes_mensal && sessoesValidas > companyData.limite_sessoes_mensal) ? sessoesValidas - companyData.limite_sessoes_mensal : 0;
+
     return (
         <>
             <SectionHeader
@@ -298,7 +308,10 @@ export default function EditCompany(props) {
                 </Box>
                 <Box sx={styles.inputSection}>
                     <TextInput disabled={!isPermissionEdit && true} placeholder='CNPJ' name='cnpj' onChange={handleChange} value={companyData?.cnpj || ''} label='CNPJ' sx={{ flex: 1, }} />
-                    <Box sx={{ display: 'flex', gap: 1 }}>
+                    {isAdministrator && (
+                        <TextInput disabled={!isPermissionEdit && true} type="number" placeholder='Limite de Sessões no Mês' name='limite_sessoes_mensal' onChange={handleChange} value={companyData?.limite_sessoes_mensal || ''} label='Limite de Sessões Mensais (Vazio = Ilimitado)' sx={{ flex: 'none', width: { xs: '100%', md: '50%' } }} />
+                    )}
+                    <Box sx={{ display: 'flex', gap: 1, flex: 1 }}>
                         <TextInput disabled={!isPermissionEdit && true} placeholder='Código de Acesso' name='cod_key' onChange={handleChange} value={companyData?.cod_key || ''} label='Código de Acesso' sx={{ flex: 1, }} />
                         <Button text="Gerar chave" onClick={() => generateKey(12)} />
                     </Box>
@@ -323,8 +336,43 @@ export default function EditCompany(props) {
                     }} onClick={() => copyToClipboard()} />
                 </Box>
                 <RadioItem disabled={!isPermissionEdit && true} valueRadio={companyData?.ativo} group={groupStatus} title="Status" horizontal={mobile ? false : true} onSelect={(value) => setCompanyData({ ...companyData, ativo: parseInt(value) })} />
-
             </ContentContainer>
+
+            {!newCompany && (
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 4, mb: 4 }}>
+                    <Text title bold>Métricas de Sessões</Text>
+
+                    <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                        <Box sx={{ flex: '1 1 200px', backgroundColor: colorPalette?.secondary, padding: 3, borderRadius: 2, border: `1px solid ${colorPalette?.primary}` }}>
+                            <Text light small>Sessões Agendadas/Contratadas</Text>
+                            <Text bold large>{sessoesValidas} {companyData?.limite_sessoes_mensal ? `/ ${companyData?.limite_sessoes_mensal}` : ''}</Text>
+                        </Box>
+                        <Box sx={{ flex: '1 1 200px', backgroundColor: excedentes > 0 ? '#fdecea' : colorPalette?.secondary, padding: 3, borderRadius: 2, border: `1px solid ${excedentes > 0 ? 'red' : colorPalette?.primary}` }}>
+                            <Text light small style={{ color: excedentes > 0 ? 'red' : 'inherit' }}>Sessões Excedentes</Text>
+                            <Text bold large style={{ color: excedentes > 0 ? 'red' : 'inherit' }}>{excedentes}</Text>
+                        </Box>
+                        <Box sx={{ flex: '1 1 200px', backgroundColor: colorPalette?.secondary, padding: 3, borderRadius: 2, border: `1px solid ${colorPalette?.primary}` }}>
+                            <Text light small>Sessões Agendadas</Text>
+                            <Text bold large>{stats?.agendadas || 0}</Text>
+                        </Box>
+                    </Box>
+
+                    <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+                        <Box sx={{ flex: '1 1 200px', backgroundColor: colorPalette?.secondary, padding: 3, borderRadius: 2, border: `1px solid ${colorPalette?.primary}` }}>
+                            <Text light small>Sessões Concluídas</Text>
+                            <Text bold large>{stats?.concluidas || 0}</Text>
+                        </Box>
+                        <Box sx={{ flex: '1 1 200px', backgroundColor: colorPalette?.secondary, padding: 3, borderRadius: 2, border: `1px solid ${colorPalette?.primary}` }}>
+                            <Text light small>Sessões Remarcadas</Text>
+                            <Text bold large>{stats?.remarcadas || 0}</Text>
+                        </Box>
+                        <Box sx={{ flex: '1 1 200px', backgroundColor: colorPalette?.secondary, padding: 3, borderRadius: 2, border: `1px solid ${colorPalette?.primary}` }}>
+                            <Text light small>Sessões Canceladas</Text>
+                            <Text bold large>{stats?.canceladas || 0}</Text>
+                        </Box>
+                    </Box>
+                </Box>
+            )}
 
             <Box sx={{ display: !newCompany ? 'flex' : 'none', flexDirection: 'column', justifyContent: 'space-between', gap: 1.8, width: '100%' }}>
                 <Box sx={{ display: 'flex', gap: 1, flex: 1, justifyContent: 'space-between', alignItems: 'center', flexDirection: { xs: 'column', sm: 'column', md: 'row', lg: 'row' } }}>

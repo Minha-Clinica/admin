@@ -40,6 +40,7 @@ function Home() {
    const [showContactWpp, setShowContactWpp] = useState(false)
    const [selectedEvent, setSelectedEvent] = useState(null);
    const [showEventForm, setShowEventForm] = useState(false);
+   const [companyStats, setCompanyStats] = useState({ sessoes_realizadas_mes: 0, valor_total_mes: 0, limite_sessoes_mensal: null });
    const [eventData, setEventData] = useState({
       title: "",
       description: "",
@@ -263,13 +264,28 @@ function Home() {
       }
    }
 
+   const getCompanySessionStats = async () => {
+      try {
+         const response = await api.get(`/company/${user.empresa_id}`)
+         const statsResp = await api.get(`/company/${user.empresa_id}/dashboard-stats`)
+         setCompanyStats({
+            ...statsResp.data,
+            limite_sessoes_mensal: response.data?.limite_sessoes_mensal
+         })
+      } catch (error) {
+         console.log(error)
+      }
+   }
 
    useEffect(() => {
       handleEvents()
       getConsultion()
       getSessionsCalendar()
       getEmployees()
-   }, [])
+      if (user?.empresa_id && isPartner) {
+         getCompanySessionStats()
+      }
+   }, [user?.empresa_id, isPartner])
 
    const nowMonth = new Date().toLocaleString('pt-BR', { month: 'long' });
    const formattedMonth = nowMonth[0].toString().toLocaleUpperCase() + nowMonth.slice(1);
@@ -478,12 +494,22 @@ function Home() {
 
                {(isPacient || isPartner) &&
                   <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column' }}>
+
+                     {isPartner && (
+                        <Box sx={{ p: '12px 20px', backgroundColor: companyStats.sessoes_realizadas_mes >= companyStats.limite_sessoes_mensal ? '#fdecea' : colorPalette.secondary, border: `1px solid ${companyStats.sessoes_realizadas_mes >= companyStats.limite_sessoes_mensal ? 'red' : 'lightgray'}`, borderRadius: 2, display: 'flex', gap: 2, alignItems: 'center', mt: 2 }}>
+                           <Text bold style={{ color: companyStats.sessoes_realizadas_mes >= companyStats.limite_sessoes_mensal ? 'red' : 'inherit' }}>
+                              ⚠️ Atenção: Sua empresa realizou {companyStats.sessoes_realizadas_mes} de {companyStats.limite_sessoes_mensal} sessões permitidas neste mês.
+                              {companyStats.sessoes_realizadas_mes >= companyStats.limite_sessoes_mensal && " O limite foi atingido. Consultas adicionais serão cobradas como excedentes."}
+                           </Text>
+                        </Box>
+                     )}
+
                      <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column', marginTop: 2 }}>
 
                         <Text light large>Minhas próximas Sessões.</Text>
                         <Box sx={{ display: 'flex', gap: 2, flexDirection: { xs: 'column', xm: 'column', md: 'row', lg: 'row' } }}>
 
-                      {myEvents?.filter(item => item.disponivel === 1)?.length > 0 ?
+                           {myEvents?.filter(item => item.disponivel === 1)?.length > 0 ?
                               <Box sx={{
                                  display: 'flex', flexDirection: 'row', gap: .5, width: '100%', overflowY: 'auto',
                                  scrollbarWidth: 'none', // Esconde a barra de rolagem no Firefox
