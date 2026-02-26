@@ -474,6 +474,8 @@ function Home() {
       }
    }
 
+   const sessoesValidas = Number(companyStats?.agendadas || 0) + Number(companyStats?.concluidas || 0);
+   const excedentes = Number(sessoesValidas - Number(companyStats.limite_sessoes_mensal));
    return (
       <>
          <Head>
@@ -495,11 +497,11 @@ function Home() {
                {(isPacient || isPartner) &&
                   <Box sx={{ display: 'flex', gap: 2, flexDirection: 'column' }}>
 
-                     {isPartner && (
-                        <Box sx={{ p: '12px 20px', backgroundColor: companyStats.sessoes_realizadas_mes >= companyStats.limite_sessoes_mensal ? '#fdecea' : colorPalette.secondary, border: `1px solid ${companyStats.sessoes_realizadas_mes >= companyStats.limite_sessoes_mensal ? 'red' : 'lightgray'}`, borderRadius: 2, display: 'flex', gap: 2, alignItems: 'center', mt: 2 }}>
-                           <Text bold style={{ color: companyStats.sessoes_realizadas_mes >= companyStats.limite_sessoes_mensal ? 'red' : 'inherit' }}>
-                              ⚠️ Atenção: Sua empresa realizou {companyStats.sessoes_realizadas_mes} de {companyStats.limite_sessoes_mensal} sessões permitidas neste mês.
-                              {companyStats.sessoes_realizadas_mes >= companyStats.limite_sessoes_mensal && " O limite foi atingido. Consultas adicionais serão cobradas como excedentes."}
+                     {isPartner && companyStats?.limite_sessoes_mensal && (
+                        <Box sx={{ p: '12px 20px', backgroundColor: sessoesValidas >= companyStats.limite_sessoes_mensal ? '#fdecea' : colorPalette.secondary, border: `1px solid ${sessoesValidas >= companyStats.limite_sessoes_mensal ? 'red' : 'lightgray'}`, borderRadius: 2, display: 'flex', gap: 2, alignItems: 'center', mt: 2 }}>
+                           <Text bold style={{ color: sessoesValidas >= companyStats.limite_sessoes_mensal ? 'red' : 'inherit' }}>
+                              ⚠️ Atenção: Sua empresa tem {sessoesValidas} agendamentos de {companyStats.limite_sessoes_mensal} sessões contratadas neste mês.
+                              {sessoesValidas >= companyStats.limite_sessoes_mensal && " O limite foi atingido. Consultas adicionais serão cobradas como excedentes."}
                            </Text>
                         </Box>
                      )}
@@ -909,6 +911,13 @@ function Home() {
                            }
                         }} onClick={() => setShowEmployeeList(false)} />
                      </Box>
+                     {isPartner && excedentes > 0 && (
+                        <Box sx={{ p: '8px 12px', backgroundColor: '#fdecea', border: `1px solid red`, borderRadius: 2, display: 'flex', gap: 1, alignItems: 'center', mb: 2 }}>
+                           <Text bold small style={{ color: 'red' }}>
+                              ⚠️ O limite mensal de sessões da sua empresa foi atingido. Este agendamento será cobrado como excedente.
+                           </Text>
+                        </Box>
+                     )}
                      <Box>
                         <SelectList
                            fullWidth

@@ -17,7 +17,7 @@ export const ProfessionalAndCalendarMobile = ({
 }) => {
 
     const router = useRouter()
-    const { colorPalette, user } = useAppContext()
+    const { colorPalette, user, alert } = useAppContext()
     const [data, setData] = useState([])
     const [availableDays, setAvailableDays] = useState([]);
     const [agendasSelected, setAgendasSelected] = useState([])
@@ -25,6 +25,21 @@ export const ProfessionalAndCalendarMobile = ({
     const [employees, setEmployees] = useState([])
     const companyId = user.empresa_id;
     const isPartner = user?.perfil?.includes('parceiro')
+    const [companyStats, setCompanyStats] = useState({ sessoes_realizadas_mes: 0, valor_total_mes: 0, limite_sessoes_mensal: null });
+
+
+    const getCompanySessionStats = async () => {
+        try {
+            const response = await api.get(`/company/${user.empresa_id}`)
+            const statsResp = await api.get(`/company/${user.empresa_id}/dashboard-stats`)
+            setCompanyStats({
+                ...statsResp.data,
+                limite_sessoes_mensal: response.data?.limite_sessoes_mensal
+            })
+        } catch (error) {
+            console.log(error)
+        }
+    }
 
     const getProfissional = async () => {
         setLoadingDate(true)
@@ -76,6 +91,7 @@ export const ProfessionalAndCalendarMobile = ({
         getProfissional()
         if (isPartner) {
             getEmployees()
+            getCompanySessionStats()
         }
     }, [])
 
@@ -140,6 +156,9 @@ export const ProfessionalAndCalendarMobile = ({
             setLoadingDate(false)
         }
     }
+
+    const sessoesValidas = Number(companyStats?.agendadas || 0) + Number(companyStats?.concluidas || 0);
+    const excedentes = Number(sessoesValidas - Number(companyStats.limite_sessoes_mensal));
 
 
     return (
@@ -215,15 +234,15 @@ export const ProfessionalAndCalendarMobile = ({
                                                 defaultActiveStartDate={new Date()}
                                                 onChange={(date) => handleSelectedDate(date, dateSelected.profissionalId)}
                                                 tileDisabled={({ date }) => !availableDays.includes(moment(date).format("YYYY-MM-DD"))}
- tileClassName={({ date }) => {
-    const formattedDate = moment(date).format("YYYY-MM-DD");
-    if (availableDays.includes(formattedDate)) {
-      return "available-day";
-    }
-    return null;
-  }}
+                                                tileClassName={({ date }) => {
+                                                    const formattedDate = moment(date).format("YYYY-MM-DD");
+                                                    if (availableDays.includes(formattedDate)) {
+                                                        return "available-day";
+                                                    }
+                                                    return null;
+                                                }}
                                             />
-                                            
+
                                         </Box>
                                         {/* <Box sx={{ display: 'flex', height: `100%`, width: '2px', backgroundColor: '#eaeaea' }} /> */}
                                         {(dateSelected.profissionalId && dateSelected.day) ?
@@ -329,6 +348,13 @@ export const ProfessionalAndCalendarMobile = ({
                             }
                         }} onClick={() => setShowEmployeeList(false)} />
                     </Box>
+                    {isPartner && excedentes > 0 && (
+                        <Box sx={{ p: '8px 12px', backgroundColor: '#fdecea', border: `1px solid red`, borderRadius: 2, display: 'flex', gap: 1, alignItems: 'center', mb: 2 }}>
+                            <Text bold small style={{ color: 'red' }}>
+                                ⚠️ O limite mensal de sessões da sua empresa foi atingido. Este agendamento será cobrado como excedente.
+                            </Text>
+                        </Box>
+                    )}
                     <Box>
                         <SelectList
                             fullWidth
