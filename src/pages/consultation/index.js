@@ -958,8 +958,12 @@ const TableConsultion = ({ data = [], filters = [], onPress = () => { }, callBac
                                                                 }}
                                                                     onClick={() => {
                                                                         if (canUncheck) {
-                                                                            getProfissionalAgendas({ profissionalId: item?.profissional_id, dateConsult: item?.data, consultId: item?.id_consulta })
-                                                                            setDateSelected({ ...dateSelected, consultId: item?.id_consulta })
+                                                                            if (!isWithin24Hours(item?.data)) {
+                                                                                getProfissionalAgendas({ profissionalId: item?.profissional_id, dateConsult: item?.data, consultId: item?.id_consulta })
+                                                                                setDateSelected({ ...dateSelected, consultId: item?.id_consulta })
+                                                                            } else {
+                                                                                alert.info('Não é possível remarcar a sessão com menos de 24hrs de antecedência.')
+                                                                            }
                                                                         }
                                                                     }}>
                                                                     <Box sx={{
@@ -1376,8 +1380,12 @@ const CardConsultion = ({ data, isTerapeuta, isPartner, handleRowClick, handleUp
                                                 }}
                                                     onClick={() => {
                                                         if (canUncheck) {
-                                                            getProfissionalAgendas({ profissionalId: item?.profissional_id, dateConsult: item?.data, consultId: item?.id_consulta })
-                                                            setDateSelected({ ...dateSelected, consultId: item?.id_consulta })
+                                                            if (!isWithin24Hours(item?.data)) {
+                                                                getProfissionalAgendas({ profissionalId: item?.profissional_id, dateConsult: item?.data, consultId: item?.id_consulta })
+                                                                setDateSelected({ ...dateSelected, consultId: item?.id_consulta })
+                                                            } else {
+                                                                alert.info('Não é possível remarcar a sessão com menos de 24hrs de antecedência.')
+                                                            }
                                                         }
                                                     }}>
                                                     <Box sx={{
